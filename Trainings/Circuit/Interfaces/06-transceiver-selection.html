@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 6: Transceiver IC selection for serial interfaces — RS232 charge-pump parts (MAX232), RS485/422 half vs full duplex with DE/RE control, slew-rate-limited vs high-speed parts, and unit loads."
+    />
+    <title>06 · Transceiver Selection | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/06-transceiver-selection.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sel-card {
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--cyan);
+        border-radius: var(--radius-lg);
+        background: var(--bg-muted);
+        padding: 1rem 1.25rem;
+      }
+      .sel-card h4 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 0 0 0.35rem;
+      }
+      .sel-card p {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item active"
+            >06. Transceiver Selection</a
+          >
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>06. Transceiver Selection</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 06</span>
+                <span class="badge badge-gray">~45 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Transceiver IC Selection</h1>
+              <p class="subtitle">
+                The transceiver is the chip that turns your logic-level UART into the interface's
+                real electrical signals. Pick the wrong one and you're missing rails, fighting
+                reflections, or overloading the bus. See how a MAX232 charge pump conjures &plusmn;V
+                from a single supply, and learn the half/full-duplex and slew-rate choices.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- SECTION 1: charge pump -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🔋 &nbsp;1. RS232 Charge Pump (MAX232) — Live</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    RS232 needs &plusmn;5 V to &plusmn;15 V swings, but most boards only have a
+                    single +5 V (or +3.3 V) rail. The classic <strong>MAX232 family</strong> solves
+                    this with an on-chip <strong>charge pump</strong>: external capacitors are
+                    switched to first <em>double</em> the supply, then <em>invert</em> it, creating
+                    the positive and negative rails the RS232 driver needs. Watch the two-phase
+                    pump:
+                  </p>
+                  <div class="diagram-box">
+                    <canvas id="pumpCanvas" width="880" height="240"></canvas>
+                    <div class="diagram-cap" id="pumpCap">
+                      Phase 1: the flying capacitor charges from Vcc.
+                    </div>
+                  </div>
+                  <div class="info-box">
+                    This is why a MAX232 needs those four external capacitors on its pins — they're
+                    the charge-pump "flying" and reservoir caps. A part like the MAX3232 does the
+                    same at 3.0&ndash;5.5 V. No charge pump is needed for RS485/RS422 — their
+                    differential drivers work directly from the logic supply.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: half vs full duplex -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🔀 &nbsp;2. Half-Duplex (DE/RE) vs Full-Duplex Parts</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    For RS485/RS422 you choose between two transceiver architectures based on your
+                    duplex needs:
+                  </p>
+                  <div class="two-col">
+                    <div class="sel-card">
+                      <h4 style="color: #22d3ee">Half-duplex (single transceiver + DE/RE)</h4>
+                      <p>
+                        One driver and one receiver share the same A/B pair.
+                        <strong>DE</strong> (driver enable) and <strong>RE</strong> (receiver
+                        enable, active-low) flip the chip between talking and listening. Common on
+                        2-wire RS485. Firmware must assert DE before transmitting and release it
+                        after — timing matters (Module 8).
+                      </p>
+                    </div>
+                    <div class="sel-card">
+                      <h4 style="color: #a78bfa">Full-duplex (separate driver + receiver pairs)</h4>
+                      <p>
+                        Independent TX pair and RX pair — no direction switching. Used for RS422 and
+                        4-wire RS485. Simpler firmware (no turnaround), at the cost of two cable
+                        pairs.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    <strong>Tie DE and RE together</strong> on a half-duplex 2-wire design and drive
+                    them from one GPIO: high = transmit, low = receive. Add a small delay after the
+                    last stop bit before releasing DE so the final bit fully leaves the driver.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: slew rate -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🐢 &nbsp;3. Slew-Rate-Limited vs High-Speed Parts</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Transceivers come in slew-rate-limited and high-speed variants. The right pick
+                    depends on your baud rate and cable.
+                  </p>
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Attribute</th>
+                        <th>Slew-rate-limited</th>
+                        <th>High-speed</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Best for</td>
+                        <td>Long cable, noisy/industrial, lower baud</td>
+                        <td>Short cable, high baud rate</td>
+                      </tr>
+                      <tr>
+                        <td>Edge rate</td>
+                        <td>Deliberately softened</td>
+                        <td>Fast</td>
+                      </tr>
+                      <tr>
+                        <td>EMI</td>
+                        <td>Lower emissions</td>
+                        <td>Higher emissions</td>
+                      </tr>
+                      <tr>
+                        <td>Reflection tolerance</td>
+                        <td>More forgiving of stubs/mismatch</td>
+                        <td>Needs careful termination</td>
+                      </tr>
+                      <tr>
+                        <td>Typical max rate</td>
+                        <td>~250 kbps</td>
+                        <td>10&ndash;50 Mbps</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="warning-box">
+                    <strong>Rule of thumb:</strong> if the cable is long or the environment noisy
+                    and you don't need megabaud speed, choose the slew-rate-limited part. Its softer
+                    edges tolerate imperfect termination and radiate less. Reach for high-speed only
+                    when the baud rate demands it.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: unit loads / example parts -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📦 &nbsp;4. Unit Loads &amp; Representative Parts</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    RS485 defines a <strong>unit load (UL)</strong> — the standard driver can
+                    support 32 unit loads. Transceivers rated at 1/2, 1/4, or 1/8 UL let you put 64,
+                    128, or 256 nodes on a bus. Check the receiver input load before promising a big
+                    node count.
+                  </p>
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Interface</th>
+                        <th>Representative part</th>
+                        <th>Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>RS232</td>
+                        <td>MAX232 / MAX3232</td>
+                        <td>Charge-pump, single-supply, 2 TX / 2 RX</td>
+                      </tr>
+                      <tr>
+                        <td>RS485 half-duplex</td>
+                        <td>MAX485 / SN65HVD series</td>
+                        <td>DE/RE control, 1/8–1 UL variants</td>
+                      </tr>
+                      <tr>
+                        <td>RS422 / 4-wire RS485</td>
+                        <td>MAX490 / equivalent</td>
+                        <td>Separate driver &amp; receiver, full-duplex</td>
+                      </tr>
+                      <tr>
+                        <td>Isolated RS485</td>
+                        <td>ADM2582E / ISO15xx series</td>
+                        <td>Integrated isolation (Module 8)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem">
+                    Part numbers are representative examples of common families — always confirm
+                    exact specs against the current datasheet before designing in.
+                  </p>
+                </div>
+              </div>
+
+              <!-- QUIZ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;5. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">Answer to reveal instant feedback.</p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="margin-top: 1rem; font-weight: 700; color: var(--cyan); display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="05-termination-biasing.html"
+                  >← Termination &amp; Biasing</a
+                >
+                <a class="btn btn-primary" href="07-pcb-layout-cabling.html"
+                  >Next: PCB Layout &amp; Cabling →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var open = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b) {
+          if (!b.classList.contains('collapsed')) {
+            open++;
+          }
+        });
+        var pct = Math.round((open / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+      function css(name, fb) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return v ? v.trim() : fb;
+      }
+
+      // Charge pump animation
+      (function () {
+        var c = document.getElementById('pumpCanvas');
+        var ctx = c.getContext('2d');
+        var cap = document.getElementById('pumpCap');
+        var t = 0;
+        var W = c.width,
+          H = c.height;
+
+        function box(x, y, w, h, color, fill) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.5;
+          ctx.fillStyle = fill || 'transparent';
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, 5);
+          if (fill) {
+            ctx.fill();
+          }
+          ctx.stroke();
+        }
+        function label(x, y, txt, color) {
+          ctx.fillStyle = color;
+          ctx.font = '12px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(txt, x, y);
+          ctx.textAlign = 'left';
+        }
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          var phase = Math.floor(t / 90) % 2;
+          // Vcc source
+          box(40, 90, 70, 60, '#fb923c', 'rgba(251,146,60,0.12)');
+          label(75, 125, '+5V', '#fb923c');
+          // flying cap
+          var fillLevel = phase === 0 ? Math.min(1, (t % 90) / 90) : 1;
+          box(360, 70, 60, 100, '#22d3ee', 'rgba(34,211,238,0.10)');
+          ctx.fillStyle = 'rgba(34,211,238,' + (0.15 + fillLevel * 0.4) + ')';
+          ctx.fillRect(362, 170 - fillLevel * 98, 56, fillLevel * 98);
+          label(390, 60, 'Flying C', '#22d3ee');
+          // output reservoir
+          box(690, 40, 70, 60, '#34d399', 'rgba(52,211,153,0.12)');
+          box(690, 140, 70, 60, '#f87171', 'rgba(248,113,113,0.12)');
+          label(725, 75, '+10V', '#34d399');
+          label(725, 175, '−10V', '#f87171');
+
+          // switches / flow arrows
+          ctx.strokeStyle = phase === 0 ? '#22d3ee' : 'rgba(148,163,184,0.25)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(110, 120);
+          ctx.lineTo(360, 120);
+          ctx.stroke();
+          ctx.strokeStyle = phase === 1 ? '#34d399' : 'rgba(148,163,184,0.25)';
+          ctx.beginPath();
+          ctx.moveTo(420, 110);
+          ctx.lineTo(690, 70);
+          ctx.moveTo(420, 130);
+          ctx.lineTo(690, 170);
+          ctx.stroke();
+
+          // moving charge dots
+          ctx.fillStyle = phase === 0 ? '#22d3ee' : '#34d399';
+          var p = (t % 90) / 90;
+          if (phase === 0) {
+            var dx = 110 + (360 - 110) * p;
+            ctx.beginPath();
+            ctx.arc(dx, 120, 5, 0, Math.PI * 2);
+            ctx.fill();
+            cap.innerHTML = 'Phase 1: the flying capacitor charges from Vcc (+5 V).';
+          } else {
+            var dx2 = 420 + (690 - 420) * p;
+            ctx.beginPath();
+            ctx.arc(dx2, 110 - 40 * p, 5, 0, Math.PI * 2);
+            ctx.fill();
+            cap.innerHTML =
+              'Phase 2: the charged capacitor is switched to pump the ±10 V output rails.';
+          }
+        }
+        function loop() {
+          t += 1;
+          draw();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
+
+      // Quiz
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'Why does a MAX232 need external capacitors?',
+            options: [
+              'For decoupling only',
+              'They are the charge-pump flying/reservoir caps that generate the ±V RS232 rails',
+              'To set the baud rate',
+              'For ESD protection',
+            ],
+            correct: 1,
+            fb: 'The charge pump switches those caps to double and invert Vcc, producing the ± rails RS232 drivers need.',
+          },
+          {
+            q: 'On a 2-wire half-duplex RS485 transceiver, what do DE and RE do?',
+            options: [
+              'Set termination',
+              'Enable driver / receiver — flipping between transmit and listen',
+              'Generate the charge pump',
+              'Select the baud rate',
+            ],
+            correct: 1,
+            fb: 'DE (driver enable) and RE (receiver enable) switch direction on the shared pair.',
+          },
+          {
+            q: 'For a long, noisy cable at modest baud rate, which transceiver is preferable?',
+            options: ['High-speed', 'Slew-rate-limited', 'Either', 'A charge-pump RS232 part'],
+            correct: 1,
+            fb: 'Slew-rate-limited parts radiate less and tolerate imperfect termination — ideal for long/noisy runs.',
+          },
+          {
+            q: 'A transceiver rated at 1/8 unit load lets you place roughly how many nodes on an RS485 bus?',
+            options: ['32', '64', '128', '256'],
+            correct: 3,
+            fb: '32 unit loads ÷ 1/8 UL per node ≈ 256 nodes.',
+          },
+          {
+            q: 'Which interface does NOT require a charge pump?',
+            options: [
+              'RS232',
+              'RS485/RS422 (differential drivers work from the logic supply)',
+              'All of them',
+              'None',
+            ],
+            correct: 1,
+            fb: 'Differential RS485/RS422 drivers run directly from the logic rail; only RS232 needs the ± charge pump.',
+          },
+        ];
+        var answered = 0,
+          correctCount = 0;
+        var wrap = document.getElementById('quiz');
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h = document.createElement('div');
+          h.className = 'quiz-question';
+          h.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var s = document.getElementById('quizScore');
+                s.style.display = 'block';
+                s.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

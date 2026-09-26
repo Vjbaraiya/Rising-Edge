@@ -1,0 +1,1422 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Step-by-step walkthrough of what happens from FPGA power-on to DONE — POR, initialization, configuration loading, and the startup sequence."
+    />
+    <title>Configuration Process | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/22-configuration-process.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .lesson-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        margin-bottom: 12px;
+      }
+      .section-heading {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 32px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .lesson-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-base);
+        line-height: 1.2;
+        margin-bottom: 12px;
+      }
+      .lesson-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        font-size: 0.825rem;
+        color: var(--text-muted);
+      }
+      .lesson-lead {
+        font-size: 1rem;
+        color: var(--text-sub);
+        line-height: 1.75;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      code {
+        background: var(--bg-muted);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-family: 'Courier New', monospace;
+        color: #22d3ee;
+      }
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      .tag {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+        border-radius: 12px;
+        background: var(--bg-muted);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+      .phase-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+      }
+      .phase-num {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+      .phase-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .phase-desc {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      #cfg-time-chart {
+        width: 100%;
+        height: 320px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item active" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div style="max-width: 860px; margin: 0 auto; padding: var(--sp-6) var(--sp-5)">
+          <div class="lesson-badge">Lesson 22 of 25 &nbsp;·&nbsp; 10 min read</div>
+          <h1 class="lesson-title">FPGA Configuration Process</h1>
+          <div class="lesson-meta">
+            <span>FPGA Fundamentals &amp; Architecture</span>
+            <span>·</span>
+            <span>88% complete</span>
+            <span>·</span>
+            <span>10 MIN</span>
+          </div>
+          <p class="lesson-lead">
+            What actually happens between the moment you apply power and the moment the DONE pin
+            goes high? This lesson walks through every stage of the FPGA configuration process —
+            Power-On Reset, SRAM clearing, mode detection, bitstream loading, CRC verification, the
+            startup sequence, and finally user mode. Understanding this sequence is essential for
+            board bring-up, debugging boot failures, and implementing reliable field update
+            strategies like MultiBoot.
+          </p>
+
+          <h2 class="section-heading">Power-On Reset (POR)</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The configuration process begins as soon as FPGA power supplies ramp up. The FPGA has an
+            internal <strong style="color: var(--text-base)">Power-On Reset (POR)</strong> circuit
+            that monitors the core supply voltage (VCCINT). Until VCCINT crosses a minimum threshold
+            and remains stable for a defined hold time, the POR circuit keeps the entire device in
+            reset.
+          </p>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">During POR:</p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              All configuration SRAM cells are cleared to 0 — all routing switches open, all LUTs
+              set to output 0
+            </li>
+            <li>
+              All IO pins are placed in a high-impedance, input-only state to avoid bus contention
+            </li>
+            <li>
+              The <strong style="color: var(--text-base)">INIT_B pin</strong> is driven low,
+              signaling to external circuits that the FPGA is not yet ready
+            </li>
+            <li>
+              The MODE pins M[2:0] are sampled and latched — the values must be stable before POR
+              deasserts
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            When VCCINT is stable and the POR hold time expires, INIT_B rises to indicate the FPGA
+            is ready to accept configuration data. On some boards an external circuit can hold
+            INIT_B low longer than necessary (by driving it low externally) to delay configuration
+            start — this can be useful for synchronizing multiple FPGAs.
+          </p>
+
+          <h2 class="section-heading">Configuration Phase State Machine</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The FPGA internal configuration controller implements a state machine with five
+            sequential phases. Each phase must complete successfully before the next begins:
+          </p>
+
+          <div class="phase-card">
+            <div class="phase-num">Phase 1</div>
+            <div class="phase-name">Initialization</div>
+            <div class="phase-desc">
+              POR releases. INIT_B goes high. MODE pins are latched — the configuration source (SPI,
+              JTAG, SelectMAP, etc.) is now fixed until the next power cycle or PROGRAM_B pulse. The
+              configuration controller enters the appropriate interface mode and prepares to receive
+              bitstream data.
+            </div>
+          </div>
+
+          <div class="phase-card">
+            <div class="phase-num">Phase 2</div>
+            <div class="phase-name">Configuration Loading</div>
+            <div class="phase-desc">
+              Bitstream frames are loaded sequentially into the configuration SRAM. In Master SPI
+              mode, the FPGA drives the SPI flash clock and reads bitstream bytes. In Slave
+              SelectMAP, the host CPU writes data to the FPGA data bus. The configuration controller
+              writes each frame to the address specified by the FAR register.
+            </div>
+          </div>
+
+          <div class="phase-card">
+            <div class="phase-num">Phase 3</div>
+            <div class="phase-name">CRC Verification</div>
+            <div class="phase-desc">
+              After each major section of the bitstream, the configuration controller verifies a CRC
+              value embedded in the bitstream against the CRC it computed from the received data. If
+              the CRC matches, loading continues. A CRC mismatch causes the controller to assert
+              INIT_B low again (configuration error) and halt — it does not proceed to user mode.
+            </div>
+          </div>
+
+          <div class="phase-card">
+            <div class="phase-num">Phase 4</div>
+            <div class="phase-name">Startup Sequence</div>
+            <div class="phase-desc">
+              Once all frames are loaded and CRCs pass, the startup sequencer executes a
+              configurable sequence of events: releasing global three-state (GTS), releasing global
+              set/reset (GSR), activating end-of-startup (EOS), and finally asserting the DONE pin.
+              The user design must not begin operation until GSR is released.
+            </div>
+          </div>
+
+          <div class="phase-card">
+            <div class="phase-num">Phase 5</div>
+            <div class="phase-name">User Mode</div>
+            <div class="phase-desc">
+              DONE pin goes high. The user design begins operating — all clocks are running, all IOs
+              are actively driving per the bitstream IO settings, and the user RTL logic begins
+              executing. Configuration mode pins are no longer sampled. JTAG remains active for
+              debug access.
+            </div>
+          </div>
+
+          <h2 class="section-heading">Startup Sequence Detail</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The startup sequence is a programmable series of events controlled by the
+            <strong style="color: var(--text-base)">COR0 (Configuration Option Register 0)</strong>.
+            The key events and their order are:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">GTS release</strong> — Global Three-State
+              release: IO output drivers become active. Before this event all FPGA IOs are
+              high-impedance even though configuration is complete.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">GSR release</strong> — Global Set/Reset
+              release: all flip-flops are released from their power-up reset state. The user
+              design's flip-flops begin in a known state (set or reset according to their INIT
+              attribute) and then begin clocking.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">EOS (End of Startup)</strong> — signals to the
+              configuration controller that startup is complete.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">DONE assertion</strong> — DONE pin goes high.
+              External circuits monitoring DONE know the FPGA is fully operational.
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The startup clock source is configurable: JTAG clock (JTAGCLK), a user-provided clock
+            (USERCLK2), or the internal configuration oscillator (CFGMCLK at ~65 MHz). The startup
+            sequence typically completes within a few hundred nanoseconds after the last bitstream
+            byte is loaded.
+          </p>
+
+          <h2 class="section-heading">Master SPI Boot Sequence — Step by Step</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Master SPI is the standard production boot mode. Here is the exact sequence of events
+            from power-on to user mode:
+          </p>
+
+          <div class="mermaid">
+            graph TD A["Power On\nVCCINT ramps up"] --> B["POR: VCCINT stable\nINIT_B held low\nSRAM
+            cleared"] B --> C["M[2:0] sampled\nSPI mode confirmed\nINIT_B rises"] C --> D["Assert
+            CS_B on SPI flash\nSend 0x03 READ command\n+ 24-bit address 0x000000"] D --> E["Clock in
+            bitstream bytes\nfrom SPI flash at CCLK rate\n(default 3.125 MHz, up to 100 MHz)"] E -->
+            F["Parse sync word 0xAA995566\nBegin frame loading via FAR+FDRI"] F --> G["CRC check
+            after each section"] G --> H{"CRC OK?"} H -->|Yes| I["Continue loading next section"] H
+            -->|No| J["Assert INIT_B low\nHalt — Config Error\nWait for PROGRAM_B pulse"] I -->
+            K["All frames loaded\nDeassert CS_B on SPI flash"] K --> L["Startup sequence:\nGTS
+            release → GSR release → EOS"] L --> M["DONE pin goes HIGH\nUser mode active\nDesign
+            begins operation"]
+          </div>
+
+          <h2 class="section-heading">Configuration Time by Device</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Configuration time is determined by bitstream size divided by interface bandwidth. The
+            table below shows theoretical loading times at the specified SPI clock rates. Real-world
+            times may be slightly longer due to flash latency and protocol overhead:
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Device</th>
+                <th>Bitstream Size</th>
+                <th>SPI x1 @ 50 MHz</th>
+                <th>SPI x4 (QSPI) @ 50 MHz</th>
+                <th>BPI @ 100 MHz</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>XC7A35T</td>
+                <td>~17 MB</td>
+                <td>~2.7 s</td>
+                <td>~0.7 s</td>
+                <td>~1.4 s</td>
+              </tr>
+              <tr>
+                <td>XC7A200T</td>
+                <td>~78 MB</td>
+                <td>~12.5 s</td>
+                <td>~3.1 s</td>
+                <td>~6.3 s</td>
+              </tr>
+              <tr>
+                <td>XC7K325T</td>
+                <td>~130 MB</td>
+                <td>~20.8 s</td>
+                <td>~5.2 s</td>
+                <td>~10.4 s</td>
+              </tr>
+              <tr>
+                <td>XC7VX690T</td>
+                <td>~230 MB</td>
+                <td>~36.8 s</td>
+                <td>~9.2 s</td>
+                <td>~18.4 s</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div id="cfg-time-chart"></div>
+
+          <h2 class="section-heading">JTAG Configuration</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            JTAG (IEEE 1149.1) is always available as a programming and debug interface regardless
+            of MODE pin settings. The four JTAG signals are:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">TCK</strong> — Test Clock: clocks the JTAG
+              state machine and data shift registers
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">TMS</strong> — Test Mode Select: controls the
+              JTAG state machine transitions
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">TDI</strong> — Test Data In: serial data input
+              to the device
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">TDO</strong> — Test Data Out: serial data
+              output from the device (captured on TDI edge)
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            In Vivado Hardware Manager:
+            <em>Open Target → Auto Connect → Program Device → select .bit file → Program</em>.
+            Multiple FPGA devices can be daisy-chained in a JTAG scan chain — TDO of device N
+            connects to TDI of device N+1, sharing TCK and TMS. Vivado supports scan chains with up
+            to 40+ devices. Recommended JTAG cables: Xilinx Platform Cable USB II or Digilent
+            JTAG-SMT3-NC.
+          </p>
+
+          <h2 class="section-heading">SelectMAP Configuration (CPU-Driven)</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            SelectMAP allows a host processor to push the bitstream to the FPGA over a parallel bus.
+            This is the configuration method used in Zynq-7000 systems where the ARM Processing
+            System (PS) programs the Programmable Logic (PL) after booting Linux or a bare-metal
+            application.
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">Bus width</strong>: 8, 16, or 32 bits. Wider
+              buses dramatically reduce configuration time.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Byte-wide SelectMAP bandwidth</strong>: at 100
+              MHz → 100 MB/s → XC7K325T loads in ~1.3 seconds
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">32-bit SelectMAP</strong>: theoretical 400
+              MB/s → XC7K325T in ~330 ms
+            </li>
+            <li>
+              <strong style="color: var(--text-base)"
+                >ICAP (Internal Configuration Access Port)</strong
+              >
+              — a dedicated primitive available in the FPGA fabric that allows the
+              <em>user design itself</em> to write partial bitstreams to the FPGA configuration
+              controller. Used for partial reconfiguration, MultiBoot management, and in-field
+              design updates.
+            </li>
+          </ul>
+
+          <h2 class="section-heading">Configuration Error Recovery</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            If configuration fails — due to a corrupted bitstream, CRC mismatch, wrong bitstream for
+            the device, or a noisy SPI bus — the FPGA indicates the error by reasserting INIT_B low.
+            DONE will not go high. Recovery options:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">PROGRAM_B pulse</strong> — asserting PROGRAM_B
+              low for at least 300 ns clears the configuration SRAM and restarts the entire
+              configuration process from Phase 1. On production boards, this pin is often connected
+              to a watchdog timer or supervisor IC.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Watchdog supervisor</strong> — if DONE does
+              not go high within a defined timeout (e.g., 5 seconds for a large device), the
+              supervisor pulses PROGRAM_B to trigger a retry. After N retries, the supervisor can
+              switch to a golden bitstream address.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">IPROG primitive</strong> — available from
+              within running FPGA fabric, IPROG asserts PROGRAM_B internally and instructs the
+              configuration controller to boot from a new address in SPI flash. Used to implement
+              software-triggered reboot and MultiBoot.
+            </li>
+          </ul>
+
+          <h2 class="section-heading">MultiBoot / Golden Image Strategy</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            MultiBoot is Xilinx's mechanism for storing multiple bitstreams in SPI flash and
+            automatically selecting between them based on boot success. Every production system
+            handling field firmware updates should implement a MultiBoot scheme:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">Golden image</strong> — stored at SPI flash
+              address 0. Contains a known-good, proven bitstream that should never be overwritten
+              during field updates. The FPGA always boots from address 0 on power-on.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Upgrade image</strong> — stored at a higher
+              flash address (e.g., 0x400000). After verification, the golden image uses the
+              <strong style="color: var(--text-base)">WBSTAR (Warm Boot Start Address)</strong>
+              register to redirect to the upgrade image address and triggers IPROG.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Fallback mechanism</strong> — if the upgrade
+              image fails (DONE does not go high within the POR timeout), the FPGA's internal
+              MultiBoot watchdog automatically boots the golden image at address 0.
+            </li>
+            <li><strong style="color: var(--text-base)">Typical flash layout:</strong></li>
+          </ul>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Flash Address</th>
+                <th>Content</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>0x000000</code></td>
+                <td>Golden bitstream</td>
+                <td>Never overwritten by OTA updates</td>
+              </tr>
+              <tr>
+                <td><code>0x400000</code></td>
+                <td>Upgrade bitstream slot A</td>
+                <td>Active upgrade image</td>
+              </tr>
+              <tr>
+                <td><code>0x800000</code></td>
+                <td>Upgrade bitstream slot B</td>
+                <td>Secondary slot for A/B updates</td>
+              </tr>
+              <tr>
+                <td><code>0xC00000</code></td>
+                <td>User data / parameters</td>
+                <td>Calibration, serial numbers, etc.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout callout-info">
+            <strong>Board Bring-Up Tip</strong>
+            The DONE pin is your most important debug signal during initial board bring-up. If DONE
+            does not go high within the expected configuration time, the boot failed. Check: (1) SPI
+            flash is correctly programmed and powered, (2) SPI clock traces are routed cleanly, (3)
+            MODE pins are tied correctly for Master SPI, (4) VCCINT supply is stable before INIT_B
+            is expected to release.
+          </div>
+
+          <div class="callout callout-tip">
+            <strong>Pro Tip: MultiBoot in Every Production Design</strong>
+            Implement MultiBoot with a golden image for all production hardware — even if you don't
+            plan field updates initially. Storage costs nothing (a few MB of flash), but the
+            fallback protection it provides can save an entire product recall if a field update
+            corrupts the upgrade slot. The golden image should be programmed during factory testing
+            and never touched again.
+          </div>
+
+          <div class="callout callout-warning">
+            <strong>ICAP Safety Warning</strong>
+            Never power down the FPGA mid-configuration when using ICAP for in-system partial
+            reconfiguration. If power is removed while ICAP is writing a partial bitstream, the
+            configuration SRAM will be left in an indeterminate state and the device will fail to
+            boot on the next power cycle. Always complete the ICAP transaction before allowing power
+            removal, and implement a safe shutdown sequence in your design.
+          </div>
+
+          <div class="callout callout-interview">
+            <strong>Interview Question</strong>
+            Q: How does an FPGA fall back to a golden bitstream after a failed firmware update?<br /><br />
+            A: Using MultiBoot — two bitstreams are stored in SPI flash. The golden image lives at
+            address 0 and is never overwritten. During normal operation, the golden image writes the
+            upgrade bitstream address into the WBSTAR register and triggers IPROG to redirect boot
+            to the upgrade slot. If the upgrade image fails to reach user mode (DONE stays low
+            within the internal MultiBoot watchdog timeout), the configuration controller
+            automatically resets and boots from address 0, loading the golden image. This recovery
+            happens entirely in hardware with no external CPU intervention required.
+          </div>
+
+          <h2 class="section-heading">Knowledge Check</h2>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              1. Which FPGA pin indicates that configuration has completed successfully and the user
+              design is active?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>INIT_B
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>PROGRAM_B
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb22-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>DONE
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>TCK
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb22-1">
+              Correct! The DONE pin goes high only after all configuration frames have been loaded,
+              CRC verification has passed, and the startup sequence (GTS release, GSR release, EOS)
+              has completed. External circuits monitoring DONE can use it to enable downstream
+              logic, release bus arbitration, or signal to a supervisory processor that the FPGA is
+              fully operational.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              2. What signal must go low during Power-On Reset to indicate the FPGA is not yet ready
+              for configuration?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb22-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>INIT_B
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>DONE
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>TMS
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>CS_B
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb22-2">
+              Correct! INIT_B is driven low by the FPGA during Power-On Reset while the
+              configuration SRAM is being cleared. It rises when the FPGA is ready to accept
+              bitstream data. If INIT_B stays low longer than expected, it can indicate either a
+              slow supply ramp, insufficient POR hold time, or (after configuration starts) a CRC
+              error that has aborted the configuration process.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              3. The ICAP (Internal Configuration Access Port) allows what capability?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>Programming an adjacent FPGA via JTAG
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>Encrypting bitstreams at runtime
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb22-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>The FPGA user design to reconfigure the FPGA from within the fabric
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>Reading back the active bitstream to verify its contents
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb22-3">
+              Correct! ICAP is a hard primitive embedded in the FPGA fabric that provides a direct
+              interface to the configuration controller. The user design can write partial
+              bitstreams to ICAP to perform partial reconfiguration, write to the WBSTAR register to
+              set the next boot address, or trigger IPROG to initiate a warm reboot — all without
+              any external hardware involvement.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              4. MultiBoot solves which critical production hardware problem?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>Reducing SPI flash boot time by half
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb22-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>Automatic recovery from failed field firmware updates
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>Encrypting the bitstream during SPI flash programming
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>Enabling JTAG programming in the field
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb22-4">
+              Correct! MultiBoot enables automatic fallback to a known-good golden image if a field
+              firmware update fails. Without MultiBoot, a failed update could permanently brick the
+              device — it would fail to boot with no recovery path. With MultiBoot, the golden image
+              at address 0 always provides a recovery path, making field updates safe.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              5. The SelectMAP configuration interface supports which bus widths?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>1, 2, or 4 bits (serial variants only)
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>4, 8, or 16 bits
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb22-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>8, 16, or 32 bits
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb22-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>64 bits only
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb22-5">
+              Correct! SelectMAP supports 8-bit, 16-bit, and 32-bit parallel bus widths. The 32-bit
+              version is used in high-performance Zynq PL programming scenarios where fast
+              configuration time is critical. At 100 MHz with 32-bit bus, theoretical throughput is
+              400 MB/s — loading a 130 MB bitstream in under 400 milliseconds.
+            </div>
+          </div>
+
+          <h2 class="section-heading">Practical Exercise</h2>
+          <div class="callout callout-tip">
+            <strong>Hands-On: Measure FPGA Configuration Time with an Oscilloscope</strong>
+            <p style="margin-top: 8px">
+              On a board with a Xilinx FPGA and SPI flash, measure the exact configuration time
+              using a 2-channel oscilloscope:
+            </p>
+            <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.9">
+              <li>
+                Connect Channel 1 to the INIT_B pin and Channel 2 to the DONE pin. Set both channels
+                to 3.3V scale, 500ms/div time base.
+              </li>
+              <li>
+                Trigger on Channel 1 rising edge (INIT_B going high = configuration starting). Power
+                cycle the board.
+              </li>
+              <li>
+                Measure the time between INIT_B rising and DONE rising — this is the total
+                configuration time. Compare against the theoretical value from the table above.
+              </li>
+              <li>
+                If measured time is much longer than theoretical: probe the SPI CLK pin and measure
+                the actual clock frequency. Many boards default to CCLK = 3.125 MHz instead of 50
+                MHz — check the SPI_BUSWIDTH and CONFIGRATE Vivado bitstream settings.
+              </li>
+              <li>
+                Enable QSPI (x4) mode in Vivado settings and reprogram. Measure again — boot time
+                should decrease by ~4×.
+              </li>
+            </ol>
+          </div>
+
+          <div class="tag-list">
+            <span class="tag">Power-On Reset</span>
+            <span class="tag">DONE Pin</span>
+            <span class="tag">INIT_B</span>
+            <span class="tag">Startup Sequence</span>
+            <span class="tag">Master SPI Boot</span>
+            <span class="tag">SelectMAP</span>
+            <span class="tag">ICAP</span>
+            <span class="tag">MultiBoot</span>
+            <span class="tag">Golden Image</span>
+            <span class="tag">WBSTAR</span>
+          </div>
+
+          <nav class="lesson-nav">
+            <a href="21-configuration-memory.html">&#8592; Config Memory</a>
+            <a href="23-development-flow.html">Dev Flow &#8594;</a>
+          </nav>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-22';
+      const TOTAL = 25;
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        var isDark = document.documentElement.dataset.theme === 'dark';
+        var textColor = isDark ? '#94a3b8' : '#475569';
+        var gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+        Plotly.newPlot(
+          'cfg-time-chart',
+          [
+            {
+              type: 'bar',
+              orientation: 'h',
+              x: [2.7, 12.5, 20.8, 36.8],
+              y: ['XC7A35T', 'XC7A200T', 'XC7K325T', 'XC7VX690T'],
+              marker: { color: ['#22d3ee', '#818cf8', '#34d399', '#fb923c'] },
+              text: ['2.7 s', '12.5 s', '20.8 s', '36.8 s'],
+              textposition: 'outside',
+              hovertemplate: '%{y}: %{x:.1f} seconds<extra></extra>',
+              name: 'SPI x1 @ 50 MHz',
+            },
+          ],
+          {
+            title: {
+              text: 'Configuration Time via SPI x1 @ 50 MHz',
+              font: { color: textColor, size: 14 },
+            },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            xaxis: {
+              title: { text: 'Seconds', font: { color: textColor } },
+              tickfont: { color: textColor },
+              gridcolor: gridColor,
+              range: [0, 42],
+            },
+            yaxis: { tickfont: { color: textColor } },
+            margin: { l: 90, r: 60, t: 50, b: 50 },
+            font: { family: 'Inter, sans-serif' },
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      });
+    </script>
+  </body>
+</html>

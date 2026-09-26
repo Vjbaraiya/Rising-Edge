@@ -1,0 +1,366 @@
+// Rising Edge Technologies — Prisma Schema
+// Database: PostgreSQL (Neon serverless)
+// ORM: Prisma 5
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Required for Neon serverless
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  USER
+  RECRUITER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubscriptionPlan {
+  BASIC
+  ADVANCED
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  TRIAL
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DEACTIVATED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum TrainingLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum LessonType {
+  VIDEO
+  PDF
+  QUIZ
+  ASSIGNMENT
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+
+model User {
+  id                   String     @id @default(cuid())
+  fullName             String
+  email                String     @unique
+  passwordHash         String
+  role                 Role       @default(USER)
+  status               UserStatus @default(PENDING_VERIFICATION)
+  emailVerified        Boolean    @default(false)
+  emailVerifyToken     String?
+  emailVerifyExpiry    DateTime?
+  passwordResetToken   String?
+  passwordResetExpiry  DateTime?
+  mfaEnabled           Boolean    @default(false)
+  mfaSecret            String?
+  avatarUrl            String?
+  phone                String?
+  bio                  String?
+  failedLoginAttempts  Int        @default(0)
+  lockedUntil          DateTime?
+  lastLoginAt          DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  // Relations
+  subscription   UserSubscription?
+  enrollments    Enrollment[]
+  payments       Payment[]
+  certificates   Certificate[]
+  progress       Progress[]
+  refreshTokens  RefreshToken[]
+  loginHistory   LoginHistory[]
+  auditLogs      AuditLog[]
+
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTIONS
+// ─────────────────────────────────────────────
+
+model UserSubscription {
+  id          String             @id @default(cuid())
+  userId      String             @unique
+  plan        SubscriptionPlan   @default(BASIC)
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime           @default(now())
+  endDate     DateTime?          // null = BASIC (never expires)
+  autoRenew   Boolean            @default(false)
+  paymentId   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_subscriptions")
+}
+
+model SubscriptionPlanConfig {
+  id            String           @id @default(cuid())
+  name          SubscriptionPlan @unique
+  displayName   String
+  priceMonthly  Decimal          @db.Decimal(10, 2)
+  priceYearly   Decimal?         @db.Decimal(10, 2)
+  features      Json             // string[] of feature descriptions
+  maxDownloads  Int?             // null = unlimited
+  aiUsageLimit  Int?             // null = unlimited
+  isActive      Boolean          @default(true)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("subscription_plan_configs")
+}
+
+// ─────────────────────────────────────────────
+// TRAININGS & CONTENT
+// ─────────────────────────────────────────────
+
+model Training {
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  description     String
+  shortDesc       String?
+  level           TrainingLevel    @default(BEGINNER)
+  category        String
+  instructorId    String           // references User.id (no FK — admin manages)
+  instructorName  String
+  price           Decimal          @db.Decimal(10, 2) @default(0)
+  thumbnailUrl    String?
+  previewVideoUrl String?
+  published       Boolean          @default(false)
+  featured        Boolean          @default(false)
+  requiredPlan    SubscriptionPlan @default(BASIC)
+  totalDuration   Int?             // minutes
+  totalLessons    Int?
+  tags            String[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  modules      Module[]
+  enrollments  Enrollment[]
+  certificates Certificate[]
+
+  @@index([published])
+  @@index([category])
+  @@index([requiredPlan])
+  @@map("trainings")
+}
+
+model Module {
+  id         String   @id @default(cuid())
+  trainingId String
+  title      String
+  order      Int
+  createdAt  DateTime @default(now())
+
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  lessons    Lesson[]
+
+  @@index([trainingId])
+  @@map("modules")
+}
+
+model Lesson {
+  id         String     @id @default(cuid())
+  moduleId   String
+  title      String
+  type       LessonType
+  contentUrl String?
+  duration   Int?       // seconds for video
+  order      Int
+  isFree     Boolean    @default(false) // free preview?
+  createdAt  DateTime   @default(now())
+
+  module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress  Progress[]
+
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+// ─────────────────────────────────────────────
+// ENROLLMENTS
+// ─────────────────────────────────────────────
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  trainingId  String
+  paymentId   String?
+  enrolledAt  DateTime  @default(now())
+  expiresAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  training Training @relation(fields: [trainingId], references: [id])
+  payment  Payment? @relation(fields: [paymentId], references: [id])
+
+  @@unique([userId, trainingId])
+  @@index([userId])
+  @@index([trainingId])
+  @@map("enrollments")
+}
+
+// ─────────────────────────────────────────────
+// PAYMENTS
+// ─────────────────────────────────────────────
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("INR")
+  gateway       String        @default("cashfree")
+  orderId       String        @unique  // Cashfree order ID
+  transactionId String?               // Cashfree transaction ID
+  status        PaymentStatus @default(PENDING)
+  description   String?
+  metadata      Json?                 // gateway-specific data
+  refundId      String?
+  refundedAt    DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  enrollments Enrollment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderId])
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────
+// CERTIFICATES
+// ─────────────────────────────────────────────
+
+model Certificate {
+  id             String   @id @default(cuid())
+  userId         String
+  trainingId     String
+  certificateUrl String
+  certificateId  String   @unique @default(cuid()) // public verifiable ID
+  issuedAt       DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  training Training @relation(fields: [trainingId], references: [id])
+
+  @@unique([userId, trainingId])
+  @@map("certificates")
+}
+
+// ─────────────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────────────
+
+model Progress {
+  id         String   @id @default(cuid())
+  userId     String
+  lessonId   String
+  completed  Boolean  @default(false)
+  quizScore  Float?
+  timeSpent  Int?     // seconds
+  lastViewed DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@map("progress")
+}
+
+// ─────────────────────────────────────────────
+// AUTH TOKENS & SESSIONS
+// ─────────────────────────────────────────────
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  deviceInfo String?
+  ipAddress  String?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  ipAddress String?
+  userAgent String?
+  device    String?
+  location  String?
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("login_history")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String   // e.g. "USER_LOGIN", "COURSE_PUBLISHED", "PAYMENT_REFUNDED"
+  resource   String?  // e.g. "Training", "User"
+  resourceId String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

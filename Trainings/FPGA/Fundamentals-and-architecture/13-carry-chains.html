@@ -1,0 +1,1509 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Master the CARRY4 primitive — Xilinx's dedicated fast-arithmetic silicon path that implements ripple-carry adders, subtractors, and counters 5× faster than LUT-only logic."
+    />
+    <title>Carry Chains | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/13-carry-chains.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .code-block {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+        line-height: 1.8;
+        color: var(--text-sub);
+        overflow-x: auto;
+        margin: 16px 0;
+        white-space: pre;
+      }
+      .gif-placeholder {
+        background: var(--bg-muted);
+        border: 2px dashed var(--border);
+        border-radius: 10px;
+        padding: 32px 24px;
+        text-align: center;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        line-height: 1.7;
+      }
+      .gif-placeholder strong {
+        display: block;
+        color: var(--text-sub);
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item active" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Carry Chains</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 13/25</span><span>52%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 52%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 13 OF 25</span>
+                <span class="badge">12 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Carry Chains
+              </h1>
+              <p class="subtitle">
+                Master the CARRY4 primitive — Xilinx's dedicated fast-arithmetic silicon path that
+                implements ripple-carry adders, subtractors, and counters 5× faster than LUT-only
+                logic.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                What are Carry Chains?
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                Binary addition is the most fundamental arithmetic operation in digital logic. When
+                you add two multi-bit numbers, each bit position must account for a carry from the
+                bit below — that carry must propagate from the least-significant bit (LSB) all the
+                way to the most-significant bit (MSB). This is known as
+                <strong style="color: var(--text-base)">ripple-carry propagation</strong>.
+              </p>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                If you implement a wide adder using only LUTs and general routing fabric, each carry
+                bit has to travel through a LUT output and then through the routing interconnect to
+                reach the next stage. That journey takes approximately
+                <strong style="color: var(--text-base)">0.5 ns per bit stage</strong>. A 32-bit
+                adder would require roughly 16 ns just for carry propagation — completely
+                unacceptable at 500 MHz (2 ns period).
+              </p>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                The solution is
+                <strong style="color: var(--text-base)">dedicated carry chain silicon</strong>.
+                Xilinx FPGAs include a hardwired path specifically for carry propagation that
+                bypasses general routing entirely. This dedicated path achieves approximately
+                <strong style="color: var(--text-base)">0.1 ns per carry stage</strong> — roughly 5×
+                faster than routing through general fabric. The primitive that implements this fast
+                path is called <strong style="color: var(--text-base)">CARRY4</strong>.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>Key Numbers at a Glance</strong>
+                General routing carry propagation: ~0.5 ns per bit stage. Dedicated CARRY4 chain:
+                ~0.1 ns per bit stage. Each Slice contains exactly one CARRY4 primitive providing 4
+                carry stages. Four Slices per CLB column = 16-bit carry chain per CLB column.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                CARRY4 Primitive Structure
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                The CARRY4 primitive has a specific set of inputs and outputs designed exclusively
+                for fast chained arithmetic. Understanding each port is essential for knowing how
+                Vivado synthesizes arithmetic operations and how to debug timing failures in adder
+                paths.
+              </p>
+
+              <div class="mermaid">
+                graph LR subgraph INPUTS["Inputs"] CI["CI\nCarry In from below"]
+                CYINIT["CYINIT\nChain Init (VCC/GND)"] DI["DI[3:0]\nGenerate — LUT O5"]
+                S["S[3:0]\nPropagate — LUT O6"] end subgraph CARRY4P["CARRY4 Primitive"] ST0["Stage
+                0\nCarry Mux"] ST1["Stage 1\nCarry Mux"] ST2["Stage 2\nCarry Mux"] ST3["Stage
+                3\nCarry Mux"] ST0 --> ST1 --> ST2 --> ST3 end subgraph OUTPUTS["Outputs"]
+                CO["CO[3:0]\nCarry Outputs\nCO[3] → next CI"] O["O[3:0]\nSum Outputs"] end CI -->
+                ST0 CYINIT --> ST0 DI --> ST0 DI --> ST1 DI --> ST2 DI --> ST3 S --> ST0 S --> ST1 S
+                --> ST2 S --> ST3 ST0 --> CO ST1 --> CO ST2 --> CO ST3 --> CO ST0 --> O ST1 --> O
+                ST2 --> O ST3 --> O
+              </div>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Port</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Function</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>CI</code></td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>Carry in from the CARRY4 directly below in the same CLB column</td>
+                  </tr>
+                  <tr>
+                    <td><code>CYINIT</code></td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>
+                      Initialize the chain: VCC for subtraction (CI=1), GND for addition (CI=0)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>DI[3:0]</code></td>
+                    <td>Input</td>
+                    <td>4</td>
+                    <td>Data input from LUT O5 outputs — carry generate signals (A AND B)</td>
+                  </tr>
+                  <tr>
+                    <td><code>S[3:0]</code></td>
+                    <td>Input</td>
+                    <td>4</td>
+                    <td>Sum select from LUT O6 outputs — carry propagate signals (A XOR B)</td>
+                  </tr>
+                  <tr>
+                    <td><code>O[3:0]</code></td>
+                    <td>Output</td>
+                    <td>4</td>
+                    <td>Sum outputs — XOR of S[i] and carry-in to that stage</td>
+                  </tr>
+                  <tr>
+                    <td><code>CO[3:0]</code></td>
+                    <td>Output</td>
+                    <td>4</td>
+                    <td>
+                      Carry outputs — CO[3] cascades to next CARRY4's CI via dedicated routing
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p
+                style="color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; margin: 12px 0"
+              >
+                The carry mux logic at each stage follows two simple rules:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 24px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong style="color: var(--text-base)">S[i] = 0:</strong> CO[i] = DI[i] — carry
+                  generate/kill mode (carry determined by data, not previous stage)
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">S[i] = 1:</strong> CO[i] = CI — carry
+                  ripple mode (carry passes through from the stage below)
+                </li>
+              </ul>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                How Fast Arithmetic Works Inside CARRY4
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                For a 1-bit full adder stage with inputs A[i] and B[i] and carry-in CI:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 24px;
+                  margin-bottom: 12px;
+                "
+              >
+                <li>
+                  The <strong style="color: var(--text-base)">LUT6 output (O6)</strong> computes
+                  <code>S[i] = A[i] XOR B[i]</code> — the "propagate" signal fed into CARRY4 S port
+                </li>
+                <li>
+                  The <strong style="color: var(--text-base)">LUT5 output (O5)</strong> computes
+                  <code>DI[i] = A[i] AND B[i]</code> — the "generate" signal fed into CARRY4 DI port
+                </li>
+                <li>
+                  CARRY4 combines them: if S[i]=1, carry ripples through from below; if S[i]=0,
+                  carry is generated from DI[i]
+                </li>
+                <li>The final sum bit is <code>O[i] = S[i] XOR carry_in_to_stage_i</code></li>
+              </ul>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Since a 7-series LUT6 can produce both O5 and O6 simultaneously (using its
+                dual-output feature), each Slice implements 4 bits of full addition using its 4 LUTs
+                and 1 CARRY4 — with no wasted resources. With 4 Slices per CLB column, that is
+                <strong style="color: var(--text-base)">16 bits per CLB</strong>. A 128-bit adder
+                stacks 8 CLBs vertically; the tools handle column placement automatically.
+              </p>
+
+              <div id="chart-carry-speed" style="width: 100%; height: 340px; margin: 20px 0"></div>
+
+              <div class="callout callout-info">
+                <strong>Column Placement is Automatic</strong>
+                Each CARRY4 spans exactly one Slice vertically. Cascade 8 CARRY4s (8 Slices = 2
+                CLBs) for a 32-bit adder. Vivado's P&amp;R engine automatically constrains cascaded
+                CARRY4 primitives to the same CLB column — you never need manual placement
+                constraints for standard adders.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Operations Implemented by CARRY4
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Any digital operation that can be reduced to fast carry propagation benefits from
+                the CARRY4 chain. The following table lists the most common operations the
+                synthesizer maps to CARRY4:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Operation</th>
+                    <th>How CARRY4 is Used</th>
+                    <th>Verilog Operator</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Adder</td>
+                    <td>Direct ripple-carry chain with CYINIT=GND</td>
+                    <td><code>sum = a + b;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Subtractor</td>
+                    <td>Two's complement: invert B bits, CYINIT=VCC (carry-in=1)</td>
+                    <td><code>diff = a - b;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Accumulator</td>
+                    <td>Adder with registered feedback; carry chain per clock cycle</td>
+                    <td><code>acc &lt;= acc + data;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Comparator</td>
+                    <td>Subtraction result — sign bit gives greater/less-than</td>
+                    <td><code>gt = (a &gt; b);</code></td>
+                  </tr>
+                  <tr>
+                    <td>Counter</td>
+                    <td>Increment via carry chain — very efficient for wide counters</td>
+                    <td><code>cnt &lt;= cnt + 1;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Incrementer</td>
+                    <td>CARRY4 with one input tied to 0, carry-in = 1</td>
+                    <td><code>out = in + 1;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Shift-and-add multiplier</td>
+                    <td>Partial sum accumulation uses carry chain per partial product</td>
+                    <td><code>prod = a * b;</code> (small widths)</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Cascading Carry Chains for Wide Adders
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Wide adders require multiple CARRY4 primitives chained in series within the same CLB
+                column. The cascade mechanism is straightforward: CO[3] of one CARRY4 connects to CI
+                of the next via a dedicated carry routing wire that never touches general fabric.
+              </p>
+
+              <div class="mermaid">
+                graph TD CYINIT["CYINIT = GND (add) or VCC (sub)"] C4A["CARRY4 — Bits 3:0\nCI ←
+                CYINIT\nCO[3] → next CI"] C4B["CARRY4 — Bits 7:4\nCI ← CO[3] above\nCO[3] → next
+                CI"] C4C["CARRY4 — Bits 11:8\nCI ← CO[3] above\nCO[3] → next CI"] C4D["CARRY4 — Bits
+                15:12\nCI ← CO[3] above\nCO[3] = overflow bit"] CYINIT --> C4A --> C4B --> C4C -->
+                C4D
+              </div>
+
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 24px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong style="color: var(--text-base)">CYINIT = GND:</strong> carry-in to bit 0
+                  is 0 — standard addition
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">CYINIT = VCC:</strong> carry-in to bit 0
+                  is 1 — used in two's complement subtraction (invert B + carry-in of 1)
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">CO[3]</strong> of each CARRY4 connects to
+                  <strong style="color: var(--text-base)">CI</strong> of the one above — dedicated
+                  carry wire, ~0.01 ns crossing delay
+                </li>
+                <li>
+                  Vivado P&amp;R places all cascaded CARRY4s in the same column automatically — no
+                  Pblock needed
+                </li>
+              </ul>
+
+              <div id="chart-adder-delay" style="width: 100%; height: 340px; margin: 20px 0"></div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Synthesis Inference — Let Vivado Do the Work
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                In virtually all practical designs, you do not need to instantiate CARRY4 manually.
+                Vivado's synthesis engine recognizes arithmetic operators and maps them to CARRY4
+                chains automatically. The following code shows both approaches — inferred
+                (recommended) and manual instantiation (advanced only):
+              </p>
+
+              <div class="code-block">
+                // ─── RECOMMENDED: Inferred CARRY4 ─────────────────────────────────────────── //
+                Vivado automatically infers a chain of CARRY4 + LUT6 for the + operator module
+                fast_adder ( input [15:0] a, input [15:0] b, output [16:0] sum // 17-bit: bit 16
+                captures carry-out (overflow) ); assign sum = {1'b0, a} + {1'b0, b}; // Vivado
+                infers 4x CARRY4 + 16x LUT6 endmodule // ─── ADVANCED ONLY: Manual CARRY4
+                Instantiation ───────────────────────────── // Only needed for sub-nanosecond
+                critical path tuning. // Ties design to Xilinx 7-series — not portable to
+                UltraScale+ without rewrite. CARRY4 carry_stage0 ( .CYINIT (1'b0), // GND: carry-in
+                to bit 0 = 0 (addition) .CI (1'b0), // Unused when CYINIT drives the first stage .DI
+                (di_3_0), // Generate signals: A[3:0] AND B[3:0] from LUT O5 .S (s_3_0), //
+                Propagate signals: A[3:0] XOR B[3:0] from LUT O6 .CO (co_3_0), // co_3_0[3] feeds
+                next CARRY4's CI .O (sum_3_0) // Sum bits 3:0 );
+              </div>
+
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                After synthesis, open the Vivado Synthesis Report and search for
+                <code
+                  style="
+                    background: var(--bg-muted);
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 0.82rem;
+                  "
+                  >CARRY4</code
+                >
+                in the resource utilization section. For a 16-bit adder you will see exactly 4
+                CARRY4 instances. For a 32-bit adder, 8 instances.
+              </p>
+
+              <div class="callout callout-tip">
+                <strong>Best Practice: Trust the Synthesizer</strong>
+                Never instantiate CARRY4 manually unless you are optimizing an extremely tight
+                critical path where even inferred logic doesn't meet timing. Vivado infers it
+                correctly from + and - operators. Manual instantiation also ties your design
+                irreversibly to Xilinx 7-series architecture — moving to UltraScale or Intel
+                requires complete rewriting of those modules.
+              </div>
+
+              <div class="callout callout-warning">
+                <strong>Avoid CARRY4 Misuse</strong>
+                Do not use CARRY4 for non-arithmetic functions like priority encoders or one-hot
+                decoders. While technically possible, it wastes resources, complicates timing
+                analysis, and makes cross-device retargeting impossible. Use LUTs for logic; use
+                CARRY4 for arithmetic.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Performance Comparison: Carry Chain vs LUT-Only Adder
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                The following table compares timing for CARRY4-based adders versus LUT-only
+                implementations at worst-case process/voltage/temperature corner for Xilinx
+                7-series:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Adder Width</th>
+                    <th>CARRY4 Chain Delay</th>
+                    <th>LUT-Only Delay</th>
+                    <th>Speed Improvement</th>
+                    <th>CARRY4 Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>8-bit</td>
+                    <td>~0.8 ns</td>
+                    <td>~4 ns</td>
+                    <td>5×</td>
+                    <td>2</td>
+                  </tr>
+                  <tr>
+                    <td>16-bit</td>
+                    <td>~1.6 ns</td>
+                    <td>~8 ns</td>
+                    <td>5×</td>
+                    <td>4</td>
+                  </tr>
+                  <tr>
+                    <td>32-bit</td>
+                    <td>~3.2 ns</td>
+                    <td>~16 ns (LUT tree)</td>
+                    <td>5×</td>
+                    <td>8</td>
+                  </tr>
+                  <tr>
+                    <td>64-bit</td>
+                    <td>~6.4 ns</td>
+                    <td>~25 ns</td>
+                    <td>~4×</td>
+                    <td>16</td>
+                  </tr>
+                  <tr>
+                    <td>128-bit</td>
+                    <td>~12.8 ns</td>
+                    <td>~45 ns</td>
+                    <td>~3.5×</td>
+                    <td>32</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: How many CARRY4 primitives are needed for a 32-bit ripple-carry adder in Xilinx
+                7-series?
+                <br /><br />
+                A: 8 CARRY4 primitives. Each CARRY4 handles 4 bits of carry propagation, so 32 ÷ 4 =
+                8 CARRY4s. Vivado places all 8 in the same CLB column automatically — they span 8
+                Slices across 2 CLBs (4 Slices per CLB). The total carry propagation delay is
+                approximately 8 × 0.1 ns = 0.8 ns, plus LUT and flip-flop delays.
+              </div>
+
+              <div class="gif-placeholder">
+                <strong>Animation Placeholder</strong>
+                Suggested GIF: ripple-carry animation showing a carry bit propagating from bit 0 to
+                bit 7 during an 8-bit addition, with each CARRY4 stage lighting up sequentially at
+                approximately 0.1 ns intervals. The animation should visually show how carry travels
+                up the silicon column from LSB to MSB entirely within the dedicated carry routing —
+                never touching general routing fabric.
+              </div>
+            </div>
+          </section>
+
+          <!-- QUIZ SECTION -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1" data-answered="">
+                <p class="quiz-q">
+                  1. How many full-adder stages does one CARRY4 primitive implement?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>A</span> 1 stage
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>B</span> 2 stages
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>C</span> 4 stages
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>D</span> 8 stages
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q1fb">
+                  Correct! Each CARRY4 primitive has 4 carry stages — CO[0] through CO[3] —
+                  implementing 4 bits of a ripple-carry adder. The name CARRY4 literally refers to
+                  these 4 carry stages. Each stage requires one LUT to supply the propagate (O6) and
+                  generate (O5) signals.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2" data-answered="">
+                <p class="quiz-q">
+                  2. Which signal propagates carry between adjacent CARRY4 primitives in a cascade?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>A</span> CO[0] to CYINIT of next CARRY4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>B</span> CO[3] to CI of next CARRY4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>C</span> O[3] to DI[0] of next CARRY4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>D</span> S[3] to CI of next CARRY4
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q2fb">
+                  Correct! CO[3] — the carry output from the most-significant (top) stage of one
+                  CARRY4 — connects directly to the CI (carry input) of the next CARRY4 above it in
+                  the column. This connection uses a dedicated carry wire, not general routing
+                  fabric, adding essentially zero additional delay.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3" data-answered="">
+                <p class="quiz-q">
+                  3. CARRY4 dedicated carry paths are faster than general routing carry propagation
+                  by approximately how much?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>A</span> 2×
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>B</span> 10×
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>C</span> 5×
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>D</span> 20×
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q3fb">
+                  Correct! The dedicated CARRY4 path achieves ~0.1 ns per stage versus ~0.5 ns per
+                  stage through general routing — a 5× speed improvement. For a 32-bit adder this
+                  means 3.2 ns vs 16 ns total carry propagation delay, making the difference between
+                  meeting 300 MHz timing and failing it completely.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4" data-answered="">
+                <p class="quiz-q">
+                  4. Which Verilog operator causes Vivado to automatically infer a CARRY4 chain
+                  during synthesis?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>A</span> &amp; (bitwise AND)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>B</span> + (addition operator)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>C</span> ^ (XOR operator)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>D</span> &gt;&gt; (right shift)
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q4fb">
+                  Correct! The + and - arithmetic operators trigger CARRY4 inference in Vivado. When
+                  Vivado sees a multi-bit + operation, it maps it to a chain of CARRY4 primitives
+                  plus supporting LUT6/LUT5 configurations — all automatically, with no user
+                  intervention required.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5" data-answered="">
+                <p class="quiz-q">5. In CARRY4, what does setting CYINIT = VCC accomplish?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>A</span> Resets the carry chain to zero
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>B</span> Disables the carry chain output
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>C</span> Initializes the carry chain with carry-in = logic 1 (used for
+                    subtraction)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>D</span> Routes carry through general fabric instead of dedicated path
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q5fb">
+                  Correct! CYINIT = VCC sets the initial carry-in to logic 1. This is the key to
+                  two's complement subtraction: to compute A − B, you invert all bits of B
+                  (producing ~B) and then add with carry-in = 1. The + 1 completes the two's
+                  complement negation of B. CYINIT = GND is used for normal addition with carry-in =
+                  0.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q6" data-answered="">
+                <p class="quiz-q">
+                  6. How many CARRY4 primitives are required to build a 64-bit adder?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>A</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>B</span> 64
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>C</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>D</span> 32
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q6fb">
+                  Correct! 64 bits ÷ 4 stages per CARRY4 = 16 CARRY4 primitives. These occupy 16
+                  Slices arranged vertically in the same CLB column (4 CLBs × 4 Slices each). Total
+                  carry propagation delay: 16 × 0.1 ns ≈ 1.6 ns — well within budget at 300 MHz (3.3
+                  ns period).
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRACTICAL EXERCISE -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-tip">
+                <strong>Exercise — Synthesize a 16-bit Adder and Inspect CARRY4 Inference</strong>
+                Write a Verilog module <code>fast_adder</code> with two 16-bit inputs
+                (<code>a</code>, <code>b</code>) and a 17-bit output (<code>sum</code>) where bit 16
+                captures the carry-out (overflow indicator). Use a simple
+                <code>assign sum = {1'b0,a} + {1'b0,b};</code> statement. <br /><br />
+                Synthesize in Vivado targeting any Artix-7, Kintex-7, or UltraScale device. After
+                synthesis completes: (1) open the Synthesis Report and search for "CARRY4" in the
+                resource utilization table — verify you see exactly 4 instances; (2) open the
+                implemented design schematic and trace the CARRY4 cascade from bottom to top of the
+                column; (3) right-click any CARRY4 and select "Highlight Fanout" to visualize the
+                chain; (4) run <code>report_timing -max_paths 5 -path_type full</code> and identify
+                whether the critical path slack is dominated by carry chain delay or by the
+                surrounding LUT/FF delays.
+              </div>
+            </div>
+          </section>
+
+          <!-- SUMMARY -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Summary
+              </h3>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 20px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  The <strong style="color: var(--text-base)">CARRY4 primitive</strong> provides 4
+                  dedicated carry stages per Slice at ~0.1 ns per stage — 5× faster than general
+                  routing (~0.5 ns/stage)
+                </li>
+                <li>
+                  Ports: CI (carry in), CYINIT (chain init via VCC/GND), DI[3:0] (generate from LUT
+                  O5), S[3:0] (propagate from LUT O6), CO[3:0] (carry out), O[3:0] (sum out)
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">CO[3]</strong> cascades to the next
+                  CARRY4's <strong style="color: var(--text-base)">CI</strong> via a dedicated carry
+                  wire — no general routing involved
+                </li>
+                <li>
+                  Vivado automatically infers CARRY4 chains from Verilog <code>+</code> and
+                  <code>-</code> operators — manual instantiation is rarely necessary
+                </li>
+                <li>
+                  Supported operations include: adders, subtractors, accumulators, comparators,
+                  counters, incrementers, and shift-and-add multipliers
+                </li>
+                <li>
+                  A 32-bit adder uses 8 CARRY4s; a 64-bit adder uses 16 — all placed in the same CLB
+                  column by Vivado automatically
+                </li>
+                <li>
+                  Check the synthesis report for CARRY4 instance counts to verify correct inference
+                  after synthesis
+                </li>
+              </ul>
+
+              <nav class="lesson-nav" aria-label="Lesson navigation">
+                <a href="12-flip-flops.html">← Flip-Flops</a>
+                <a href="14-routing-architecture.html">Routing Architecture →</a>
+              </nav>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-13';
+      const TOTAL = 25;
+
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '✓ Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        renderCharts();
+      });
+
+      function renderCharts() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#374151';
+        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+        Plotly.newPlot(
+          'chart-carry-speed',
+          [
+            {
+              x: ['CARRY4 Dedicated Path', 'General Routing Carry'],
+              y: [0.1, 0.5],
+              type: 'bar',
+              marker: { color: ['#22d3ee', '#f87171'], opacity: 0.85 },
+              text: ['0.1 ns / bit', '0.5 ns / bit'],
+              textposition: 'outside',
+              width: [0.4, 0.4],
+            },
+          ],
+          {
+            title: {
+              text: 'Carry Propagation Delay Per Bit Stage',
+              font: { color: textColor, size: 14 },
+              x: 0.5,
+            },
+            yaxis: {
+              title: 'Delay (ns)',
+              color: textColor,
+              gridcolor: gridColor,
+              range: [0, 0.75],
+              tickfont: { color: textColor },
+            },
+            xaxis: { color: textColor, tickfont: { color: textColor } },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: textColor, family: 'Inter,sans-serif' },
+            margin: { t: 55, b: 60, l: 65, r: 20 },
+            showlegend: false,
+          },
+          { responsive: true }
+        );
+
+        Plotly.newPlot(
+          'chart-adder-delay',
+          [
+            {
+              x: [8, 16, 32, 64, 128],
+              y: [0.8, 1.6, 3.2, 6.4, 12.8],
+              type: 'scatter',
+              mode: 'lines+markers',
+              name: 'CARRY4 Chain (linear)',
+              line: { color: '#22d3ee', width: 2.5 },
+              marker: { color: '#22d3ee', size: 8 },
+            },
+            {
+              x: [8, 16, 32, 64, 128],
+              y: [4, 8, 16, 25, 45],
+              type: 'scatter',
+              mode: 'lines+markers',
+              name: 'LUT-Only Adder (exponential)',
+              line: { color: '#f87171', width: 2.5, dash: 'dot' },
+              marker: { color: '#f87171', size: 8 },
+            },
+          ],
+          {
+            title: {
+              text: 'Adder Total Delay vs Bit Width',
+              font: { color: textColor, size: 14 },
+              x: 0.5,
+            },
+            xaxis: {
+              title: 'Adder Width (bits)',
+              color: textColor,
+              gridcolor: gridColor,
+              tickfont: { color: textColor },
+            },
+            yaxis: {
+              title: 'Total Delay (ns)',
+              color: textColor,
+              gridcolor: gridColor,
+              tickfont: { color: textColor },
+            },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: textColor, family: 'Inter,sans-serif' },
+            legend: { font: { color: textColor }, bgcolor: 'transparent' },
+            margin: { t: 55, b: 65, l: 65, r: 20 },
+          },
+          { responsive: true }
+        );
+      }
+    </script>
+  </body>
+</html>

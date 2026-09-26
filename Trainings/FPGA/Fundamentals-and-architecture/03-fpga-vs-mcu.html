@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Compare FPGA and microcontroller architectures, execution models, performance, power, cost, and learn when to choose each for your design."
+    />
+    <meta property="og:title" content="FPGA vs MCU | FPGA Academy | Rising Edge" />
+    <title>FPGA vs MCU | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/03-fpga-vs-mcu.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .data-table .winner {
+        color: #34d399;
+        font-weight: 700;
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .objectives-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .objectives-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .objectives-list li:last-child {
+        border-bottom: none;
+      }
+      .objectives-list li::before {
+        content: '→';
+        color: #22d3ee;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .section-heading {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 2rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+      }
+      .widget-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .widget-container h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 12px;
+      }
+      .arch-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+      @media (max-width: 640px) {
+        .arch-split {
+          grid-template-columns: 1fr;
+        }
+      }
+      .arch-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .arch-box h4 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .arch-box.mcu-box {
+        border-top: 3px solid #22d3ee;
+      }
+      .arch-box.fpga-box {
+        border-top: 3px solid #818cf8;
+      }
+      .arch-box ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .arch-box ul li {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        gap: 8px;
+      }
+      .arch-box ul li::before {
+        content: '•';
+        color: #94a3b8;
+        flex-shrink: 0;
+      }
+      .exercise-step {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .exercise-step:last-child {
+        border-bottom: none;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .step-text {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        padding-top: 4px;
+      }
+      .scenario-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+      .scenario-card .scenario-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+      .scenario-card .scenario-q {
+        font-size: 0.875rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .scenario-card .scenario-a {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item active" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>FPGA vs MCU</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 3/25</span><span>12%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 12%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 3 OF 25</span>
+                <span class="badge">12 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                FPGA vs Microcontroller (MCU)
+              </h1>
+              <p class="subtitle">
+                Compare the fundamental architectures, execution models, performance
+                characteristics, and cost profiles of FPGAs and microcontrollers to know exactly
+                when to use each.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Learning Objectives -->
+              <div class="widget-container">
+                <h3>Learning Objectives</h3>
+                <ul class="objectives-list">
+                  <li>
+                    Contrast the Von Neumann (MCU) and dataflow (FPGA) execution models at the
+                    architectural level
+                  </li>
+                  <li>Explain why MCU execution is sequential and FPGA execution is parallel</li>
+                  <li>
+                    Compare FPGA and MCU across: clock speed, parallelism, power, cost, and
+                    development time
+                  </li>
+                  <li>Identify the programming languages and toolchains used for each platform</li>
+                  <li>
+                    Recognize scenarios where combining MCU and FPGA (Zynq SoC) is the optimal
+                    choice
+                  </li>
+                  <li>
+                    Apply a decision framework to select between MCU and FPGA for given design
+                    requirements
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Overview -->
+              <h2 class="section-heading">Two Fundamentally Different Machines</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                A microcontroller (MCU) and an FPGA are both programmable silicon devices, but they
+                represent completely different philosophies of computation. Understanding the
+                distinction at the architectural level — not just as a checklist — is what separates
+                engineers who make good technology choices from those who reach for the wrong tool.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                An <strong style="color: var(--text-base)">MCU</strong> implements the Von Neumann
+                architecture: a fixed CPU core, fixed memory (Flash + SRAM), and fixed peripherals
+                (UART, SPI, I2C, ADC). You write firmware in C/C++ that the CPU executes
+                sequentially — one instruction at a time. The hardware never changes; only the
+                software changes. An ARM Cortex-M4 running at 168 MHz executes at most one
+                instruction per clock cycle (with limited 2-wide superscalar on some variants). It's
+                fast, but fundamentally sequential.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 24px">
+                An <strong style="color: var(--text-base)">FPGA</strong> implements a configurable
+                dataflow architecture: you describe hardware circuits in RTL (VHDL or Verilog),
+                synthesize them into gates and flip-flops, and the FPGA fabric becomes that circuit.
+                There is no instruction pointer. Every LUT, flip-flop, and DSP slice in your design
+                evaluates every clock cycle simultaneously. You're not programming a computer —
+                you're designing a computer.
+              </p>
+
+              <!-- Architecture Comparison -->
+              <h2 class="section-heading">Architecture Side by Side</h2>
+              <div class="arch-split">
+                <div class="arch-box mcu-box">
+                  <h4 style="color: #22d3ee">Microcontroller (MCU)</h4>
+                  <ul>
+                    <li>Fixed CPU core (ARM Cortex-M, RISC-V, AVR)</li>
+                    <li>Fixed on-chip Flash memory (16KB–2MB)</li>
+                    <li>Fixed on-chip SRAM (4KB–1MB)</li>
+                    <li>Fixed peripherals: UART, SPI, I2C, USB, ADC, PWM</li>
+                    <li>Fixed clock domains (usually 1–3)</li>
+                    <li>Sequential instruction execution</li>
+                    <li>Interrupt-driven event handling</li>
+                    <li>Power: µW (sleep) to ~500mW (active)</li>
+                    <li>Cost: $0.10–$20 per unit</li>
+                    <li>Dev language: C/C++/MicroPython</li>
+                  </ul>
+                </div>
+                <div class="arch-box fpga-box">
+                  <h4 style="color: #818cf8">FPGA</h4>
+                  <ul>
+                    <li>Configurable LUT array (thousands to millions of LUTs)</li>
+                    <li>Programmable Block RAM (BRAM, 36Kb per block)</li>
+                    <li>Hardened DSP slices (18x18 or 27x18 multipliers)</li>
+                    <li>Flexible I/O supporting 100+ voltage standards</li>
+                    <li>Multiple independent clock domains (hundreds)</li>
+                    <li>True parallel evaluation every clock cycle</li>
+                    <li>Hardware interrupt response (zero latency)</li>
+                    <li>Power: 100mW–10W typical</li>
+                    <li>Cost: $5–$500+ per unit</li>
+                    <li>Dev language: VHDL, Verilog, SystemVerilog, HLS</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Mermaid Architecture Diagram -->
+              <h2 class="section-heading">Internal Architecture Comparison</h2>
+              <div class="mermaid">
+                graph LR subgraph MCU["Microcontroller"] direction TB CPU["CPU Core\n(Fetch → Decode
+                → Execute)"] --> SRAM["SRAM\n(Data)"] CPU --> FLASH["Flash\n(Firmware)"] CPU -->
+                PER["Fixed Peripherals\nUART · SPI · I2C · ADC · PWM"] CPU --> BUS["System
+                Bus\n(Sequential Access)"] end subgraph FPGA_chip["FPGA"] direction TB LUT["LUT
+                Array\n(Combinational Logic)"] --> FF["Flip-Flops\n(Registered State)"] FF -->
+                BRAM["Block RAM\n(Configurable)"] FF --> DSP["DSP Slices\n(Hardened MACs)"] LUT -->
+                IO["Programmable IO\n(Any Standard)"] end style MCU fill:#0f2040,stroke:#22d3ee
+                style FPGA_chip fill:#1a0f40,stroke:#818cf8
+              </div>
+
+              <!-- Performance Deep Dive -->
+              <h2 class="section-heading">Performance: Clock Speed vs Actual Throughput</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Clock speed comparisons between MCU and FPGA are misleading without context. An MCU
+                at 480 MHz (STM32H7) is impressive — but it executes one instruction per cycle. An
+                FPGA at 250 MHz might have 10,000 DSP slices all running multiply-accumulate
+                simultaneously. The relevant metric is work done per second, not cycles per second.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                For a 16-channel audio mixer running 256-tap FIR filters per channel: an MCU needs
+                to execute 16 × 256 × 48,000 = 196.6 million MACs per second. An STM32H7 at 480 MHz
+                with DSP instructions can sustain roughly 480 MMAC/s — it handles the load, but uses
+                ~40% of CPU time on filtering alone, leaving little headroom. An FPGA implements 16
+                × 256 = 4,096 parallel MAC units, completing all 16 filter channels simultaneously
+                in a single clock cycle at any frequency above 50 kHz — leaving 99.9% of the FPGA
+                fabric available for other functions.
+              </p>
+
+              <!-- Radar Chart -->
+              <h2 class="section-heading">Head-to-Head: Capability Radar</h2>
+              <div id="chart-radar" style="width: 100%; height: 420px"></div>
+
+              <!-- Full Comparison Table -->
+              <h2 class="section-heading">Comprehensive Comparison Table</h2>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Parameter</th>
+                    <th>Microcontroller (MCU)</th>
+                    <th>FPGA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Architecture</strong></td>
+                    <td>Von Neumann — fixed CPU, fixed memory</td>
+                    <td>Dataflow — configurable logic fabric</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Execution Model</strong></td>
+                    <td>Sequential instruction fetch/decode/execute</td>
+                    <td>Parallel — all logic evaluates every clock cycle</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Clock Speed</strong></td>
+                    <td>8 MHz – 480 MHz (single core)</td>
+                    <td>50 MHz – 700 MHz per clock domain (hundreds of domains)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Parallel Operations</strong></td>
+                    <td>1–8 (with SIMD/DSP instructions)</td>
+                    <td>Thousands to millions simultaneously</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Programming Language</strong></td>
+                    <td>C, C++, Assembly, MicroPython, Rust</td>
+                    <td>VHDL, Verilog, SystemVerilog, HLS (C++), Vivado IP</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Memory</strong></td>
+                    <td>Fixed Flash (16 KB–2 MB) + SRAM (4 KB–1 MB)</td>
+                    <td>Configurable BRAM (kilobits–megabits), distributed RAM, external DDR</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Power (active)</strong></td>
+                    <td>1 mW – 500 mW</td>
+                    <td>100 mW – 10 W (design-dependent)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Power (sleep)</strong></td>
+                    <td>1 µW – 100 µW</td>
+                    <td>~50 mW static (SRAM cells always powered)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Unit Cost</strong></td>
+                    <td>$0.10 – $20</td>
+                    <td>$5 – $500+</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Boot/Start Time</strong></td>
+                    <td>&lt;1 ms (from cold)</td>
+                    <td>10–100 ms (bitstream load from SPI Flash)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Custom Interfaces</strong></td>
+                    <td>Limited to built-in peripherals; bit-bang costly</td>
+                    <td>Any voltage standard, any protocol, any timing</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Real-Time Timing</strong></td>
+                    <td>Yes (bare metal), No (with RTOS jitter)</td>
+                    <td>Absolute — hardware guarantees timing</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Development Time</strong></td>
+                    <td>Hours to days (familiar toolchain)</td>
+                    <td>Days to months (RTL + synthesis + P&amp;R + timing closure)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Debugging</strong></td>
+                    <td>Easy — JTAG/SWD, printf, GDB</td>
+                    <td>Complex — ILA (Integrated Logic Analyzer), simulation required</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Best For</strong></td>
+                    <td>Control logic, UI, simple protocols, IoT, low power</td>
+                    <td>Data processing, custom protocols, high throughput, parallel algorithms</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-info">
+                <strong>The Best of Both Worlds</strong>
+                Many real-world products use MCU + FPGA together: the MCU handles system management,
+                user interface, and control logic (running embedded Linux or RTOS); the FPGA handles
+                data-plane acceleration, custom interfaces, and real-time signal processing. AMD
+                Xilinx Zynq-7000 and Zynq UltraScale+ MPSoC put both on the same die — ARM
+                Cortex-A9/A53 processors tightly coupled to programmable logic fabric.
+              </div>
+
+              <div class="callout callout-warning">
+                <strong>Common Mistake</strong>
+                Don't design a 10 MHz SPI controller or a simple PWM generator in an FPGA when a
+                $0.50 MCU would do the job identically. FPGAs make engineering sense when the
+                requirements include features impossible or impractical on an MCU: massively
+                parallel data paths, sub-100 ns latency, 100+ Gbps throughput, or non-standard
+                electrical interfaces.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: Can an MCU implement a custom protocol like a proprietary sensor interface?<br />
+                A: Yes — via bit-banging (software toggling of GPIO pins). But this approach ties up
+                100% of the CPU during transmission, adds timing jitter from interrupt latency, and
+                cannot exceed a few MHz. An FPGA implements the protocol as dedicated hardware with
+                zero CPU overhead, deterministic timing, and can run at hundreds of MHz. For
+                production systems where the CPU needs to do other work, FPGA wins.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — The Zynq Solution</strong>
+                When your design needs both control logic (boot, management, user interface) and
+                data processing (signal processing, protocol acceleration), the AMD Xilinx Zynq
+                architecture is purpose-built. The Processing System (PS) runs Linux or FreeRTOS on
+                ARM cores; the Programmable Logic (PL) implements your custom hardware. They
+                communicate via AXI4 buses with &lt;1 µs latency. One chip, two paradigms, both
+                optimal.
+              </div>
+
+              <!-- Decision Scenarios -->
+              <h2 class="section-heading">Selection Guide: MCU or FPGA?</h2>
+              <div class="scenario-card">
+                <div class="scenario-label">Scenario A</div>
+                <div class="scenario-q">
+                  IoT temperature/humidity sensor that transmits via LoRaWAN every 5 minutes.
+                  Battery powered, 5-year life target.
+                </div>
+                <div class="scenario-a">
+                  Choose <strong style="color: #22d3ee">MCU</strong> (e.g., STM32L0). Ultra-low
+                  power sleep mode (1 µA), built-in LoRa radio SPI, simple firmware in C. An FPGA
+                  cannot sleep to µA levels due to SRAM static power. There is zero computational
+                  challenge here that needs FPGA parallelism.
+                </div>
+              </div>
+              <div class="scenario-card">
+                <div class="scenario-label">Scenario B</div>
+                <div class="scenario-q">
+                  Real-time 4K@60fps video codec (H.265 encode/decode) for a broadcast camera.
+                </div>
+                <div class="scenario-a">
+                  Choose <strong style="color: #818cf8">FPGA</strong> (e.g., Xilinx UltraScale+).
+                  4K@60fps H.265 encoding requires ~10 billion operations per second. No MCU is
+                  close to sufficient. FPGA implements the transform, quantization, entropy coding,
+                  and motion estimation engines as parallel hardware pipelines.
+                </div>
+              </div>
+              <div class="scenario-card">
+                <div class="scenario-label">Scenario C</div>
+                <div class="scenario-q">
+                  Motor controller for a 3-phase BLDC motor with 10 kHz PWM update rate and basic
+                  PID loop.
+                </div>
+                <div class="scenario-a">
+                  Choose <strong style="color: #22d3ee">MCU</strong> (e.g., STM32G4 with motor
+                  control unit). 10 kHz PID updates take 100 µs — well within MCU capability.
+                  Built-in advanced timer/PWM hardware, low-cost, mature motor control libraries.
+                  FPGA is overkill.
+                </div>
+              </div>
+              <div class="scenario-card">
+                <div class="scenario-label">Scenario D</div>
+                <div class="scenario-q">
+                  400 Gbps network packet processor for a data center switch.
+                </div>
+                <div class="scenario-a">
+                  Choose <strong style="color: #818cf8">FPGA</strong> (e.g., Xilinx UltraScale+
+                  VU9P). 400 Gbps = processing a 64-byte packet every 1.28 nanoseconds. No MCU, no
+                  CPU, no GPU can do this. FPGA implements the packet parser, forwarding table
+                  lookup (TCAM), QoS shaper, and statistics counters as dedicated parallel hardware
+                  at wire rate.
+                </div>
+              </div>
+
+              <!-- Knowledge Check -->
+              <h2 class="section-heading">Knowledge Check</h2>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q1" data-answered="">
+                  1. How does a microcontroller execute a program compared to an FPGA?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    MCU executes instructions sequentially; FPGA evaluates all logic in parallel
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    MCU executes in parallel; FPGA executes sequentially
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Both execute instructions sequentially but at different speeds
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Both evaluate all logic in parallel simultaneously
+                  </li>
+                </ul>
+                <div id="fb1" class="quiz-fb">
+                  Correct! An MCU has a fixed CPU core that fetches and executes instructions one at
+                  a time (fetch → decode → execute). An FPGA has no instruction pointer — every LUT
+                  and flip-flop evaluates simultaneously every clock cycle. This is the fundamental
+                  architectural difference.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q2" data-answered="">
+                  2. Which platform provides true parallel hardware execution for thousands of
+                  simultaneous operations?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    Microcontroller with SIMD extensions
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    FPGA with custom parallel logic fabric
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    MCU with dual-core symmetric multiprocessing
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    MCU with DMA controller offload
+                  </li>
+                </ul>
+                <div id="fb2" class="quiz-fb">
+                  Correct! FPGAs provide true spatial parallelism — you instantiate as many hardware
+                  operators as the design requires, and all of them run simultaneously. SIMD and SMP
+                  on MCUs provide limited parallelism (4–16 ways at most), while an FPGA can have
+                  millions of parallel logic operations.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q3" data-answered="">
+                  3. MCUs generally consume less power than FPGAs. Is this true?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    True — especially in sleep modes, MCUs reach µW; FPGAs have ~50 mW static power
+                    minimum
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    False — FPGAs are always more power efficient due to parallelism
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    True — MCUs always consume less power regardless of the task
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    False — they consume exactly the same power for equivalent tasks
+                  </li>
+                </ul>
+                <div id="fb3" class="quiz-fb">
+                  Correct — True! MCUs in sleep mode consume as little as 1 µA. FPGAs cannot reach
+                  this because their SRAM configuration cells must remain powered to maintain the
+                  design. FPGA static (quiescent) power is typically 50 mW–500 mW minimum. For
+                  battery-powered IoT, MCU wins decisively.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q4" data-answered="">
+                  4. What hardware description languages are used to program FPGA fabric?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    C, C++, Python
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    Assembly and machine code
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    VHDL, Verilog, SystemVerilog (and HLS for C++ synthesis)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    Java and Kotlin (for JVM-based toolchains)
+                  </li>
+                </ul>
+                <div id="fb4" class="quiz-fb">
+                  Correct! FPGA design uses Hardware Description Languages (HDLs): VHDL (IEEE
+                  standard, verbose, strongly typed), Verilog (IEEE standard, concise, C-like
+                  syntax), and SystemVerilog (superset of Verilog with verification features).
+                  High-Level Synthesis (HLS) tools like Xilinx Vitis HLS also accept C++ and compile
+                  to RTL.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q5" data-answered="">
+                  5. For a battery-powered soil moisture sensor that sends data over Bluetooth LE
+                  every 30 seconds, which is the better choice?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    Microcontroller — low power sleep, built-in BLE radio, simple task, µA sleep
+                    current
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    FPGA — more flexible, can implement custom BLE stack in hardware
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    FPGA with external BLE module — best of both worlds
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    Either — they perform identically for this use case
+                  </li>
+                </ul>
+                <div id="fb5" class="quiz-fb">
+                  Correct! MCU (e.g., Nordic nRF52840) is the clear winner. It includes a BLE radio,
+                  ARM Cortex-M4 core, ADC for sensor reading, and can sleep at 2 µA — enabling a
+                  5-year battery life on a coin cell. An FPGA cannot achieve µA sleep power, costs
+                  10x more, and offers no advantage for this simple periodic-sensing task.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q6" data-answered="">
+                  6. Which AMD Xilinx device family combines ARM processor cores with FPGA fabric on
+                  the same chip?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    Artix-7
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    Kintex UltraScale
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    Zynq-7000 and Zynq UltraScale+ MPSoC
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    Virtex UltraScale+
+                  </li>
+                </ul>
+                <div id="fb6" class="quiz-fb">
+                  Correct! Zynq-7000 contains dual ARM Cortex-A9 + 28nm FPGA fabric. Zynq
+                  UltraScale+ MPSoC contains quad ARM Cortex-A53 (APU) + dual Cortex-R5F (RPU) +
+                  16nm FPGA fabric. These are SoC FPGAs — true heterogeneous compute platforms that
+                  eliminate the need for separate MCU + FPGA components.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h2 class="section-heading">Practical Exercise — Technology Selection</h2>
+              <div class="widget-container">
+                <h3>Scenario-Based Selection Exercise</h3>
+                <p
+                  style="
+                    font-size: 0.875rem;
+                    color: var(--text-sub);
+                    line-height: 1.7;
+                    margin-bottom: 16px;
+                  "
+                >
+                  For each scenario below, choose MCU, FPGA, or Zynq SoC. Write a 2–3 sentence
+                  justification addressing: computational requirement, power budget, cost
+                  sensitivity, and any custom interface needs.
+                </p>
+                <div class="exercise-step">
+                  <div class="step-num">A</div>
+                  <div class="step-text">
+                    <strong>400 Gbps Ethernet packet processor</strong> for a data center
+                    top-of-rack switch. Must classify packets at wire rate, support ACLs and QoS.
+                    Latency budget: &lt;100 ns port-to-port.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">B</div>
+                  <div class="step-text">
+                    <strong>IoT soil moisture sensor</strong> deployed in an agricultural field.
+                    Reads an analog sensor every 60 seconds, transmits data via LoRaWAN. Must run 3
+                    years on 2 AA batteries.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">C</div>
+                  <div class="step-text">
+                    <strong>Real-time 4K@60fps H.265 video codec</strong> for a professional
+                    broadcast camera. Must encode from a CMOS sensor (custom MIPI interface) and
+                    output via 12G-SDI.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">D</div>
+                  <div class="step-text">
+                    <strong>Smart industrial motor controller</strong>: runs a 20 kHz FOC
+                    (Field-Oriented Control) algorithm for a servo drive AND hosts a web interface
+                    for configuration AND runs EtherCAT real-time fieldbus (sub-100 µs cycle time).
+                    All three simultaneously.
+                  </div>
+                </div>
+                <div class="callout callout-tip" style="margin-top: 12px">
+                  <strong>Hint for Scenario D</strong>
+                  This is a classic Zynq use case: the ARM processor handles the web UI and Linux
+                  networking; the FPGA fabric implements the 20 kHz FOC loop and the EtherCAT slave
+                  controller in dedicated hardware — all on one chip.
+                </div>
+              </div>
+
+              <!-- Summary -->
+              <h2 class="section-heading">Lesson Summary</h2>
+              <div class="widget-container">
+                <h3>Key Takeaways</h3>
+                <ul class="objectives-list">
+                  <li>
+                    MCU = Von Neumann machine: fixed CPU + fixed peripherals, sequential instruction
+                    execution in C/C++
+                  </li>
+                  <li>
+                    FPGA = configurable dataflow fabric: custom parallel hardware described in RTL,
+                    all logic evaluates simultaneously
+                  </li>
+                  <li>
+                    MCU wins for: low power, simple control, standard protocols, IoT, short
+                    development cycles, cost sensitivity
+                  </li>
+                  <li>
+                    FPGA wins for: parallel data processing, custom protocols, high throughput,
+                    sub-µs latency, custom electrical interfaces
+                  </li>
+                  <li>
+                    FPGA static power (~50 mW+) makes MCU the only viable choice for battery-powered
+                    low-duty-cycle applications
+                  </li>
+                  <li>
+                    Zynq SoC (ARM + FPGA on-die) is the optimal solution for designs requiring both
+                    control and data-plane functions
+                  </li>
+                  <li>
+                    MCU development takes hours–days; FPGA design takes days–months due to RTL,
+                    synthesis, and timing closure complexity
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a href="02-why-fpga.html">← Why FPGA?</a>
+                <a href="04-fpga-vs-asic.html">FPGA vs ASIC →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-03';
+      const TOTAL = 25;
+
+      // Radar chart
+      var categories = [
+        'Performance',
+        'Parallelism',
+        'Power Efficiency',
+        'Ease of Dev',
+        'Low Cost',
+        'Custom IO',
+      ];
+      Plotly.newPlot(
+        'chart-radar',
+        [
+          {
+            type: 'scatterpolar',
+            r: [6, 2, 9, 9, 10, 3],
+            theta: categories,
+            fill: 'toself',
+            name: 'MCU',
+            line: { color: '#22d3ee' },
+            fillcolor: 'rgba(34,211,238,0.15)',
+          },
+          {
+            type: 'scatterpolar',
+            r: [9, 10, 5, 3, 3, 10],
+            theta: categories,
+            fill: 'toself',
+            name: 'FPGA',
+            line: { color: '#818cf8' },
+            fillcolor: 'rgba(129,140,248,0.15)',
+          },
+        ],
+        {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#94a3b8', family: 'Inter' },
+          title: {
+            text: 'MCU vs FPGA — Capability Comparison (1=low, 10=high)',
+            font: { size: 13, color: '#e2e8f0' },
+          },
+          polar: {
+            radialaxis: {
+              visible: true,
+              range: [0, 10],
+              gridcolor: 'rgba(148,163,184,0.2)',
+              color: '#64748b',
+            },
+            angularaxis: { gridcolor: 'rgba(148,163,184,0.2)', color: '#94a3b8' },
+          },
+          legend: { x: 0.85, y: 1.1 },
+          margin: { t: 60, b: 40, l: 60, r: 60 },
+        },
+        { responsive: true, displayModeBar: false }
+      );
+
+      async function loadProgress() {
+        try {
+          const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const token = session.accessToken || session.token || '';
+          if (!token) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          const data = await r.json();
+          let done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          const sbp = document.getElementById('sb-pct');
+          const sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress. Please check your connection.');
+        }
+      }
+
+      function markAsCompleteUI() {
+        const btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="#34d399" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="#34d399" stroke-width="2.5" fill="none"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          if (isCorrect) fb.classList.add('correct');
+          else fb.classList.add('incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

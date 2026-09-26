@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="A real 300 MHz radiated emission failure — root cause, fix, and 6 dB compliance margin — with before/after spectrum graphs, EUT test setup diagram, real lab equipment images, animations of how each source emits, plus a full best-practices checklist and course summary."
+    />
+    <title>
+      Case Study, Best Practices &amp; Summary | Radiated Emissions (RE) Testing Academy | Rising
+      Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/RE/10-case-study-and-best-practices.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      /* Before / After case study callout */
+      .ba-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      .ba-card {
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        text-align: center;
+      }
+      .ba-before {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid var(--danger, #f87171);
+      }
+      .ba-after {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid var(--success, #34d399);
+      }
+      .ba-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .ba-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+      .ba-before .ba-value {
+        color: var(--danger, #f87171);
+      }
+      .ba-after .ba-value {
+        color: var(--success, #34d399);
+      }
+      .ba-sub {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        margin-top: 4px;
+      }
+      @media (max-width: 640px) {
+        .ba-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      /* Checklist */
+      .check-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .check-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .check-list li:last-child {
+        border-bottom: none;
+      }
+      .check-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(52, 211, 153, 0.15);
+        color: var(--success, #34d399);
+        font-size: 0.75rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+      }
+      /* Figures (real images) */
+      .figure-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        overflow: hidden;
+      }
+      .figure-card img {
+        display: block;
+        width: 100%;
+        height: 210px;
+        object-fit: cover;
+        background: #0b0f14;
+      }
+      .figure-caption {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .figure-caption strong {
+        color: var(--text-base);
+        display: block;
+        font-size: 0.82rem;
+        margin-bottom: 2px;
+      }
+      .figure-caption a {
+        color: var(--cyan);
+      }
+      .figure-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0 1.5rem;
+      }
+      /* Emission-mechanism animation cards */
+      .emit-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .emit-card h4 {
+        margin: 0 0 0.3rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .emit-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.03));
+        border: 1px solid var(--border);
+        margin: 0.75rem 0;
+      }
+      .emit-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .equip-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.9rem;
+        margin-top: 1rem;
+      }
+      .equip-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+      }
+      .equip-card .equip-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.35rem;
+      }
+      .equip-card h5 {
+        margin: 0 0 0.25rem;
+        font-size: 0.88rem;
+        color: var(--text-base);
+      }
+      .equip-card p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Radiated Emissions (RE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Are Radiated Emissions</a
+          >
+          <a href="02-spectrum-and-importance.html" class="module-item"
+            >02. EM Spectrum &amp; Why RE Testing Matters</a
+          >
+          <a href="03-sources.html" class="module-item">03. Sources of Radiated Emissions</a>
+          <a href="04-test-types.html" class="module-item">04. Types of RE Testing</a>
+          <a href="05-frequency-and-standards.html" class="module-item"
+            >05. Frequency Ranges &amp; RE Standards</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. RE Requirements by Product Category</a
+          >
+          <a href="07-environment-and-equipment.html" class="module-item"
+            >07. Test Environment &amp; Equipment</a
+          >
+          <a href="08-setup-and-measurement.html" class="module-item"
+            >08. Test Setup, Measurement &amp; Detectors</a
+          >
+          <a href="09-failures-and-design.html" class="module-item"
+            >09. Failure Mechanisms, Design &amp; Troubleshooting</a
+          >
+          <a href="10-case-study-and-best-practices.html" class="module-item active"
+            >10. Case Study, Best Practices &amp; Summary</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies (FPGA, Power Supply &amp; More)</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Radiated Emissions (RE) Testing</a><span>/</span>
+            <span>Case Study, Best Practices &amp; Summary</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 10/10</span><span>100%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 10 &mdash; CASE STUDY</div>
+              <h1 style="font-size: 2.2rem">Case Study, Best Practices &amp; Summary</h1>
+              <p class="subtitle">
+                A real 300 MHz radiated emission failure, traced from symptom to root cause to fix
+                using the exact troubleshooting methodology from Module 09 &mdash; with a real
+                before/after spectrum graph, animations of how the failure actually radiated, real
+                lab equipment images, an EUT test setup diagram, a best-practices checklist, and a
+                summary of everything this course has covered.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Case Study -->
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.5rem">Case Study: 300 MHz Networking Board Failure</h3>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Problem
+                </h4>
+                <p style="color: var(--text-sub); font-size: 0.875rem; line-height: 1.7">
+                  A networking board failed radiated emission testing at 300 MHz with a margin of 8
+                  dB above the CISPR limit.
+                </p>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Investigation
+                </h4>
+                <div class="metrics-grid" style="margin-bottom: 8px">
+                  <div class="metric-card">Fundamental clock: 100 MHz</div>
+                  <div class="metric-card">Third harmonic: 300 MHz</div>
+                  <div class="metric-card">High emissions on the Ethernet cable</div>
+                </div>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Root Cause
+                </h4>
+                <p style="color: var(--text-sub); font-size: 0.875rem; line-height: 1.7">
+                  Common-mode current caused by an interrupted return path beneath the clock
+                  routing, combined with inadequate common-mode suppression at the Ethernet
+                  interface.
+                </p>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Solution
+                </h4>
+                <ul class="check-list">
+                  <li>
+                    <span class="check-icon">&#10003;</span> Restored continuous reference plane
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Added common-mode choke to Ethernet
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Optimized decoupling capacitor
+                    placement
+                  </li>
+                  <li><span class="check-icon">&#10003;</span> Improved cable grounding</li>
+                </ul>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 16px 0 6px">
+                  Result
+                </h4>
+                <div class="ba-grid">
+                  <div class="ba-card ba-before">
+                    <div class="ba-label">Before</div>
+                    <div class="ba-value">+8 dB over limit</div>
+                    <div class="ba-sub">Failed at 300 MHz (3rd harmonic of 100 MHz clock)</div>
+                  </div>
+                  <div class="ba-card ba-after">
+                    <div class="ba-label">After</div>
+                    <div class="ba-value">-6 dB margin</div>
+                    <div class="ba-sub">Redesigned board passed with 6 dB compliance margin</div>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.85rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">Before/After Spectrum Plot</strong>
+                  &mdash; a representative pre-compliance sweep of this exact case study, showing
+                  the fail trace collapsing below the CISPR 32 Class B limit line after the fix:
+                </p>
+                <div class="widget-container" style="padding: 1rem">
+                  <div id="plotlyBeforeAfter" style="width: 100%; height: 380px"></div>
+                  <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem">
+                    Representative quasi-peak trace (CISPR 32 Class B limit at 10 m). The 300 MHz
+                    peak &mdash; the 3rd harmonic of the 100 MHz system clock &mdash; is the point
+                    that failed before the fix and cleared the limit by 6 dB afterward. Always
+                    verify against the actual measured data from your test lab; this chart is for
+                    teaching purposes.
+                  </p>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.75rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">How the failure actually radiated</strong>
+                </p>
+                <div class="emit-card">
+                  <h4>&#9202; Interrupted Return Path Beneath the Clock Trace</h4>
+                  <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0">
+                    A slot or split in the reference plane directly under a high-speed clock trace
+                    forces the return current to detour around the gap. That detour enlarges the
+                    effective current loop area &mdash; and radiated field strength scales with loop
+                    area &times; current &times; frequency&sup2; &mdash; which is why fixing the
+                    return path alone can remove several dB of emission.
+                  </p>
+                  <div class="emit-canvas-wrap">
+                    <canvas id="canvasReturnPath"></canvas>
+                  </div>
+                </div>
+                <div class="emit-card">
+                  <h4>&#128268; Common-Mode Current on the Ethernet Cable</h4>
+                  <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0">
+                    Once the 300 MHz harmonic coupled onto the board's ground structure, it drove a
+                    small common-mode current onto the shield/return of the Ethernet cable. At 300
+                    MHz, a 1&ndash;2 m cable is a significant fraction of a wavelength, so it
+                    radiated efficiently &mdash; acting exactly like the monopole antenna described
+                    in Module 05.
+                  </p>
+                  <div class="emit-canvas-wrap">
+                    <canvas id="canvasCmCable"></canvas>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.75rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)"
+                    >Test Environment &amp; Equipment Used</strong
+                  >
+                </p>
+                <div class="figure-grid">
+                  <div class="figure-card">
+                    <img
+                      src="https://commons.wikimedia.org/wiki/Special:FilePath/Anechoic_chamber_for_EMC_testing_(Electromagnetic_Compatibility)_Nemko_Norway.jpg"
+                      alt="Semi-anechoic chamber used for EMC radiated emission testing, showing RF absorber cones lining the walls and ceiling"
+                      loading="lazy"
+                    />
+                    <div class="figure-caption">
+                      <strong>Semi-Anechoic Chamber (SAC)</strong>
+                      Where the board was retested before and after the fix &mdash; absorber-lined
+                      walls/ceiling and a conductive floor eliminate reflections.
+                      <br /><a
+                        href="https://commons.wikimedia.org/wiki/File:Anechoic_chamber_for_EMC_testing_(Electromagnetic_Compatibility)_Nemko_Norway.jpg"
+                        target="_blank"
+                        rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                  <div class="figure-card">
+                    <img
+                      src="https://commons.wikimedia.org/wiki/Special:FilePath/A_modern_real_time_spectrum_analyzer.jpg"
+                      alt="Modern real-time spectrum analyzer used as an EMI test receiver to capture the before/after spectrum"
+                      loading="lazy"
+                    />
+                    <div class="figure-caption">
+                      <strong>EMI Test Receiver / Spectrum Analyzer</strong>
+                      Captured the quasi-peak trace shown in the before/after plot above, sweeping
+                      30&ndash;1000 MHz against the CISPR 32 Class B limit.
+                      <br /><a
+                        href="https://commons.wikimedia.org/wiki/File:A_modern_real_time_spectrum_analyzer.jpg"
+                        target="_blank"
+                        rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                  <div class="figure-card">
+                    <img
+                      src="https://commons.wikimedia.org/wiki/Special:FilePath/Rotatable_log-periodic_antenna.jpg"
+                      alt="Rotatable log-periodic dipole array antenna used to capture the 300 MHz emission"
+                      loading="lazy"
+                    />
+                    <div class="figure-caption">
+                      <strong>Log-Periodic Dipole Array Antenna</strong>
+                      Covers 300 MHz&ndash;1 GHz &mdash; the exact band containing the 3rd harmonic
+                      that failed in this case study.
+                      <br /><a
+                        href="https://commons.wikimedia.org/wiki/File:Rotatable_log-periodic_antenna.jpg"
+                        target="_blank"
+                        rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.85rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">EUT Test Setup Diagram</strong> &mdash;
+                  the geometry used to retest the board before and after the fix:
+                </p>
+                <div class="widget-container">
+                  <div class="plot-area" style="height: 320px">
+                    <canvas id="canvasSetup"></canvas>
+                  </div>
+                  <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem">
+                    The board sat on a non-conductive turntable atop the ground plane; the receive
+                    antenna swept 1&ndash;4 m in height while the turntable rotated 0&ndash;360&deg;
+                    to find the worst-case orientation for the 300 MHz emission.
+                  </p>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">Typical Test Equipment</strong>
+                </p>
+                <div class="equip-grid">
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128225;</div>
+                    <h5>EMI Receiver / Spectrum Analyzer</h5>
+                    <p>
+                      CISPR 16-1-1 compliant receiver with peak, quasi-peak, and average detectors.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128246;</div>
+                    <h5>Log-Periodic Dipole Array Antenna</h5>
+                    <p>
+                      Captured the 300 MHz harmonic; loop and biconical antennas cover lower bands.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128268;</div>
+                    <h5>Low-Noise Preamplifier</h5>
+                    <p>
+                      Boosted the weak 300 MHz signal above the receiver noise floor for accurate
+                      margin measurement.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128260;</div>
+                    <h5>Turntable &amp; Antenna Mast</h5>
+                    <p>
+                      Automated 0&ndash;360&deg; rotation and 1&ndash;4 m antenna height scan to
+                      find worst case.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#127968;</div>
+                    <h5>Semi-Anechoic Chamber</h5>
+                    <p>
+                      Absorber-lined chamber with a conductive ground plane used for both retests.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128202;</div>
+                    <h5>Near-Field Probe Set</h5>
+                    <p>
+                      Used on the bench during troubleshooting to localize the interrupted return
+                      path before the chamber retest.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Best Practices -->
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.75rem">Best Practices</h3>
+                <ul class="check-list">
+                  <li>
+                    <span class="check-icon">&#10003;</span> Consider EMC from the initial design
+                    stage
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Perform pre-compliance testing early in
+                    development
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Use proper PCB stack-ups with
+                    uninterrupted reference planes
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Keep high-speed loops as small as
+                    possible
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Verify cable shielding and grounding
+                    strategies
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Review clock routing and return current
+                    paths
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Validate enclosure shielding
+                    effectiveness
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Maintain detailed EMC design guidelines
+                    across projects
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Summary -->
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.75rem">Summary</h3>
+                <p style="color: var(--text-sub); font-size: 0.875rem; line-height: 1.75">
+                  Radiated Emission (RE) testing verifies that electronic products do not emit
+                  excessive electromagnetic energy that could interfere with other equipment.
+                  Compliance with standards such as FCC, CISPR, IEC, MIL-STD, and DO-160 is
+                  essential for regulatory approval and reliable operation. Successful EMC
+                  performance begins with good design practices, including proper PCB layout,
+                  grounding, filtering, shielding, and cable management. Understanding emission
+                  sources, selecting the correct test methods, and conducting pre-compliance
+                  evaluations significantly reduce certification risks, development costs, and time
+                  to market. By integrating EMC considerations early in the product lifecycle,
+                  engineers can design products that are both compliant and robust in real-world
+                  electromagnetic environments.
+                </p>
+              </div>
+
+              <!-- Key Takeaways -->
+              <div
+                class="callout"
+                style="
+                  background: rgba(34, 211, 238, 0.06);
+                  border: 1px solid rgba(34, 211, 238, 0.25);
+                "
+              >
+                <h3 style="margin-bottom: 10px; font-size: 0.9375rem; color: var(--text-base)">
+                  Key Takeaways
+                </h3>
+                <ul class="check-list">
+                  <li>
+                    <span class="check-icon">&#10003;</span> Radiated emissions are electromagnetic
+                    waves unintentionally emitted into free space.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Compliance requirements vary by product
+                    category and target market.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Test frequency ranges extend from 9 kHz
+                    to 40 GHz, depending on the applicable standard.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Semi-anechoic chambers are the most
+                    common environment for compliance testing.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Proper PCB layout, grounding,
+                    shielding, and filtering are the most effective methods to control radiated
+                    emissions.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> Early EMC planning and pre-compliance
+                    testing reduce redesign effort and certification delays.
+                  </li>
+                  <li>
+                    <span class="check-icon">&#10003;</span> A failing spectrum trace and a passing
+                    one often differ by only a few dB at a single harmonic &mdash; small layout
+                    fixes can be the difference between fail and pass.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Comprehensive Final Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">FINAL KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Comprehensive Final Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score:
+                    <span id="quizScore" style="color: var(--cyan); font-weight: 700">0</span> / 14
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  This final quiz draws from every module in the course. Select the best answer for
+                  each question.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of 14
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 7.14%;
+                        background: linear-gradient(90deg, var(--cyan), #00d4aa);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Course Complete -->
+              <div
+                class="widget-container"
+                style="margin-top: 2rem; text-align: center; padding: 2rem"
+              >
+                <h3 style="margin-bottom: 0.5rem">Course Complete!</h3>
+                <p style="color: var(--text-sub); font-size: 0.875rem; margin-bottom: 1.25rem">
+                  You've finished all 10 modules of the Radiated Emissions (RE) Testing Academy —
+                  from EM fundamentals and emission sources through standards, test methods,
+                  measurement procedure, troubleshooting, and a real-world case study. You now have
+                  the foundation to plan, run, and interpret radiated emission testing on real
+                  products.
+                </p>
+                <a class="btn btn-primary btn-lg" href="index.html"
+                  >Back to Course Overview &rarr;</a
+                >
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="09-failures-and-design.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="index.html">Back to Course Overview &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      /* ─── Theme helpers (shared by Plotly + canvas) ─────────────────── */
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        return isLightTheme() ? 'rgba(15,23,42,' + alpha + ')' : 'rgba(226,232,240,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: isLightTheme() ? '#1f2937' : '#e2e8f0', size: 11 },
+          margin: { l: 60, r: 20, t: 20, b: 40 },
+        };
+      }
+
+      /* ─── Plotly: before/after spectrum trace vs. CISPR 32 limit ────── */
+      function gaussianBump(f, center, widthOctaves, peakDb) {
+        var ratio = Math.log2(f / center);
+        return peakDb * Math.exp(-(ratio * ratio) / (2 * widthOctaves * widthOctaves));
+      }
+      function buildTrace(freqs, peaks, floor) {
+        return freqs.map(function (f) {
+          var v = floor;
+          peaks.forEach(function (p) {
+            v += gaussianBump(f, p.center, p.width, p.peak);
+          });
+          return v;
+        });
+      }
+      function drawBeforeAfterChart() {
+        var el = document.getElementById('plotlyBeforeAfter');
+        if (!el || typeof Plotly === 'undefined') return;
+
+        var freqs = [];
+        for (var i = 0; i <= 120; i++) {
+          freqs.push(30 * Math.pow(1000 / 30, i / 120));
+        }
+
+        var beforeY = buildTrace(
+          freqs,
+          [
+            { center: 100, width: 0.05, peak: 8 }, // fundamental
+            { center: 300, width: 0.04, peak: 27 }, // 3rd harmonic — the failure
+            { center: 500, width: 0.05, peak: 6 }, // 5th harmonic
+          ],
+          22
+        );
+        var afterY = buildTrace(
+          freqs,
+          [
+            { center: 100, width: 0.05, peak: 6 },
+            { center: 300, width: 0.04, peak: 13 }, // reduced by fix
+            { center: 500, width: 0.05, peak: 4 },
+          ],
+          20
+        );
+
+        var limitX = [30, 230, 230, 1000];
+        var limitY = [40, 40, 47, 47];
+
+        var traces = [
+          {
+            x: freqs,
+            y: beforeY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Before fix (measured trace)',
+            line: { color: '#ef4444', width: 2.5 },
+          },
+          {
+            x: freqs,
+            y: afterY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'After fix (measured trace)',
+            line: { color: '#10b981', width: 2.5 },
+          },
+          {
+            x: limitX,
+            y: limitY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'CISPR 32 Class B limit (10 m)',
+            line: { color: '#f59e0b', width: 2, dash: 'dash', shape: 'hv' },
+          },
+        ];
+
+        var layout = Object.assign(getPlotlyLayoutBase(), {
+          xaxis: {
+            type: 'log',
+            title: 'Frequency (MHz)',
+            gridcolor: inkColor(0.08),
+            zerolinecolor: inkColor(0.15),
+          },
+          yaxis: {
+            title: 'Field Strength (dBµV/m, quasi-peak)',
+            gridcolor: inkColor(0.08),
+            zerolinecolor: inkColor(0.15),
+          },
+          legend: { orientation: 'h', y: -0.25 },
+          annotations: [
+            {
+              x: Math.log10(300),
+              y: 55,
+              xref: 'x',
+              yref: 'y',
+              text: '300 MHz: +8 dB over limit (before)',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 30,
+              ay: -30,
+              font: { color: '#ef4444', size: 10 },
+            },
+            {
+              x: Math.log10(300),
+              y: 33,
+              xref: 'x',
+              yref: 'y',
+              text: '300 MHz: −6 dB margin (after)',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 40,
+              ay: 30,
+              font: { color: '#10b981', size: 10 },
+            },
+          ],
+        });
+
+        Plotly.newPlot(el, traces, layout, { displayModeBar: false, responsive: true });
+      }
+
+      drawBeforeAfterChart();
+      window.addEventListener('resize', drawBeforeAfterChart);
+
+      /* ─── Canvas: interrupted vs. continuous return path ────────────── */
+      var returnPathStart = null;
+      function drawReturnPath(ts) {
+        var canvas = document.getElementById('canvasReturnPath');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) {
+          requestAnimationFrame(drawReturnPath);
+          return;
+        }
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        var ctx = canvas.getContext('2d');
+        if (returnPathStart === null) returnPathStart = ts;
+        var elapsed = (ts - returnPathStart) / 1000;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var w = canvas.width,
+          h = canvas.height;
+        var traceY = h * 0.32;
+        var planeY = h * 0.62;
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText('Clock trace (signal current →)', 8, traceY - 10);
+
+        // Signal trace on top
+        ctx.strokeStyle = inkColor(0.85);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(20, traceY);
+        ctx.lineTo(w - 20, traceY);
+        ctx.stroke();
+
+        // Reference plane below, with a gap in the middle
+        var gapStart = w * 0.42;
+        var gapEnd = w * 0.58;
+        ctx.strokeStyle = 'rgba(239,68,68,0.85)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(20, planeY);
+        ctx.lineTo(gapStart, planeY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(gapEnd, planeY);
+        ctx.lineTo(w - 20, planeY);
+        ctx.stroke();
+        ctx.fillText('Reference plane (SPLIT — before fix)', 8, planeY + 18);
+
+        // Moving signal pulse
+        var sigX = 20 + ((elapsed * 90) % (w - 40));
+        ctx.fillStyle = '#22d3ee';
+        ctx.beginPath();
+        ctx.arc(sigX, traceY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Return current follows directly under signal on the intact plane...
+        var retProgress = ((elapsed * 90) % (w - 40)) + 20;
+        if (retProgress < gapStart || retProgress > gapEnd) {
+          ctx.fillStyle = 'rgba(245,158,11,0.9)';
+          ctx.beginPath();
+          ctx.arc(retProgress, planeY, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // ...but must detour up and around the gap, enlarging the loop area
+          ctx.strokeStyle = 'rgba(245,158,11,0.9)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(gapStart, planeY);
+          ctx.quadraticCurveTo((gapStart + gapEnd) / 2, planeY - h * 0.28, gapEnd, planeY);
+          ctx.stroke();
+          var detourAlpha = 0.4 + 0.4 * Math.sin(elapsed * 6);
+          ctx.strokeStyle = 'rgba(239,68,68,' + detourAlpha + ')';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(
+            (gapStart + gapEnd) / 2,
+            (traceY + planeY) / 2 - h * 0.1,
+            (gapEnd - gapStart) / 1.6,
+            h * 0.22,
+            0,
+            0,
+            Math.PI * 2
+          );
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Detour around the gap = larger loop area = more radiated field', 8, h - 10);
+
+        requestAnimationFrame(drawReturnPath);
+      }
+
+      /* ─── Canvas: common-mode current on the Ethernet cable ─────────── */
+      var cmCableStart = null;
+      function drawCmCable(ts) {
+        var canvas = document.getElementById('canvasCmCable');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) {
+          requestAnimationFrame(drawCmCable);
+          return;
+        }
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        var ctx = canvas.getContext('2d');
+        if (cmCableStart === null) cmCableStart = ts;
+        var elapsed = (ts - cmCableStart) / 1000;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var w = canvas.width,
+          h = canvas.height,
+          midY = h / 2;
+
+        ctx.strokeStyle = inkColor(0.7);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(20, midY - 25, 60, 50);
+        ctx.fillStyle = inkColor(0.55);
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText('Board', 32, midY + 4);
+
+        var cableEndX = w - 40;
+        ctx.beginPath();
+        ctx.moveTo(80, midY);
+        ctx.lineTo(cableEndX, midY);
+        ctx.stroke();
+        ctx.fillText('Ethernet cable (300 MHz ≈ significant fraction of λ)', 60, midY - 34);
+
+        for (var i = 0; i < 4; i++) {
+          var prog = (elapsed * 0.6 + i * 0.25) % 1;
+          var x = 80 + prog * (cableEndX - 80);
+          var alpha = 0.15 + 0.5 * Math.sin(prog * Math.PI);
+          ctx.strokeStyle = 'rgba(239,68,68,' + alpha + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(x, midY, 6, 22, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        for (var j = 0; j < 3; j++) {
+          var rp = (elapsed * 1.1 + j * 0.33) % 1;
+          ctx.strokeStyle = 'rgba(34,211,238,' + 0.5 * (1 - rp) + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cableEndX, midY, 10 + rp * 40, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Common-mode current → cable radiates like a monopole antenna', 8, h - 10);
+
+        requestAnimationFrame(drawCmCable);
+      }
+
+      requestAnimationFrame(drawReturnPath);
+      requestAnimationFrame(drawCmCable);
+
+      /* ─── Canvas: EUT test setup diagram (static, redraw on resize) ── */
+      function drawSetup() {
+        var canvas = document.getElementById('canvasSetup');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) return;
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        var ctx = canvas.getContext('2d');
+        var w = canvas.width,
+          h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        var floorY = h * 0.78;
+        ctx.strokeStyle = inkColor(0.6);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.05, floorY);
+        ctx.lineTo(w * 0.95, floorY);
+        ctx.stroke();
+        ctx.fillStyle = inkColor(0.5);
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText('Conductive ground plane', w * 0.05, floorY + 16);
+
+        ctx.strokeStyle = 'rgba(99,102,241,0.8)';
+        ctx.beginPath();
+        ctx.ellipse(w * 0.28, floorY, w * 0.09, 8, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Turntable (0–360° rotation)', w * 0.17, floorY + 28);
+
+        ctx.strokeStyle = inkColor(0.85);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(w * 0.24, floorY - 46, w * 0.08, 46);
+        ctx.fillStyle = inkColor(0.6);
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText('EUT', w * 0.255, floorY - 20);
+
+        var antX = w * 0.78;
+        ctx.strokeStyle = inkColor(0.4);
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.28, floorY - 55);
+        ctx.lineTo(antX, floorY - 55);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Test distance: 3 m (FCC) or 10 m (CISPR)', w * 0.35, floorY - 62);
+
+        ctx.strokeStyle = inkColor(0.85);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(antX, floorY);
+        ctx.lineTo(antX, floorY - 70);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(antX - 14, floorY - 70);
+        ctx.lineTo(antX + 14, floorY - 45);
+        ctx.moveTo(antX + 14, floorY - 70);
+        ctx.lineTo(antX - 14, floorY - 45);
+        ctx.stroke();
+        ctx.fillText('Antenna mast', antX - 30, floorY + 16);
+        ctx.fillText('scans 1–4 m height', antX - 34, floorY + 30);
+
+        ctx.strokeStyle = 'rgba(34,211,238,0.6)';
+        ctx.beginPath();
+        ctx.moveTo(antX + 24, floorY - 20);
+        ctx.lineTo(antX + 24, floorY - 68);
+        ctx.stroke();
+
+        ctx.strokeStyle = inkColor(0.4);
+        ctx.beginPath();
+        ctx.moveTo(antX, floorY - 55);
+        ctx.lineTo(w * 0.93, floorY - 55);
+        ctx.lineTo(w * 0.93, floorY - 30);
+        ctx.stroke();
+        ctx.strokeRect(w * 0.9, floorY - 30, w * 0.06, 30);
+        ctx.fillText('Receiver', w * 0.885, floorY + 12);
+      }
+
+      drawSetup();
+      window.addEventListener('resize', drawSetup);
+
+      // Re-render theme-aware visuals (Plotly charts + static canvas diagram)
+      // whenever the site theme changes (dark/light/night toggle in the nav).
+      // Theme.set() in core.js only flips the data-theme attribute — it does
+      // not know about this page's charts — so we watch the attribute directly.
+      var themeObserver = new MutationObserver(function () {
+        drawBeforeAfterChart();
+        if (typeof drawSetup === 'function') drawSetup();
+      });
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      var quizData = [
+        {
+          q: 'A digital clock runs at 100 MHz. At what frequency does its 3rd harmonic land, matching the case study in this module?',
+          opts: ['100 MHz', '200 MHz', '300 MHz', '400 MHz'],
+          correct: 2,
+        },
+        {
+          q: 'Which detector is required for CISPR compliance testing?',
+          opts: ['Peak', 'Quasi-Peak', 'Average', 'RMS'],
+          correct: 1,
+        },
+        {
+          q: 'Which standard applies specifically to medical devices such as patient monitors and infusion pumps?',
+          opts: ['CISPR 25', 'IEC 60601-1-2', 'MIL-STD-461', 'RTCA DO-160'],
+          correct: 1,
+        },
+        {
+          q: 'Which test environment is most common for commercial EMC compliance labs?',
+          opts: [
+            'Open Area Test Site (OATS)',
+            'Semi-Anechoic Chamber (SAC)',
+            'Fully Anechoic Chamber (FAC)',
+            'An unshielded lab bench',
+          ],
+          correct: 1,
+        },
+        {
+          q: "What was the root cause of the case study's 300 MHz failure?",
+          opts: [
+            'A faulty antenna during testing',
+            'Common-mode current from an interrupted return path beneath the clock routing plus inadequate Ethernet common-mode suppression',
+            'The EUT was not rotated during the test',
+            'The test distance was set incorrectly',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Roughly what frequency range can radiated emission testing span, depending on the applicable standard?',
+          opts: ['1 MHz - 100 MHz only', '9 kHz to 40 GHz', '1 GHz - 2 GHz only', '60 Hz - 1 kHz'],
+          correct: 1,
+        },
+        {
+          q: 'Why do medical devices have stricter RE requirements than most other product categories?',
+          opts: [
+            'They only need to pass emissions, not immunity',
+            'They must meet extremely low emissions AND high immunity simultaneously, for patient safety',
+            'Medical devices are exempt from EMC testing',
+            'They are only tested at 1 m distance',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'After the case study board was redesigned with a continuous reference plane and a common-mode choke, what result was achieved?',
+          opts: [
+            'It still failed by 8 dB',
+            'It passed with a 6 dB compliance margin below the limit',
+            'It passed but only at reduced clock speed',
+            'The fix had no measurable effect',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'In the before/after spectrum plot, why did splitting the reference plane under the clock trace increase radiated emissions?',
+          opts: [
+            'It increased the DC resistance of the trace',
+            'It forced return current to detour around the gap, enlarging the effective current loop area that radiates',
+            'It changed the clock frequency itself',
+            'It had no effect — the emission was unrelated to the plane split',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why was a 1–2 m Ethernet cable an efficient radiator of the 300 MHz common-mode current in this case study?',
+          opts: [
+            'Because copper always radiates well regardless of frequency',
+            'Because at 300 MHz, that cable length is a significant fraction of a wavelength, making it behave like a monopole antenna',
+            'Because Ethernet cables are unshielded by design',
+            'Because the cable carried differential-mode data signals only',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'On the before/after spectrum plot, what does the dashed orange line represent?',
+          opts: [
+            'The measured "before" trace',
+            'The measured "after" trace',
+            'The CISPR 32 Class B regulatory limit line',
+            'The noise floor of the spectrum analyzer',
+          ],
+          correct: 2,
+        },
+        {
+          q: 'Which piece of equipment in the case study retest was primarily responsible for capturing the 300 MHz emission and comparing it to the limit?',
+          opts: [
+            'The turntable',
+            'The EMI receiver / spectrum analyzer',
+            'The common-mode choke',
+            'The near-field probe',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'During the EUT test setup, why does the antenna mast scan a height range while the turntable simultaneously rotates?',
+          opts: [
+            'To keep the antenna cable untangled only',
+            'To find the worst-case combination of EUT orientation and antenna height for each test frequency',
+            'It is purely cosmetic and does not affect the measurement',
+            'Antenna height only matters for conducted emissions, not radiated',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the single biggest lesson from this case study for future PCB designs?',
+          opts: [
+            'Always test in an OATS instead of a semi-anechoic chamber',
+            'A continuous reference plane under high-speed traces and good cable common-mode suppression can be the difference between an 8 dB fail and a 6 dB pass',
+            'Clock frequencies above 100 MHz should never be used',
+            'Ethernet interfaces should be avoided entirely in EMC-sensitive designs',
+          ],
+          correct: 1,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      /* Quiz logic - one question at a time with nav */
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Final Knowledge Check and completed the Radiated Emissions (RE) Testing Academy.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the modules above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

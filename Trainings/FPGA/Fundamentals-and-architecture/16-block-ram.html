@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep dive into RAMB36E1 Block RAM — dual-port modes, width configurations, ECC, FIFO mode, and cascade in Xilinx 7-series FPGAs."
+    />
+    <title>Block RAM | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/16-block-ram.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .code-block {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: var(--text-sub);
+        overflow-x: auto;
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. FPGA Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. LUT</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item active" data-module="lesson-16"
+            >16. Block RAM</a
+          >
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Block RAM</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 16/25</span><span>64%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 64%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 16 OF 25</span><span class="badge">15 MIN</span
+                ><span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Block RAM (BRAM)
+              </h1>
+              <p class="subtitle">
+                Master the RAMB36E1 primitive — dual-port modes, width configurations, ECC error
+                correction, FIFO mode, and cascade techniques for on-chip memory in Xilinx 7-series
+                FPGAs.
+              </p>
+            </div>
+          </section>
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                What is Block RAM?
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Block RAM (BRAM) is a dedicated on-chip SRAM resource embedded in the FPGA fabric.
+                Unlike LUT-based memory, BRAM is a fixed silicon block optimized purely for data
+                storage. In 7-series Xilinx devices, the core primitive is
+                <strong>RAMB36E1</strong> — a 36 Kb dual-port synchronous SRAM that can also be
+                split into two independent 18 Kb blocks (RAMB18E1).
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 24px">
+                BRAMs are arranged in columns throughout the FPGA fabric, interleaved between CLB
+                columns. They are the go-to solution for FIFOs, packet buffers, coefficient tables,
+                and frame memories — anything that needs dense, fast on-chip storage.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                RAMB36E1 — Block Diagram
+              </h3>
+              <div class="mermaid">
+                graph TD subgraph BRAM["RAMB36E1 — 36Kb Block RAM"] PORTA["Port
+                A\nADDRA[15:0]\nDINA[31:0]\nDOUTA[31:0]\nWEA[3:0] · CLKA · ENA"] CORE["36Kb SRAM
+                Core\n+ 4Kb Parity Bits\n= 40Kb total capacity"] PORTB["Port
+                B\nADDRB[15:0]\nDINB[31:0]\nDOUTB[31:0]\nWEB[3:0] · CLKB · ENB"] ECC["ECC
+                Logic\nSECDED 72-bit mode\nEN_ECC_READ / EN_ECC_WRITE"] PORTA <--> CORE PORTB <-->
+                CORE CORE --> ECC end
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Width Configurations
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each RAMB36E1 port can be independently configured for different aspect ratios. The
+                total bit capacity stays constant at 36Kb (plus 4Kb parity):
+              </p>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Width Mode</th>
+                    <th>Depth</th>
+                    <th>Data Bits</th>
+                    <th>Address Bits</th>
+                    <th>Parity Bits</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>×1</td>
+                    <td>32K</td>
+                    <td>1</td>
+                    <td>15</td>
+                    <td>0</td>
+                    <td>Deepest configuration</td>
+                  </tr>
+                  <tr>
+                    <td>×2</td>
+                    <td>16K</td>
+                    <td>2</td>
+                    <td>14</td>
+                    <td>0</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>×4</td>
+                    <td>8K</td>
+                    <td>4</td>
+                    <td>13</td>
+                    <td>0</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>×9</td>
+                    <td>4K</td>
+                    <td>8</td>
+                    <td>12</td>
+                    <td>1</td>
+                    <td>Parity bit for ECC</td>
+                  </tr>
+                  <tr>
+                    <td>×18</td>
+                    <td>2K</td>
+                    <td>16</td>
+                    <td>11</td>
+                    <td>2</td>
+                    <td>Common FIFO width</td>
+                  </tr>
+                  <tr>
+                    <td>×36</td>
+                    <td>1K</td>
+                    <td>32</td>
+                    <td>10</td>
+                    <td>4</td>
+                    <td>Widest per-port config</td>
+                  </tr>
+                  <tr>
+                    <td>×72 (SDP)</td>
+                    <td>512</td>
+                    <td>64</td>
+                    <td>9</td>
+                    <td>8</td>
+                    <td>SDP mode only — 72-bit ECC</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Dual-Port Modes
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Port A</th>
+                    <th>Port B</th>
+                    <th>Max Width</th>
+                    <th>Best Use Case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Simple Dual-Port (SDP)</strong></td>
+                    <td>Write only</td>
+                    <td>Read only</td>
+                    <td>72-bit (combined)</td>
+                    <td>FIFOs, streaming buffers</td>
+                  </tr>
+                  <tr>
+                    <td><strong>True Dual-Port (TDP)</strong></td>
+                    <td>Read + Write</td>
+                    <td>Read + Write</td>
+                    <td>36-bit each port</td>
+                    <td>Shared memory, CDC buffers</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="color: var(--text-sub); line-height: 1.8; margin: 12px 0 24px">
+                In <strong>SDP mode</strong>, ports A and B are combined: Port A becomes the
+                full-width write port and Port B becomes the full-width read port. This allows a
+                maximum width of 72 bits (64 data + 8 parity) — ideal for FIFOs. In
+                <strong>TDP mode</strong>, both ports operate independently, each up to 36 bits
+                wide, and can use different clocks. This enables true shared memory between two
+                clock domains.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Read/Write Collision Modes
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                When both ports access the same address simultaneously, the behavior is determined
+                by the <code>READ_WIDTH_A/B</code> and write mode settings:
+              </p>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Simultaneous Read+Write Behavior</th>
+                    <th>Best For</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>READ_FIRST</strong></td>
+                    <td>
+                      Old data is read before new data is written. Output shows previous value.
+                    </td>
+                    <td>Collision-safe register files</td>
+                  </tr>
+                  <tr>
+                    <td><strong>WRITE_FIRST</strong></td>
+                    <td>
+                      New written data is immediately forwarded to the read output (transparent).
+                    </td>
+                    <td>Look-ahead FIFOs</td>
+                  </tr>
+                  <tr>
+                    <td><strong>NO_CHANGE</strong></td>
+                    <td>Read output does not change during a write. Previous output is held.</td>
+                    <td>Power saving; most FIFOs</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-warning">
+                <strong>Warning — Read Latency</strong>
+                BRAM output registers add 1 clock cycle of read latency. Standard BRAM read latency
+                is 2 cycles (1 cycle address registered + 1 cycle output registered). If you bypass
+                output registers for 1-cycle latency, the read path may not meet timing at high
+                clock speeds above 200–250MHz.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                ECC — Error Correction Code
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                RAMB36E1 implements
+                <strong>SECDED (Single-Error Correct, Double-Error Detect)</strong> ECC in 72-bit
+                wide mode. The 8 parity bits in the ×9 width configuration store syndrome bits for
+                error detection and correction. Enable via <code>EN_ECC_READ</code> and
+                <code>EN_ECC_WRITE</code> generic parameters. ECC status pins
+                <code>SBITERR</code> and <code>DBITERR</code> signal single-bit and double-bit
+                errors.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Initialization
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                BRAMs can be pre-loaded with data at FPGA configuration time using
+                <code>INIT_00</code> through <code>INIT_7F</code> parameters. Each parameter is a
+                256-bit hex string. This makes BRAMs ideal for ROM coefficient tables, boot code
+                storage, and lookup tables:
+              </p>
+              <div class="code-block">
+                RAMB36E1 #( .INIT_00(256'hDEADBEEF_CAFEBABE_...), // First 8 locations
+                .INIT_01(256'h...), // Next 8 locations // ... up to INIT_7F .INITP_00(256'h...) //
+                Parity initialization ) bram_inst (...);
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                FIFO Mode
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                RAMB36E1 can operate as a built-in FIFO with dedicated read/write pointers and
+                flags: <code>EMPTY</code>, <code>FULL</code>, <code>ALMOST_EMPTY</code>,
+                <code>ALMOST_FULL</code>, <code>RDCOUNT</code>, <code>WRCOUNT</code>. Both
+                synchronous (single-clock) and asynchronous (dual-clock) FIFO modes are supported.
+                Xilinx FIFO Generator IP and the <code>xpm_fifo_sync</code>/<code
+                  >xpm_fifo_async</code
+                >
+                macros use this mode internally.
+              </p>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — Use XPM FIFOs</strong>
+                For FIFOs, ALWAYS use Xilinx FIFO Generator IP (or xpm_fifo_sync/xpm_fifo_async)
+                instead of manual BRAM instantiation. The IP handles write-to-read synchronization,
+                ECC, ALMOST_FULL programmable thresholds, and timing corner cases that are extremely
+                easy to miss in manual implementations.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                BRAM Capacity — Across Device Families
+              </h3>
+              <div id="bram-chart" style="width: 100%; height: 320px"></div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Cascade
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Multiple BRAMs can be cascaded to build deeper or wider memories. RAMB36E1 provides
+                <code>CASCADEOUTA</code>/<code>CASCADEOUTB</code> and <code>CASCADEINA</code>/<code
+                  >CASCADEINB</code
+                >
+                pins for address extension, allowing two 36Kb BRAMs to form a 72Kb×1 deep memory
+                without routing overhead.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>UltraScale+ — UltraRAM (URAM)</strong>
+                In UltraScale+, BRAMs remain 36Kb (same as 7-series) but Xilinx added a new tier:
+                UltraRAM (URAM) blocks — each 288Kb (8× denser than BRAM). Virtex UltraScale+ VU13P
+                has 960 URAMs = 276 Mb of ultra-dense on-chip storage, plus 2160 BRAMs. URAMs have
+                2-cycle read latency and 72-bit data width.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: What is the difference between SDP and TDP BRAM mode?<br /><br />
+                A: SDP (Simple Dual-Port) combines both RAMB36E1 ports to create one full-width
+                write port and one full-width read port, enabling up to 72-bit wide access — the
+                most common configuration for FIFOs. TDP (True Dual-Port) gives two fully
+                independent ports, each capable of read and write with separate clocks, enabling
+                shared memory between two independent clock domains at up to 36-bit width each.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Best Practice — BRAM vs Distributed RAM</strong>
+                Use BRAM for: FIFOs, packet buffers, coefficient lookup tables, frame buffers, any
+                memory larger than 1Kb. Use distributed RAM (LUT-based) only for very small memories
+                (under 1Kb) that require asynchronous (0-cycle) read access. Mixing both
+                intelligently maximizes resource utilization.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <p class="quiz-q">
+                  1. What is the data capacity of one RAMB36E1 primitive (excluding parity bits)?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>A</span> 18 Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>B</span> 36 Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>C</span> 40 Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>D</span> 72 Kb
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb1">
+                  Correct! RAMB36E1 is 36Kb of data SRAM plus an additional 4Kb of parity bits,
+                  totaling 40Kb of physical capacity. However, the usable data capacity is 36Kb.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <p class="quiz-q">
+                  2. Which BRAM mode allows both ports to independently read AND write, making it
+                  suitable for shared memory between two clock domains?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>A</span> Simple Dual-Port (SDP)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>B</span> True Dual-Port (TDP)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>C</span> Single-Port (SP)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>D</span> FIFO mode
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb2">
+                  Correct! True Dual-Port (TDP) mode gives both Port A and Port B full
+                  read-and-write capability, each with an independent clock. This is the ideal
+                  configuration for ping-pong buffers and clock-domain-crossing memories.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <p class="quiz-q">3. What ECC scheme does RAMB36E1 implement in 72-bit mode?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>A</span> CRC-32
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>B</span> Hamming(7,4)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>C</span> SECDED (Single-Error Correct, Double-Error Detect)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>D</span> Reed-Solomon
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb3">
+                  Correct! RAMB36E1 uses SECDED — Single-Error Correct, Double-Error Detect — across
+                  a 72-bit data word (64 data + 8 syndrome bits). Single-bit errors are
+                  automatically corrected; double-bit errors are flagged via the DBITERR pin.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <p class="quiz-q">
+                  4. Which generic parameter set is used to pre-initialize BRAM contents at
+                  configuration time?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>A</span> ROM_CONTENT_00 through ROM_CONTENT_FF
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>B</span> INIT_00 through INIT_7F
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>C</span> PRELOAD_00 through PRELOAD_FF
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>D</span> MEM_INIT_0 through MEM_INIT_7
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb4">
+                  Correct! INIT_00 through INIT_7F are 128 parameters, each a 256-bit hex string,
+                  used to initialize the BRAM contents during FPGA bitstream generation. This allows
+                  BRAMs to function as pre-loaded ROMs immediately after power-up.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <p class="quiz-q">
+                  5. What is the standard read latency of a RAMB36E1 with output registers enabled?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>A</span> 0 cycles (combinational)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>B</span> 1 cycle
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>C</span> 2 cycles
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>D</span> 4 cycles
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb5">
+                  Correct! Standard BRAM read latency with output registers is 2 cycles: 1 cycle for
+                  the address to be registered into the BRAM, and 1 cycle for the output register to
+                  capture the data. Bypassing the output register reduces this to 1 cycle but limits
+                  maximum clock frequency.
+                </div>
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div
+                style="
+                  background: var(--bg-card);
+                  border: 1px solid var(--border);
+                  border-radius: 12px;
+                  padding: 24px;
+                  margin: 16px 0;
+                "
+              >
+                <p style="font-weight: 700; color: var(--text-base); margin-bottom: 12px">
+                  BRAM Design Challenge
+                </p>
+                <ol style="color: var(--text-sub); line-height: 2; padding-left: 20px">
+                  <li>
+                    Design a 1024×32-bit synchronous FIFO using BRAM in Vivado. Use
+                    <code>xpm_fifo_sync</code> with FIFO_DEPTH=1024 and DATA_WIDTH=32.
+                  </li>
+                  <li>
+                    Verify the FIFO can run at 250MHz by checking the Vivado timing report after
+                    implementation. What is the worst negative slack?
+                  </li>
+                  <li>
+                    Check the Vivado utilization report: how many RAMB36E1 (or RAMB18E1) primitives
+                    does the FIFO consume?
+                  </li>
+                  <li>
+                    Enable ECC (set ECC_MODE="en_ecc"). What happens to the data width? How does
+                    BRAM count change? What extra output signals become available?
+                  </li>
+                </ol>
+              </div>
+              <div class="lesson-nav">
+                <a href="15-clock-distribution.html">← Clock Distribution</a>
+                <a href="17-distributed-ram.html">Distributed RAM →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-16';
+      const TOTAL = 25;
+      async function loadProgress() {
+        try {
+          const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const t = s.accessToken || s.token || '';
+          if (!t) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const p = Math.round((done / TOTAL) * 100);
+          const sp = document.getElementById('sb-pct');
+          const sf = document.getElementById('sb-fill');
+          if (sp) sp.textContent = p + '%';
+          if (sf) sf.style.width = p + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          b.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#475569';
+        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+        const paperBg = isDark ? '#1e293b' : '#ffffff';
+        Plotly.newPlot(
+          'bram-chart',
+          [
+            {
+              type: 'bar',
+              x: [
+                'Artix-7\nXC7A200T',
+                'Kintex-7\nXC7K480T',
+                'Virtex-7\nXC7VX690T',
+                'Kintex US+\nXCKU115',
+                'Virtex US+\nXCVU13P',
+              ],
+              y: [13140, 37080, 52920, 75900, 276480],
+              text: [
+                '365 BRAMs\n1.6 MB',
+                '1030 BRAMs\n4.5 MB',
+                '1470 BRAMs\n6.4 MB',
+                '2160 BRAMs\n9.2 MB',
+                '2160 BRAMs+\n960 URAMs\n33.8 MB',
+              ],
+              textposition: 'outside',
+              marker: {
+                color: ['#22d3ee', '#818cf8', '#f472b6', '#34d399', '#fb923c'],
+                opacity: 0.85,
+              },
+            },
+          ],
+          {
+            paper_bgcolor: paperBg,
+            plot_bgcolor: paperBg,
+            font: { family: 'Inter,sans-serif', color: textColor },
+            title: { text: 'On-Chip SRAM Capacity (Kbits)', font: { size: 14 } },
+            xaxis: { gridcolor: gridColor, tickfont: { size: 11 } },
+            yaxis: { gridcolor: gridColor, title: 'Total Kbits' },
+            margin: { t: 50, b: 60, l: 70, r: 20 },
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      });
+    </script>
+  </body>
+</html>

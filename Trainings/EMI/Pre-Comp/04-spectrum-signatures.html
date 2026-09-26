@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 4 — Reading the EMC spectrum: narrowband vs broadband, clock harmonic combs, SMPS switching signatures and sidebands, cable/enclosure resonances, and mapping a peak to its source."
+    />
+    <title>04 · Reading the Spectrum | EMC Pre-Compliance | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Pre-Comp/04-spectrum-signatures.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sig-toggle {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 1rem 0;
+      }
+      .sig-btn {
+        padding: 7px 13px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .sig-btn.on {
+        border-color: var(--cyan);
+        color: var(--cyan);
+        background: rgba(34, 211, 238, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >EMC Pre-Compliance Testing &amp; Debugging</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-why-pre-compliance.html" class="module-item">01. Why Pre-Compliance</a>
+          <a href="02-building-a-bench.html" class="module-item"
+            >02. Building an Affordable Bench</a
+          >
+          <a href="03-measurement-technique.html" class="module-item"
+            >03. Measurement Technique &amp; Toolkit</a
+          >
+          <a href="04-spectrum-signatures.html" class="module-item active"
+            >04. Reading the Spectrum</a
+          >
+          <a href="05-fixing-at-the-source.html" class="module-item"
+            >05. Fixing at the Source (PCB/IC)</a
+          >
+          <a href="06-chokes-and-filtering.html" class="module-item"
+            >06. Common-Mode Chokes &amp; Filtering</a
+          >
+          <a href="07-shielding.html" class="module-item">07. Shielding &amp; Enclosures</a>
+          <a href="08-cables-and-grounding.html" class="module-item"
+            >08. Cables, Connectors &amp; Grounding</a
+          >
+          <a href="09-immunity-debug.html" class="module-item"
+            >09. Immunity Pre-Compliance &amp; Debug</a
+          >
+          <a href="10-methodology-and-cases.html" class="module-item"
+            >10. Debug Methodology + Case Studies</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">EMC Pre-Compliance</a><span>/</span>
+            <span>04. Reading the Spectrum</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">EMI/EMC Academy</span>
+                <span class="badge badge-gray">~35 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Reading the Spectrum — Signatures &amp; Root-Cause Analysis</h1>
+              <p class="subtitle">
+                Every emission has a fingerprint. A comb of evenly spaced spikes is a clock; a broad
+                mound that shifts with load is a switching supply; a lump that moves when you wiggle
+                a cable is a resonance. Learn to read the plot and you've already localized the
+                source.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <div class="callout" style="margin-bottom: 1.5rem">
+                <strong>Learning objectives.</strong> Distinguish narrowband from broadband
+                emissions; recognize a clock harmonic comb and use its spacing to identify the
+                source clock; spot SMPS switching signatures and sidebands; identify cable/enclosure
+                resonances; and map a measured peak back to a physical part of the product.
+              </div>
+
+              <!-- SECTION 1 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="s1">
+                  <span>📊 &nbsp;1. Narrowband vs Broadband</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body open" id="s1">
+                  <p class="lead">
+                    <strong>Narrowband</strong> energy sits at discrete frequencies — clocks,
+                    oscillators, CW carriers. It appears as sharp lines whose height barely changes
+                    when you narrow the resolution bandwidth. <strong>Broadband</strong> energy is
+                    spread — switching edges, arcing, motor brushes. Its displayed level
+                    <em>drops</em> as you reduce RBW (less bandwidth captures less of the spread
+                    energy). That RBW test is the fastest way to classify a peak.
+                  </p>
+                  <div class="tip-box">
+                    <strong>Quick test:</strong> halve the RBW. A line that stays put is narrowband;
+                    a line that falls ~3–6 dB is broadband. This one trick guides your whole fix
+                    strategy.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2 : interactive plotly -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s2">
+                  <span>🎛️ &nbsp;2. Signature Explorer (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s2">
+                  <p class="lead">
+                    Toggle each source on/off and watch how it stacks up against an illustrative
+                    Class B limit line. Note the shapes: the clock is a comb, the SMPS is a broad
+                    hash, the cable resonance is a single moving lump.
+                  </p>
+                  <div class="sig-toggle" id="sigToggle">
+                    <button class="sig-btn on" data-sig="clock">Clock comb (100 MHz)</button>
+                    <button class="sig-btn on" data-sig="smps">SMPS broadband</button>
+                    <button class="sig-btn" data-sig="cable">Cable resonance (~230 MHz)</button>
+                    <button class="sig-btn" data-sig="ambient">Ambient (FM/Wi-Fi)</button>
+                  </div>
+                  <div id="specPlot" style="width: 100%; height: 340px"></div>
+                  <div class="diagram-cap">
+                    Illustrative spectrum (dBµV/m vs MHz). Values are for teaching, not a real limit
+                    line.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3 : signatures -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s3">
+                  <span>🔍 &nbsp;3. Reading Each Signature</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s3">
+                  <div class="two-col">
+                    <div class="info-box">
+                      <strong>Clock harmonic comb.</strong> Evenly spaced spikes at N × f. The
+                      <em>spacing equals the clock frequency</em>, so a comb every 100 MHz points to
+                      a 100 MHz clock (or its source). Odd harmonics dominate for ~50% duty square
+                      waves.
+                    </div>
+                    <div class="info-box">
+                      <strong>SMPS switching.</strong> A cluster around the switching frequency and
+                      its harmonics, often with a <em>broadband</em> hash from fast FET edges and
+                      diode reverse recovery. Shifts when load or line changes; strongest near the
+                      hot loop.
+                    </div>
+                    <div class="info-box">
+                      <strong>Cable/enclosure resonance.</strong> A single broad hump whose center
+                      frequency corresponds to a physical length (λ/4 or λ/2). It
+                      <em>moves or changes</em> when you reroute the cable — the tell-tale of a
+                      resonant radiator.
+                    </div>
+                    <div class="info-box">
+                      <strong>Ambient.</strong> Stable carriers (FM 88–108 MHz, broadcast TV,
+                      cellular, 2.4/5 GHz Wi-Fi) that are present with the <em>EUT off</em>.
+                      Subtract them mentally, or tent the setup.
+                    </div>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Common mistake:</strong> "fixing" an ambient. If a 98 MHz spike is still
+                    there with the EUT unpowered, no ferrite on your board will remove it — it's the
+                    local FM station.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4 : mapping + quiz -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s4">
+                  <span>🧭 &nbsp;4. Peak → Source</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s4">
+                  <p class="lead">
+                    Turn the plot into a physical location: read the frequency, classify
+                    (narrow/broad), infer the likely source from the signature, then confirm with a
+                    near-field probe or current clamp (Module 3). For example, a comb at multiples
+                    of 25 MHz that gets louder when you clamp the Ethernet cable → the PHY clock is
+                    coupling common-mode onto that cable.
+                  </p>
+                </div>
+              </div>
+
+              <div class="callout" style="margin-top: 1.5rem">
+                <strong>Key takeaways.</strong> Shape tells source: combs are clocks, broad hash is
+                switching, moving humps are resonances, stable carriers are ambient. Classify with
+                the RBW test, then confirm with a probe. Next: fixing the source you just found.
+              </div>
+
+              <div
+                class="lesson-nav"
+                style="display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem"
+              >
+                <a class="btn btn-secondary" href="03-measurement-technique.html">← Previous</a>
+                <a class="btn btn-primary" href="05-fixing-at-the-source.html"
+                  >Next: Fixing at the Source →</a
+                >
+              </div>
+
+              <div id="global-bottom-nav"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        var fill = document.getElementById('progFill');
+        var pctEl = document.getElementById('progPct');
+        var total = document.querySelectorAll('.section-collapsible').length;
+        function updateProgress() {
+          var open = document.querySelectorAll('.section-body.open').length;
+          var p = total ? Math.round((open / total) * 100) : 0;
+          if (fill) fill.style.width = p + '%';
+          if (pctEl) pctEl.textContent = p + '%';
+        }
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+            updateProgress();
+            if (target.id === 's2') drawSpectrum();
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+        updateProgress();
+      })();
+      (function () {
+        document.querySelectorAll('.quiz-question').forEach(function (q) {
+          var fb = q.querySelector('.quiz-feedback');
+          q.querySelectorAll('.quiz-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (q.getAttribute('data-answered')) return;
+              q.setAttribute('data-answered', '1');
+              var correct = opt.getAttribute('data-correct') === 'true';
+              q.querySelectorAll('.quiz-option').forEach(function (o) {
+                if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+              });
+              if (!correct) opt.classList.add('incorrect');
+              if (fb) fb.style.display = 'block';
+            });
+          });
+        });
+      })();
+      /* Plotly signature explorer */
+      var sigState = { clock: true, smps: true, cable: false, ambient: false };
+      function cssVar(name, fallback) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return (v && v.trim()) || fallback;
+      }
+      function buildSpectrum() {
+        var f = [];
+        var i;
+        for (i = 30; i <= 400; i += 1) f.push(i);
+        function floor(x) {
+          return 8 + 3 * Math.sin(x / 7) + Math.random() * 2;
+        }
+        var base = f.map(floor);
+        var clock = f.map(function (x) {
+          if (!sigState.clock) return -50;
+          var nearest = Math.round(x / 100) * 100;
+          var d = Math.abs(x - nearest);
+          return nearest >= 100 && d < 1 ? 46 - (nearest / 100) * 3 : -50;
+        });
+        var smps = f.map(function (x) {
+          if (!sigState.smps) return -50;
+          return 30 * Math.exp(-Math.pow((x - 70) / 45, 2)) + 8;
+        });
+        var cable = f.map(function (x) {
+          if (!sigState.cable) return -50;
+          return 40 * Math.exp(-Math.pow((x - 230) / 18, 2));
+        });
+        var ambient = f.map(function (x) {
+          if (!sigState.ambient) return -50;
+          var fm = 42 * Math.exp(-Math.pow((x - 98) / 2, 2));
+          return fm;
+        });
+        var total = f.map(function (x, k) {
+          return Math.max(base[k], clock[k], smps[k], cable[k], ambient[k]);
+        });
+        return { f: f, total: total };
+      }
+      function drawSpectrum() {
+        if (typeof Plotly === 'undefined') return;
+        var d = buildSpectrum();
+        var text = cssVar('--text-sub', '#94a3b8');
+        var grid = 'rgba(148,163,184,0.18)';
+        var trace = {
+          x: d.f,
+          y: d.total,
+          mode: 'lines',
+          line: { color: cssVar('--cyan', '#22d3ee'), width: 1.5 },
+          fill: 'tozeroy',
+          fillcolor: 'rgba(34,211,238,0.12)',
+          name: 'Emission',
+        };
+        var limit = {
+          x: [30, 230, 230, 400],
+          y: [40, 40, 47, 47],
+          mode: 'lines',
+          line: { color: '#ef4444', width: 2, dash: 'dash' },
+          name: 'Class B (illustrative)',
+        };
+        var layout = {
+          margin: { l: 44, r: 12, t: 10, b: 40 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: text, size: 11 },
+          xaxis: { title: 'Frequency (MHz)', gridcolor: grid, zeroline: false },
+          yaxis: { title: 'dBµV/m', gridcolor: grid, zeroline: false, range: [0, 60] },
+          showlegend: true,
+          legend: { orientation: 'h', y: 1.15 },
+        };
+        Plotly.react('specPlot', [trace, limit], layout, {
+          displayModeBar: false,
+          responsive: true,
+        });
+      }
+      (function () {
+        var btns = document.querySelectorAll('#sigToggle .sig-btn');
+        btns.forEach(function (b) {
+          b.addEventListener('click', function () {
+            var k = b.getAttribute('data-sig');
+            sigState[k] = !sigState[k];
+            b.classList.toggle('on', sigState[k]);
+            drawSpectrum();
+          });
+        });
+      })();
+      window.addEventListener('resize', function () {
+        drawSpectrum();
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

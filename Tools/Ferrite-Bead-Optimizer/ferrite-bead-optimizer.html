@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Select the optimal ferrite bead for your EMI filter. Calculates impedance vs frequency, insertion loss, current derating, and PDN noise suppression with 10 interactive charts."
+    />
+    <title>Ferrite Bead Optimizer | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/Ferrite-Bead-Optimizer/ferrite-bead-optimizer.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/ferrite-bead-optimizer.css" />
+    <link rel="stylesheet" href="css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <main class="fb-page">
+      <!-- ── HERO ── -->
+      <header class="fb-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../../home.html">Home</a><span>/</span><a href="../tools.html">Tools</a
+          ><span>/</span><span>Ferrite Bead Optimizer</span>
+        </nav>
+        <div class="fb-hero-grid">
+          <div>
+            <div class="fb-kicker">EMI Filter &amp; Power Integrity Tool</div>
+            <h1>Ferrite Bead Optimizer</h1>
+            <p>
+              Enter your EMI filter requirements to automatically select the optimal ferrite bead,
+              calculate impedance vs frequency, model insertion loss, and generate PCB layout
+              guidelines for power and signal integrity.
+            </p>
+            <div class="fb-tags">
+              <span class="badge badge-blue">Intermediate</span>
+              <span class="badge badge-green">2–4 min</span>
+              <span class="badge badge-purple">v1.0</span>
+              <span class="badge badge-gray">Updated Jul 2026</span>
+            </div>
+          </div>
+          <div class="fb-hero-actions">
+            <button class="btn btn-primary" id="optimizeBtn">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5"
+                />
+              </svg>
+              Run Optimizer
+            </button>
+            <button class="btn btn-outline" data-help-open aria-haspopup="dialog">? Help</button>
+            <a class="btn btn-ghost" href="#fb-learn">Engineering Notes</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- ── INTRO ── -->
+      <section class="fb-intro card" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">
+            Ferrite bead selection requires balancing impedance, current, and resonance
+          </h2>
+          <p>
+            A ferrite bead's impedance is highly nonlinear — it peaks at the self-resonant frequency
+            then drops as resistive losses dominate. DC bias current degrades impedance
+            dramatically. This tool models the real-world impedance curve of your selected bead and
+            predicts EMI suppression performance at your target frequency.
+          </p>
+        </div>
+        <div class="alert alert-info">
+          <strong>Common mistake:</strong> Choosing a ferrite bead based on its nominal impedance
+          (at 100 MHz) without checking the impedance at your actual noise frequency, or ignoring
+          the DC bias derating curve — a bead rated 600 Ω may drop to &lt; 100 Ω at rated current.
+        </div>
+      </section>
+
+      <!-- ── WORKSPACE ── -->
+      <section class="fb-workspace" aria-label="Ferrite bead optimizer workspace">
+        <div class="fb-inputs">
+          <!-- Step 01 — Application Parameters -->
+          <div class="card fb-card" id="tour-params">
+            <div class="fb-card-head">
+              <div>
+                <span class="fb-step">01</span>
+                <h2>
+                  Application Parameters
+                  <button
+                    class="help-tip"
+                    data-help-topic="params"
+                    aria-label="Help for application parameters"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span class="fb-hint" id="paramsHint">Configure your filter requirements</span>
+            </div>
+            <div class="fb-form-grid">
+              <label
+                >Application type
+                <select class="select" id="appType">
+                  <option value="power">Power rail EMI filter (VDD, VCORE)</option>
+                  <option value="signal">Signal line filter (I2C, SPI, GPIO)</option>
+                  <option value="rf">RF / antenna isolation</option>
+                  <option value="audio">Audio / sensitive analog</option>
+                  <option value="usb">USB power filtering (VBUS)</option>
+                </select>
+              </label>
+              <label
+                >Target noise frequency <span>MHz</span>
+                <input
+                  class="input"
+                  id="noiseFreq"
+                  type="number"
+                  min="1"
+                  max="3000"
+                  step="1"
+                  value="100"
+                />
+              </label>
+              <label
+                >Supply current (max) <span>mA</span>
+                <input
+                  class="input"
+                  id="supplyCurrentMa"
+                  type="number"
+                  min="1"
+                  max="5000"
+                  step="1"
+                  value="200"
+                />
+              </label>
+              <label
+                >Supply voltage <span>V</span>
+                <input
+                  class="input"
+                  id="supplyVoltage"
+                  type="number"
+                  min="0.9"
+                  max="60"
+                  step="0.1"
+                  value="3.3"
+                />
+              </label>
+              <label
+                >Max voltage drop <span>mV</span>
+                <input
+                  class="input"
+                  id="maxVdropMv"
+                  type="number"
+                  min="1"
+                  max="500"
+                  step="1"
+                  value="50"
+                />
+              </label>
+              <label
+                >Target attenuation <span>dB</span>
+                <input
+                  class="input"
+                  id="targetAttenDb"
+                  type="number"
+                  min="10"
+                  max="60"
+                  step="1"
+                  value="30"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- Step 02 — Bead Selection -->
+          <div class="card fb-card" id="tour-bead">
+            <div class="fb-card-head">
+              <div>
+                <span class="fb-step">02</span>
+                <h2>
+                  Ferrite Bead Selection
+                  <button
+                    class="help-tip"
+                    data-help-topic="bead-select"
+                    aria-label="Help for bead selection"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <button class="btn btn-outline btn-sm" id="autoSelectBtn">Auto-select</button>
+            </div>
+            <div class="fb-form-grid fb-form-grid-3">
+              <label class="fb-span2"
+                >Part number / series
+                <select class="select" id="beadPart">
+                  <option value="">— Select a ferrite bead —</option>
+                </select>
+              </label>
+              <label
+                >Package
+                <select class="select" id="beadPackage">
+                  <option value="0402">0402</option>
+                  <option value="0603" selected>0603</option>
+                  <option value="0805">0805</option>
+                  <option value="1206">1206</option>
+                </select>
+              </label>
+              <label
+                >Rated impedance at 100 MHz <span>Ω</span>
+                <input
+                  class="input"
+                  id="beadZ100"
+                  type="number"
+                  min="10"
+                  max="5000"
+                  step="10"
+                  value="600"
+                />
+              </label>
+              <label
+                >Rated DC current <span>mA</span>
+                <input
+                  class="input"
+                  id="beadIrated"
+                  type="number"
+                  min="10"
+                  max="10000"
+                  step="10"
+                  value="500"
+                />
+              </label>
+              <label
+                >DC resistance (R<sub>DC</sub>) <span>mΩ</span>
+                <input
+                  class="input"
+                  id="beadRdc"
+                  type="number"
+                  min="1"
+                  max="2000"
+                  step="1"
+                  value="300"
+                />
+              </label>
+              <label
+                >Self-resonant frequency <span>MHz</span>
+                <input
+                  class="input"
+                  id="beadSrf"
+                  type="number"
+                  min="50"
+                  max="3000"
+                  step="10"
+                  value="500"
+                />
+              </label>
+              <label
+                >Load capacitance <span>µF</span>
+                <input
+                  class="input"
+                  id="loadCapUf"
+                  type="number"
+                  min="0.001"
+                  max="1000"
+                  step="0.001"
+                  value="10"
+                />
+              </label>
+            </div>
+            <div class="fb-button-row">
+              <button class="btn btn-primary fb-wide" id="runBtn">Run Optimizer</button>
+            </div>
+          </div>
+
+          <!-- Step 03 — Filter Topology -->
+          <div class="card fb-card" id="tour-topology">
+            <div class="fb-card-head">
+              <div>
+                <span class="fb-step">03</span>
+                <h2>
+                  Filter Topology
+                  <button
+                    class="help-tip"
+                    data-help-topic="topology"
+                    aria-label="Help for filter topology"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+            </div>
+            <div class="fb-topo-grid">
+              <label class="fb-topo-card" id="topo-L">
+                <input type="radio" name="topology" value="L" checked />
+                <div class="fb-topo-icon">
+                  <svg
+                    viewBox="0 0 100 40"
+                    width="100"
+                    height="40"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="0" y1="20" x2="20" y2="20" />
+                    <rect x="20" y="12" width="30" height="16" rx="2" />
+                    <line x1="50" y1="20" x2="70" y2="20" />
+                    <line x1="70" y1="10" x2="70" y2="30" />
+                    <line x1="62" y1="10" x2="78" y2="10" />
+                    <line x1="62" y1="30" x2="78" y2="30" />
+                    <line x1="70" y1="30" x2="70" y2="40" />
+                    <line x1="60" y1="40" x2="80" y2="40" />
+                    <line x1="70" y1="20" x2="100" y2="20" />
+                  </svg>
+                </div>
+                <span class="fb-topo-name">L-filter</span>
+                <span class="fb-topo-desc">Bead + output cap. Best for moderate EMI.</span>
+              </label>
+              <label class="fb-topo-card" id="topo-pi">
+                <input type="radio" name="topology" value="pi" />
+                <div class="fb-topo-icon">
+                  <svg
+                    viewBox="0 0 140 40"
+                    width="140"
+                    height="40"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="0" y1="20" x2="20" y2="20" />
+                    <line x1="20" y1="10" x2="20" y2="30" />
+                    <line x1="12" y1="10" x2="28" y2="10" />
+                    <line x1="12" y1="30" x2="28" y2="30" />
+                    <line x1="20" y1="30" x2="20" y2="40" />
+                    <line x1="10" y1="40" x2="30" y2="40" />
+                    <line x1="20" y1="20" x2="40" y2="20" />
+                    <rect x="40" y="12" width="30" height="16" rx="2" />
+                    <line x1="70" y1="20" x2="100" y2="20" />
+                    <line x1="100" y1="10" x2="100" y2="30" />
+                    <line x1="92" y1="10" x2="108" y2="10" />
+                    <line x1="92" y1="30" x2="108" y2="30" />
+                    <line x1="100" y1="30" x2="100" y2="40" />
+                    <line x1="90" y1="40" x2="110" y2="40" />
+                    <line x1="100" y1="20" x2="140" y2="20" />
+                  </svg>
+                </div>
+                <span class="fb-topo-name">π-filter</span>
+                <span class="fb-topo-desc">Input cap + bead + output cap. Best for high EMI.</span>
+              </label>
+              <label class="fb-topo-card" id="topo-T">
+                <input type="radio" name="topology" value="T" />
+                <div class="fb-topo-icon">
+                  <svg
+                    viewBox="0 0 140 40"
+                    width="140"
+                    height="40"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="0" y1="20" x2="10" y2="20" />
+                    <rect x="10" y="12" width="22" height="16" rx="2" />
+                    <line x1="32" y1="20" x2="55" y2="20" />
+                    <line x1="55" y1="10" x2="55" y2="30" />
+                    <line x1="47" y1="10" x2="63" y2="10" />
+                    <line x1="47" y1="30" x2="63" y2="30" />
+                    <line x1="55" y1="30" x2="55" y2="40" />
+                    <line x1="45" y1="40" x2="65" y2="40" />
+                    <line x1="55" y1="20" x2="76" y2="20" />
+                    <rect x="76" y="12" width="22" height="16" rx="2" />
+                    <line x1="98" y1="20" x2="140" y2="20" />
+                  </svg>
+                </div>
+                <span class="fb-topo-name">T-filter</span>
+                <span class="fb-topo-desc"
+                  >Two beads + shunt cap. Best for source impedance matching.</span
+                >
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RESULTS COLUMN ── -->
+        <div class="fb-results">
+          <!-- Summary Stats -->
+          <div class="card fb-card fb-summary-card" id="tour-results">
+            <div class="fb-card-head">
+              <div>
+                <span class="fb-step">04</span>
+                <h2>
+                  Optimization Summary
+                  <button
+                    class="help-tip"
+                    data-help-topic="results"
+                    aria-label="Help interpreting results"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span id="result-status" class="badge badge-gray">Not run</span>
+            </div>
+            <div class="fb-stats">
+              <div><span>Impedance @ target</span><strong id="stat-z">—</strong></div>
+              <div><span>Insertion loss</span><strong id="stat-il">—</strong></div>
+              <div><span>Voltage drop</span><strong id="stat-vdrop">—</strong></div>
+              <div><span>Bias derating</span><strong id="stat-derate">—</strong></div>
+              <div><span>Resonant freq</span><strong id="stat-res">—</strong></div>
+              <div><span>Status</span><strong id="stat-pass">—</strong></div>
+            </div>
+            <!-- Main impedance chart -->
+            <div
+              id="fb-impedance-chart"
+              class="fb-chart"
+              data-tour-chart
+              role="img"
+              aria-label="Ferrite bead impedance vs frequency chart"
+            >
+              <div class="fb-empty">
+                Run the optimizer to view the impedance vs frequency curve.
+              </div>
+            </div>
+          </div>
+
+          <!-- Insertion Loss Chart -->
+          <div class="card fb-card" id="tour-il-chart">
+            <div class="fb-card-head">
+              <h2>
+                Insertion Loss vs Frequency
+                <button class="help-tip" data-help-topic="charts" aria-label="Help for charts">
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div id="fb-insertion-loss-chart" class="fb-chart fb-chart-sm">
+              <div class="fb-empty">Run optimizer to view insertion loss curve.</div>
+            </div>
+          </div>
+
+          <!-- Current Derating -->
+          <div class="card fb-card" id="tour-derating">
+            <div class="fb-card-head">
+              <h2>DC Bias Derating</h2>
+            </div>
+            <div id="fb-derating-chart" class="fb-chart fb-chart-sm">
+              <div class="fb-empty">Run optimizer to view DC bias derating curve.</div>
+            </div>
+          </div>
+
+          <!-- Export -->
+          <div class="card fb-card" id="tour-export">
+            <div class="fb-card-head">
+              <h2>
+                Reports &amp; Export
+                <button class="help-tip" data-help-topic="reports" aria-label="Help for reports">
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="fb-export-grid">
+              <button class="btn btn-outline" id="exportCsv" disabled>Export CSV</button>
+              <button class="btn btn-outline" id="exportJson" disabled>Export JSON</button>
+              <button class="btn btn-outline" id="saveConfig">Save config</button>
+              <label class="btn btn-outline fb-file-label"
+                >Load config
+                <input id="loadConfig" type="file" accept="application/json" />
+              </label>
+              <button class="btn btn-primary" id="printReport" disabled>Print report</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── COMPARISON TABLE ── -->
+      <section class="fb-table-section" id="comparisonSection" hidden>
+        <div class="fb-section-head">
+          <div>
+            <h2>Candidate Bead Comparison</h2>
+            <p>Top ferrite bead candidates ranked by suitability for your requirements.</p>
+          </div>
+          <div class="fb-filter-row">
+            <button class="chip chip-active filter-chip" data-filter="all">ALL</button>
+            <button class="chip filter-chip" data-filter="pass">PASS</button>
+            <button class="chip filter-chip" data-filter="marginal">MARGINAL</button>
+            <button class="chip filter-chip" data-filter="fail">FAIL</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="fbTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Part / Series</th>
+                <th>Package</th>
+                <th>Z @ 100 MHz</th>
+                <th>I<sub>rated</sub></th>
+                <th>R<sub>DC</sub></th>
+                <th>Z @ Target freq</th>
+                <th>Insertion loss</th>
+                <th>V<sub>drop</sub></th>
+                <th>Bias derate</th>
+                <th>SRF</th>
+                <th>Resonance risk</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="fbTableBody"></tbody>
+          </table>
+        </div>
+        <div id="noResults" class="fb-no-results" hidden>
+          No suitable ferrite beads found for these requirements. Try relaxing the target
+          attenuation or increasing the allowed voltage drop.
+        </div>
+      </section>
+
+      <!-- ── RECOMMENDATIONS ── -->
+      <section class="fb-recs-section" id="recsSection" hidden>
+        <div class="fb-section-head">
+          <div>
+            <h2>Top Recommendations</h2>
+            <p>Ranked candidates with per-bead analysis and selection rationale.</p>
+          </div>
+          <div class="fb-recs-legend">
+            <span class="chip chip-active">Z &gt; target</span>
+            <span class="chip">I &gt; I<sub>supply</sub></span>
+            <span class="chip">V<sub>drop</sub> &lt; budget</span>
+          </div>
+        </div>
+        <div class="fb-rec-grid" id="fbRecGrid"></div>
+      </section>
+
+      <!-- ── ADVANCED CHARTS ── -->
+      <section class="fb-charts-section" id="chartsSection" hidden>
+        <div class="fb-section-head">
+          <h2>Advanced Analysis</h2>
+          <p>Resonance risk, PDN noise model, Bode plot, and topology comparison.</p>
+        </div>
+        <div class="fb-chart-grid">
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>Resonance Analysis</h2></div>
+            <div id="fb-resonance-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to view resonance model.</div>
+            </div>
+          </div>
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>PDN Noise Model</h2></div>
+            <div id="fb-pdn-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to view PDN noise model.</div>
+            </div>
+          </div>
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>Bode Plot (|H(jω)|)</h2></div>
+            <div id="fb-bode-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to view Bode plot.</div>
+            </div>
+          </div>
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>Topology Comparison</h2></div>
+            <div id="fb-topo-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to compare filter topologies.</div>
+            </div>
+          </div>
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>Impedance vs Temperature</h2></div>
+            <div id="fb-temp-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to view temperature derating.</div>
+            </div>
+          </div>
+          <div class="card fb-card">
+            <div class="fb-card-head"><h2>Candidate Z Comparison</h2></div>
+            <div id="fb-compare-chart" class="fb-chart fb-chart-md">
+              <div class="fb-empty">Run optimizer to compare candidate impedances.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── LAYOUT GUIDELINES ── -->
+      <section class="fb-layout-section" id="layoutSection" hidden>
+        <div class="fb-section-head">
+          <h2>PCB Layout Guidelines</h2>
+          <p>Placement and routing requirements for effective ferrite bead EMI filtering.</p>
+        </div>
+        <div class="fb-guidelines-grid" id="layoutGrid">
+          <!-- populated by optimizer.js -->
+        </div>
+      </section>
+
+      <!-- ── ENGINEERING NOTES ── -->
+      <section id="fb-learn" class="fb-learn">
+        <h2>Ferrite bead engineering notes</h2>
+        <p class="fb-section-lead">
+          Understanding the physics of ferrite beads prevents the common pitfalls that cause
+          expensive redesigns and EMI test failures.
+        </p>
+        <div class="fb-accordion">
+          <details open>
+            <summary>How do ferrite beads work?</summary>
+            <p>
+              A ferrite bead is a lossy inductor — its core material converts high-frequency noise
+              energy into heat rather than reflecting it back to the source. At low frequencies
+              (below the self-resonant frequency) the bead behaves inductively. Above the SRF, the
+              capacitive parasitic of the winding dominates and impedance falls. The key figure of
+              merit is the resistive component (R) of the complex impedance Z = R + jX — it is R
+              that dissipates energy and provides attenuation.
+            </p>
+          </details>
+          <details>
+            <summary>DC bias current derating</summary>
+            <p>
+              Ferrite permeability decreases as the DC bias field increases. A bead rated 600 Ω at
+              100 MHz with 0 A bias may drop to 200–300 Ω at half its rated DC current. Always check
+              the manufacturer's impedance-vs-bias-current curve and derate the bead so that the DC
+              operating current is typically ≤ 30–50% of the rated current if impedance performance
+              is critical. For purely power delivery applications where some derating is acceptable,
+              operating up to 80% of rated current is common.
+            </p>
+          </details>
+          <details>
+            <summary>Self-resonant frequency (SRF) and resonance peaking</summary>
+            <p>
+              At frequencies above the SRF, the parasitic winding capacitance dominates and
+              impedance falls rapidly, reducing EMI attenuation. Worse, when the bead is combined
+              with bulk capacitance on the output (as in an L-filter), the LC tank can create a
+              resonance peak that amplifies noise at the resonant frequency. Damp this resonance
+              with an electrolytic capacitor in parallel (higher ESR) or a small resistor in series
+              with the MLCC. For π-filters, the input and output capacitors both contribute to
+              resonance risk.
+            </p>
+          </details>
+          <details>
+            <summary>Insertion loss: ideal vs real-world</summary>
+            <p>
+              Ferrite bead datasheets specify insertion loss using a 50 Ω source and 50 Ω load (S21
+              measurement). In real PCB circuits, the source impedance is the PDN / regulator output
+              impedance (often &lt; 1 Ω) and the load is the decoupling capacitor (very low
+              impedance). Actual insertion loss in circuit is very different from the datasheet
+              value. Use the full filter transfer function H(s) = Z_load / (Z_load + Z_bead) to
+              calculate real-world attenuation.
+            </p>
+          </details>
+          <details>
+            <summary>π-filter design for maximum EMI suppression</summary>
+            <p>
+              A π-filter (Cin – bead – Cout) provides the highest attenuation because both
+              capacitors contribute. Cin bypasses high-frequency noise before the bead, and Cout
+              provides a local charge reservoir. However, a π-filter creates a sharper resonance
+              peak and is more sensitive to the Q of the capacitors. Use X5R/X7R ceramics (not C0G —
+              too high Q) and consider adding a resistor (1–10 Ω) in series with Cout to dampen the
+              resonance. Target Cin = Cout = 10–100× the parasitic capacitance of the bead.
+            </p>
+          </details>
+          <details>
+            <summary>Ferrite bead vs inductor for power rail filtering</summary>
+            <p>
+              A ferrite bead is a lossy inductor — its series resistance R increases with frequency,
+              which is desirable for EMI filtering but undesirable for energy storage. Inductors
+              have much lower series resistance and store energy efficiently. Use a ferrite bead
+              when the primary goal is EMI attenuation and voltage drop is acceptable. Use an
+              inductor when energy storage, efficiency, or load transient response is critical
+              (e.g., DC-DC converters, high-current power rails). Never use an inductor as an EMI
+              filter on a sensitive analog rail without modelling the resonance.
+            </p>
+          </details>
+          <details>
+            <summary>Signal line ferrite beads</summary>
+            <p>
+              On signal lines (I2C, SPI, GPIO), a ferrite bead adds series impedance that forms an
+              RC low-pass filter with the input capacitance of the receiving device. This slows edge
+              rates and reduces radiated EMI. However, too much impedance causes signal integrity
+              problems: ringing, excessive rise time, or data errors. On high-speed interfaces (&gt;
+              10 MHz), verify that the filter cutoff frequency is well above the signal bandwidth.
+              For USB and other differential interfaces, use matched differential ferrite arrays to
+              maintain impedance balance.
+            </p>
+          </details>
+          <details>
+            <summary>Temperature and frequency effects on impedance</summary>
+            <p>
+              Ferrite permeability is temperature-dependent. Most NiZn ferrites (used in
+              high-frequency beads, &gt; 100 MHz applications) have a Curie temperature around
+              130–180 °C but show measurable permeability changes above 50 °C. MnZn ferrites (lower
+              frequency applications) have higher permeability but are more temperature-sensitive.
+              For automotive or industrial designs operating above 85 °C, derate the impedance by
+              10–20% and confirm with the datasheet's temperature curve. Frequency also shifts the
+              peak impedance point at elevated temperatures.
+            </p>
+          </details>
+          <details>
+            <summary>PDN design with ferrite beads</summary>
+            <p>
+              When a ferrite bead is placed between the main power supply and a local power domain
+              (e.g., analog VDD), the bead's inductance becomes part of the PDN impedance. During
+              fast load transients, the bead limits the current slew rate, causing a voltage droop
+              at the load. This can be mitigated by placing sufficient bulk and HF decoupling
+              capacitance on the load side of the bead. Rule of thumb: place at least 10–100 µF bulk
+              capacitance after the bead for digital loads, and ensure HF decoupling (100 nF MLCC)
+              is placed within 1 mm of each VDD pin.
+            </p>
+          </details>
+          <details>
+            <summary>Multiple ferrite beads in series</summary>
+            <p>
+              Two beads in series provide more attenuation than one, but also double the voltage
+              drop and the resonance risk. The T-filter topology uses two beads with a shunt
+              capacitor between them, which improves both attenuation and resonance damping compared
+              to two beads alone. For extreme EMI requirements, a multi-stage filter with different
+              bead types (e.g., a low-frequency + high-frequency bead in series) can provide
+              broadband suppression. Always simulate or prototype such filters before committing to
+              a PCB layout.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── HELP DIALOG ── -->
+    <div class="help-backdrop" id="help-dialog" hidden>
+      <section class="help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <header class="help-header">
+          <div>
+            <span class="fb-kicker">Built-in Help Center</span>
+            <h2 id="help-title">Ferrite Bead Optimizer Guide</h2>
+            <p>Version 1.0 · Updated July 2026</p>
+          </div>
+          <button class="help-close" data-help-close aria-label="Close help">×</button>
+        </header>
+        <div class="help-search-wrap">
+          <label for="help-search">Search help topics</label>
+          <input
+            class="input"
+            id="help-search"
+            type="search"
+            placeholder="Try impedance, resonance, current, layout…"
+            autocomplete="off"
+          />
+          <span id="help-search-status" aria-live="polite"></span>
+        </div>
+        <div class="help-layout">
+          <nav class="help-nav" id="help-nav" aria-label="Help topics"></nav>
+          <article class="help-content" id="help-content" tabindex="0"></article>
+        </div>
+        <footer class="help-footer">
+          <button class="btn btn-outline" id="help-start-tour">Start feature tour</button>
+          <a
+            class="btn btn-primary"
+            href="help/ferrite-bead-user-guide.html"
+            target="_blank"
+            rel="noopener"
+          >
+            Open full user manual
+          </a>
+        </footer>
+      </section>
+    </div>
+
+    <!-- ── TOUR ── -->
+    <div class="tour-backdrop" id="tour-backdrop" hidden></div>
+    <aside
+      class="tour-popover"
+      id="tour-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-title"
+      hidden
+    >
+      <span id="tour-progress"></span>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-actions">
+        <button class="btn btn-ghost btn-sm" id="tour-skip">Skip</button>
+        <button class="btn btn-outline btn-sm" id="tour-prev">Previous</button>
+        <button class="btn btn-primary btn-sm" id="tour-next">Next</button>
+      </div>
+    </aside>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="../../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script src="js/calculations.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/recommendations.js"></script>
+    <script src="js/optimizer.js"></script>
+    <script src="js/help.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

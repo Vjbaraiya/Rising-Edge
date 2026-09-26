@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="FPGA power bring-up and verification: pre-power checks, first power-up ritual, sequence capture, ripple measurement technique, load-transient testing, XADC/PGOOD monitoring, and the failure-signature table."
+    />
+    <title>
+      Bring-up &amp; Verification | FPGA Power Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/07-bringup-verification.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item active"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Bring-up &amp; Verification</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 07</span>
+              <span class="badge badge-orange">Bring-up</span>
+              <h1>Bring-up &amp; Verification</h1>
+              <p class="subtitle">
+                Never let a fresh board meet a full-power supply on faith. Twenty minutes of
+                disciplined bring-up catches what would otherwise be a week of "why won't it
+                configure?"
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <div class="widget-container">
+                <div class="widget-header"><h3>Before first power</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Ohm every rail to ground and rail-to-rail — catch solder bridges cold. Record
+                    the values (a "healthy" VCCINT reads tens of ohms, not ∞, due to the FPGA
+                    itself).
+                  </li>
+                  <li>
+                    Verify regulator feedback networks against the schematic — a swapped divider
+                    resistor is the classic overvoltage killer.
+                  </li>
+                  <li>
+                    If your 0 Ω current links (Module 03) are fitted, note which rails you can
+                    isolate.
+                  </li>
+                  <li>
+                    Visual: caps of the right size in the right spots, polarity of any polymers, no
+                    missing FB parts.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>The first power-up ritual</h3></div>
+                <ol
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-sub);
+                    line-height: 1.9;
+                    padding-left: 1.3rem;
+                  "
+                >
+                  <li>
+                    <strong>Current-limited bench supply</strong> into the input — start with the
+                    limit at ~20 % above expected idle current. A limit hit = stop and investigate,
+                    nothing burns.
+                  </li>
+                  <li>
+                    <strong>Set-points:</strong> DMM every rail at its sense point (not the
+                    regulator output cap). All within tolerance before anything else happens.
+                  </li>
+                  <li>
+                    <strong>Sequence capture:</strong> 4-channel scope on VCCINT/VCCAUX/VCCO/RESET;
+                    single-shot trigger on the input. Verify order, ramp times inside the datasheet
+                    window, and monotonicity. <em>Archive the screenshot</em> — it's your golden
+                    reference forever.
+                  </li>
+                  <li>
+                    <strong>Configuration:</strong> load a bitstream; watch DONE go high. Then
+                    re-measure rails under the real design's load.
+                  </li>
+                  <li>
+                    <strong>Ripple:</strong> measure with tip-and-barrel (no ground clip loop!), 20
+                    MHz bandwidth limit for the regulator-band number, full bandwidth for a look at
+                    switching spikes. Compare against the stack budget from Module 01.
+                  </li>
+                  <li>
+                    <strong>Load transient:</strong> toggle the heaviest logic block (or use an
+                    on-fabric load generator design) while scoping VCCINT — droop must stay inside
+                    the transient budget.
+                  </li>
+                  <li>
+                    <strong>Thermal survey:</strong> IR camera or thermocouples on every regulator
+                    and the FPGA at max load, max ambient if you can chamber it.
+                  </li>
+                </ol>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>In-system monitoring</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>XADC / SYSMON:</strong> the FPGA's internal ADC reads VCCINT, VCCAUX,
+                    VCCBRAM and die temperature for free — expose them in your design's status
+                    registers and log them in production units.
+                  </li>
+                  <li>
+                    <strong>PGOOD aggregation:</strong> AND all PGOODs into a status LED and a
+                    supervisor input; a field return that "sometimes reboots" is diagnosed in
+                    seconds if you can see which rail flickers.
+                  </li>
+                  <li>
+                    <strong>PMBus telemetry</strong> (if you used a manager IC): per-rail
+                    voltage/current/fault logs — invaluable for fleet debugging.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Failure signatures</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Symptom</th>
+                        <th>Likely cause</th>
+                        <th>Check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Won't configure (DONE never rises)</td>
+                        <td>Sequence/ramp violation; VCCAUX missing; non-monotonic VCCINT</td>
+                        <td>Sequence capture vs datasheet; INIT_B state</td>
+                      </tr>
+                      <tr>
+                        <td>Configures, crashes under load</td>
+                        <td>VCCINT droop beyond budget (PDN or regulator transient)</td>
+                        <td>Scope VCCINT during the crash workload</td>
+                      </tr>
+                      <tr>
+                        <td>Transceiver bit errors / link flaps</td>
+                        <td>MGT rail ripple/noise; shared-rail contamination</td>
+                        <td>µV-level ripple on VMGTAVCC; eye scan trend vs load</td>
+                      </tr>
+                      <tr>
+                        <td>Random BRAM/logic corruption</td>
+                        <td>VCCBRAM sag; local hot spot</td>
+                        <td>XADC logs vs failure times; IR camera</td>
+                      </tr>
+                      <tr>
+                        <td>Reboots at power-on only when cold/hot</td>
+                        <td>Soft-start vs supervisor timing race at temperature</td>
+                        <td>Chambered sequence captures at extremes</td>
+                      </tr>
+                      <tr>
+                        <td>Input supply current limit at plug-in</td>
+                        <td>Inrush (all bulk caps at once) — or a real short</td>
+                        <td>Stagger soft-starts; inrush limiter on input</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Current-limited first power, always; set-points before sequence, sequence before
+                    configuration.
+                  </li>
+                  <li>The archived sequence screenshot is a deliverable of the design.</li>
+                  <li>Ripple technique matters: tip-and-barrel, both bandwidths, at the load.</li>
+                  <li>
+                    Design in observability — XADC + PGOOD LEDs turn field mysteries into log
+                    entries.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="06-layout-thermal.html">← Layout &amp; Thermal</a>
+                <a class="btn btn-primary" href="08-checklist-faq.html"
+                  >Next: Checklist &amp; FAQ →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 layout and routing guidelines: length-matching hierarchy, reference planes and impedance control, via/stub minimization, fly-by routing order, and differential pair rules for CK and DQS."
+    />
+    <title>
+      Layout &amp; Routing | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/09-layout-routing.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .check-list {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0;
+        display: grid;
+        gap: 8px;
+      }
+      .check-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        transition: all 0.15s ease;
+      }
+      .check-list li.checked {
+        border-color: var(--success, #34d399);
+        color: var(--text-base);
+      }
+      .check-list input {
+        margin-top: 2px;
+        accent-color: var(--success, #34d399);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item active">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Layout &amp; Routing</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 09</span>
+              <span class="badge badge-cyan">Diagrams</span>
+              <span class="badge badge-green">Checklist</span>
+              <h1>Layout &amp; Routing Guidelines</h1>
+              <p class="subtitle">
+                Everything from Modules 05–08 — signal groups, SI, termination, and the PDN —
+                converges into one set of concrete PCB rules here. This is the module where the
+                schematic becomes a board.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Length matching hierarchy -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The length-matching hierarchy</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Not every signal needs the same tolerance. DDR4 length matching is nested —
+                  tightest within a byte lane, looser between byte lanes, looser still against the
+                  shared command/address bus.
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Match group</th>
+                        <th>Typical tolerance</th>
+                        <th>Why</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>DQS+/DQS− (intra-pair)</td>
+                        <td>± 2–5 mil</td>
+                        <td>Differential pair skew directly degrades the strobe edge</td>
+                      </tr>
+                      <tr>
+                        <td>DQ[7:0] + DM/DBI to their DQS (intra-byte-lane)</td>
+                        <td>± 10–25 mil (per vendor guide)</td>
+                        <td>Sets read/write data-valid window inside that lane</td>
+                      </tr>
+                      <tr>
+                        <td>Byte lane to byte lane</td>
+                        <td>Looser, but bounded (per vendor guide)</td>
+                        <td>Read leveling/deskew has real but finite range</td>
+                      </tr>
+                      <tr>
+                        <td>CK+/CK− (intra-pair)</td>
+                        <td>± 2–5 mil</td>
+                        <td>Clock pair skew shows up on every sampled bit</td>
+                      </tr>
+                      <tr>
+                        <td>CA/address/control (fly-by group)</td>
+                        <td>Looser than DQS, still bounded</td>
+                        <td>Write leveling compensates CK-to-DQS skew, not CA skew</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  Always route to the exact tolerances in your specific FPGA vendor's memory
+                  interface routing guidelines (Module 10) — the numbers above are typical orders of
+                  magnitude, not a substitute for the datasheet.
+                </div>
+              </div>
+
+              <!-- Serpentine length matching diagram -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Length matching in practice: serpentine tuning</h3>
+                  <span class="badge badge-cyan">Diagram</span>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 560 150"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Diagram showing a short direct trace and a longer trace with serpentine meanders added to equalize their electrical lengths, both starting and ending at the same points"
+                  >
+                    <text x="20" y="24" font-size="9" font-weight="700" fill="var(--text-sub)">
+                      DQ0 (short, direct route)
+                    </text>
+                    <line
+                      x1="20"
+                      y1="40"
+                      x2="540"
+                      y2="40"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="3"
+                    />
+                    <circle cx="20" cy="40" r="4" fill="var(--cyan,#22d3ee)" />
+                    <circle cx="540" cy="40" r="4" fill="var(--cyan,#22d3ee)" />
+
+                    <text x="20" y="66" font-size="9" font-weight="700" fill="var(--text-sub)">
+                      DQ1 (physically shorter path — needs length added)
+                    </text>
+                    <path
+                      d="M20,100 L200,100 L200,84 L216,84 L216,116 L232,116 L232,84 L248,84 L248,116 L264,116 L264,84 L280,84 L280,116 L296,116 L296,84 L360,84 L360,100 L540,100"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="3"
+                    />
+                    <circle cx="20" cy="100" r="4" fill="var(--success,#34d399)" />
+                    <circle cx="540" cy="100" r="4" fill="var(--success,#34d399)" />
+                    <text
+                      x="248"
+                      y="135"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--success,#34d399)"
+                    >
+                      serpentine (accordion) meander adds exactly the missing length
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    Both traces now carry the same electrical delay end-to-end, even though DQ1's
+                    direct path was physically shorter — the meander adds length, not just distance
+                    on the page.
+                  </p>
+                </div>
+                <div class="warning-box">
+                  Keep serpentine spacing at least 3–4× the trace width apart to avoid the meander
+                  itself becoming a crosstalk source between adjacent turns (Module 06).
+                </div>
+              </div>
+
+              <!-- Reference planes / stackup -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Reference planes &amp; impedance control</h3>
+                  <span class="badge badge-cyan">Diagram</span>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 560 150"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="PCB stackup cross section showing a signal layer routed as microstrip referenced to a continuous ground plane below it, with power and ground plane pairs beneath"
+                  >
+                    <rect
+                      x="20"
+                      y="20"
+                      width="520"
+                      height="14"
+                      fill="var(--bg-muted)"
+                      stroke="var(--border)"
+                    />
+                    <text x="30" y="16" font-size="8" fill="var(--text-muted)">
+                      L1 — DDR signal layer (microstrip)
+                    </text>
+                    <line
+                      x1="200"
+                      y1="27"
+                      x2="320"
+                      y2="27"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="3"
+                    />
+                    <rect
+                      x="20"
+                      y="40"
+                      width="520"
+                      height="10"
+                      fill="rgba(52,211,153,0.25)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text x="30" y="60" font-size="8" fill="var(--success,#34d399)">
+                      L2 — solid GND reference (uninterrupted under DDR signals)
+                    </text>
+                    <rect
+                      x="20"
+                      y="66"
+                      width="520"
+                      height="10"
+                      fill="rgba(248,113,113,0.2)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text x="30" y="88" font-size="8" fill="var(--danger,#f87171)">
+                      L3 — VDDQ / power plane
+                    </text>
+                    <rect
+                      x="20"
+                      y="94"
+                      width="520"
+                      height="10"
+                      fill="var(--bg-muted)"
+                      stroke="var(--border)"
+                    />
+                    <text x="30" y="118" font-size="8" fill="var(--text-muted)">
+                      L4+ — additional signal/plane layers
+                    </text>
+                    <line
+                      x1="20"
+                      y1="130"
+                      x2="540"
+                      y2="130"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                      stroke-dasharray="5 3"
+                    />
+                    <text
+                      x="280"
+                      y="145"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--warning,#fb923c)"
+                    >
+                      Avoid routing DDR signals across any plane split crossing this boundary
+                    </text>
+                  </svg>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  A continuous, uninterrupted reference plane directly adjacent to the signal layer
+                  is what makes the trace's impedance predictable in the first place — a signal that
+                  crosses a plane split loses its return path and effectively creates a large,
+                  unplanned impedance discontinuity (Module 06).
+                </p>
+              </div>
+
+              <!-- Via/stub minimization -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Via &amp; stub minimization</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Minimize layer changes on critical DQ/DQS/CK nets — every via adds inductance
+                    and a potential stub.
+                  </li>
+                  <li>
+                    Back-drill or use blind/buried vias on higher-layer-count boards to remove the
+                    unused portion of a through-hole via barrel.
+                  </li>
+                  <li>
+                    Keep a ground via next to every signal via changing layers, to preserve a short
+                    return path (mirrors the PDN loop-area lesson from Module 08).
+                  </li>
+                  <li>
+                    Route an entire byte lane's vias at the same board location where practical, so
+                    lane members see similar via-induced delay and impedance effects.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Fly-by ordering -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Fly-by routing order</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Module 04 established that CA/CK/control must daisy-chain past each device in
+                  order, never branch. The routing consequence: keep every address/command/control
+                  line in the <strong>same physical device order</strong> down the bus, and
+                  terminate only after the last device — reordering even one line creates its own
+                  hidden skew that write/read leveling wasn't designed to correct.
+                </p>
+                <div class="info-box">
+                  Group the whole CA/CK fly-by bundle in the routing tool as one ordered unit before
+                  you start pulling traces — reordering later, after other nets are already routed
+                  around it, is one of the most time-consuming DDR4 layout mistakes to fix.
+                </div>
+              </div>
+
+              <!-- Differential pair rules -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Differential pair routing rules (CK, DQS)</h3></div>
+                <table class="iface-spec-table">
+                  <thead>
+                    <tr>
+                      <th>Rule</th>
+                      <th>Typical guidance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Intra-pair length match</td>
+                      <td>± 2–5 mil, matched as close to the discontinuity as possible</td>
+                    </tr>
+                    <tr>
+                      <td>Coupling spacing</td>
+                      <td>Tight and consistent for the full run — don't let spacing drift</td>
+                    </tr>
+                    <tr>
+                      <td>Layer changes</td>
+                      <td>Change both traces of a pair together, same via pattern</td>
+                    </tr>
+                    <tr>
+                      <td>Reference plane</td>
+                      <td>Same continuous reference for both traces of the pair, full length</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Routing checklist -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Routing checklist</h3></div>
+                <ul class="check-list" id="routeCheckList">
+                  <li>
+                    <input type="checkbox" /> CA/CK/control routed as one ordered fly-by bundle, no
+                    branching
+                  </li>
+                  <li>
+                    <input type="checkbox" /> DQ/DQS/DM grouped and length-matched per byte lane
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Differential pairs (CK, DQS) intra-pair matched and
+                    consistently coupled
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Continuous reference plane under every DDR signal
+                    layer, no plane-split crossings
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Via count minimized on critical nets; stubs
+                    back-drilled where applicable
+                  </li>
+                  <li>
+                    <input type="checkbox" /> VTT termination placed at the true electrical end of
+                    the CA fly-by bus
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Decoupling caps placed with shortest possible loop to
+                    each power ball (Module 08)
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Final lengths verified against the FPGA vendor's
+                    memory-interface routing guide (Module 10)
+                  </li>
+                </ul>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Length-matching tolerance is nested: tightest inside a byte lane, looser between
+                    byte lanes, looser still on the shared CA/CK bus.
+                  </li>
+                  <li>
+                    Serpentine meanders add electrical length without changing endpoints — spacing
+                    them properly avoids self-crosstalk.
+                  </li>
+                  <li>
+                    A continuous reference plane under every DDR signal layer is what makes trace
+                    impedance predictable in the first place.
+                  </li>
+                  <li>
+                    Fly-by nets must stay in the same device order throughout routing — reordering
+                    breaks an assumption leveling can't fix.
+                  </li>
+                  <li>
+                    Differential pairs need matched, consistent coupling and layer changes performed
+                    together, not independently.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="08-decoupling-pdn.html">← Decoupling &amp; PDN</a>
+                <a class="btn btn-primary" href="10-fpga-considerations.html"
+                  >Next: FPGA-Specific Considerations →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      document.querySelectorAll('#routeCheckList input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          cb.closest('li').classList.toggle('checked', cb.checked);
+        });
+      });
+    </script>
+  </body>
+</html>

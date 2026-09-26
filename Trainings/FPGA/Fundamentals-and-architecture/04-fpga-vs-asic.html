@@ -1,0 +1,1368 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep-dive comparison of FPGA vs ASIC: NRE cost, performance, power, time-to-market, risk, and when to transition from FPGA prototype to ASIC production."
+    />
+    <meta property="og:title" content="FPGA vs ASIC | FPGA Academy | Rising Edge" />
+    <title>FPGA vs ASIC | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/04-fpga-vs-asic.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .objectives-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .objectives-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .objectives-list li:last-child {
+        border-bottom: none;
+      }
+      .objectives-list li::before {
+        content: '→';
+        color: #22d3ee;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .section-heading {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 2rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+      }
+      .widget-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .widget-container h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 12px;
+      }
+      .cost-highlight {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .cost-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        text-align: center;
+      }
+      .cost-card .cost-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .cost-card .cost-value {
+        font-size: 1.4rem;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+      .cost-card .cost-desc {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.5;
+      }
+      .risk-item {
+        display: flex;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        align-items: flex-start;
+      }
+      .risk-item:last-child {
+        border-bottom: none;
+      }
+      .risk-badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .risk-low {
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+      }
+      .risk-high {
+        background: rgba(248, 113, 113, 0.15);
+        color: #f87171;
+      }
+      .risk-med {
+        background: rgba(251, 146, 60, 0.15);
+        color: #fb923c;
+      }
+      .risk-content {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+      }
+      .exercise-step {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .exercise-step:last-child {
+        border-bottom: none;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .step-text {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        padding-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item active" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>FPGA vs ASIC</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 4/25</span><span>16%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 16%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 4 OF 25</span>
+                <span class="badge">15 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                FPGA vs ASIC
+              </h1>
+              <p class="subtitle">
+                Understand the fundamental trade-offs between FPGA and custom silicon — NRE cost,
+                performance, power efficiency, time-to-market risk, and how to model the volume
+                crossover point for business decisions.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Learning Objectives -->
+              <div class="widget-container">
+                <h3>Learning Objectives</h3>
+                <ul class="objectives-list">
+                  <li>
+                    Define ASIC and explain what makes it fundamentally different from an FPGA
+                  </li>
+                  <li>
+                    Quantify ASIC NRE costs and explain why they are the primary decision driver
+                  </li>
+                  <li>Calculate the break-even volume between FPGA and ASIC using a cost model</li>
+                  <li>Compare FPGA and ASIC performance, power efficiency, and silicon area</li>
+                  <li>Describe the standard FPGA-to-ASIC transition strategy used in industry</li>
+                  <li>Assess the risk profile differences between FPGA and ASIC development</li>
+                </ul>
+              </div>
+
+              <!-- Overview -->
+              <h2 class="section-heading">What Is an ASIC?</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                An
+                <strong style="color: var(--text-base)"
+                  >Application-Specific Integrated Circuit (ASIC)</strong
+                >
+                is custom silicon designed and manufactured for one specific purpose. Unlike an FPGA
+                (which ships as generic programmable fabric), an ASIC is designed transistor by
+                transistor, laid out in physical layers, and manufactured in a semiconductor fab
+                with a custom mask set. Once fabricated, the design is fixed forever — there is no
+                reconfiguration, no field update, no second chance without a new chip.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The processor in your smartphone is an ASIC. The WiFi chip in your laptop is an
+                ASIC. The Ethernet controller on your network card is an ASIC. Every fixed-function,
+                high-volume chip in consumer electronics is an ASIC — designed once, manufactured
+                billions of times, with per-unit costs measured in cents. The performance and power
+                efficiency of a well-designed ASIC is unmatched by any other technology.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 24px">
+                But ASICs are extraordinarily expensive to create. The Non-Recurring Engineering
+                (NRE) cost — covering EDA tool licenses, verification, physical design, mask set
+                fabrication, and test program development — ranges from $1M to $50M+ depending on
+                the process node. At TSMC 5nm, a full mask set alone costs $15M–$20M. This makes
+                ASICs economically viable only at very high production volumes where the NRE
+                amortizes to a few cents per unit.
+              </p>
+
+              <!-- Cost Highlights -->
+              <div class="cost-highlight">
+                <div class="cost-card">
+                  <div class="cost-label">ASIC NRE Cost</div>
+                  <div class="cost-value" style="color: #f87171">$1M–$50M+</div>
+                  <div class="cost-desc">
+                    Non-recurring engineering: masks, verification, layout, test
+                  </div>
+                </div>
+                <div class="cost-card">
+                  <div class="cost-label">ASIC Unit Cost (volume)</div>
+                  <div class="cost-value" style="color: #34d399">$0.10–$10</div>
+                  <div class="cost-desc">
+                    At millions of units; dies from wafer + packaging + test
+                  </div>
+                </div>
+                <div class="cost-card">
+                  <div class="cost-label">FPGA NRE Cost</div>
+                  <div class="cost-value" style="color: #34d399">~$0</div>
+                  <div class="cost-desc">
+                    Use existing silicon; only pay for engineering time and tools
+                  </div>
+                </div>
+                <div class="cost-card">
+                  <div class="cost-label">FPGA Unit Cost</div>
+                  <div class="cost-value" style="color: #fb923c">$5–$500+</div>
+                  <div class="cost-desc">Each unit is a full FPGA chip; never scales like ASIC</div>
+                </div>
+                <div class="cost-card">
+                  <div class="cost-label">ASIC Time to Market</div>
+                  <div class="cost-value" style="color: #f87171">18–36 mo</div>
+                  <div class="cost-desc">From RTL freeze to first production silicon</div>
+                </div>
+                <div class="cost-card">
+                  <div class="cost-label">FPGA Time to Market</div>
+                  <div class="cost-value" style="color: #34d399">Weeks–Months</div>
+                  <div class="cost-desc">RTL to working prototype in days; product in months</div>
+                </div>
+              </div>
+
+              <!-- Development Flow Diagram -->
+              <h2 class="section-heading">The FPGA-to-ASIC Transition Strategy</h2>
+              <div class="mermaid">
+                graph TD CONCEPT["Design Concept\n& RTL Development"] --> PROTO["FPGA
+                Prototype\n(Weeks — Low Cost)\nValidate algorithm\nProve interfaces"] PROTO -->
+                VALID["Field Validation\n& Customer Testing\nFix bugs via\nbitstream update"] VALID
+                --> VOL{"Volume\nDecision"} VOL -- "High Volume\n(100K+ units)\nHigh margin" -->
+                NRE["ASIC Tape-out\n$1M–$50M NRE\n18–36 months\nTSMC/Samsung fab"] VOL -- "Low–Med
+                Volume\nor fast-changing spec" --> STAY["Stay on FPGA\nUpdate anytime\nZero respin
+                cost"] NRE --> BRING["Bring-up\n& Qualification\n6–12 months"] BRING --> PROD["Mass
+                Production\nLow per-unit cost\nFixed silicon forever"] STAY --> UPDATE["Bitstream
+                Updates\n→ New Features\n→ Bug Fixes\n→ Protocol Changes"] style PROTO
+                fill:#0f2d1f,stroke:#34d399,color:#94a3b8 style NRE
+                fill:#2d0f0f,stroke:#f87171,color:#94a3b8 style STAY
+                fill:#0f1f2d,stroke:#22d3ee,color:#94a3b8
+              </div>
+
+              <!-- Cost Model Chart -->
+              <h2 class="section-heading">Cost Crossover: FPGA vs ASIC</h2>
+              <div id="chart-cost" style="width: 100%; height: 400px"></div>
+
+              <!-- Performance Comparison -->
+              <h2 class="section-heading">Performance and Efficiency: The ASIC Advantage</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                When it comes to raw performance, power efficiency, and silicon area, an ASIC
+                designed for a specific function wins decisively. The reason is
+                <em>programmability overhead</em>: every LUT in an FPGA requires 6–16 SRAM cells to
+                store its truth table, plus programmable routing multiplexers that add delay. An
+                ASIC uses the minimum number of transistors needed for the function — no
+                configuration overhead, no routing indirection.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 24px">
+                Quantitatively: equivalent logic in an ASIC consumes 3–10x less power, occupies
+                10–30x less silicon area, and achieves 3–5x higher clock frequency compared to the
+                same logic in an FPGA at the same process node. These numbers explain why
+                billion-unit consumer chips (SoCs, WiFi, DRAM controllers) are always ASICs — at
+                that scale, the efficiency difference justifies enormous NRE investment.
+              </p>
+
+              <!-- Comparison Table -->
+              <h2 class="section-heading">FPGA vs ASIC — Full Comparison</h2>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Parameter</th>
+                    <th>FPGA</th>
+                    <th>ASIC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>NRE Cost</strong></td>
+                    <td>~$0 (use existing silicon)</td>
+                    <td>$1M–$50M+ per design / node</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Unit Cost</strong></td>
+                    <td>$5–$500+ (never scales)</td>
+                    <td>$0.01–$20 at high volume</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Time to First Silicon</strong></td>
+                    <td>Days (load bitstream)</td>
+                    <td>18–36 months from RTL freeze</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Time to Working Product</strong></td>
+                    <td>Weeks–months</td>
+                    <td>24–48 months total</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Performance (clock)</strong></td>
+                    <td>100–700 MHz</td>
+                    <td>1–5 GHz at advanced nodes</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Power Efficiency</strong></td>
+                    <td>Baseline (1x)</td>
+                    <td>3–10x better (less overhead)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Silicon Area</strong></td>
+                    <td>10–30x larger than ASIC equivalent</td>
+                    <td>Minimum area for function</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Bug Fix Cost</strong></td>
+                    <td>$0 — fix RTL, reload bitstream</td>
+                    <td>$2M–$10M per respin (new masks)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Feature Updates</strong></td>
+                    <td>Any time, zero cost</td>
+                    <td>Impossible without new tape-out</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Design Risk</strong></td>
+                    <td>Low — iterate fast, fail cheap</td>
+                    <td>Extremely high — one shot per $10M</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Volume Break-even</strong></td>
+                    <td>Wins at &lt;50K–500K units</td>
+                    <td>Wins at &gt;50K–500K units</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Product Life</strong></td>
+                    <td>FPGA devices available 15–20 years</td>
+                    <td>Fixed forever after tape-out</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Design Flow</strong></td>
+                    <td>RTL → Synthesis → P&amp;R (vendor tool)</td>
+                    <td>RTL → Synthesis → Physical design → DRC/LVS → Tape-out</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Design Team Size</strong></td>
+                    <td>1–10 engineers</td>
+                    <td>20–500+ engineers (physical design, DFT, packaging)</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — The Industry Standard Strategy</strong>
+                The textbook approach for hardware products: (1) Prototype the design on FPGA. (2)
+                Validate functionality, find and fix bugs with bitstream updates. (3) Field-test
+                with real customers. (4) Only then — if volume justifies the NRE — commit to an ASIC
+                tape-out. Never tape out an ASIC without FPGA validation first. No exceptions.
+              </div>
+
+              <div class="callout callout-danger">
+                <strong>Critical Warning — ASIC Respin Risk</strong>
+                ASIC respins (manufacturing a corrected chip after a bug is found in silicon) cost
+                $2M–$10M each and add 6–12 months to schedule. A single functional bug, a timing
+                violation, or an incorrect assumption about power can cause a respin. Many startups
+                have been destroyed by this. FPGAs eliminate respin risk entirely — fix the RTL and
+                reload the bitstream the same day.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: At what production volume does an ASIC become economically better than an
+                FPGA?<br />
+                A: It depends on the ASIC NRE cost and FPGA unit cost. Typical crossover is
+                50,000–500,000 units. Example: ASIC NRE = $5M, ASIC unit = $2, FPGA unit = $100.
+                Break-even = $5M / ($100 - $2) = ~51,000 units. Above 51K units, ASIC is cheaper.
+                Below, FPGA wins. You must also factor in: time-to-market, design risk, feature
+                update needs, and product lifecycle.
+              </div>
+
+              <div class="callout callout-info">
+                <strong>Industry Reality</strong>
+                Many chips marketed as "ASICs" — including Apple's A-series processors — were
+                extensively validated on FPGA emulation farms before tape-out. Apple, AMD, and Intel
+                use rack-mounted FPGA arrays (running at 1/10th the target frequency) to run
+                millions of hours of software and hardware validation before committing a single
+                dollar to mask sets. FPGA validation is not a startup technique — it's how the best
+                chip companies in the world work.
+              </div>
+
+              <!-- Risk Table -->
+              <h2 class="section-heading">Risk Comparison Matrix</h2>
+              <div class="widget-container">
+                <h3>Project Risk Assessment</h3>
+                <div class="risk-item">
+                  <span class="risk-badge risk-high">HIGH RISK — ASIC</span>
+                  <div class="risk-content">
+                    <strong>Functional bug found after tape-out:</strong> $2–10M respin cost, 6–12
+                    month delay. Could kill the product launch and the company.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-low">LOW RISK — FPGA</span>
+                  <div class="risk-content">
+                    <strong>Functional bug found after deployment:</strong> Fix RTL, synthesize,
+                    load new bitstream. Cost: a few days of engineering time. Zero hardware change.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-high">HIGH RISK — ASIC</span>
+                  <div class="risk-content">
+                    <strong>Spec change after tape-out:</strong> The ASIC cannot be modified. Either
+                    ship the non-compliant part or respin ($2–10M). Common in 5G standards where
+                    specs changed during chip development.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-low">LOW RISK — FPGA</span>
+                  <div class="risk-content">
+                    <strong>Spec change after deployment:</strong> Implement updated specification,
+                    synthesize, push bitstream update to field. Nokia used this to upgrade deployed
+                    4G base stations to 5G.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-med">MED RISK — ASIC</span>
+                  <div class="risk-content">
+                    <strong>Market pivot or cancelled product:</strong> NRE investment is partially
+                    or fully lost. Masks are sunk costs. ASIC inventory becomes worthless.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-low">LOW RISK — FPGA</span>
+                  <div class="risk-content">
+                    <strong>Market pivot or cancelled product:</strong> FPGA inventory can be
+                    repurposed to another design (same device, different bitstream). Development
+                    investment is still lost, but no sunk silicon cost.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-high">HIGH RISK — ASIC</span>
+                  <div class="risk-content">
+                    <strong>Volume lower than forecast:</strong> NRE amortizes poorly. If you
+                    planned for 1M units and sell 50K, ASIC per-unit cost is 20x higher than
+                    expected — possibly higher than an FPGA.
+                  </div>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-badge risk-low">LOW RISK — FPGA</span>
+                  <div class="risk-content">
+                    <strong>Volume lower than forecast:</strong> FPGA per-unit cost is fixed. Lower
+                    volume has no unit cost impact — only lower total revenue.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Knowledge Check -->
+              <h2 class="section-heading">Knowledge Check</h2>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q1" data-answered="">
+                  1. What does NRE stand for in the context of ASIC development?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Net Recurring Expense
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    Non-Recurring Engineering cost
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    New Respin Evaluation
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Nano-Reduced Element cost
+                  </li>
+                </ul>
+                <div id="fb1" class="quiz-fb">
+                  Correct! NRE = Non-Recurring Engineering. These are one-time costs incurred once
+                  regardless of production volume: EDA tool licenses, design verification, physical
+                  layout, mask set fabrication ($5M–$20M for leading nodes), and test program
+                  development. NRE is amortized across all units sold.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q2" data-answered="">
+                  2. At high production volumes (millions of units), which has a lower per-unit
+                  cost?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    FPGA — no NRE means lower total cost
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    ASIC — low per-unit cost amortizes the NRE investment
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    They cost the same at high volume
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    FPGA — because ASIC performance advantages reduce units needed
+                  </li>
+                </ul>
+                <div id="fb2" class="quiz-fb">
+                  Correct! At high volume, ASIC wins decisively. A consumer chip ASIC can cost
+                  $0.50–$2 per unit at tens of millions of units. An equivalent FPGA costs $20–$200.
+                  Once NRE is amortized, the ASIC's low manufacturing cost per die makes it
+                  economically dominant.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q3" data-answered="">
+                  3. Which technology gets a product to market faster?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    FPGA — weeks to months versus 18–36 months for ASIC
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    ASIC — automated tools reduce development time
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    They are equivalent — both take 6–12 months
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    ASIC — fewer design iterations are needed
+                  </li>
+                </ul>
+                <div id="fb3" class="quiz-fb">
+                  Correct! FPGA time-to-market is dramatically faster. An FPGA design can be
+                  prototyped in days and reach production in weeks to months. An ASIC requires 18–36
+                  months minimum from RTL freeze to first production silicon — and that's assuming
+                  no respins. In fast-moving markets, FPGA's time advantage can be worth more than
+                  ASIC's cost advantage.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q4" data-answered="">
+                  4. What is the typical development time from RTL freeze to first production ASIC
+                  silicon?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    1–3 months
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    6–12 months
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    18–36 months
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    5–10 years
+                  </li>
+                </ul>
+                <div id="fb4" class="quiz-fb">
+                  Correct! ASIC development from RTL freeze to production silicon takes 18–36
+                  months. This includes: front-end design (6–12 months), physical design and signoff
+                  (6–12 months), mask set ordering and fab (3–5 months), silicon bring-up and
+                  qualification (3–6 months). Complex SoCs can take 4–5 years.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q5" data-answered="">
+                  5. An ASIC can be updated to fix a bug after it has been manufactured. True or
+                  False?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    True — via in-system programming similar to FPGA
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    False — once an ASIC is manufactured, the silicon is fixed forever
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    True — if the ASIC includes embedded Flash for configuration
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    Partially true — metal layer ECOs can patch some bugs
+                  </li>
+                </ul>
+                <div id="fb5" class="quiz-fb">
+                  Correct — False! An ASIC's logic is permanently defined by its mask set. A logic
+                  bug requires a full respin (new masks = $2M–$10M). Metal ECOs (Engineering Change
+                  Orders) can patch very minor issues by changing only the top metal layers (~$500K)
+                  but cannot fix fundamental logic errors. Some ASICs include embedded Flash or ROM
+                  for firmware, but the hardware logic itself is fixed.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q6" data-answered="">
+                  6. An ASIC NRE is $10M. ASIC unit cost is $3. FPGA unit cost is $200. At what unit
+                  volume does ASIC break even with FPGA?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    ~5,000 units
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    ~25,000 units
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    ~51,000 units
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    ~500,000 units
+                  </li>
+                </ul>
+                <div id="fb6" class="quiz-fb">
+                  Correct! Break-even = NRE / (FPGA unit cost − ASIC unit cost) = $10,000,000 /
+                  ($200 − $3) = $10,000,000 / $197 ≈ 50,761 units. Above ~51K units, ASIC total cost
+                  is lower. Below, FPGA total cost is lower. This formula is the core of any FPGA vs
+                  ASIC business case.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h2 class="section-heading">Practical Exercise — Cost Modeling</h2>
+              <div class="widget-container">
+                <h3>ASIC Break-Even Analysis</h3>
+                <p
+                  style="
+                    font-size: 0.875rem;
+                    color: var(--text-sub);
+                    line-height: 1.7;
+                    margin-bottom: 16px;
+                  "
+                >
+                  A hardware startup is building a machine learning inference accelerator. Work
+                  through this business case:
+                </p>
+                <div class="exercise-step">
+                  <div class="step-num">1</div>
+                  <div class="step-text">
+                    <strong>Given data:</strong> ASIC NRE = $8M (TSMC 7nm). ASIC unit cost at volume
+                    = $2. FPGA unit cost (Xilinx Kintex UltraScale+) = $150. Expected annual sales
+                    volume = 20,000 units/year for 3 years (60,000 total).<br />Calculate: At what
+                    total unit volume does ASIC break even? With 60,000 total units, what is the
+                    total cost for each approach?
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">2</div>
+                  <div class="step-text">
+                    <strong>Financial analysis:</strong> At 60,000 units — FPGA total: 60,000 × $150
+                    = $9M. ASIC total: $8M NRE + 60,000 × $2 = $8.12M. The ASIC appears cheaper —
+                    but is it? What if there is one respin ($5M)? Now ASIC total = $13.12M vs FPGA
+                    $9M. Which is better? Write your recommendation with reasoning.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">3</div>
+                  <div class="step-text">
+                    <strong>Non-financial factors:</strong> The startup's ML inference chip must
+                    support rapidly evolving model architectures. A competitor released a new
+                    transformer model that requires a different sparsity pattern the ASIC cannot
+                    handle. If the product were FPGA-based, a new bitstream handles it. What is the
+                    dollar value of this flexibility? How does this change your recommendation?
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">4</div>
+                  <div class="step-text">
+                    <strong>Write a 1-page technical memo</strong> recommending FPGA or ASIC for
+                    this startup, addressing: (a) break-even analysis, (b) respin risk, (c)
+                    time-to-market advantage, (d) competitive flexibility. What hybrid strategy
+                    might you recommend?
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary -->
+              <h2 class="section-heading">Lesson Summary</h2>
+              <div class="widget-container">
+                <h3>Key Takeaways</h3>
+                <ul class="objectives-list">
+                  <li>
+                    ASIC = custom silicon designed once, fixed forever, manufactured in volume —
+                    lowest per-unit cost, highest NRE ($1M–$50M+)
+                  </li>
+                  <li>
+                    FPGA NRE is ~$0; FPGA unit cost is $5–$500 and never scales with volume like an
+                    ASIC
+                  </li>
+                  <li>
+                    ASIC achieves 3–10x better power efficiency, 3–5x higher clock, 10–30x smaller
+                    area vs equivalent FPGA logic
+                  </li>
+                  <li>ASIC time-to-market: 18–36 months. FPGA time-to-market: weeks to months</li>
+                  <li>ASIC respin cost: $2M–$10M per fix. FPGA bug fix: $0 (reload bitstream)</li>
+                  <li>
+                    Break-even volume = NRE / (FPGA unit cost − ASIC unit cost); typically 50K–500K
+                    units
+                  </li>
+                  <li>
+                    Industry best practice: FPGA prototype first, validate thoroughly, then ASIC
+                    tape-out only when volume justifies the NRE
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a href="03-fpga-vs-mcu.html">← FPGA vs MCU</a>
+                <a href="05-fpga-vs-gpu.html">FPGA vs GPU →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-04';
+      const TOTAL = 25;
+
+      // Cost crossover chart
+      var volumes = [];
+      for (var v = 0; v <= 300000; v += 5000) volumes.push(v);
+      var fpgaCosts = volumes.map(function (v) {
+        return v * 150;
+      });
+      var asicCosts = volumes.map(function (v) {
+        return 8000000 + v * 2;
+      });
+
+      Plotly.newPlot(
+        'chart-cost',
+        [
+          {
+            x: volumes,
+            y: fpgaCosts,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'FPGA Total Cost ($150/unit)',
+            line: { color: '#22d3ee', width: 2.5 },
+          },
+          {
+            x: volumes,
+            y: asicCosts,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'ASIC Total Cost ($8M NRE + $2/unit)',
+            line: { color: '#f87171', width: 2.5 },
+          },
+          {
+            x: [54054],
+            y: [54054 * 150],
+            type: 'scatter',
+            mode: 'markers+text',
+            name: 'Break-even ~54K units',
+            marker: { color: '#34d399', size: 12, symbol: 'star' },
+            text: ['Break-even\n~54K units'],
+            textposition: 'top right',
+            textfont: { color: '#34d399', size: 11 },
+          },
+        ],
+        {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#94a3b8', family: 'Inter' },
+          title: {
+            text: 'FPGA vs ASIC Total Cost vs Production Volume\n(Example: ASIC NRE=$8M, ASIC unit=$2, FPGA unit=$150)',
+            font: { size: 12, color: '#e2e8f0' },
+          },
+          xaxis: { gridcolor: 'rgba(148,163,184,0.1)', title: 'Units Produced', tickformat: ',' },
+          yaxis: {
+            gridcolor: 'rgba(148,163,184,0.1)',
+            title: 'Total Cost (USD)',
+            tickformat: '$,',
+          },
+          legend: { x: 0.05, y: 0.95 },
+          margin: { t: 70, b: 60, l: 100, r: 20 },
+          shapes: [
+            {
+              type: 'line',
+              x0: 54054,
+              x1: 54054,
+              y0: 0,
+              y1: 54054 * 150,
+              line: { color: '#34d399', width: 1.5, dash: 'dash' },
+            },
+          ],
+        },
+        { responsive: true, displayModeBar: false }
+      );
+
+      async function loadProgress() {
+        try {
+          const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const token = session.accessToken || session.token || '';
+          if (!token) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          const data = await r.json();
+          let done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          const sbp = document.getElementById('sb-pct');
+          const sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress. Please check your connection.');
+        }
+      }
+
+      function markAsCompleteUI() {
+        const btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="#34d399" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="#34d399" stroke-width="2.5" fill="none"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          if (isCorrect) fb.classList.add('correct');
+          else fb.classList.add('incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

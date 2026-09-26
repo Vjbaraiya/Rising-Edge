@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR memory topologies: fly-by vs T-branch command/address/clock routing, why DDR3/DDR4/DDR5 mandate fly-by, point-to-point topology for LPDDR4/5, and devices-per-byte-lane fan-out limits."
+    />
+    <title>
+      Memory Topologies | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/04-topologies.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .topo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+      }
+      .topo-card h4 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+        text-align: center;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item active">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Memory Topologies</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 04</span>
+              <span class="badge badge-cyan">Animated</span>
+              <h1>Memory Topologies</h1>
+              <p class="subtitle">
+                How command, address, clock and data physically connect the FPGA to one or more DRAM
+                devices shapes almost every decision downstream — termination, length matching, and
+                even how many devices you can use at all.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Rank / device basics -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Ranks, and discrete vs. module</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Single-rank</strong> — one set of DRAM devices responds to each
+                    chip-select; simplest, lowest capacitive load.
+                  </li>
+                  <li>
+                    <strong>Dual-rank</strong> — two sets share the data/address bus but respond to
+                    separate chip-selects, doubling capacity at the cost of extra bus loading.
+                  </li>
+                  <li>
+                    <strong>Discrete (soldered-down) devices</strong> — the norm for FPGA designs:
+                    DRAM ICs placed directly on the board, giving full control over topology and
+                    length matching.
+                  </li>
+                  <li>
+                    <strong>DIMM/SODIMM sockets</strong> — modular and field-upgradeable, but the
+                    module's internal topology is fixed by the module vendor; less common in
+                    embedded FPGA designs.
+                  </li>
+                </ul>
+                <div class="info-box">
+                  This course assumes <strong>discrete devices</strong> throughout — the far more
+                  common choice for FPGA board designs, and the case where topology is entirely in
+                  your hands.
+                </div>
+              </div>
+
+              <!-- Three topologies -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Fly-by vs. T-branch vs. point-to-point</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Watch the pulse travel in each topology below — notice <em>when</em> it reaches
+                  each device.
+                </p>
+                <div class="topo-grid">
+                  <!-- Fly-by -->
+                  <div class="topo-card diagram-box">
+                    <h4>Fly-by (DDR3/4/5 command/address/clock)</h4>
+                    <svg
+                      viewBox="0 0 260 150"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                      role="img"
+                      aria-label="Fly-by topology: a single trace runs past three DRAM devices in sequence, each tapping off the main line, terminating at the far end"
+                    >
+                      <rect
+                        x="4"
+                        y="60"
+                        width="34"
+                        height="26"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="21"
+                        y="77"
+                        text-anchor="middle"
+                        font-size="8"
+                        font-weight="700"
+                        fill="var(--text-base)"
+                      >
+                        FPGA
+                      </text>
+                      <line
+                        x1="38"
+                        y1="73"
+                        x2="230"
+                        y2="73"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <circle r="4" fill="var(--warning,#fb923c)">
+                        <animate
+                          attributeName="cx"
+                          values="38;230"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="cy"
+                          values="73;73"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                      <g font-size="7" fill="var(--text-sub)">
+                        <rect
+                          x="72"
+                          y="30"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="87" y="43" text-anchor="middle">D0</text>
+                        <line x1="87" y1="50" x2="87" y2="73" stroke="var(--border)" />
+                        <rect
+                          x="132"
+                          y="30"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="147" y="43" text-anchor="middle">D1</text>
+                        <line x1="147" y1="50" x2="147" y2="73" stroke="var(--border)" />
+                        <rect
+                          x="192"
+                          y="30"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="207" y="43" text-anchor="middle">D2</text>
+                        <line x1="207" y1="50" x2="207" y2="73" stroke="var(--border)" />
+                      </g>
+                      <rect
+                        x="232"
+                        y="66"
+                        width="10"
+                        height="14"
+                        fill="none"
+                        stroke="var(--text-muted)"
+                        stroke-width="1.5"
+                      />
+                      <text
+                        x="130"
+                        y="110"
+                        text-anchor="middle"
+                        font-size="8"
+                        fill="var(--text-muted)"
+                      >
+                        D0 sees it first, D2 last — leveling compensates
+                      </text>
+                    </svg>
+                  </div>
+                  <!-- T-branch -->
+                  <div class="topo-card diagram-box">
+                    <h4>T-branch / star</h4>
+                    <svg
+                      viewBox="0 0 260 150"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                      role="img"
+                      aria-label="T-branch topology: a single trace from the FPGA splits at a junction into three equal branches, one to each DRAM device"
+                    >
+                      <rect
+                        x="4"
+                        y="60"
+                        width="34"
+                        height="26"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="21"
+                        y="77"
+                        text-anchor="middle"
+                        font-size="8"
+                        font-weight="700"
+                        fill="var(--text-base)"
+                      >
+                        FPGA
+                      </text>
+                      <line
+                        x1="38"
+                        y1="73"
+                        x2="120"
+                        y2="73"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="120"
+                        y1="73"
+                        x2="120"
+                        y2="20"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="120"
+                        y1="20"
+                        x2="220"
+                        y2="20"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="120"
+                        y1="73"
+                        x2="220"
+                        y2="73"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="120"
+                        y1="73"
+                        x2="120"
+                        y2="126"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="120"
+                        y1="126"
+                        x2="220"
+                        y2="126"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <circle cx="120" cy="73" r="3" fill="var(--danger,#f87171)" />
+                      <circle r="4" fill="var(--warning,#fb923c)">
+                        <animate
+                          attributeName="cx"
+                          values="38;120;220"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="cy"
+                          values="73;73;20"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                      <circle r="4" fill="var(--warning,#fb923c)" opacity="0.7">
+                        <animate
+                          attributeName="cx"
+                          values="38;120;220"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="cy"
+                          values="73;73;73"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                      <circle r="4" fill="var(--warning,#fb923c)" opacity="0.7">
+                        <animate
+                          attributeName="cx"
+                          values="38;120;220"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="cy"
+                          values="73;73;126"
+                          keyTimes="0;0.5;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                      <g font-size="7" fill="var(--text-sub)">
+                        <rect
+                          x="222"
+                          y="10"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="237" y="23" text-anchor="middle">D0</text>
+                        <rect
+                          x="222"
+                          y="63"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="237" y="76" text-anchor="middle">D1</text>
+                        <rect
+                          x="222"
+                          y="116"
+                          width="30"
+                          height="20"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="237" y="129" text-anchor="middle">D2</text>
+                      </g>
+                    </svg>
+                    <p
+                      style="
+                        font-size: 0.72rem;
+                        color: var(--text-muted);
+                        text-align: center;
+                        margin-top: 4px;
+                      "
+                    >
+                      All devices see it together — but the junction itself causes reflections at
+                      DDR4 speeds
+                    </p>
+                  </div>
+                  <!-- P2P -->
+                  <div class="topo-card diagram-box">
+                    <h4>Point-to-point (LPDDR4/5)</h4>
+                    <svg
+                      viewBox="0 0 260 150"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                      role="img"
+                      aria-label="Point-to-point topology: a single short trace directly connects the FPGA to one DRAM package, as typically used with LPDDR"
+                    >
+                      <rect
+                        x="20"
+                        y="60"
+                        width="60"
+                        height="30"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="50"
+                        y="79"
+                        text-anchor="middle"
+                        font-size="9"
+                        font-weight="700"
+                        fill="var(--text-base)"
+                      >
+                        FPGA
+                      </text>
+                      <line
+                        x1="80"
+                        y1="75"
+                        x2="180"
+                        y2="75"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <circle r="4" fill="var(--warning,#fb923c)">
+                        <animate
+                          attributeName="cx"
+                          values="80;180"
+                          dur="1s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="cy"
+                          values="75;75"
+                          dur="1s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                      <rect
+                        x="180"
+                        y="60"
+                        width="60"
+                        height="30"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text
+                        x="210"
+                        y="79"
+                        text-anchor="middle"
+                        font-size="9"
+                        font-weight="700"
+                        fill="var(--text-sub)"
+                      >
+                        LPDDR
+                      </text>
+                    </svg>
+                    <p
+                      style="
+                        font-size: 0.72rem;
+                        color: var(--text-muted);
+                        text-align: center;
+                        margin-top: 4px;
+                      "
+                    >
+                      Single short, direct link — simplest topology, minimal termination needed
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Why fly-by mandated -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why DDR3/DDR4/DDR5 mandate fly-by</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  A T-branch junction is electrically a discontinuity: at DDR4 speeds the trace
+                  impedance seen at the split doesn't match a single trace's impedance, causing
+                  reflections back toward the source. Fly-by avoids the junction entirely — CA/CK is
+                  a single continuous trace that simply passes each device in turn.
+                </p>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  The trade-off: devices further down the fly-by chain see every command later than
+                  devices near the source. Rather than fight this with layout alone, the
+                  controller's
+                  <strong>read/write leveling</strong> (Module 03) measures and compensates for it
+                  per device — which is precisely why DDR3 and later <em>require</em> fly-by
+                  topology and a leveling-capable controller.
+                </p>
+                <div class="warning-box">
+                  ⚠ T-branch/star CA/CK topology is a legacy pattern from slower memory generations.
+                  Using it on a DDR4 design (even "because it seemed simpler to route") is one of
+                  the most common root causes of a board that never trains/calibrates at power-up.
+                </div>
+              </div>
+
+              <!-- P2P for LPDDR -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why LPDDR4/5 gets to skip all this</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  LPDDR4/5 is designed for point-to-point connections — typically one FPGA/SoC to
+                  one (or a small number of) package-on-package or nearby discrete devices, with
+                  very short traces. There's no fly-by chain to level, and often no external
+                  termination network at all (Module 07) — a direct consequence of the topology
+                  being this simple.
+                </p>
+              </div>
+
+              <!-- Fan-out limits -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Devices per byte lane &amp; fan-out limits</h3></div>
+                <table class="iface-spec-table">
+                  <thead>
+                    <tr>
+                      <th>Consideration</th>
+                      <th>Guidance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Data (DQ/DQS) fan-out</td>
+                      <td>
+                        Point-to-point per byte lane — one device's DQ/DQS group does not fan out to
+                        another device.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>CA/CK fan-out</td>
+                      <td>
+                        Shared fly-by bus — every device on the same chip-select group taps the same
+                        CA/CK trace.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Loading vs. trace length</td>
+                      <td>
+                        More devices on the fly-by chain increases total trace length and capacitive
+                        loading — check the controller's max fly-by length spec.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Typical practical limit</td>
+                      <td>
+                        Most FPGA designs use 1–2 devices per byte lane's worth of CA/CK fan-out
+                        before signal margin becomes the limiting factor (Module 06).
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Discrete devices (not DIMM sockets) are the norm for FPGA designs — you control
+                    the topology.
+                  </li>
+                  <li>
+                    Fly-by avoids the impedance discontinuity of a T-branch junction; the resulting
+                    per-device delay is corrected by read/write leveling, not layout alone.
+                  </li>
+                  <li>
+                    Point-to-point topology (LPDDR4/5) sidesteps the whole problem — no chain,
+                    minimal termination.
+                  </li>
+                  <li>
+                    Data (DQ/DQS) is point-to-point per device; only CA/CK is shared across a fly-by
+                    chain.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="03-key-parameters.html"
+                  >← Key Electrical &amp; Timing Parameters</a
+                >
+                <a class="btn btn-primary" href="05-signal-groups.html"
+                  >Next: Signal Groups &amp; Roles →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

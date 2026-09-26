@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Multi-master I2C explained: clock synchronization, lossless bit-by-bit SDA arbitration with an animated waveform, firmware requirements, pitfalls, and safer alternatives."
+    />
+    <title>Multi-Master Buses | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/05-multi-master.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item active">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>Multi-Master Buses</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 05</span>
+              <h1>Multiple Masters, One Bus</h1>
+              <p class="subtitle">
+                I2C was designed from day one to let several controllers share the same two wires —
+                thanks to the wired-AND, they can even collide mid-byte and nobody's data gets
+                corrupted. Here's how that works, and why you should still think twice.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- when -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>When multi-master actually appears</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>An application MCU and a wireless SoC sharing one sensor set.</li>
+                  <li>
+                    A supervisor/BMC and a host CPU sharing management devices (very common in
+                    servers — via SMBus).
+                  </li>
+                  <li>Hot-swap backplanes where each card's controller talks on a shared bus.</li>
+                </ul>
+                <div class="warning-box">
+                  <strong>Honest advice:</strong> multi-master is fully specified but poorly
+                  supported — many MCU I2C peripherals and drivers handle arbitration loss badly. If
+                  you can restructure (one controller owns the bus, the other asks it), you'll ship
+                  sooner. If you can't, this module is what you need to get right.
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 660 150"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Two controllers and three targets all sharing the same SDA and SCL lines with one pull-up pair."
+                  >
+                    <rect
+                      x="6"
+                      y="20"
+                      width="90"
+                      height="52"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="51"
+                      y="43"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      MCU A
+                    </text>
+                    <text x="51" y="58" text-anchor="middle" fill="var(--text-muted)" font-size="8">
+                      controller
+                    </text>
+                    <rect
+                      x="6"
+                      y="86"
+                      width="90"
+                      height="52"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="51"
+                      y="109"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      MCU B
+                    </text>
+                    <text
+                      x="51"
+                      y="124"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8"
+                    >
+                      controller
+                    </text>
+                    <line
+                      x1="96"
+                      y1="46"
+                      x2="150"
+                      y2="66"
+                      stroke="var(--border)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="96"
+                      y1="112"
+                      x2="150"
+                      y2="92"
+                      stroke="var(--border)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="150"
+                      y1="66"
+                      x2="650"
+                      y2="66"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <line
+                      x1="150"
+                      y1="92"
+                      x2="650"
+                      y2="92"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="632"
+                      y="58"
+                      fill="var(--warning,#fb923c)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      SCL
+                    </text>
+                    <text
+                      x="632"
+                      y="110"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      SDA
+                    </text>
+                    <g font-size="9">
+                      <rect
+                        x="260"
+                        y="108"
+                        width="84"
+                        height="34"
+                        rx="6"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="302" y="129" text-anchor="middle" fill="var(--text-sub)">
+                        Sensor 0x48
+                      </text>
+                      <line
+                        x1="290"
+                        y1="92"
+                        x2="290"
+                        y2="108"
+                        stroke="var(--border)"
+                        stroke-width="1.5"
+                      />
+                      <rect
+                        x="390"
+                        y="108"
+                        width="84"
+                        height="34"
+                        rx="6"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="432" y="129" text-anchor="middle" fill="var(--text-sub)">
+                        EEPROM 0x50
+                      </text>
+                      <line
+                        x1="420"
+                        y1="92"
+                        x2="420"
+                        y2="108"
+                        stroke="var(--border)"
+                        stroke-width="1.5"
+                      />
+                      <rect
+                        x="520"
+                        y="108"
+                        width="84"
+                        height="34"
+                        rx="6"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="562" y="129" text-anchor="middle" fill="var(--text-sub)">
+                        PMIC 0x60
+                      </text>
+                      <line
+                        x1="550"
+                        y1="92"
+                        x2="550"
+                        y2="108"
+                        stroke="var(--border)"
+                        stroke-width="1.5"
+                      />
+                    </g>
+                    <text x="180" y="30" fill="var(--text-muted)" font-size="9">
+                      single pull-up pair, shared by everyone
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    Multi-master, multi-slave: both MCUs can initiate transfers to any target on the
+                    same wires.
+                  </p>
+                </div>
+              </div>
+
+              <!-- clock sync -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Clock synchronization</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  If both controllers clock simultaneously, SCL becomes the AND of their clocks: the
+                  line only rises when <em>every</em> controller has released it, and any controller
+                  can hold the low phase longer. Result: the bus automatically runs at the
+                  <strong>slowest participant's</strong> pace — no negotiation needed. This is the
+                  same mechanism as clock stretching, applied between controllers.
+                </p>
+              </div>
+
+              <!-- arbitration -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Arbitration: losing without corrupting</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Two controllers can START at the same instant. Each transmits its bits
+                  <em>while reading the bus back</em>. Writing a 1 means releasing the line — so if
+                  the other controller writes a 0, the line stays low, and the "1" controller reads
+                  back a 0: <strong>it just lost arbitration</strong>. It backs off immediately and
+                  mid-bit. The winner never notices; its transfer proceeds intact.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 660 250"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Animated arbitration waveform: Controller A and Controller B both transmit; at bit 3 controller A writes 1 while B writes 0; the bus stays low, A detects the mismatch and stops driving; B continues."
+                  >
+                    <g font-size="10" font-weight="700">
+                      <text x="4" y="42" fill="var(--success,#34d399)">A wants</text>
+                      <text x="4" y="106" fill="var(--warning,#fb923c)">B wants</text>
+                      <text x="4" y="176" fill="var(--cyan,#22d3ee)">SDA bus</text>
+                    </g>
+                    <!-- A: 1 0 1(loses) released... -->
+                    <path
+                      d="M70 28 H190 V56 H310 V28 H430"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2.5"
+                    />
+                    <path
+                      d="M430 28 H650"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2.5"
+                      stroke-dasharray="5 5"
+                      opacity="0.5"
+                    />
+                    <!-- B: 1 0 0 1 0 -->
+                    <path
+                      d="M70 92 H190 V120 H430 V92 H540 V120 H650"
+                      fill="none"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <!-- Bus = AND: 1 0 0 1 0 -->
+                    <path
+                      d="M70 162 H190 V190 H430 V162 H540 V190 H650"
+                      fill="none"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="3"
+                    />
+                    <!-- bit labels -->
+                    <g font-size="9" fill="var(--text-muted)" text-anchor="middle">
+                      <text x="130" y="215">bit 1 = 1</text>
+                      <text x="250" y="215">bit 2 = 0</text>
+                      <text x="370" y="215">bit 3: A=1, B=0</text>
+                      <text x="485" y="215">B continues…</text>
+                      <text x="595" y="215">…alone</text>
+                    </g>
+                    <!-- collision highlight -->
+                    <rect
+                      x="310"
+                      y="14"
+                      width="120"
+                      height="192"
+                      fill="rgba(248,113,113,0.10)"
+                      stroke="var(--danger,#f87171)"
+                      stroke-dasharray="4 4"
+                    >
+                      <animate
+                        attributeName="opacity"
+                        values="0;0;1;1;0"
+                        keyTimes="0;0.35;0.45;0.85;1"
+                        dur="5s"
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                    <text
+                      x="370"
+                      y="240"
+                      text-anchor="middle"
+                      font-size="10"
+                      font-weight="800"
+                      fill="var(--danger,#f87171)"
+                    >
+                      <animate
+                        attributeName="opacity"
+                        values="0;0;1;1;0"
+                        keyTimes="0;0.35;0.45;0.85;1"
+                        dur="5s"
+                        repeatCount="indefinite"
+                      />
+                      A reads 0 while sending 1 → A loses, releases bus
+                    </text>
+                    <!-- playhead -->
+                    <rect
+                      x="70"
+                      y="10"
+                      width="3"
+                      height="196"
+                      fill="var(--text-base)"
+                      opacity="0.5"
+                    >
+                      <animate
+                        attributeName="x"
+                        values="70;650;70"
+                        keyTimes="0;0.92;1"
+                        dur="5s"
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                  </svg>
+                  <p class="diagram-caption">
+                    Bit-by-bit arbitration. The bus (wired-AND) follows whoever writes 0. The moment
+                    A's sent bit ≠ read-back bit, A silently bows out; B's frame is untouched. Lower
+                    addresses therefore win arbitration.
+                  </p>
+                </div>
+              </div>
+
+              <!-- requirements -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Design requirements for real multi-master</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Silicon:</strong> every controller's I2C peripheral must support
+                    arbitration-loss detection and clock sync (check the reference manual — not all
+                    do, and bit-banged controllers never do).
+                  </li>
+                  <li>
+                    <strong>Firmware:</strong> on arbitration loss, the driver must retry later —
+                    and cope with being addressed <em>as a target</em> mid-retry.
+                  </li>
+                  <li>
+                    <strong>Repeated START discipline:</strong> multi-message transactions must use
+                    Sr, or another master can sneak in between your write and read.
+                  </li>
+                  <li>
+                    <strong>All controllers open-drain:</strong> one push-pull SCL driver destroys
+                    the whole scheme (and possibly a port pin).
+                  </li>
+                  <li>
+                    <strong>Timeouts everywhere:</strong> a hung target blocks all masters, so every
+                    controller needs bus-recovery logic (Module 07).
+                  </li>
+                </ul>
+              </div>
+
+              <!-- alternatives -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Safer alternatives</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Alternative</th>
+                        <th>How it works</th>
+                        <th>Best when</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Single owner + mailbox</td>
+                        <td>MCU A owns the bus; MCU B requests data over UART/SPI/shared memory</td>
+                        <td>You control both firmwares</td>
+                      </tr>
+                      <tr>
+                        <td>Bus mux + request GPIO</td>
+                        <td>An analog switch hands the whole bus to one controller at a time</td>
+                        <td>Coarse-grained sharing (e.g. boot-time programming)</td>
+                      </tr>
+                      <tr>
+                        <td>Dual-port target devices</td>
+                        <td>Some PMICs/EEPROMs expose two independent I2C ports</td>
+                        <td>Only 1–2 shared devices</td>
+                      </tr>
+                      <tr>
+                        <td>Accept multi-master (SMBus)</td>
+                        <td>Follow SMBus rules — timeouts make failure modes bounded</td>
+                        <td>Server/BMC-style management buses</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Wired-AND makes collisions harmless: arbitration is lossless and the winner's
+                    frame survives untouched.
+                  </li>
+                  <li>
+                    A controller loses the moment it reads 0 while sending 1 — then it must retry
+                    <em>and</em> be addressable as a target.
+                  </li>
+                  <li>
+                    Verify peripheral + driver support before committing; it's the weakest link.
+                  </li>
+                  <li>
+                    If the architecture allows, prefer a single bus owner — multi-master correctness
+                    is mostly a firmware tax.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="04-multi-slave.html">← One Master, Many Slaves</a>
+                <a class="btn btn-primary" href="06-layout-guidelines.html"
+                  >Next: PCB Layout &amp; SI →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

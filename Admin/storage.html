@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Storage inventory for browser localStorage and PostgreSQL tables - Rising Edge Admin."
+    />
+    <title>Storage | Rising Edge Admin</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Admin/storage.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../assets/css/admin.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .storage-tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: var(--sp-5);
+        flex-wrap: wrap;
+      }
+      .storage-tab {
+        padding: 10px var(--sp-4);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        border: none;
+        background: none;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        white-space: nowrap;
+      }
+      .storage-tab.active {
+        color: #f87171;
+        border-bottom-color: #ef4444;
+      }
+      .storage-pane {
+        display: none;
+      }
+      .storage-pane.active {
+        display: block;
+      }
+      .storage-toolbar {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-3);
+        flex-wrap: wrap;
+        margin-bottom: var(--sp-4);
+      }
+      .storage-count {
+        margin-left: auto;
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+      }
+      .storage-kind {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 999px;
+      }
+      .storage-kind.browser {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary-300);
+      }
+      .storage-kind.db {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+      }
+      .storage-kind.cache {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--warning);
+      }
+      .storage-kind.sensitive {
+        background: rgba(239, 68, 68, 0.12);
+        color: #f87171;
+      }
+      .storage-desc {
+        max-width: 520px;
+        color: var(--text-muted);
+        line-height: 1.55;
+      }
+      .storage-mono {
+        font-family: var(--font-mono, Consolas, monospace);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .storage-value {
+        max-width: 320px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .storage-empty {
+        padding: var(--sp-8);
+        text-align: center;
+        color: var(--text-faint);
+        font-size: 0.875rem;
+      }
+      .storage-panel-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--sp-5);
+        margin-bottom: var(--sp-6);
+      }
+      @media (min-width: 900px) {
+        .storage-panel-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .schema-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .schema-chip {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 7px;
+      }
+      .action-btn {
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .action-btn:hover {
+        background: var(--bg-muted);
+        color: var(--text-base);
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.62);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: var(--sp-4);
+      }
+      .modal-box {
+        width: min(760px, 100%);
+        max-height: 82vh;
+        overflow: auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+      }
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--sp-4);
+        padding: var(--sp-5) var(--sp-6);
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-body {
+        padding: var(--sp-5) var(--sp-6);
+      }
+      .json-block {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--sp-4);
+        font-family: Consolas, monospace;
+        font-size: 0.75rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="admin-wrap">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="admin-badge">
+            <svg
+              width="10"
+              height="10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Admin
+          </div>
+          <div class="sidebar-brand-name">Rising Edge</div>
+          <div class="sidebar-brand-sub">Platform Control Panel</div>
+        </div>
+        <nav class="admin-nav">
+          <div class="admin-section-label">Overview</div>
+          <a href="index.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            Dashboard</a
+          >
+          <a href="users.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+            </svg>
+            Users</a
+          >
+          <a href="analytics.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            Analytics</a
+          >
+          <a href="database.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <ellipse cx="12" cy="5" rx="9" ry="3" />
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+            </svg>
+            Database</a
+          >
+          <a href="storage.html" class="admin-nav-item active"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+              />
+              <polyline points="7.5 4.21 12 6.81 16.5 4.21" />
+              <polyline points="7.5 19.79 7.5 14.6 3 12" />
+              <polyline points="21 12 16.5 14.6 16.5 19.79" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            Storage</a
+          >
+          <div class="admin-section-label">Content</div>
+          <a href="training-admin.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            Courses</a
+          >
+          <a href="resources-admin.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            </svg>
+            Resources</a
+          >
+          <a href="certificates.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="8" r="6" />
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+            </svg>
+            Certificates</a
+          >
+          <div class="admin-section-label">Communication</div>
+          <a href="broadcast.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M3 11l18-8-8 18-2-8-8-2z" />
+            </svg>
+            Broadcast
+          </a>
+          <div class="admin-section-label">Monetization</div>
+          <a href="coupons.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+            </svg>
+            Coupons</a
+          >
+          <div class="admin-section-label">System</div>
+          <a href="audit.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Audit Log</a
+          >
+          <a href="settings.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Settings</a
+          >
+          <div id="superadmin-nav-section" style="display: none">
+            <div class="admin-section-label" style="color: rgba(239, 68, 68, 0.7)">Super Admin</div>
+            <a href="site-health/index.html" class="admin-nav-item"
+              ><svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Site Health</a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="admin-avatar" id="admin-av">AD</div>
+          <div>
+            <div class="sidebar-foot-name" id="admin-foot-name">Admin</div>
+            <div class="sidebar-foot-role" id="admin-foot-role">ADMIN</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Storage</h1>
+            <p class="admin-page-sub">
+              Browser localStorage keys and PostgreSQL tables used by the platform.
+            </p>
+          </div>
+          <div class="admin-page-actions">
+            <button class="btn btn-outline btn-sm" onclick="refreshStorage()">Refresh</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportActive()">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="admin-stat-card" style="--glow: rgba(37, 99, 235, 0.1)">
+            <div class="stat-icon-row">
+              <div class="stat-icon-box" style="background: rgba(37, 99, 235, 0.1)">
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="var(--primary-400)"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                >
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M7 8h10M7 12h6" />
+                </svg>
+              </div>
+            </div>
+            <div class="admin-stat-val" id="stat-local">0</div>
+            <div class="admin-stat-lbl">Local Keys Found</div>
+          </div>
+          <div class="admin-stat-card" style="--glow: rgba(16, 185, 129, 0.1)">
+            <div class="stat-icon-row">
+              <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.1)">
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="var(--success)"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                >
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </div>
+            </div>
+            <div class="admin-stat-val" id="stat-db">0</div>
+            <div class="admin-stat-lbl">Database Tables</div>
+          </div>
+          <div class="admin-stat-card" style="--glow: rgba(245, 158, 11, 0.1)">
+            <div class="stat-icon-row">
+              <div class="stat-icon-box" style="background: rgba(245, 158, 11, 0.1)">
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="var(--warning)"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                  <path
+                    d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div class="admin-stat-val" id="stat-sensitive">0</div>
+            <div class="admin-stat-lbl">Sensitive Keys</div>
+          </div>
+          <div class="admin-stat-card" style="--glow: rgba(124, 58, 237, 0.1)">
+            <div class="stat-icon-row">
+              <div class="stat-icon-box" style="background: rgba(124, 58, 237, 0.1)">
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="#a78bfa"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h10" />
+                </svg>
+              </div>
+            </div>
+            <div class="admin-stat-val" id="stat-known">0</div>
+            <div class="admin-stat-lbl">Known Key Types</div>
+          </div>
+        </div>
+
+        <div class="storage-panel-grid">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">What This Page Shows</span></div>
+            <div class="panel-body storage-desc">
+              The localStorage tab scans this browser right now, then explains each known key used
+              by the project. The database tab lists the PostgreSQL tables created by the backend
+              and the main fields stored in each table.
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Storage Rule</span></div>
+            <div class="panel-body storage-desc">
+              Browser storage is only cache, preferences, and demo/offline state. Account, payment,
+              subscription, and security records should be treated as database-owned data.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="padding: var(--sp-5)">
+          <div class="storage-tabs">
+            <button class="storage-tab active" onclick="switchTab('local', this)">
+              localStorage
+            </button>
+            <button class="storage-tab" onclick="switchTab('database', this)">
+              Database Tables
+            </button>
+          </div>
+
+          <div class="storage-pane active" id="pane-local">
+            <div class="storage-toolbar">
+              <div class="search-wrap" style="max-width: 320px">
+                <svg
+                  width="13"
+                  height="13"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  class="input"
+                  type="search"
+                  id="local-search"
+                  placeholder="Search localStorage keys..."
+                  oninput="renderLocal()"
+                />
+              </div>
+              <select
+                class="select"
+                style="max-width: 180px"
+                id="local-filter"
+                onchange="renderLocal()"
+              >
+                <option value="">All types</option>
+                <option value="Preference">Preference</option>
+                <option value="Session">Session</option>
+                <option value="Profile">Profile</option>
+                <option value="Catalog">Catalog</option>
+                <option value="Admin Cache">Admin Cache</option>
+                <option value="Certificate">Certificate</option>
+                <option value="Progress">Progress</option>
+              </select>
+              <span class="storage-count" id="local-count"></span>
+            </div>
+            <div style="overflow-x: auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Type</th>
+                    <th>Stored Data</th>
+                    <th>Current Value</th>
+                    <th>Risk</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-local"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="storage-pane" id="pane-database">
+            <div class="storage-toolbar">
+              <div class="search-wrap" style="max-width: 320px">
+                <svg
+                  width="13"
+                  height="13"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  class="input"
+                  type="search"
+                  id="db-search"
+                  placeholder="Search database tables..."
+                  oninput="renderDatabase()"
+                />
+              </div>
+              <select
+                class="select"
+                style="max-width: 180px"
+                id="db-filter"
+                onchange="renderDatabase()"
+              >
+                <option value="">All domains</option>
+                <option value="Identity">Identity</option>
+                <option value="Learning">Learning</option>
+                <option value="Commerce">Commerce</option>
+                <option value="Catalog">Catalog</option>
+                <option value="Security">Security</option>
+              </select>
+              <span class="storage-count" id="db-count"></span>
+            </div>
+            <div style="overflow-x: auto">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Table</th>
+                    <th>Domain</th>
+                    <th>Purpose</th>
+                    <th>Main Columns</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-db"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div
+      class="modal-overlay"
+      id="storage-modal"
+      onclick="if (event.target === this) closeModal();"
+    >
+      <div class="modal-box">
+        <div class="modal-head">
+          <div>
+            <div class="panel-title" id="modal-title">Details</div>
+            <div class="storage-mono" id="modal-subtitle"></div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
+        </div>
+        <div class="modal-body"><div class="json-block" id="modal-content"></div></div>
+      </div>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      var ACTIVE_TAB = 'local';
+
+      var KNOWN_LOCAL = [
+        {
+          key: 're-theme',
+          type: 'Preference',
+          risk: 'Low',
+          data: 'Selected site theme: dark, light, or night.',
+        },
+        {
+          key: 're_vhdl_theme',
+          type: 'Preference',
+          risk: 'Low',
+          data: 'Legacy Signal Integrity page theme value.',
+        },
+        {
+          key: 're-logged-in',
+          type: 'Session',
+          risk: 'Medium',
+          data: 'Browser-only login flag used by UI guards.',
+        },
+        {
+          key: 're_user',
+          type: 'Session',
+          risk: 'Sensitive',
+          data: 'Cached user details such as name, email, role, plan, mobile, location, and current role.',
+        },
+        {
+          key: 're_pending_email',
+          type: 'Session',
+          risk: 'Medium',
+          data: 'Email address waiting for verification after registration.',
+        },
+        {
+          key: 're_session',
+          type: 'Session',
+          risk: 'Sensitive',
+          data: 'Session object used by admin/profile pages. May contain accessToken or token.',
+        },
+        {
+          key: 're_access_token',
+          type: 'Session',
+          risk: 'Sensitive',
+          data: 'JWT/access token used by subscription and admin API calls.',
+        },
+        {
+          key: 'accessToken',
+          type: 'Session',
+          risk: 'Sensitive',
+          data: 'Alternate access token key used by the admin database page.',
+        },
+        {
+          key: 're_profile',
+          type: 'Profile',
+          risk: 'Medium',
+          data: 'Cached profile extras such as organization, job title, and LinkedIn URL.',
+        },
+        {
+          key: 're_courses',
+          type: 'Catalog',
+          risk: 'Low',
+          data: 'Custom or admin-edited course list merged with default courses.',
+        },
+        {
+          key: 're_tools',
+          type: 'Catalog',
+          risk: 'Low',
+          data: 'Custom or admin-edited engineering tool list.',
+        },
+        {
+          key: 're_resources',
+          type: 'Catalog',
+          risk: 'Low',
+          data: 'Custom or admin-edited resource library list.',
+        },
+        {
+          key: 're_coupons',
+          type: 'Admin Cache',
+          risk: 'Medium',
+          data: 'Coupon cache/fallback used by admin coupon and pricing screens.',
+        },
+        {
+          key: 're_pricing',
+          type: 'Admin Cache',
+          risk: 'Medium',
+          data: 'Cached pricing values used when plan API data is unavailable.',
+        },
+        {
+          key: 'admin_users',
+          type: 'Admin Cache',
+          risk: 'Low',
+          data: 'Local override for total users displayed on admin dashboard widgets.',
+        },
+        {
+          key: 'admin_enrollments',
+          type: 'Admin Cache',
+          risk: 'Low',
+          data: 'Local override for enrollment count displayed on admin dashboard widgets.',
+        },
+        {
+          key: 're_certificates',
+          type: 'Certificate',
+          risk: 'Medium',
+          data: 'Offline/demo certificate records for the certificate module.',
+        },
+        {
+          key: 're_last_login',
+          type: 'Progress',
+          risk: 'Low',
+          data: 'Last login date used by dashboard streak logic.',
+        },
+        {
+          key: 're_streak',
+          type: 'Progress',
+          risk: 'Low',
+          data: 'Current learning/login streak count.',
+        },
+        {
+          key: 'si_module_*_completed',
+          type: 'Progress',
+          risk: 'Low',
+          data: 'Signal Integrity module completion flags, often stored as 1.',
+        },
+        {
+          key: '*_completed',
+          type: 'Progress',
+          risk: 'Low',
+          data: 'Alternate module completion flags used by learning and certificate pages, often stored as true.',
+        },
+      ];
+
+      var DB_TABLES = [
+        {
+          name: 'users',
+          domain: 'Identity',
+          source: 'server.js',
+          purpose:
+            'Stores user account, profile, role, status, verification, password reset, and login security fields.',
+          columns: [
+            'id',
+            'full_name',
+            'email',
+            'password_hash',
+            'role',
+            'status',
+            'email_verified',
+            'email_verify_token',
+            'password_reset_token',
+            'avatar_url',
+            'mobile',
+            'location',
+            'current_role',
+            'failed_login_attempts',
+            'locked_until',
+            'last_login_at',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'refresh_tokens',
+          domain: 'Security',
+          source: 'server.js',
+          purpose: 'Stores hashed refresh-token sessions for authenticated users.',
+          columns: [
+            'id',
+            'user_id',
+            'token_hash',
+            'ip_address',
+            'device_info',
+            'expires_at',
+            'created_at',
+          ],
+        },
+        {
+          name: 'login_history',
+          domain: 'Security',
+          source: 'server.js',
+          purpose: 'Stores login attempts and audit information for authentication activity.',
+          columns: ['id', 'user_id', 'ip_address', 'user_agent', 'success', 'created_at'],
+        },
+        {
+          name: 'subscription_plans',
+          domain: 'Commerce',
+          source: 'server.js',
+          purpose: 'Defines Basic, Advanced, and Premium plan pricing and features.',
+          columns: [
+            'id',
+            'name',
+            'price_monthly',
+            'price_yearly',
+            'description',
+            'features',
+            'max_courses',
+            'badge_color',
+            'is_popular',
+            'created_at',
+          ],
+        },
+        {
+          name: 'user_subscriptions',
+          domain: 'Commerce',
+          source: 'server.js',
+          purpose: 'Stores each user course subscription plan and status.',
+          columns: [
+            'id',
+            'user_id',
+            'plan_id',
+            'status',
+            'start_date',
+            'end_date',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'courses',
+          domain: 'Learning',
+          source: 'server.js',
+          purpose: 'Stores course catalog records and plan requirements.',
+          columns: [
+            'id',
+            'title',
+            'category',
+            'description',
+            'status',
+            'modules_count',
+            'href',
+            'gradient',
+            'badge_color',
+            'required_plan',
+            'price_inr',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'plan_course_access',
+          domain: 'Learning',
+          source: 'server.js',
+          purpose: 'Maps subscription plans to courses they can access.',
+          columns: ['plan_id', 'course_id'],
+        },
+        {
+          name: 'course_enrollments',
+          domain: 'Learning',
+          source: 'server.js',
+          purpose: 'Stores course enrollment records and progress percentages.',
+          columns: [
+            'id',
+            'user_id',
+            'course_id',
+            'status',
+            'progress',
+            'enrolled_at',
+            'completed_at',
+          ],
+        },
+        {
+          name: 'tool_subscriptions',
+          domain: 'Commerce',
+          source: 'server.js',
+          purpose:
+            'Stores paid tool-plan subscriptions, credits, renewal status, and order references.',
+          columns: [
+            'id',
+            'user_id',
+            'plan_id',
+            'billing_cycle',
+            'status',
+            'start_date',
+            'expiry_date',
+            'auto_renew',
+            'remaining_credits',
+            'credits_used',
+            'transaction_id',
+            'payment_id',
+            'cashfree_order_id',
+            'amount',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'tool_payments',
+          domain: 'Commerce',
+          source: 'server.js',
+          purpose:
+            'Stores Cashfree tool payment orders, invoice data, GST amount, and payment status.',
+          columns: [
+            'id',
+            'order_id',
+            'payment_id',
+            'user_id',
+            'plan_id',
+            'billing_cycle',
+            'amount',
+            'gst_amount',
+            'status',
+            'gateway',
+            'invoice_number',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'coupons',
+          domain: 'Commerce',
+          source: 'server.js',
+          purpose: 'Stores discount coupon definitions and usage counters.',
+          columns: [
+            'id',
+            'code',
+            'type',
+            'val',
+            'used',
+            'limit_count',
+            'expires',
+            'active',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'tools',
+          domain: 'Catalog',
+          source: 'server.js',
+          purpose: 'Stores engineering tool catalog entries.',
+          columns: [
+            'id',
+            'title',
+            'category',
+            'plan',
+            'description',
+            'url',
+            'status',
+            'sort_order',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          name: 'resources',
+          domain: 'Catalog',
+          source: 'server.js',
+          purpose: 'Stores downloadable or viewable resource library entries.',
+          columns: [
+            'id',
+            'title',
+            'type',
+            'plan',
+            'description',
+            'url',
+            'downloads',
+            'sort_order',
+            'created_at',
+            'updated_at',
+          ],
+        },
+      ];
+
+      function h(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+      function riskClass(risk) {
+        return risk === 'Sensitive' ? 'sensitive' : risk === 'Medium' ? 'cache' : 'browser';
+      }
+      function getKnown(key) {
+        for (var i = 0; i < KNOWN_LOCAL.length; i++) {
+          var k = KNOWN_LOCAL[i].key;
+          if (k === key) return KNOWN_LOCAL[i];
+          if (k === 'si_module_*_completed' && /^si_module_\d+_completed$/.test(key))
+            return KNOWN_LOCAL[i];
+          if (k === '*_completed' && /_completed$/.test(key)) return KNOWN_LOCAL[i];
+        }
+        return {
+          key: key,
+          type: 'Other',
+          risk: 'Unknown',
+          data: 'Key exists in this browser but is not part of the documented storage inventory.',
+        };
+      }
+      function getLocalRows() {
+        var keys = {};
+        KNOWN_LOCAL.forEach(function (item) {
+          if (item.key.indexOf('*') === -1) keys[item.key] = true;
+        });
+        for (var i = 0; i < localStorage.length; i++) keys[localStorage.key(i)] = true;
+        return Object.keys(keys)
+          .sort()
+          .map(function (key) {
+            var meta = getKnown(key);
+            var raw = localStorage.getItem(key);
+            return {
+              key: key,
+              type: meta.type,
+              risk: meta.risk,
+              data: meta.data,
+              value: raw,
+              exists: raw !== null,
+            };
+          });
+      }
+      function preview(value) {
+        if (value === null) return 'Not stored in this browser';
+        try {
+          return JSON.stringify(JSON.parse(value));
+        } catch (e) {
+          return value;
+        }
+      }
+      function shortValue(value) {
+        var text = preview(value);
+        return text.length > 80 ? text.slice(0, 80) + '...' : text;
+      }
+      function switchTab(name, btn) {
+        ACTIVE_TAB = name;
+        document.querySelectorAll('.storage-tab').forEach(function (el) {
+          el.classList.remove('active');
+        });
+        document.querySelectorAll('.storage-pane').forEach(function (el) {
+          el.classList.remove('active');
+        });
+        btn.classList.add('active');
+        document.getElementById('pane-' + name).classList.add('active');
+      }
+      function renderLocal() {
+        var q = (document.getElementById('local-search').value || '').toLowerCase();
+        var f = document.getElementById('local-filter').value;
+        var rows = getLocalRows().filter(function (row) {
+          var text = [row.key, row.type, row.risk, row.data, preview(row.value)]
+            .join(' ')
+            .toLowerCase();
+          return (!q || text.indexOf(q) !== -1) && (!f || row.type === f);
+        });
+        document.getElementById('local-count').textContent = rows.length + ' rows';
+        document.getElementById('stat-local').textContent = getLocalRows().filter(function (r) {
+          return r.exists;
+        }).length;
+        document.getElementById('stat-known').textContent = KNOWN_LOCAL.length;
+        document.getElementById('stat-sensitive').textContent = getLocalRows().filter(function (r) {
+          return r.exists && r.risk === 'Sensitive';
+        }).length;
+        document.getElementById('tbody-local').innerHTML = rows.length
+          ? rows
+              .map(function (row) {
+                return (
+                  '<tr>' +
+                  '<td><span class="storage-mono">' +
+                  h(row.key) +
+                  '</span>' +
+                  (row.exists
+                    ? ''
+                    : '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">not currently stored</div>') +
+                  '</td>' +
+                  '<td><span class="storage-kind browser">' +
+                  h(row.type) +
+                  '</span></td>' +
+                  '<td class="storage-desc">' +
+                  h(row.data) +
+                  '</td>' +
+                  '<td><div class="storage-mono storage-value" title="' +
+                  h(preview(row.value)) +
+                  '">' +
+                  h(shortValue(row.value)) +
+                  '</div></td>' +
+                  '<td><span class="storage-kind ' +
+                  riskClass(row.risk) +
+                  '">' +
+                  h(row.risk) +
+                  '</span></td>' +
+                  '<td><button class="action-btn js-view-local" type="button" data-storage-key="' +
+                  encodeURIComponent(row.key) +
+                  '">View</button></td>' +
+                  '</tr>'
+                );
+              })
+              .join('')
+          : '<tr><td colspan="6" class="storage-empty">No localStorage keys match this filter.</td></tr>';
+      }
+      function renderDatabase() {
+        var q = (document.getElementById('db-search').value || '').toLowerCase();
+        var f = document.getElementById('db-filter').value;
+        var rows = DB_TABLES.filter(function (row) {
+          var text = [row.name, row.domain, row.purpose, row.columns.join(' ')]
+            .join(' ')
+            .toLowerCase();
+          return (!q || text.indexOf(q) !== -1) && (!f || row.domain === f);
+        });
+        document.getElementById('db-count').textContent = rows.length + ' rows';
+        document.getElementById('stat-db').textContent = DB_TABLES.length;
+        document.getElementById('tbody-db').innerHTML = rows.length
+          ? rows
+              .map(function (row) {
+                return (
+                  '<tr>' +
+                  '<td><span class="storage-mono">' +
+                  h(row.name) +
+                  '</span></td>' +
+                  '<td><span class="storage-kind db">' +
+                  h(row.domain) +
+                  '</span></td>' +
+                  '<td class="storage-desc">' +
+                  h(row.purpose) +
+                  '</td>' +
+                  '<td><div class="schema-list">' +
+                  row.columns
+                    .map(function (c) {
+                      return '<span class="schema-chip">' + h(c) + '</span>';
+                    })
+                    .join('') +
+                  '</div></td>' +
+                  '<td><span class="storage-mono">' +
+                  h(row.source) +
+                  '</span></td>' +
+                  '</tr>'
+                );
+              })
+              .join('')
+          : '<tr><td colspan="5" class="storage-empty">No database tables match this filter.</td></tr>';
+      }
+      function showLocal(key) {
+        var row =
+          getLocalRows().filter(function (r) {
+            return r.key === key;
+          })[0] || getKnown(key);
+        var value = localStorage.getItem(key);
+        var formatted = value;
+        try {
+          formatted = JSON.stringify(JSON.parse(value), null, 2);
+        } catch (e) {}
+        if (value === null) formatted = 'This known key is not currently stored in this browser.';
+        document.getElementById('modal-title').textContent = key;
+        document.getElementById('modal-subtitle').textContent = row.type + ' | ' + row.risk;
+        document.getElementById('modal-content').textContent = formatted;
+        document.getElementById('storage-modal').style.display = 'flex';
+      }
+      function closeModal() {
+        document.getElementById('storage-modal').style.display = 'none';
+      }
+      function refreshStorage() {
+        renderLocal();
+        renderDatabase();
+      }
+      document.getElementById('tbody-local').addEventListener('click', function (event) {
+        var btn = event.target.closest('.js-view-local');
+        if (!btn) return;
+        showLocal(decodeURIComponent(btn.getAttribute('data-storage-key') || ''));
+      });
+      function exportActive() {
+        var rows = ACTIVE_TAB === 'local' ? getLocalRows() : DB_TABLES;
+        var keys =
+          ACTIVE_TAB === 'local'
+            ? ['key', 'type', 'risk', 'data', 'value', 'exists']
+            : ['name', 'domain', 'purpose', 'columns', 'source'];
+        var csv = [keys.join(',')]
+          .concat(
+            rows.map(function (row) {
+              return keys
+                .map(function (k) {
+                  var val = k === 'columns' ? row[k].join('|') : row[k];
+                  return '"' + String(val == null ? '' : val).replace(/"/g, '""') + '"';
+                })
+                .join(',');
+            })
+          )
+          .join('\n');
+        var a = document.createElement('a');
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        a.download = 'storage_' + ACTIVE_TAB + '_' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.click();
+      }
+      (function initAdmin() {
+        var u = {};
+        try {
+          u = JSON.parse(localStorage.getItem('re_user') || '{}');
+        } catch (e) {}
+        var n = u.fullName || u.email || 'Administrator';
+        document.getElementById('admin-av').textContent =
+          n
+            .split(' ')
+            .map(function (w) {
+              return w[0] || '';
+            })
+            .join('')
+            .toUpperCase()
+            .slice(0, 2) || 'AD';
+        document.getElementById('admin-foot-name').textContent = n;
+        document.getElementById('admin-foot-role').textContent = u.role || 'ADMIN';
+        if (u.role === 'SUPER_ADMIN') {
+          var sec = document.getElementById('superadmin-nav-section');
+          if (sec) sec.style.display = 'block';
+        }
+        refreshStorage();
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

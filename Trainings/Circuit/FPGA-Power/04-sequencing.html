@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="FPGA power sequencing: why order matters, typical up and down sequences, ramp-rate and monotonicity rules, and three implementation patterns with an animated PGOOD-chain timing diagram."
+    />
+    <title>Power Sequencing | FPGA Power Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/04-sequencing.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item active">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Power Sequencing</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 04</span>
+              <span class="badge badge-cyan">Animated</span>
+              <h1>Power Sequencing</h1>
+              <p class="subtitle">
+                Rails up in the wrong order and the FPGA may draw excess current, fail to configure,
+                or slowly damage itself through parasitic paths. The fix costs a PGOOD wire — if you
+                design it in.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- why -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why order matters</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Parasitic/latch-up paths:</strong> I/O rails up before the core can
+                    forward-bias internal structures — excess current, long-term damage.
+                  </li>
+                  <li>
+                    <strong>Configuration reliability:</strong> the config engine needs VCCINT +
+                    VCCAUX stable before it starts; violate the ramp window and the FPGA may not
+                    load its bitstream.
+                  </li>
+                  <li>
+                    <strong>Bus contention:</strong> unconfigured I/O drifting while a live 3.3 V
+                    bank drives into it stresses both chips.
+                  </li>
+                  <li>
+                    <strong>Datasheet law:</strong> every family specifies a recommended order,
+                    ramp-rate window (e.g. 0.2–50 ms), and <em>monotonic</em> ramp requirement.
+                    These are requirements, not suggestions.
+                  </li>
+                </ul>
+                <div class="info-box">
+                  Typical required order — <strong>up:</strong> VCCINT → VCCBRAM → VCCAUX → VCCO
+                  (MGT rails per their own note, usually after AUX). <strong>Down:</strong> exact
+                  reverse. Always confirm in your family's datasheet DC/switching chapter.
+                </div>
+              </div>
+
+              <!-- animated timing -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The PGOOD chain in action</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 680 240"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Animated sequencing timing diagram: VCCINT ramps, its PGOOD asserts and enables VCCAUX; VCCAUX PGOOD enables VCCO; after all rails are up the supervisor releases reset and the FPGA configures."
+                  >
+                    <g font-size="9.5" font-weight="700">
+                      <text x="4" y="40" fill="var(--danger,#f87171)">VCCINT</text>
+                      <text x="4" y="90" fill="var(--warning,#fb923c)">VCCAUX</text>
+                      <text x="4" y="140" fill="var(--cyan,#22d3ee)">VCCO</text>
+                      <text x="4" y="190" fill="var(--success,#34d399)">RESET_n</text>
+                    </g>
+                    <!-- VCCINT ramp -->
+                    <path
+                      d="M70 52 H130 L190 24 H660"
+                      fill="none"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2.5"
+                      stroke-dasharray="700"
+                      stroke-dashoffset="700"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="700;0"
+                        dur="1.4s"
+                        begin="0s;seqEnd.end+0.8s"
+                        fill="freeze"
+                        id="s1"
+                      />
+                    </path>
+                    <!-- PGOOD1 arrow -->
+                    <g opacity="0">
+                      <animate
+                        attributeName="opacity"
+                        values="0;1"
+                        dur="0.2s"
+                        begin="s1.begin+0.9s"
+                        fill="freeze"
+                      />
+                      <line
+                        x1="196"
+                        y1="28"
+                        x2="196"
+                        y2="66"
+                        stroke="var(--text-muted)"
+                        stroke-dasharray="3 3"
+                      />
+                      <text x="202" y="52" fill="var(--text-muted)" font-size="8">
+                        PGOOD₁ → EN₂
+                      </text>
+                    </g>
+                    <!-- VCCAUX ramp -->
+                    <path
+                      d="M70 102 H210 L270 74 H660"
+                      fill="none"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                      stroke-dasharray="700"
+                      stroke-dashoffset="700"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="700;0"
+                        dur="1.4s"
+                        begin="s1.begin+1.0s"
+                        fill="freeze"
+                        id="s2"
+                      />
+                    </path>
+                    <g opacity="0">
+                      <animate
+                        attributeName="opacity"
+                        values="0;1"
+                        dur="0.2s"
+                        begin="s2.begin+0.9s"
+                        fill="freeze"
+                      />
+                      <line
+                        x1="276"
+                        y1="78"
+                        x2="276"
+                        y2="116"
+                        stroke="var(--text-muted)"
+                        stroke-dasharray="3 3"
+                      />
+                      <text x="282" y="102" fill="var(--text-muted)" font-size="8">
+                        PGOOD₂ → EN₃
+                      </text>
+                    </g>
+                    <!-- VCCO ramp -->
+                    <path
+                      d="M70 152 H290 L350 124 H660"
+                      fill="none"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                      stroke-dasharray="700"
+                      stroke-dashoffset="700"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="700;0"
+                        dur="1.4s"
+                        begin="s2.begin+1.0s"
+                        fill="freeze"
+                        id="s3"
+                      />
+                    </path>
+                    <!-- reset release after supervisor delay -->
+                    <path
+                      d="M70 202 H430 V174 H660"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2.5"
+                      stroke-dasharray="700"
+                      stroke-dashoffset="700"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="700;0"
+                        dur="1.2s"
+                        begin="s3.begin+1.1s"
+                        fill="freeze"
+                        id="seqEnd"
+                      />
+                    </path>
+                    <g opacity="0">
+                      <animate
+                        attributeName="opacity"
+                        values="0;1"
+                        dur="0.3s"
+                        begin="s3.begin+1.6s"
+                        fill="freeze"
+                      />
+                      <text
+                        x="470"
+                        y="164"
+                        fill="var(--success,#34d399)"
+                        font-size="9"
+                        font-weight="700"
+                      >
+                        supervisor delay done → FPGA configures ✓
+                      </text>
+                    </g>
+                    <text
+                      x="360"
+                      y="228"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="9"
+                    >
+                      each rail's PGOOD enables the next; the supervisor holds reset until all rails
+                      are valid
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    PGOOD daisy-chain: order is guaranteed by wiring, not firmware. Note every ramp
+                    is monotonic — no dips, no plateaus below threshold.
+                  </p>
+                </div>
+              </div>
+
+              <!-- implementations -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Three implementation patterns</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Pattern</th>
+                        <th>Order control</th>
+                        <th>Down-sequence?</th>
+                        <th>Fault handling</th>
+                        <th>Fits</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>PGOOD chain</strong></td>
+                        <td>Hard-wired</td>
+                        <td>No (falls as it falls)</td>
+                        <td>Rail failure stops the chain</td>
+                        <td>≤ 4–5 rails, most boards</td>
+                      </tr>
+                      <tr>
+                        <td><strong>PMIC sequencer</strong></td>
+                        <td>Programmed slots + delays</td>
+                        <td>Yes, reverse slots</td>
+                        <td>Configurable retry/latch-off</td>
+                        <td>PMIC-based trees</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Sequencer / PMBus manager IC</strong></td>
+                        <td>Fully programmable</td>
+                        <td>Yes, monitored</td>
+                        <td>Fault logging, telemetry, margining</td>
+                        <td>6+ rails, servers, hot-swap</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  <strong>Down-sequencing is the forgotten half.</strong> A wall-wart yank removes
+                  the input while bulk caps discharge at their own rates — check whether your family
+                  requires controlled power-down (many are tolerant, some MGT rails are not). If
+                  required, use a sequencer with down-slots and enough input hold-up.
+                </div>
+              </div>
+
+              <!-- rules -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Ramp rules</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Monotonic:</strong> no dips on the way up — a non-monotonic VCCINT ramp
+                    can corrupt configuration. Watch for soft-start interacting with large output
+                    capacitance.
+                  </li>
+                  <li>
+                    <strong>Ramp window:</strong> too fast (&lt; ~200 µs) can trip inrush/latch-up
+                    limits; too slow (&gt; ~50 ms) can hang POR circuits. Set buck soft-start inside
+                    the window.
+                  </li>
+                  <li>
+                    <strong>Pre-bias safe:</strong> regulators must not sink current from a rail
+                    partially charged through parasitic paths — use pre-bias-safe bucks (most modern
+                    sync bucks are; verify).
+                  </li>
+                  <li>
+                    <strong>Simultaneity option:</strong> some families allow "all rails together
+                    within X ms" as an alternative to strict ordering — sometimes simpler with one
+                    PMIC. Read the fine print.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Sequence order, ramp window, monotonicity: all three are datasheet requirements.
+                  </li>
+                  <li>
+                    PGOOD chaining gives hardware-guaranteed order for the price of a few traces.
+                  </li>
+                  <li>Verify EN thresholds and PGOOD pull-up rails — the classic chain bugs.</li>
+                  <li>
+                    Plan power-<em>down</em> too, and always capture the real sequence on a scope
+                    (Module 07).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="03-power-tree.html">← Building the Power Tree</a>
+                <a class="btn btn-primary" href="05-pdn-decoupling.html"
+                  >Next: PDN &amp; Decoupling →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

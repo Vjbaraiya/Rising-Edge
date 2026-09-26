@@ -1,0 +1,1814 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f97316" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="A 12-step surge protection design flow, interface-wise protection schematics for AC mains, DC power, Ethernet, USB, HDMI, RS-232/485, CAN and telephone lines, plus a good-vs-bad PCB layout comparison."
+    />
+    <title>
+      Design Flow &amp; Interface-Wise Protection | Surge Immunity Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Surge/08-design-flow-and-interfaces.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        margin-top: 1rem;
+      }
+      .objective-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 14px;
+        text-align: center;
+      }
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .cat-card {
+        padding: 14px 10px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .cat-card.active {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.12);
+      }
+      .cat-card .emoji {
+        font-size: 1.4rem;
+        display: block;
+        margin-bottom: 6px;
+      }
+      .cat-card .name {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .step-grid-small {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .step-chip {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .step-chip.active {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.12);
+      }
+      .step-chip .num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+      .step-chip.active .num {
+        background: #f97316;
+        border-color: #f97316;
+        color: #fff;
+      }
+      .step-chip .txt {
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: var(--text-base);
+        line-height: 1.3;
+      }
+      .canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+      }
+      .canvas-wrap canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .toggle-tab {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #f97316;
+        border-color: #f97316;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-faint);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Surge Immunity (IEC 61000-4-5)
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction to Surge Immunity</a>
+          <a href="02-surge-sources.html" class="module-item">02. What Causes Surge</a>
+          <a href="03-propagation-and-waveforms.html" class="module-item"
+            >03. How Surge Travels &amp; Standard Waveforms</a
+          >
+          <a href="04-iec-61000-4-5-and-levels.html" class="module-item"
+            >04. IEC 61000-4-5, Test Levels &amp; Classes</a
+          >
+          <a href="05-test-setup-and-coupling.html" class="module-item"
+            >05. Test Setup, CDN &amp; Coupling Methods</a
+          >
+          <a href="06-procedure-and-criteria.html" class="module-item"
+            >06. Test Procedure &amp; Pass/Fail Criteria</a
+          >
+          <a href="07-protection-components.html" class="module-item"
+            >07. Surge Protection Components</a
+          >
+          <a href="08-design-flow-and-interfaces.html" class="module-item active"
+            >08. Design Flow &amp; Interface-Wise Protection</a
+          >
+          <a href="09-case-studies.html" class="module-item"
+            >09. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="10-wizard-calculators-and-project.html" class="module-item"
+            >10. Wizard, Calculators &amp; Final Project</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Surge Immunity (IEC 61000-4-5)</a><span>/</span>
+            <span>Design Flow &amp; Interface-Wise Protection</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 8/10</span><span>80%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 08</div>
+              <h1 style="font-size: 2.2rem">Design Flow &amp; Interface-Wise Protection</h1>
+              <p class="subtitle">
+                Every port on a product needs its own protection decision -- an AC mains input, a
+                USB port, and an RS-485 bus all see fundamentally different surge exposure and need
+                different topologies.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.25rem">Learning Objectives</h3>
+                <div class="objective-grid">
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🗺️</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Follow a complete 12-step surge protection design flow
+                    </div>
+                  </div>
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔌</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Recognize typical protection topologies per interface type
+                    </div>
+                  </div>
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">📐</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Spot good vs. poor PCB layout practice for surge protection
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1: 12-step design flow -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: The 12-Step Surge Protection Design Flow (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <div class="step-grid-small" id="flowGrid"></div>
+                  <div class="widget-container"><div id="flowDetail"></div></div>
+                </div>
+              </div>
+
+              <!-- Section 2: Interface-wise schematics -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Interface-Wise Protection Schematics (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <div class="cat-grid" id="ifaceGrid"></div>
+                  <div class="widget-container">
+                    <div class="canvas-wrap"><canvas id="ifaceCanvas"></canvas></div>
+                    <div id="ifaceDetail" style="margin-top: 1rem"></div>
+                  </div>
+
+                  <!-- The selected interface mapped onto a real circuit + board -->
+                  <div class="widget-container" style="margin-top: 1rem">
+                    <h3 style="margin-bottom: 0.5rem" id="ifaceRealTitle">
+                      The Same Topology on a Real Circuit &amp; Board
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      These two views update with the interface selected above. Left: the concrete
+                      schematic of the animated topology. Right: where each part physically sits on
+                      the board &mdash; the first stage at the connector with the shortest possible
+                      ground/earth return, the decoupling element between stages, and the second
+                      stage placed at the IC it protects.
+                    </p>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 14px;
+                      "
+                    >
+                      <div>
+                        <div
+                          style="
+                            font-size: 0.8rem;
+                            font-weight: 700;
+                            color: var(--text-sub);
+                            margin-bottom: 6px;
+                          "
+                        >
+                          Schematic
+                        </div>
+                        <div id="ifaceRealSchematic"></div>
+                      </div>
+                      <div>
+                        <div
+                          style="
+                            font-size: 0.8rem;
+                            font-weight: 700;
+                            color: var(--text-sub);
+                            margin-bottom: 6px;
+                          "
+                        >
+                          Board placement (top view)
+                        </div>
+                        <div id="ifaceRealBoard"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: PCB layout -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Section 3: PCB Layout -- Good vs. Poor Practice (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <div class="widget-container" id="audioExplainWidget" style="margin-bottom: 1rem">
+                    <h3 style="margin-bottom: 0.5rem">🔊 Audio Explanation: Section 3</h3>
+                    <p
+                      style="
+                        font-size: 0.82rem;
+                        color: var(--text-sub);
+                        margin-bottom: 0.85rem;
+                        line-height: 1.6;
+                      "
+                    >
+                      Prefer to listen? Press play for a full narrated walkthrough of why PCB layout
+                      matters as much as component selection, before (or instead of) toggling
+                      between the two layouts yourself below.
+                    </p>
+                    <div
+                      style="
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        gap: 8px;
+                        margin-bottom: 0.75rem;
+                      "
+                    >
+                      <button class="btn btn-primary" id="audioPlayBtn" type="button">
+                        ▶ Play
+                      </button>
+                      <button
+                        class="btn btn-secondary"
+                        id="audioPauseBtn"
+                        type="button"
+                        disabled=""
+                      >
+                        ⏸ Pause
+                      </button>
+                      <button class="btn btn-secondary" id="audioStopBtn" type="button" disabled="">
+                        ⏹ Stop
+                      </button>
+                      <label style="font-size: 0.78rem; color: var(--text-faint); margin-left: 6px">
+                        Speed:
+                        <select
+                          id="audioRateSelect"
+                          style="
+                            margin-left: 4px;
+                            padding: 4px 8px;
+                            border-radius: 6px;
+                            border: 1.5px solid var(--border);
+                            background: var(--bg-alt);
+                            color: var(--text-base);
+                            font-size: 0.78rem;
+                          "
+                        >
+                          <option value="0.75">0.75x</option>
+                          <option value="1" selected="">1x</option>
+                          <option value="1.25">1.25x</option>
+                          <option value="1.5">1.5x</option>
+                        </select>
+                      </label>
+                    </div>
+                    <p
+                      id="audioStatusText"
+                      style="font-size: 0.78rem; color: var(--text-faint); margin-bottom: 0.75rem"
+                    >
+                      Ready to play &middot; about 2 minutes
+                    </p>
+                    <details>
+                      <summary
+                        style="
+                          font-size: 0.82rem;
+                          font-weight: 700;
+                          color: var(--text-base);
+                          cursor: pointer;
+                        "
+                      >
+                        Show full transcript
+                      </summary>
+                      <div
+                        id="audioTranscript"
+                        style="
+                          font-size: 0.85rem;
+                          color: var(--text-sub);
+                          line-height: 1.75;
+                          margin-top: 0.75rem;
+                        "
+                      ></div>
+                    </details>
+                  </div>
+
+                  <div style="display: flex; gap: 8px; margin-bottom: 1rem">
+                    <button class="toggle-tab active" data-layout="poor" id="tabPoor">
+                      Poor Layout
+                    </button>
+                    <button class="toggle-tab" data-layout="good" id="tabGood">Good Layout</button>
+                  </div>
+                  <div class="widget-container">
+                    <div class="canvas-wrap"><canvas id="layoutCanvas"></canvas></div>
+                    <p
+                      id="layoutCaption"
+                      style="
+                        font-size: 0.85rem;
+                        color: var(--text-sub);
+                        margin-top: 0.75rem;
+                        line-height: 1.6;
+                      "
+                    ></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 8 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #f97316; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 10%;
+                        background: linear-gradient(90deg, #f97316, #facc15);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="07-protection-components.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="09-case-studies.html">Next Lesson &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 12;
+        ctx.save();
+        ctx.font = '700 ' + fontPx + 'px Inter, sans-serif';
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        var metrics = ctx.measureText(text);
+        var padX = 6,
+          padY = 3;
+        var w = metrics.width + padX * 2;
+        var h = fontPx + padY * 2;
+        var lx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.85)' : 'rgba(10,14,20,0.75)';
+        ctx.fillRect(lx, y - h / 2, w, h);
+        ctx.fillStyle = inkColor(0.92);
+        ctx.fillText(text, x, y);
+        ctx.restore();
+      }
+      function roundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+      function setupCanvas(canvas) {
+        var wrap = canvas.parentElement;
+        var w = wrap.clientWidth,
+          h = wrap.clientHeight;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, w: w, h: h };
+      }
+    </script>
+
+    <!-- Section 1: 12-step flow -->
+    <script>
+      var FLOW_STEPS = [
+        {
+          title: 'Identify the applicable product standard',
+          detail:
+            'Determine which product-family standard governs the design (IEC 60601-1-2, EN 50121, IEC 61000-6-1/2, etc.) and read off the required Class (1-4 or X) and performance criteria.',
+        },
+        {
+          title: 'List every external port/interface',
+          detail:
+            'Enumerate all ports exposed to the outside world: AC mains, DC power, Ethernet, USB, HDMI, RS-232/485, CAN, telephone/DSL, coax, and chassis/ground connections.',
+        },
+        {
+          title: 'Determine required coupling modes per port',
+          detail:
+            "For each port, identify which coupling modes apply (line-line, line-ground, line-neutral, neutral-ground) per the product standard and Module 05's coupling configurations.",
+        },
+        {
+          title: 'Estimate expected exposure per port',
+          detail:
+            'Longer, outdoor, or shielded-vs-unshielded cable runs see very different real-world surge energy -- estimate expected let-through energy per port based on installation environment.',
+        },
+        {
+          title: 'Select first-stage (high-energy) protection',
+          detail:
+            'Choose a GDT, spark gap, or large MOV as the first stage on ports expected to see high-energy events, sized to survive repeated required test pulses.',
+        },
+        {
+          title: 'Select second-stage (fast-clamp) protection',
+          detail:
+            'Choose a TVS diode, polymer suppressor, or thyristor protector as the fast, precise clamp closest to the sensitive downstream circuitry.',
+        },
+        {
+          title: 'Design the decoupling/coordination network',
+          detail:
+            'Add a series inductor, resistor, or PCB trace impedance between stages so the first stage has time to activate before the second stage is overstressed (Module 07, Section 3).',
+        },
+        {
+          title: 'Verify stage-to-stage voltage/energy coordination',
+          detail:
+            "Confirm mathematically or via simulation that the let-through voltage of Stage 1 never exceeds Stage 2's maximum rating before Stage 1 fully activates.",
+        },
+        {
+          title: 'Plan for follow-on current handling',
+          detail:
+            'For crowbar-type devices (thyristor, spark gap, GDT) on AC lines, add a PTC or fuse to interrupt any follow-on current from the mains supply after the surge event.',
+        },
+        {
+          title: 'Design PCB layout for minimal loop area',
+          detail:
+            'Route protection components with the shortest possible path to ground, minimal loop area, and a dedicated low-inductance return (Section 3 of this module).',
+        },
+        {
+          title: 'Prototype and pre-compliance test',
+          detail:
+            "Build a prototype and run pre-compliance surge testing (Module 06's procedure) before committing to full formal certification testing.",
+        },
+        {
+          title: 'Iterate, finalize BOM &amp; documentation',
+          detail:
+            'Adjust component selection or layout based on pre-compliance results, then finalize the bill of materials and design documentation for formal compliance testing.',
+        },
+      ];
+      var currentFlow = 0;
+
+      function renderFlowGrid() {
+        var grid = document.getElementById('flowGrid');
+        var html = '';
+        FLOW_STEPS.forEach(function (s, i) {
+          html +=
+            '<div class="step-chip' +
+            (i === currentFlow ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '"><div class="num">' +
+            (i + 1) +
+            '</div><div class="txt">' +
+            s.title +
+            '</div></div>';
+        });
+        grid.innerHTML = html;
+        grid.querySelectorAll('.step-chip').forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            currentFlow = parseInt(chip.getAttribute('data-idx'));
+            renderFlowGrid();
+            renderFlowDetail();
+          });
+        });
+      }
+
+      function renderFlowDetail() {
+        var s = FLOW_STEPS[currentFlow];
+        document.getElementById('flowDetail').innerHTML =
+          '<h3 style="margin-bottom:0.5rem">Step ' +
+          (currentFlow + 1) +
+          ': ' +
+          s.title +
+          '</h3>' +
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7">' +
+          s.detail +
+          '</p>';
+      }
+
+      renderFlowGrid();
+      renderFlowDetail();
+    </script>
+
+    <!-- Section 2: Interface-wise schematics -->
+    <script>
+      var INTERFACES = [
+        {
+          name: 'AC Mains',
+          emoji: '🔌',
+          topology:
+            'GDT (line-to-ground) + decoupling inductor + MOV (line-to-line and line-to-ground) + PTC/fuse for follow-on current.',
+          note: 'The highest-energy port on most products; needs the most robust first-stage device.',
+        },
+        {
+          name: 'DC Power',
+          emoji: '🔋',
+          topology:
+            'TVS diode or MOV across the rails, sized for the DC bus voltage, plus a series inductor or ferrite for decoupling from a downstream regulator.',
+          note: 'Lower energy than AC mains but still needs protection, especially on outdoor or long-run DC (e.g. PoE, solar).',
+        },
+        {
+          name: 'Ethernet / PoE',
+          emoji: '🌐',
+          topology:
+            'Gas discharge tube or TBU on each pair for common-mode protection, plus low-capacitance TVS array for differential-mode, coordinated with the magnetics/common-mode choke already in the RJ45 jack.',
+          note: 'Capacitance must stay very low to avoid degrading Gigabit signal integrity.',
+        },
+        {
+          name: 'USB',
+          emoji: '🔗',
+          topology:
+            "Ultra-low-capacitance polymer ESD suppressor or TVS array on D+/D-/VBUS, chosen specifically for USB's high data rate.",
+          note: 'Cable lengths are short, so surge energy is typically lower than telecom/AC ports, but ESD-style transients are still common.',
+        },
+        {
+          name: 'HDMI',
+          emoji: '📺',
+          topology:
+            'Very low-capacitance TVS array on each differential pair (TMDS lines), carefully selected to avoid any measurable impact on signal integrity at high resolutions.',
+          note: 'Among the most capacitance-sensitive interfaces due to very high data rates.',
+        },
+        {
+          name: 'RS-232',
+          emoji: '🔢',
+          topology:
+            'TVS diodes on each signal line to the RS-232 transceiver, often combined with series resistors for current limiting.',
+          note: 'Point-to-point, typically shorter cable runs than RS-485, but still exposed if routed outdoors or between buildings.',
+        },
+        {
+          name: 'RS-485 / CAN',
+          emoji: '🚌',
+          topology:
+            'GDT or TBU for common-mode protection at the bus entry, plus a TVS array across the differential pair, coordinated with the bus termination resistor.',
+          note: 'Long bus runs in industrial settings make these interfaces some of the most surge-exposed data lines in a facility.',
+        },
+        {
+          name: 'Telephone / DSL',
+          emoji: '☎️',
+          topology:
+            'GDT as first stage (very high energy handling for outdoor telecom exposure) + thyristor or TVS as fast second stage, coordinated per the relevant telecom standard (e.g. ITU-T K-series).',
+          note: 'Historically the most surge-exposed interface type due to long outdoor cable plant.',
+        },
+      ];
+      var currentIface = 0;
+      var ifaceCanvasStart = null;
+
+      function renderIfaceGrid() {
+        var grid = document.getElementById('ifaceGrid');
+        var html = '';
+        INTERFACES.forEach(function (c, i) {
+          html +=
+            '<div class="cat-card' +
+            (i === currentIface ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '"><span class="emoji">' +
+            c.emoji +
+            '</span><span class="name">' +
+            c.name +
+            '</span></div>';
+        });
+        grid.innerHTML = html;
+        grid.querySelectorAll('.cat-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            currentIface = parseInt(card.getAttribute('data-idx'));
+            ifaceCanvasStart = null;
+            renderIfaceGrid();
+            renderIfaceDetail();
+          });
+        });
+      }
+
+      function renderIfaceDetail() {
+        var c = INTERFACES[currentIface];
+        document.getElementById('ifaceDetail').innerHTML =
+          '<h3 style="margin-bottom:0.5rem">' +
+          c.emoji +
+          ' ' +
+          c.name +
+          '</h3>' +
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7;margin-bottom:0.5rem"><strong>Typical topology:</strong> ' +
+          c.topology +
+          '</p>' +
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7"><strong>Note:</strong> ' +
+          c.note +
+          '</p>';
+      }
+
+      function drawIfaceDiagram(ts) {
+        var canvas = document.getElementById('ifaceCanvas');
+        if (!canvas) return;
+        var wrap = canvas.parentElement;
+        if (wrap.clientWidth === 0 || wrap.clientHeight === 0) {
+          requestAnimationFrame(drawIfaceDiagram);
+          return;
+        }
+        var setup = setupCanvas(canvas);
+        var ctx = setup.ctx,
+          w = setup.w,
+          h = setup.h;
+        if (ifaceCanvasStart === null) ifaceCanvasStart = ts || performance.now();
+        var t = ((ts || performance.now()) - ifaceCanvasStart) / 1000;
+        ctx.clearRect(0, 0, w, h);
+        var cy = h / 2;
+        var pulse = (Math.sin(t * 2.6) + 1) / 2;
+
+        // generic two-stage schematic: connector -> stage1 -> decoupling -> stage2 -> protected device
+        ctx.strokeStyle = inkColor(0.6);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(20, cy);
+        ctx.lineTo(w - 20, cy);
+        ctx.stroke();
+
+        // connector
+        roundedRect(ctx, 15, cy - 20, 40, 40, 4);
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.06)' : 'rgba(255,255,255,0.08)';
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        labelPlate(ctx, 'Connector', 35, cy - 35, 'center', 9);
+
+        var stage1X = w * 0.32,
+          stage2X = w * 0.62,
+          devX = w - 55;
+
+        roundedRect(ctx, stage1X - 20, cy - 30, 40, 60, 6);
+        ctx.fillStyle = 'rgba(167,139,250,0.15)';
+        ctx.fill();
+        ctx.strokeStyle = '#a78bfa';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        labelPlate(ctx, 'Stage 1', stage1X, cy - 45, 'center', 10);
+
+        ctx.strokeStyle = inkColor(0.6);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (var i = 0; i < 3; i++) ctx.arc(stage1X + 35 + i * 12, cy, 6, Math.PI, 0, false);
+        ctx.stroke();
+        labelPlate(ctx, 'Decouple', stage1X + 55, cy - 20, 'center', 9);
+
+        roundedRect(ctx, stage2X - 18, cy - 25, 36, 50, 6);
+        ctx.fillStyle = 'rgba(249,115,22,0.15)';
+        ctx.fill();
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        labelPlate(ctx, 'Stage 2', stage2X, cy - 40, 'center', 10);
+
+        roundedRect(ctx, devX - 18, cy - 18, 36, 36, 4);
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.1)';
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.6);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        labelPlate(ctx, 'IC', devX, cy - 32, 'center', 9);
+
+        // ground bonds from stage1/stage2 to reference line beneath
+        roundedRect(ctx, 15, cy + 55, w - 30, 8, 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fill();
+        labelPlate(ctx, 'Ground / Chassis Return', w / 2, cy + 62, 'center', 9);
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 1.5 + pulse;
+        ctx.beginPath();
+        ctx.moveTo(stage1X, cy + 30);
+        ctx.lineTo(stage1X, cy + 55);
+        ctx.stroke();
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.5 + pulse;
+        ctx.beginPath();
+        ctx.moveTo(stage2X, cy + 25);
+        ctx.lineTo(stage2X, cy + 55);
+        ctx.stroke();
+
+        labelPlate(
+          ctx,
+          INTERFACES[currentIface].name + ' -- Typical 2-Stage Topology',
+          w / 2,
+          22,
+          'center',
+          12
+        );
+
+        requestAnimationFrame(drawIfaceDiagram);
+      }
+
+      renderIfaceGrid();
+      renderIfaceDetail();
+      requestAnimationFrame(drawIfaceDiagram);
+      window.addEventListener('resize', function () {
+        ifaceCanvasStart = null;
+      });
+    </script>
+
+    <!-- Section 2: real circuit + board views per interface -->
+    <script>
+      var IFACE_REAL_CFG = [
+        {
+          conn: 'AC inlet',
+          s1: 'GDT',
+          dec: 'L1 choke',
+          s2: 'MOV',
+          load: 'PSU input',
+          series: 'PTC / fuse',
+          earth: true,
+        },
+        {
+          conn: 'DC jack',
+          s1: 'MOV',
+          dec: 'L / ferrite',
+          s2: 'TVS',
+          load: 'Regulator',
+          series: '',
+          earth: false,
+        },
+        {
+          conn: 'RJ45',
+          s1: 'GDT / TBU',
+          dec: 'magnetics + CM choke',
+          s2: 'low-C TVS array',
+          load: 'PHY',
+          series: '',
+          earth: true,
+        },
+        {
+          conn: 'USB-C',
+          s1: 'VBUS TVS',
+          dec: 'ferrite (VBUS)',
+          s2: 'low-C array (D+/D-)',
+          load: 'USB PHY',
+          series: '',
+          earth: false,
+        },
+        {
+          conn: 'HDMI',
+          s1: 'shield bond',
+          dec: 'flow-through routing',
+          s2: 'ultra-low-C TVS array',
+          load: 'TMDS Rx',
+          series: '',
+          earth: true,
+        },
+        {
+          conn: 'DE-9',
+          s1: 'TVS',
+          dec: 'series R',
+          s2: 'TVS at pin',
+          load: 'RS-232 XCVR',
+          series: '',
+          earth: false,
+        },
+        {
+          conn: 'Terminal block',
+          s1: 'GDT / TBU',
+          dec: '10Ω pulse R',
+          s2: 'TVS array',
+          load: 'Bus XCVR',
+          series: '',
+          earth: true,
+        },
+        {
+          conn: 'RJ11',
+          s1: 'GDT',
+          dec: 'series R + fuse',
+          s2: 'Thyristor / TVS',
+          load: 'Line IC',
+          series: '',
+          earth: true,
+        },
+      ];
+
+      function ifaceShuntSymbol(x, label, color) {
+        return (
+          '<line x1="' +
+          x +
+          '" y1="70" x2="' +
+          x +
+          '" y2="96" stroke="var(--text-sub)" stroke-width="2"/>' +
+          '<rect x="' +
+          (x - 30) +
+          '" y="96" width="60" height="30" rx="4" fill="' +
+          color +
+          '22" stroke="' +
+          color +
+          '" stroke-width="1.8"/>' +
+          '<text x="' +
+          x +
+          '" y="115" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--text-base)">' +
+          label +
+          '</text>' +
+          '<line x1="' +
+          x +
+          '" y1="126" x2="' +
+          x +
+          '" y2="152" stroke="var(--text-sub)" stroke-width="2"/>'
+        );
+      }
+
+      function ifaceSchematicSvg(cfg) {
+        var s =
+          '<svg viewBox="0 0 460 200" style="width:100%;height:auto;display:block" aria-label="Two-stage protection schematic for the selected interface">';
+        // zone shading
+        s +=
+          '<rect x="46" y="10" width="112" height="180" rx="8" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.3)" stroke-dasharray="4 3"/>';
+        s +=
+          '<rect x="164" y="10" width="104" height="180" rx="8" fill="rgba(250,204,21,0.06)" stroke="rgba(250,204,21,0.35)" stroke-dasharray="4 3"/>';
+        s +=
+          '<rect x="274" y="10" width="106" height="180" rx="8" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.3)" stroke-dasharray="4 3"/>';
+        s +=
+          '<text x="102" y="24" text-anchor="middle" font-size="8.5" font-weight="700" fill="#ef4444">STAGE 1</text>';
+        s +=
+          '<text x="216" y="24" text-anchor="middle" font-size="8.5" font-weight="700" fill="#eab308">DECOUPLING</text>';
+        s +=
+          '<text x="327" y="24" text-anchor="middle" font-size="8.5" font-weight="700" fill="#10b981">STAGE 2</text>';
+        // main line: in -> stage1 node -> decouple box -> stage2 node -> load
+        s += '<line x1="6" y1="70" x2="176" y2="70" stroke="var(--text-sub)" stroke-width="2"/>';
+        s +=
+          '<text x="8" y="58" font-size="8.5" fill="var(--text-muted)">' +
+          cfg.conn +
+          ' (surge in)</text>';
+        s += ifaceShuntSymbol(102, cfg.s1, '#ef4444');
+        s +=
+          '<rect x="176" y="56" width="80" height="28" rx="4" fill="var(--bg-muted)" stroke="var(--text-sub)" stroke-width="1.6"/>';
+        s +=
+          '<text x="216" y="74" text-anchor="middle" font-size="8" font-weight="700" fill="var(--text-base)">' +
+          cfg.dec +
+          '</text>';
+        s += '<line x1="256" y1="70" x2="392" y2="70" stroke="var(--text-sub)" stroke-width="2"/>';
+        s += ifaceShuntSymbol(327, cfg.s2, '#10b981');
+        if (cfg.series) {
+          s +=
+            '<text x="216" y="46" text-anchor="middle" font-size="8" fill="var(--text-muted)">+ ' +
+            cfg.series +
+            ' in series</text>';
+        }
+        // load
+        s +=
+          '<rect x="392" y="50" width="62" height="40" rx="4" fill="var(--bg-muted)" stroke="var(--text-sub)" stroke-width="1.6"/>';
+        s +=
+          '<text x="423" y="73" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--text-base)">' +
+          cfg.load +
+          '</text>';
+        // ground rail
+        s += '<line x1="70" y1="152" x2="360" y2="152" stroke="var(--text-sub)" stroke-width="2"/>';
+        s +=
+          '<line x1="216" y1="152" x2="216" y2="164" stroke="var(--text-sub)" stroke-width="2"/>';
+        s +=
+          '<line x1="202" y1="164" x2="230" y2="164" stroke="var(--text-sub)" stroke-width="2.4"/>';
+        s +=
+          '<line x1="207" y1="170" x2="225" y2="170" stroke="var(--text-sub)" stroke-width="2"/>';
+        s +=
+          '<line x1="212" y1="176" x2="220" y2="176" stroke="var(--text-sub)" stroke-width="2"/>';
+        s +=
+          '<text x="236" y="174" font-size="8.5" fill="var(--text-muted)">' +
+          (cfg.earth ? 'PE / chassis' : 'GND') +
+          '</text>';
+        s += '</svg>';
+        return s;
+      }
+
+      function ifaceBoardSvg(cfg) {
+        var s =
+          '<svg viewBox="0 0 460 200" style="width:100%;height:auto;display:block" aria-label="PCB placement for the selected interface protection">';
+        s +=
+          '<rect x="8" y="12" width="444" height="176" rx="8" fill="rgba(22,101,52,0.35)" stroke="#22c55e" stroke-width="1.6"/>';
+        s += '<rect x="14" y="18" width="130" height="164" rx="6" fill="rgba(239,68,68,0.08)"/>';
+        s += '<rect x="148" y="18" width="122" height="164" rx="6" fill="rgba(250,204,21,0.07)"/>';
+        s += '<rect x="274" y="18" width="172" height="164" rx="6" fill="rgba(16,185,129,0.08)"/>';
+        s +=
+          '<text x="79" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="#ef4444">ENTRY / STAGE 1</text>';
+        s +=
+          '<text x="209" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="#eab308">DECOUPLING</text>';
+        s +=
+          '<text x="360" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="#10b981">STAGE 2 + LOAD</text>';
+        // connector on the left edge
+        s +=
+          '<rect x="10" y="72" width="28" height="56" fill="var(--bg-muted)" stroke="var(--text-sub)" stroke-width="1.5"/>';
+        s +=
+          '<text x="24" y="64" text-anchor="middle" font-size="8" fill="var(--text-muted)">' +
+          cfg.conn +
+          '</text>';
+        // stage 1 footprint right at the connector
+        s +=
+          '<rect x="58" y="86" width="44" height="30" rx="4" fill="var(--bg-muted)" stroke="#ef4444" stroke-width="1.8"/>';
+        s +=
+          '<text x="80" y="105" text-anchor="middle" font-size="8" font-weight="700" fill="var(--text-base)">' +
+          cfg.s1 +
+          '</text>';
+        if (cfg.earth) {
+          s += '<path d="M 80 116 L 80 160" stroke="#ef4444" stroke-width="6" opacity="0.85"/>';
+          s +=
+            '<circle cx="80" cy="166" r="7" fill="none" stroke="var(--text-sub)" stroke-width="2"/>';
+          s +=
+            '<text x="94" y="170" font-size="8" fill="var(--text-muted)">chassis earth lug</text>';
+          s += '<text x="94" y="148" font-size="8" fill="#ef4444">short, wide strap</text>';
+        } else {
+          s +=
+            '<circle cx="70" cy="124" r="2.4" fill="var(--text-muted)"/><circle cx="80" cy="124" r="2.4" fill="var(--text-muted)"/><circle cx="90" cy="124" r="2.4" fill="var(--text-muted)"/>';
+          s +=
+            '<text x="80" y="138" text-anchor="middle" font-size="8" fill="var(--text-muted)">via array to GND</text>';
+        }
+        // traces
+        s += '<path d="M 38 100 L 58 100" stroke="#f59e0b" stroke-width="3.5"/>';
+        s += '<path d="M 102 100 L 176 100" stroke="#f59e0b" stroke-width="3.5"/>';
+        // decoupling footprint
+        s +=
+          '<rect x="176" y="84" width="56" height="32" rx="4" fill="var(--bg-muted)" stroke="#eab308" stroke-width="1.8"/>';
+        s +=
+          '<text x="204" y="104" text-anchor="middle" font-size="7.5" font-weight="700" fill="var(--text-base)">' +
+          cfg.dec +
+          '</text>';
+        s +=
+          '<path d="M 232 100 L 262 100 L 262 126 L 296 126" stroke="#f59e0b" stroke-width="3.5"/>';
+        s +=
+          '<text x="252" y="76" text-anchor="middle" font-size="8" fill="#eab308">trace length adds impedance</text>';
+        // stage 2 footprint near the load
+        s +=
+          '<rect x="296" y="114" width="30" height="24" rx="3" fill="rgba(16,185,129,0.5)" stroke="#10b981" stroke-width="1.6"/>';
+        s +=
+          '<text x="311" y="108" text-anchor="middle" font-size="7.5" font-weight="700" fill="#10b981">' +
+          cfg.s2 +
+          '</text>';
+        s +=
+          '<circle cx="301" cy="146" r="2.4" fill="var(--text-muted)"/><circle cx="311" cy="146" r="2.4" fill="var(--text-muted)"/><circle cx="321" cy="146" r="2.4" fill="var(--text-muted)"/>';
+        s +=
+          '<text x="311" y="160" text-anchor="middle" font-size="8" fill="var(--text-muted)">via array to GND</text>';
+        s += '<path d="M 326 126 L 352 126" stroke="#f59e0b" stroke-width="3.5"/>';
+        // load IC
+        s +=
+          '<rect x="352" y="102" width="60" height="48" rx="4" fill="var(--bg-muted)" stroke="var(--text-sub)" stroke-width="1.6"/>';
+        s +=
+          '<text x="382" y="129" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--text-base)">' +
+          cfg.load +
+          '</text>';
+        s +=
+          '<text x="382" y="94" text-anchor="middle" font-size="8" fill="#10b981">stage 2 a few mm from the pin</text>';
+        s += '</svg>';
+        return s;
+      }
+
+      function renderIfaceReal() {
+        var cfg = IFACE_REAL_CFG[currentIface];
+        if (!cfg) return;
+        var title = document.getElementById('ifaceRealTitle');
+        var schEl = document.getElementById('ifaceRealSchematic');
+        var brdEl = document.getElementById('ifaceRealBoard');
+        if (!title || !schEl || !brdEl) return;
+        title.textContent =
+          INTERFACES[currentIface].name + ' -- The Same Topology on a Real Circuit & Board';
+        schEl.innerHTML = ifaceSchematicSvg(cfg);
+        brdEl.innerHTML = ifaceBoardSvg(cfg);
+      }
+
+      // Re-render the real views whenever the interface selection changes
+      var _origRenderIfaceDetail = renderIfaceDetail;
+      // eslint-disable-next-line no-func-assign
+      renderIfaceDetail = function () {
+        _origRenderIfaceDetail();
+        renderIfaceReal();
+      };
+      renderIfaceReal();
+    </script>
+
+    <!-- Section 3: PCB layout -->
+    <script>
+      var currentLayout = 'poor';
+      var layoutStart = null;
+      var LAYOUT_CAPTIONS = {
+        poor: "Poor layout: the protection component is placed far from the connector, with a long, winding trace and a separate, distant ground via. This creates a large loop area with high inductance -- the surge voltage seen by downstream circuitry can be far higher than the component's rated clamping voltage because of the inductive voltage drop (V = L di/dt) along the long traces.",
+        good: "Good layout: the protection component sits immediately at the connector, with short, direct traces and an adjacent, low-inductance via straight to the ground plane. Minimizing loop area and trace length keeps the inductive voltage overshoot small, so the downstream circuit sees a voltage much closer to the component's actual clamping voltage.",
+      };
+
+      function drawLayout(ts) {
+        var canvas = document.getElementById('layoutCanvas');
+        if (!canvas) return;
+        var wrap = canvas.parentElement;
+        if (wrap.clientWidth === 0 || wrap.clientHeight === 0) {
+          requestAnimationFrame(drawLayout);
+          return;
+        }
+        var setup = setupCanvas(canvas);
+        var ctx = setup.ctx,
+          w = setup.w,
+          h = setup.h;
+        if (layoutStart === null) layoutStart = ts || performance.now();
+        var t = ((ts || performance.now()) - layoutStart) / 1000;
+        ctx.clearRect(0, 0, w, h);
+        var pulse = (Math.sin(t * 3) + 1) / 2;
+
+        // PCB board background
+        roundedRect(ctx, 20, 20, w - 40, h - 40, 8);
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.03)' : 'rgba(255,255,255,0.03)';
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.15);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        var connX = 50,
+          connY = h / 2;
+        roundedRect(ctx, connX - 15, connY - 22, 30, 44, 3);
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.1)';
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        labelPlate(ctx, 'Connector', connX, connY - 35, 'center', 9);
+
+        var icX = w - 60,
+          icY = h / 2;
+        roundedRect(ctx, icX - 18, icY - 18, 36, 36, 4);
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.1)';
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        labelPlate(ctx, 'IC', icX, icY - 30, 'center', 9);
+
+        if (currentLayout === 'poor') {
+          // TVS placed far from connector with long winding trace + distant ground via
+          var tvsX = w * 0.62,
+            tvsY = h * 0.28;
+          // signal trace: connector -> long path -> TVS -> IC (winding)
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(connX + 15, connY);
+          ctx.lineTo(connX + 15, h * 0.75);
+          ctx.lineTo(w * 0.45, h * 0.75);
+          ctx.lineTo(w * 0.45, tvsY);
+          ctx.lineTo(tvsX - 15, tvsY);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(tvsX + 15, tvsY);
+          ctx.lineTo(icX, tvsY);
+          ctx.lineTo(icX, icY - 18);
+          ctx.stroke();
+
+          roundedRect(ctx, tvsX - 15, tvsY - 12, 30, 24, 4);
+          ctx.fillStyle = 'rgba(239,68,68,0.15)';
+          ctx.fill();
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          labelPlate(ctx, 'TVS (far away)', tvsX, tvsY - 26, 'center', 9);
+
+          // distant ground via, long ground return path
+          var viaX = w * 0.2,
+            viaY = h * 0.85;
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 1.5 + pulse * 1.5;
+          ctx.setLineDash([5, 3]);
+          ctx.beginPath();
+          ctx.moveTo(tvsX, tvsY + 12);
+          ctx.lineTo(tvsX, viaY);
+          ctx.lineTo(viaX, viaY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(viaX, viaY, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
+          labelPlate(ctx, 'Distant ground via', viaX, viaY + 18, 'center', 9);
+          labelPlate(ctx, 'Large loop area = high inductance', w / 2, h - 22, 'center', 10);
+        } else {
+          // TVS placed right at connector with short trace + adjacent via
+          var tvsX2 = connX + 55,
+            tvsY2 = connY;
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(connX + 15, connY);
+          ctx.lineTo(tvsX2 - 15, tvsY2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(tvsX2 + 15, tvsY2);
+          ctx.lineTo(icX - 18, icY);
+          ctx.stroke();
+
+          roundedRect(ctx, tvsX2 - 15, tvsY2 - 12, 30, 24, 4);
+          ctx.fillStyle = 'rgba(34,197,94,0.15)';
+          ctx.fill();
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          labelPlate(ctx, 'TVS (at connector)', tvsX2, tvsY2 - 26, 'center', 9);
+
+          var viaX2 = tvsX2,
+            viaY2 = connY + 40;
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 1.5 + pulse * 1.5;
+          ctx.beginPath();
+          ctx.moveTo(tvsX2, tvsY2 + 12);
+          ctx.lineTo(viaX2, viaY2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(viaX2, viaY2, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#22c55e';
+          ctx.fill();
+          labelPlate(ctx, 'Adjacent ground via', viaX2, viaY2 + 18, 'center', 9);
+          labelPlate(ctx, 'Minimal loop area = low inductance', w / 2, h - 22, 'center', 10);
+        }
+
+        requestAnimationFrame(drawLayout);
+      }
+
+      document.getElementById('tabPoor').addEventListener('click', function () {
+        currentLayout = 'poor';
+        document.getElementById('tabPoor').classList.add('active');
+        document.getElementById('tabGood').classList.remove('active');
+        document.getElementById('layoutCaption').textContent = LAYOUT_CAPTIONS.poor;
+      });
+      document.getElementById('tabGood').addEventListener('click', function () {
+        currentLayout = 'good';
+        document.getElementById('tabGood').classList.add('active');
+        document.getElementById('tabPoor').classList.remove('active');
+        document.getElementById('layoutCaption').textContent = LAYOUT_CAPTIONS.good;
+      });
+      document.getElementById('layoutCaption').textContent = LAYOUT_CAPTIONS.poor;
+      requestAnimationFrame(drawLayout);
+      window.addEventListener('resize', function () {
+        layoutStart = null;
+      });
+    </script>
+
+    <!-- Section 3: Audio explanation (speech synthesis) -->
+    <script>
+      var SECTION3_NARRATION_PARAS = [
+        'Section 3 makes a point that is easy to overlook: choosing the right protection component is only half the job. Where and how you place that component on the printed circuit board can matter just as much as which part number you picked, and a perfectly-rated device can still let a damaging voltage through if the layout around it is wrong.',
+        'Start with the poor layout example. Here, the protection component -- say, a TVS diode -- is placed far from the connector where the surge actually enters the board. To reach it, the signal has to travel down a long, winding trace, and the return path back to ground runs through a separate, distant via. Together, the outgoing trace and that distant ground return trace enclose a large loop area.',
+        "That large loop area matters because it has inductance, and inductance resists a fast change in current. The surge current from a combination wave rises extremely quickly -- remember the microsecond-scale front times from earlier modules -- so even a modest trace inductance can produce a significant voltage according to the relationship V equals L times dI over dt: inductance multiplied by the rate of change of current. That extra voltage adds on top of the protection component's own rated clamping voltage, meaning the downstream integrated circuit can see a voltage well beyond what the component's datasheet would suggest, even though the correct part was selected.",
+        "Now consider the good layout example. Here the same protection component sits immediately at the connector, with a short, direct trace carrying the surge straight into it, and an adjacent, low-inductance via dropping straight down to the ground plane right next to the component. The loop area enclosed by the current path is minimized, which minimizes the parasitic inductance, which in turn minimizes that inductive voltage overshoot. The downstream circuit ends up seeing a voltage much closer to the component's actual, rated clamping voltage.",
+        'This is exactly the lesson behind one of the case studies in Module 9: a smart meter that kept failing its display and communication function even though the correctly-rated MOV was installed. The root cause was not the component choice at all -- it was a long, winding PCB trace and a distant ground via creating exactly the large loop inductance described here. The fix was a layout change, moving the same MOV right next to the connector with a short, direct trace and an adjacent via.',
+        'Use the Poor Layout and Good Layout buttons above to toggle the animated comparison and see this difference for yourself: watch how the trace routing and the ground via position change between the two versions, and notice the loop area each one encloses.',
+      ];
+
+      function initAudioExplanation() {
+        var transcriptEl = document.getElementById('audioTranscript');
+        if (transcriptEl) {
+          transcriptEl.innerHTML = SECTION3_NARRATION_PARAS.map(function (p) {
+            return '<p style="margin-bottom: 0.85rem">' + p + '</p>';
+          }).join('');
+        }
+
+        var playBtn = document.getElementById('audioPlayBtn');
+        var pauseBtn = document.getElementById('audioPauseBtn');
+        var stopBtn = document.getElementById('audioStopBtn');
+        var rateSelect = document.getElementById('audioRateSelect');
+        var statusText = document.getElementById('audioStatusText');
+        if (!playBtn || !pauseBtn || !stopBtn || !rateSelect || !statusText) return;
+
+        if (!('speechSynthesis' in window)) {
+          statusText.textContent =
+            'Audio narration is not supported in this browser -- use the transcript above instead.';
+          playBtn.disabled = true;
+          pauseBtn.disabled = true;
+          stopBtn.disabled = true;
+          return;
+        }
+
+        var fullText = SECTION3_NARRATION_PARAS.join(' ');
+        var utterance = null;
+        var isPaused = false;
+
+        function setButtonsPlaying() {
+          playBtn.disabled = true;
+          pauseBtn.disabled = false;
+          pauseBtn.textContent = '⏸ Pause';
+          stopBtn.disabled = false;
+        }
+        function setButtonsIdle() {
+          playBtn.disabled = false;
+          pauseBtn.disabled = true;
+          pauseBtn.textContent = '⏸ Pause';
+          stopBtn.disabled = true;
+          isPaused = false;
+        }
+
+        playBtn.addEventListener('click', function () {
+          window.speechSynthesis.cancel();
+          utterance = new SpeechSynthesisUtterance(fullText);
+          utterance.rate = parseFloat(rateSelect.value) || 1;
+          utterance.onstart = function () {
+            statusText.textContent = 'Playing · Section 3: PCB Layout -- Good vs. Poor Practice';
+            setButtonsPlaying();
+          };
+          utterance.onend = function () {
+            statusText.textContent = 'Finished · press Play to listen again';
+            setButtonsIdle();
+          };
+          utterance.onerror = function () {
+            statusText.textContent = 'Playback stopped';
+            setButtonsIdle();
+          };
+          window.speechSynthesis.speak(utterance);
+        });
+
+        pauseBtn.addEventListener('click', function () {
+          if (!isPaused) {
+            window.speechSynthesis.pause();
+            isPaused = true;
+            pauseBtn.textContent = '▶ Resume';
+            statusText.textContent = 'Paused';
+          } else {
+            window.speechSynthesis.resume();
+            isPaused = false;
+            pauseBtn.textContent = '⏸ Pause';
+            statusText.textContent = 'Playing · Section 3: PCB Layout -- Good vs. Poor Practice';
+          }
+        });
+
+        stopBtn.addEventListener('click', function () {
+          window.speechSynthesis.cancel();
+          statusText.textContent = 'Stopped · press Play to start over';
+          setButtonsIdle();
+        });
+
+        rateSelect.addEventListener('change', function () {
+          if (window.speechSynthesis.speaking) {
+            var wasPaused = isPaused;
+            window.speechSynthesis.cancel();
+            playBtn.click();
+            if (wasPaused) {
+              window.speechSynthesis.pause();
+              isPaused = true;
+              pauseBtn.textContent = '▶ Resume';
+            }
+          }
+        });
+
+        window.addEventListener('beforeunload', function () {
+          window.speechSynthesis.cancel();
+        });
+      }
+
+      initAudioExplanation();
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What is the first step in the 12-step surge protection design flow?',
+          opts: [
+            'Identify the applicable product standard and its required test level/class',
+            'Design the PCB layout',
+            'Order components',
+            'Run pre-compliance testing',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why must exposure be estimated per port rather than assuming one level fits all ports?',
+          opts: [
+            'Different ports (outdoor cable runs vs. short indoor cables) see very different real-world surge energy',
+            'All ports always see identical surge exposure',
+            'Only AC mains ports ever need protection',
+            'Exposure estimation is not part of any real design process',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is the purpose of verifying stage-to-stage voltage/energy coordination?',
+          opts: [
+            "To confirm the first stage's let-through voltage never exceeds the second stage's rating before the first stage activates",
+            'To ensure both stages activate at exactly the same instant',
+            'To eliminate the need for a decoupling network',
+            "To determine the product's selling price",
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is follow-on current handling (PTC/fuse) especially important for crowbar-type devices on AC lines?',
+          opts: [
+            'Once triggered, a crowbar device can continue conducting mains current after the surge itself has passed',
+            'Crowbar devices never conduct any current',
+            'Follow-on current only affects DC circuits',
+            'PTCs and fuses have no relevance to surge protection design',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What typical topology is used for AC mains surge protection?',
+          opts: [
+            'GDT (line-to-ground) + decoupling inductor + MOV, plus a PTC/fuse for follow-on current',
+            'A single low-capacitance TVS diode only',
+            'No protection is typically needed on AC mains',
+            'A common-mode choke alone with no clamping device',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is added capacitance a particular concern for Ethernet, USB, and HDMI protection components?',
+          opts: [
+            'These interfaces carry high-speed signals where excess capacitance can degrade signal integrity',
+            'Capacitance has no effect on any of these interfaces',
+            'These interfaces never require any surge protection',
+            'Only AC mains ports are capacitance-sensitive',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why are RS-485/CAN bus interfaces often significantly surge-exposed in industrial settings?',
+          opts: [
+            'Long bus runs across a facility expose the interface to switching transients and ground potential differences',
+            'RS-485/CAN cables are always shielded and fully immune to surge',
+            'These interfaces never connect to more than one device',
+            'Bus length has no relationship to surge exposure',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why does a poor PCB layout with a long, winding trace and distant ground via increase the voltage seen by downstream circuitry?',
+          opts: [
+            'The larger loop area increases inductance, and V = L di/dt produces additional voltage overshoot during the fast surge edge',
+            'Longer traces always reduce voltage seen downstream',
+            'PCB layout has no effect on surge performance',
+            'Ground vias only matter for thermal performance, not surge',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is the benefit of placing the protection component immediately at the connector?',
+          opts: [
+            'It minimizes the loop area and trace length exposed to the incoming surge before it is clamped',
+            'It has no benefit compared to placing it near the IC',
+            'It eliminates the need for a decoupling network entirely',
+            'It always increases the total board cost significantly',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is pre-compliance testing recommended before formal certification testing?',
+          opts: [
+            'It allows the design to be iterated and corrected at lower cost before committing to a formal, more expensive compliance test',
+            'Pre-compliance testing is required by law in all countries',
+            'Pre-compliance testing replaces the need for formal certification entirely',
+            'It has no practical value in the design process',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Which port is generally expected to require the highest-energy first-stage protection device?',
+          opts: ['AC mains', 'HDMI', 'USB', 'RS-232'],
+          correct: 0,
+        },
+        {
+          q: 'What does the decoupling network between two protection stages primarily provide?',
+          opts: [
+            'Enough impedance/delay for the first stage to activate before the second, more sensitive stage is overstressed',
+            'A path for signal ground only, unrelated to surge coordination',
+            'A permanent short circuit across the protected line',
+            'A way to bypass the first-stage device entirely',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0,
+          score = 0,
+          answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#f97316';
+              dot.style.borderColor = '#f97316';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

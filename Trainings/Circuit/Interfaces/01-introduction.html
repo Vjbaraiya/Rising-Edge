@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 1: Introduction to RS232, RS485 and RS422 — single-ended vs differential signaling, common-mode noise rejection, the full interface comparison table, a live baud-rate-vs-cable-length chart, and a decision guide."
+    />
+    <title>01 · Introduction & Comparison | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/01-introduction.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .cmp-232 {
+        color: #fb923c;
+        font-weight: 700;
+      }
+      .cmp-485 {
+        color: #22d3ee;
+        font-weight: 700;
+      }
+      .cmp-422 {
+        color: #a78bfa;
+        font-weight: 700;
+      }
+      .decision-card {
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--cyan, #22d3ee);
+        border-radius: var(--radius-lg);
+        background: var(--bg-muted);
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .decision-card.o232 {
+        border-left-color: #fb923c;
+      }
+      .decision-card.o485 {
+        border-left-color: #22d3ee;
+      }
+      .decision-card.o422 {
+        border-left-color: #a78bfa;
+      }
+      .decision-card h4 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 0 0 0.35rem;
+      }
+      .decision-card p {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        margin: 0;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item active"
+            >01. Introduction &amp; Comparison</a
+          >
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>01. Introduction</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <!-- HERO -->
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 01</span>
+                <span class="badge badge-gray">~50 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Introduction &amp; Interface Comparison</h1>
+              <p class="subtitle">
+                Before you route a single trace, you need to know <em>why</em> RS485 can run a
+                kilometre of cable at high speed while RS232 gives up after a few metres. The answer
+                is the difference between <strong>single-ended</strong> and
+                <strong>differential</strong> signaling. This module builds that intuition visually,
+                then lays all three interfaces side by side and gives you a decision guide.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- ── SECTION 1: THE THREE INTERFACES ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🔌 &nbsp;1. Meet RS232, RS485 &amp; RS422</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    All three are <strong>TIA/EIA serial standards</strong> that define the
+                    <em>electrical</em> layer — voltages, drivers, receivers and cabling — not the
+                    data format. You still send the same UART bytes; these standards just decide how
+                    those bits survive the trip down the wire.
+                  </p>
+                  <div class="two-col">
+                    <div class="decision-card o232">
+                      <h4><span class="cmp-232">RS232</span> — the desktop veteran</h4>
+                      <p>
+                        Single-ended, point-to-point, &plusmn;3 to &plusmn;15&nbsp;V swings. Simple
+                        and everywhere (DE-9 port), but noise-prone and limited to short cables and
+                        modest baud rates. One driver, one receiver.
+                      </p>
+                    </div>
+                    <div class="decision-card o485">
+                      <h4><span class="cmp-485">RS485</span> — the industrial bus</h4>
+                      <p>
+                        Differential, multidrop. Up to 32 (often 256 with modern parts) nodes on one
+                        twisted pair, ~1200&nbsp;m reach, high common-mode immunity. Usually
+                        half-duplex. The backbone of Modbus, PROFIBUS and building automation.
+                      </p>
+                    </div>
+                    <div class="decision-card o422">
+                      <h4><span class="cmp-422">RS422</span> — the long full-duplex link</h4>
+                      <p>
+                        Differential, point-to-point (one driver, up to 10 receivers), full-duplex
+                        with separate TX and RX pairs. Same distance/noise benefits as RS485 when
+                        you need simultaneous two-way traffic.
+                      </p>
+                    </div>
+                    <div class="decision-card">
+                      <h4>The common thread</h4>
+                      <p>
+                        RS485 and RS422 both send data as the <em>difference</em> between two wires.
+                        That single idea is what buys them distance and noise immunity — and it's
+                        what the next section makes visible.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── SECTION 2: SINGLE-ENDED VS DIFFERENTIAL (ANIMATION) ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📡 &nbsp;2. Single-Ended vs Differential — Live Noise Demo</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    A <strong>single-ended</strong> signal is measured against ground. Any noise
+                    picked up on the wire rides straight into the receiver. A
+                    <strong>differential</strong> pair sends the signal on two wires (A and B) that
+                    carry equal-and-opposite voltages. Noise couples into <em>both</em> wires almost
+                    equally, so when the receiver subtracts B from A the noise cancels — this is
+                    <strong>common-mode rejection</strong>.
+                  </p>
+
+                  <div class="sim-controls">
+                    <div class="slider-group" style="min-width: 220px">
+                      <div class="slider-label">
+                        <span>Injected noise</span
+                        ><span class="slider-value" id="noiseVal">40%</span>
+                      </div>
+                      <input type="range" id="noise" min="0" max="100" value="40" />
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="pauseBtn">Pause</button>
+                  </div>
+
+                  <div class="two-col">
+                    <div class="diagram-box">
+                      <canvas id="seCanvas" width="440" height="220"></canvas>
+                      <div class="diagram-cap">
+                        <strong style="color: #fb923c">Single-ended (RS232)</strong> — noise adds
+                        directly to the received waveform. Crank up the slider and the logic levels
+                        start to smear.
+                      </div>
+                    </div>
+                    <div class="diagram-box">
+                      <canvas id="diffCanvas" width="440" height="220"></canvas>
+                      <div class="diagram-cap">
+                        <strong style="color: #22d3ee">Differential (RS485/RS422)</strong> — A and B
+                        both pick up the same noise; the receiver's subtraction
+                        (A&nbsp;&minus;&nbsp;B) recovers a clean signal.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="info-box">
+                    <strong>Why this matters for your PCB:</strong> because rejection depends on
+                    both wires seeing <em>identical</em> noise, differential pairs must be routed
+                    close together, length-matched, and over a continuous ground plane. Break that
+                    symmetry and you throw away the very advantage you paid for. (Module 7 covers
+                    layout.)
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── SECTION 3: COMPARISON TABLE ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📊 &nbsp;3. The Comparison Table</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    The single most useful reference in this whole course. Keep it on your bench.
+                  </p>
+                  <div style="overflow-x: auto">
+                    <table class="iface-spec-table">
+                      <thead>
+                        <tr>
+                          <th>Parameter</th>
+                          <th class="cmp-232">RS232</th>
+                          <th class="cmp-485">RS485</th>
+                          <th class="cmp-422">RS422</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Signal type</strong></td>
+                          <td>Single-ended</td>
+                          <td>Differential</td>
+                          <td>Differential</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Logic / voltage levels</strong></td>
+                          <td>&plusmn;3 V to &plusmn;15 V (driver)</td>
+                          <td>Diff. &plusmn;1.5 V to &plusmn;5 V</td>
+                          <td>Diff. &plusmn;2 V to &plusmn;5 V</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Max cable length*</strong></td>
+                          <td>~15 m (50 ft)</td>
+                          <td>~1200 m (4000 ft)</td>
+                          <td>~1200 m (4000 ft)</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Max data rate*</strong></td>
+                          <td>~20 kbps (up to ~1 Mbps short)</td>
+                          <td>~10 Mbps (short) / ~100 kbps @ 1200 m</td>
+                          <td>~10 Mbps (short) / ~100 kbps @ 1200 m</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Topology</strong></td>
+                          <td>Point-to-point</td>
+                          <td>Multidrop / multipoint bus</td>
+                          <td>Point-to-point (multi-receiver)</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Max drivers / receivers</strong></td>
+                          <td>1 driver / 1 receiver</td>
+                          <td>32 drivers / 32 receivers (unit loads)</td>
+                          <td>1 driver / 10 receivers</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Duplex</strong></td>
+                          <td>Full duplex</td>
+                          <td>Half duplex (typ.) / full with 2 pairs</td>
+                          <td>Full duplex (separate TX/RX pairs)</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Bus termination</strong></td>
+                          <td>Not required</td>
+                          <td>120 &Omega; at each end</td>
+                          <td>120 &Omega; at receiver end</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem">
+                    * Cable length and data rate are inversely related — the reference points above
+                    are common industry figures, not simultaneous maximums. The next section makes
+                    that trade-off interactive.
+                  </p>
+                </div>
+              </div>
+
+              <!-- ── SECTION 4: PLOTLY CHART ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📈 &nbsp;4. Cable Length vs Data Rate (Live Chart)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    You can have distance <em>or</em> speed — rarely both. As cable gets longer,
+                    capacitance and reflections force you to slow down. This log-log Plotly chart
+                    plots the practical operating envelope for each interface. Hover any point for
+                    the exact values.
+                  </p>
+                  <div id="lenRateChart" style="width: 100%; height: 420px"></div>
+                  <div class="tip-box">
+                    <strong>Reading the chart:</strong> RS485/RS422 (the differential pair) hold a
+                    high data rate far longer before the length wall forces them down, and they
+                    reach ~1200&nbsp;m. RS232 collapses early — its single-ended swing simply can't
+                    fight cable capacitance and noise over distance.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── SECTION 5: DECISION GUIDE ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🧭 &nbsp;5. Which Interface Should I Use?</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">A one-line decision aid for the schematic-capture stage:</p>
+                  <div class="decision-card o232">
+                    <h4><span class="cmp-232">Choose RS232</span> when…</h4>
+                    <p>
+                      Short cable (&lt;15 m), a single device, full-duplex, and you want the
+                      simplest possible link — e.g. a bench instrument, a console/debug port, or a
+                      legacy PC peripheral.
+                    </p>
+                  </div>
+                  <div class="decision-card o485">
+                    <h4><span class="cmp-485">Choose RS485</span> when…</h4>
+                    <p>
+                      Long cable and/or multiple devices on one bus (multidrop) — e.g. Modbus RTU,
+                      building automation, motor networks, sensor strings. Half-duplex is fine and
+                      you want maximum node count and noise immunity.
+                    </p>
+                  </div>
+                  <div class="decision-card o422">
+                    <h4><span class="cmp-422">Choose RS422</span> when…</h4>
+                    <p>
+                      Point-to-point over distance <em>and</em> you need simultaneous two-way
+                      (full-duplex) traffic, or one transmitter broadcasting to several receivers —
+                      e.g. encoder feedback, long full-duplex links.
+                    </p>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Rule of thumb:</strong> the moment your cable leaves the enclosure or
+                    exceeds a few metres, reach for a differential interface (RS485/RS422). Distance
+                    and electrical noise are exactly where single-ended RS232 falls apart.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── KNOWLEDGE CHECK ── -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;6. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Five questions. Click an answer to check it — feedback appears instantly.
+                  </p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="
+                      margin-top: 1rem;
+                      font-weight: 700;
+                      color: var(--cyan, #22d3ee);
+                      display: none;
+                    "
+                  ></div>
+                </div>
+              </div>
+
+              <!-- NEXT -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="index.html">← Course Home</a>
+                <a class="btn btn-primary" href="02-signal-levels.html"
+                  >Next: Signal Levels &amp; Duplex →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      // ── Collapsible sections ──
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+
+      // ── Progress bar (fraction of sections opened + quiz answered) ──
+      var opened = {};
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var openCount = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b, i) {
+          if (!b.classList.contains('collapsed')) {
+            openCount++;
+          }
+        });
+        var pct = Math.round((openCount / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+
+      // ── Single-ended vs differential animation ──
+      (function () {
+        var se = document.getElementById('seCanvas');
+        var diff = document.getElementById('diffCanvas');
+        var seCtx = se.getContext('2d');
+        var diffCtx = diff.getContext('2d');
+        var noiseEl = document.getElementById('noise');
+        var noiseValEl = document.getElementById('noiseVal');
+        var pauseBtn = document.getElementById('pauseBtn');
+        var running = true;
+        var t = 0;
+
+        noiseEl.addEventListener('input', function () {
+          noiseValEl.textContent = noiseEl.value + '%';
+        });
+        pauseBtn.addEventListener('click', function () {
+          running = !running;
+          pauseBtn.textContent = running ? 'Pause' : 'Play';
+        });
+
+        function css(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return v ? v.trim() : fallback;
+        }
+
+        // deterministic pseudo-noise so both canvases share the SAME noise sample
+        function noiseAt(x, phase) {
+          return (
+            Math.sin(x * 0.17 + phase) * 0.5 +
+            Math.sin(x * 0.41 + phase * 1.7) * 0.3 +
+            Math.sin(x * 0.09 + phase * 0.6) * 0.2
+          );
+        }
+
+        // clean digital data pattern
+        function dataAt(x, phase) {
+          var bit = Math.floor((x + phase * 20) / 55) % 2;
+          return bit === 0 ? 1 : -1;
+        }
+
+        function drawSingle(ctx, W, H, phase, nAmp) {
+          ctx.clearRect(0, 0, W, H);
+          var mid = H / 2;
+          var amp = H * 0.28;
+          var textCol = css('--text-muted', '#94a3b8');
+          // grid baseline
+          ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, mid);
+          ctx.lineTo(W, mid);
+          ctx.stroke();
+          // received = data + noise
+          ctx.strokeStyle = '#fb923c';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (var x = 0; x <= W; x++) {
+            var y = mid - (dataAt(x, phase) + noiseAt(x, phase) * nAmp) * amp;
+            if (x === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+          ctx.fillStyle = textCol;
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText('Received = signal + noise', 8, 16);
+        }
+
+        function drawDiff(ctx, W, H, phase, nAmp) {
+          ctx.clearRect(0, 0, W, H);
+          var mid = H / 2;
+          var amp = H * 0.16;
+          var textCol = css('--text-muted', '#94a3b8');
+          ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, mid);
+          ctx.lineTo(W, mid);
+          ctx.stroke();
+          // A wire (signal + noise), faint
+          ctx.strokeStyle = 'rgba(34,211,238,0.35)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          for (var x = 0; x <= W; x++) {
+            var a = mid - amp * 1.2 - (dataAt(x, phase) + noiseAt(x, phase) * nAmp) * amp;
+            if (x === 0) {
+              ctx.moveTo(x, a);
+            } else {
+              ctx.lineTo(x, a);
+            }
+          }
+          ctx.stroke();
+          // B wire (inverted signal + SAME noise), faint
+          ctx.strokeStyle = 'rgba(167,139,250,0.35)';
+          ctx.beginPath();
+          for (var x2 = 0; x2 <= W; x2++) {
+            var b = mid + amp * 1.2 - (-dataAt(x2, phase) + noiseAt(x2, phase) * nAmp) * amp;
+            if (x2 === 0) {
+              ctx.moveTo(x2, b);
+            } else {
+              ctx.lineTo(x2, b);
+            }
+          }
+          ctx.stroke();
+          // Recovered = A - B  → noise cancels
+          ctx.strokeStyle = '#22d3ee';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          for (var x3 = 0; x3 <= W; x3++) {
+            var diffV = 2 * dataAt(x3, phase); // noise terms cancel
+            var y = mid - diffV * amp;
+            if (x3 === 0) {
+              ctx.moveTo(x3, y);
+            } else {
+              ctx.lineTo(x3, y);
+            }
+          }
+          ctx.stroke();
+          ctx.fillStyle = textCol;
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText('A (faint)   B (faint)   A − B = clean', 8, 16);
+        }
+
+        function loop() {
+          if (running) {
+            t += 0.6;
+          }
+          var nAmp = (parseInt(noiseEl.value, 10) / 100) * 1.2;
+          drawSingle(seCtx, se.width, se.height, t, nAmp);
+          drawDiff(diffCtx, diff.width, diff.height, t, nAmp);
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
+
+      // ── Plotly: cable length vs data rate ──
+      (function () {
+        if (!window.Plotly) {
+          return;
+        }
+        var isLight = document.documentElement.dataset.theme === 'light';
+        var fontCol = isLight ? '#334155' : '#cbd5e1';
+        var gridCol = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+
+        // Representative operating envelopes (length m vs data rate bps)
+        var rs232 = {
+          x: [1, 3, 8, 15, 30],
+          y: [1000000, 200000, 38400, 20000, 9600],
+          name: 'RS232',
+          mode: 'lines+markers',
+          line: { color: '#fb923c', width: 3 },
+          marker: { size: 7 },
+        };
+        var rs485 = {
+          x: [1, 10, 100, 300, 1200],
+          y: [10000000, 10000000, 1000000, 400000, 100000],
+          name: 'RS485',
+          mode: 'lines+markers',
+          line: { color: '#22d3ee', width: 3 },
+          marker: { size: 7 },
+        };
+        var rs422 = {
+          x: [1, 10, 100, 300, 1200],
+          y: [10000000, 10000000, 1000000, 400000, 100000],
+          name: 'RS422',
+          mode: 'lines+markers',
+          line: { color: '#a78bfa', width: 3, dash: 'dot' },
+          marker: { size: 7 },
+        };
+
+        var layout = {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: fontCol, family: 'Inter, sans-serif', size: 12 },
+          margin: { l: 70, r: 20, t: 10, b: 55 },
+          xaxis: {
+            title: 'Cable length (m)',
+            type: 'log',
+            gridcolor: gridCol,
+            zeroline: false,
+          },
+          yaxis: {
+            title: 'Max data rate (bps)',
+            type: 'log',
+            gridcolor: gridCol,
+            zeroline: false,
+          },
+          legend: { orientation: 'h', y: 1.12, x: 0 },
+          hovermode: 'closest',
+        };
+        Plotly.newPlot('lenRateChart', [rs232, rs485, rs422], layout, {
+          displayModeBar: false,
+          responsive: true,
+        });
+      })();
+
+      // ── Quiz ──
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'Why can RS485 run far longer cables than RS232?',
+            options: [
+              'It uses a higher supply voltage',
+              'It is differential, so common-mode noise cancels at the receiver',
+              'It uses thicker copper wire by specification',
+              'It transmits data more slowly by design',
+            ],
+            correct: 1,
+            fb: 'Differential signaling sends equal-and-opposite voltages on two wires; noise couples into both and cancels when the receiver subtracts them.',
+          },
+          {
+            q: 'Which interface is designed for a multidrop bus with many nodes on one twisted pair?',
+            options: ['RS232', 'RS422', 'RS485', 'None — all are point-to-point'],
+            correct: 2,
+            fb: 'RS485 supports multipoint/multidrop — up to 32 unit loads (more with modern transceivers) on a single bus.',
+          },
+          {
+            q: 'What is the approximate driver voltage swing for RS232?',
+            options: [
+              '±1.5 V to ±5 V differential',
+              '0 V to 3.3 V logic',
+              '±3 V to ±15 V single-ended',
+              '±48 V to ±60 V',
+            ],
+            correct: 2,
+            fb: 'RS232 drivers swing roughly ±3 V to ±15 V measured against ground (single-ended).',
+          },
+          {
+            q: 'You need a point-to-point link over 200 m with simultaneous two-way (full-duplex) traffic. Best choice?',
+            options: ['RS232', 'RS422', 'RS485 half-duplex', 'USB'],
+            correct: 1,
+            fb: 'RS422 is point-to-point, differential (long distance), and full-duplex via separate TX and RX pairs.',
+          },
+          {
+            q: 'Which statement about bus termination is correct?',
+            options: [
+              'RS232 point-to-point links need 120 Ω termination at each end',
+              'RS485/RS422 buses use 120 Ω termination to match twisted-pair impedance',
+              'Termination is only about limiting current, not reflections',
+              'No serial interface ever needs termination',
+            ],
+            correct: 1,
+            fb: '120 Ω matches the characteristic impedance of typical twisted pair and suppresses reflections. RS232 point-to-point does not need bus termination.',
+          },
+        ];
+
+        var answered = 0;
+        var correctCount = 0;
+        var wrap = document.getElementById('quiz');
+
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h = document.createElement('div');
+          h.className = 'quiz-question';
+          h.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var s = document.getElementById('quizScore');
+                s.style.display = 'block';
+                s.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

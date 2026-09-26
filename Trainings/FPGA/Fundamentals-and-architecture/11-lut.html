@@ -1,0 +1,1616 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep dive into LUT6 architecture, truth tables, distributed RAM, SRL modes, and LUT chaining in Xilinx 7-series FPGAs."
+    />
+    <title>Lookup Tables (LUT) | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/11-lut.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .lut-sim {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .lut-inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .lut-input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        background: var(--bg-muted);
+        border: 1.5px solid var(--border);
+      }
+      .lut-input-group input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #22d3ee;
+      }
+      .lut-input-group label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+        cursor: pointer;
+        font-family: monospace;
+      }
+      .lut-output-display {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-radius: 10px;
+        border: 2px solid var(--border);
+        background: var(--bg-muted);
+        margin-bottom: 16px;
+      }
+      .lut-output-val {
+        font-size: 2.5rem;
+        font-weight: 900;
+        font-family: monospace;
+        min-width: 48px;
+        text-align: center;
+      }
+      .lut-output-val.one {
+        color: #34d399;
+      }
+      .lut-output-val.zero {
+        color: #f87171;
+      }
+      .lut-addr-display {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-family: monospace;
+      }
+      .truth-table-mini {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: monospace;
+        font-size: 0.78rem;
+        max-height: 220px;
+        overflow-y: auto;
+        display: block;
+      }
+      .truth-table-mini th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+      }
+      .truth-table-mini td {
+        padding: 5px 10px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+      }
+      .truth-table-mini tr.selected td {
+        background: rgba(34, 211, 238, 0.15);
+        color: #22d3ee;
+        font-weight: 700;
+      }
+      .lut-preset-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .lut-preset-btn {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg-muted);
+        color: var(--text-sub);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .lut-preset-btn:hover,
+      .lut-preset-btn.active {
+        border-color: #22d3ee;
+        color: #22d3ee;
+        background: rgba(34, 211, 238, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item active" data-module="lesson-11"
+            >11. Lookup Tables</a
+          >
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Lookup Tables (LUT)</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 11/25</span><span>44%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 44%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 11 OF 25</span>
+                <span class="badge">15 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Lookup Tables (LUT)
+              </h1>
+              <p class="subtitle">
+                Understand how a 64-bit SRAM cell implements any Boolean function — the heart of
+                every FPGA logic block. Learn LUT6 structure, truth tables, distributed RAM, shift
+                register, and chaining modes.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                What is a LUT?
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                A <strong>Look-Up Table (LUT)</strong> is a small SRAM that stores the truth table
+                of any Boolean function. A 6-input LUT (LUT6) contains 2<sup>6</sup> =
+                <strong>64 memory cells</strong>, each holding one bit. The six address inputs A1–A6
+                select one of the 64 cells, and the stored value appears at the output. This single
+                mechanism allows an FPGA to implement <em>any</em> logic function — AND, OR, XOR,
+                complex combinational expressions — without using physical logic gates.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                During bitstream loading, the synthesis and implementation tools program each LUT's
+                64 SRAM cells with the correct truth table values. A new bitstream reprograms those
+                cells to implement a completely different function — this is the core of FPGA
+                reconfigurability.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>Key Concept</strong>
+                The LUT6 can implement any Boolean function of up to 6 inputs in a single pass. The
+                synthesis tool determines the optimal 64-bit INIT value during synthesis — you never
+                need to set it manually for normal designs.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT6 Internal Structure
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 8px">
+                The LUT6 in Xilinx 7-series (and later families) has the following internal
+                organization:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li><strong>Memory array:</strong> 64 × 1-bit SRAM cells</li>
+                <li>
+                  <strong>Address inputs:</strong> A1–A6 (6-bit address, 2<sup>6</sup> = 64 entries)
+                </li>
+                <li>
+                  <strong>O6 output:</strong> Full LUT6 mode — uses all 64 bits, all 6 inputs active
+                </li>
+                <li>
+                  <strong>O5 output:</strong> LUT5 mode — uses only the first 32 bits (A1–A5
+                  address), A6 ignored
+                </li>
+                <li>
+                  <strong>Dual-output mode:</strong> O5 and O6 can implement two
+                  <em>independent</em> 5-input functions simultaneously if they share inputs A1–A5
+                </li>
+              </ul>
+
+              <div class="mermaid">
+                graph LR A1[A1] --> MEM[64x1-bit\nSRAM Memory] A2[A2] --> MEM A3[A3] --> MEM A4[A4]
+                --> MEM A5[A5] --> MEM A6[A6] --> MEM MEM --> O6[O6 Output] MEM --> O5[O5
+                Output\nFirst 32-bits only] O6 --> FF[D Flip-Flop\nOptional register] FF -->
+                Q[Registered output]
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Truth Table and INIT String
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                The <strong>INIT parameter</strong> is the 64-bit hexadecimal value programmed into
+                the LUT. Each bit in the INIT string corresponds to one row of the truth table, with
+                bit position equal to the decimal value of {A6,A5,A4,A3,A2,A1}.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 8px">
+                Example — 6-input AND gate: The output is 1 only when all six inputs are 1, which is
+                address 63 (binary 111111). So only bit 63 of INIT is 1:
+              </p>
+              <pre
+                style="
+                  background: var(--bg-muted);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-family: monospace;
+                  font-size: 0.82rem;
+                  color: var(--text-base);
+                  overflow-x: auto;
+                  margin-bottom: 16px;
+                "
+              >
+// 6-input AND gate — only address 63 (all inputs high) gives output 1
+INIT = 64'h8000000000000000
+
+// 3-input AND (A1, A2, A3) — address 7 (binary 000111) gives output 1
+INIT = 64'h0000000000000080
+
+// 6-input XOR — output 1 when odd number of inputs are high
+INIT = 64'h6996966996696996
+
+// 4-input MUX (A5=select, A1-A4=data)
+// Automatically inferred by synthesis from Verilog: assign y = sel ? d1 : d0;</pre>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — LUT Fractioning</strong>
+                LUT6 can simultaneously output two independent 5-input functions (O5 and O6) if they
+                share inputs A1–A5. Vivado automatically exploits this to reduce LUT count — called
+                "LUT fractioning." A design that appears to need 100 LUTs may fit in 70 after
+                fractioning.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT as a 2:1 Multiplexer
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                When A6 acts as a select signal, the LUT6 naturally implements a 2:1 MUX between two
+                independent 5-input functions computed on A1–A5. This is fundamental to how wide
+                multiplexers and priority encoders are built in FPGA fabric. A 4:1 MUX uses two LUTs
+                plus the F7MUX.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT Chaining — F7MUX and F8MUX
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each Slice contains dedicated multiplexers that chain LUT6 outputs:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong>F7MUX:</strong> Combines two LUT6 O6 outputs with a select signal →
+                  implements any 7-input function
+                </li>
+                <li>
+                  <strong>F8MUX:</strong> Combines two F7MUX outputs → implements any 8-input
+                  function
+                </li>
+                <li>
+                  These paths use dedicated silicon wires, not the general routing matrix — adding
+                  only ~0.1ns delay
+                </li>
+                <li>
+                  Critical for wide address decoding: 16:1 MUX uses 2 F7MUXes + 1 F8MUX = 4 LUTs
+                </li>
+              </ul>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT as Distributed RAM (Slice M Only)
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                In <strong>Slice M</strong> (not Slice L), the LUT SRAM can be written — making it a
+                64×1-bit RAM. Key properties:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong>Write port:</strong> Synchronous — write occurs on clock edge when write
+                  enable is asserted
+                </li>
+                <li>
+                  <strong>Read port:</strong> Asynchronous by default — data available immediately
+                  without waiting for a clock
+                </li>
+                <li>
+                  <strong>Combining LUTs:</strong> Four LUTs in a Slice M → 256×1-bit RAM (or
+                  64×4-bit RAM)
+                </li>
+                <li>
+                  <strong>Use cases:</strong> Small register files, FIFOs, coefficient tables, shift
+                  registers
+                </li>
+              </ul>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT as Shift Register (SRL)
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                A single LUT6 in Slice M can be configured as a 32-bit shift register (SRL32) or
+                16-bit shift register (SRL16E):
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>Synchronous shift operation on clock edge</li>
+                <li>
+                  Dynamic tap selection via 5-bit address input — read any bit position at runtime
+                </li>
+                <li>Extremely efficient: replaces 32 flip-flops with 1 LUT for delay lines</li>
+                <li>Used for: pipeline delay compensation, audio buffers, deserializers</li>
+              </ul>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: How many different Boolean functions can a LUT6 implement?<br />
+                A: 2<sup>64</sup> distinct 6-input Boolean functions. Every possible truth table
+                configuration of 6 inputs can be stored in the 64 SRAM cells. This is why LUT6 can
+                implement literally any 6-input logic function.
+              </div>
+
+              <!-- LUT Operating Modes Table -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT Operating Modes
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Address Bits</th>
+                    <th>Memory Depth</th>
+                    <th>Output</th>
+                    <th>Use Case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>LUT6 Logic</td>
+                    <td>A1–A6 (6-bit)</td>
+                    <td>64 bits</td>
+                    <td>O6</td>
+                    <td>Any 6-input Boolean function</td>
+                  </tr>
+                  <tr>
+                    <td>LUT5 Logic</td>
+                    <td>A1–A5 (5-bit)</td>
+                    <td>32 bits</td>
+                    <td>O5</td>
+                    <td>Any 5-input Boolean function (A6 unused)</td>
+                  </tr>
+                  <tr>
+                    <td>Dual 5-input</td>
+                    <td>A1–A5 shared</td>
+                    <td>32+32 bits</td>
+                    <td>O5 + O6</td>
+                    <td>Two independent 5-input functions simultaneously</td>
+                  </tr>
+                  <tr>
+                    <td>Distributed RAM</td>
+                    <td>A1–A6 (write addr)</td>
+                    <td>64×1-bit SRAM</td>
+                    <td>O6 (async read)</td>
+                    <td>Small LUTs, register files (Slice M only)</td>
+                  </tr>
+                  <tr>
+                    <td>SRL32</td>
+                    <td>5-bit tap select</td>
+                    <td>32-bit shift reg</td>
+                    <td>Tap output</td>
+                    <td>Delay lines, FIFOs, pipeline alignment</td>
+                  </tr>
+                  <tr>
+                    <td>ROM</td>
+                    <td>A1–A6</td>
+                    <td>64 bits (fixed)</td>
+                    <td>O6</td>
+                    <td>Coefficient tables, constant lookup</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Vendor Comparison Table -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT Size Comparison Across FPGA Vendors
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendor / Family</th>
+                    <th>LUT Inputs</th>
+                    <th>SRAM Cells</th>
+                    <th>Dual Output</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Xilinx 7-series / UltraScale (AMD)</td>
+                    <td>6</td>
+                    <td>64</td>
+                    <td>Yes (O5+O6)</td>
+                    <td>Industry-leading — LUT6 dual output for fractioning</td>
+                  </tr>
+                  <tr>
+                    <td>Intel (Altera) ALM</td>
+                    <td>8 (adaptive)</td>
+                    <td>256 (shared)</td>
+                    <td>Yes (2×4-input)</td>
+                    <td>Adaptive Logic Module — configures as two 4-input or one 6-input</td>
+                  </tr>
+                  <tr>
+                    <td>Lattice ECP5</td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>No</td>
+                    <td>Simpler LUT4; more LUTs needed for 5-6 input functions</td>
+                  </tr>
+                  <tr>
+                    <td>Lattice iCE40</td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>No</td>
+                    <td>Ultra-low power; basic LUT4 architecture</td>
+                  </tr>
+                  <tr>
+                    <td>Microchip PolarFire</td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>Partial</td>
+                    <td>4-input LUT with carry and optional register</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- LUT Utilization -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                LUT Utilization Reporting in Vivado
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                After synthesis or implementation, Vivado's Utilization Report shows:
+              </p>
+              <pre
+                style="
+                  background: var(--bg-muted);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-family: monospace;
+                  font-size: 0.82rem;
+                  color: var(--text-base);
+                  overflow-x: auto;
+                  margin-bottom: 16px;
+                "
+              >
++----------------------------+-------+------+------------+
+|          Site Type         |  Used | Avail | Util% |
++----------------------------+-------+------+------------+
+| Slice LUTs                 |  4832 | 20800 | 23.23 |
+|   LUT as Logic             |  4120 | 20800 | 19.81 |
+|   LUT as Memory            |   512 |  9600 |  5.33 |
+|     LUT as Distributed RAM |   384 |  9600 |  4.00 |
+|     LUT as Shift Register  |   128 |  9600 |  1.33 |
++----------------------------+-------+------+------------+</pre>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Each Slice contains 4 LUTs. A design using 4832 Slice LUTs occupies approximately
+                1208 Slices. "LUT as Logic" is pure combinational/sequential logic. "LUT as Memory"
+                means the SRAM write capability is used (Slice M only).
+              </p>
+
+              <div class="callout callout-warning">
+                <strong>Common Mistake — Manual LUT Optimization</strong>
+                New FPGA engineers try to optimize LUT count manually by rewriting logic. Let the
+                synthesis tool do it — Vivado's optimizer will pack LUTs more efficiently than
+                manual effort in almost every case. Focus on writing clean, readable RTL and proper
+                architecture; optimize only if you genuinely exceed device capacity.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Best Practice — LUT Input Count</strong>
+                Design logic to use 4–6 inputs per LUT for best efficiency. Functions needing 7+
+                inputs require multiple LUTs and F7/F8 MUXes, increasing delay by one routing hop
+                (~0.1–0.3ns). Break large Boolean expressions into 5-6 input sub-expressions in RTL.
+              </div>
+
+              <!-- Interactive LUT Simulator -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Interactive LUT Simulator
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Toggle inputs A1–A6 to see which truth table address is selected and what the LUT
+                output is. Choose a preset function to load its INIT value.
+              </p>
+
+              <div class="lut-sim">
+                <div style="margin-bottom: 16px">
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.06em;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    Preset Functions
+                  </p>
+                  <div class="lut-preset-btns">
+                    <button class="lut-preset-btn active" onclick="setPreset('and4')">
+                      4-input AND
+                    </button>
+                    <button class="lut-preset-btn" onclick="setPreset('or4')">4-input OR</button>
+                    <button class="lut-preset-btn" onclick="setPreset('xor6')">6-input XOR</button>
+                    <button class="lut-preset-btn" onclick="setPreset('maj3')">
+                      3-input Majority
+                    </button>
+                    <button class="lut-preset-btn" onclick="setPreset('mux21')">2:1 MUX</button>
+                  </div>
+                </div>
+                <div style="margin-bottom: 16px">
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.06em;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    Input Values
+                  </p>
+                  <div class="lut-inputs" id="lut-inputs"></div>
+                </div>
+                <div class="lut-output-display">
+                  <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px">
+                      Address (A6..A1)
+                    </div>
+                    <div class="lut-addr-display" id="lut-addr">000000 = 0</div>
+                  </div>
+                  <div style="flex: 1; text-align: center">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px">
+                      LUT Output (O6)
+                    </div>
+                    <div class="lut-output-val zero" id="lut-out">0</div>
+                  </div>
+                  <div style="text-align: right">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px">
+                      Function
+                    </div>
+                    <div
+                      style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub)"
+                      id="lut-fn-label"
+                    >
+                      4-input AND
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 16px">
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.06em;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    INIT Value (64-bit hex)
+                  </p>
+                  <div
+                    style="
+                      font-family: monospace;
+                      font-size: 0.85rem;
+                      color: var(--text-base);
+                      background: var(--bg-muted);
+                      padding: 10px 14px;
+                      border-radius: 8px;
+                      border: 1px solid var(--border);
+                    "
+                    id="lut-init-display"
+                  >
+                    64'h0000000000008000
+                  </div>
+                </div>
+                <div style="margin-top: 16px">
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.06em;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    Truth Table (scroll to see all 64 rows)
+                  </p>
+                  <div
+                    style="
+                      max-height: 220px;
+                      overflow-y: auto;
+                      border: 1px solid var(--border);
+                      border-radius: 8px;
+                    "
+                  >
+                    <table class="truth-table-mini" id="lut-truth-table">
+                      <thead>
+                        <tr>
+                          <th>Addr</th>
+                          <th>A6</th>
+                          <th>A5</th>
+                          <th>A4</th>
+                          <th>A3</th>
+                          <th>A2</th>
+                          <th>A1</th>
+                          <th>Out</th>
+                        </tr>
+                      </thead>
+                      <tbody id="lut-truth-body"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <div class="quiz-q">1. How many memory cells are in a LUT6?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>16</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>32</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>64</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>128</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb1">
+                  Correct! 2<sup>6</sup> = 64 cells. Six address inputs select among 64 possible
+                  SRAM cells, one per row of the truth table.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <div class="quiz-q">2. What is the LUT6 INIT parameter?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The default output value when all inputs are 0</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The 64-bit hexadecimal truth table value programmed into the LUT</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The initialization delay in nanoseconds</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The number of inputs used by the function</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb2">
+                  Correct! INIT is the 64-bit hex value stored in the LUT SRAM cells. Each bit
+                  corresponds to one row of the truth table. Synthesis tools compute and set this
+                  automatically.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <div class="quiz-q">3. LUT5 mode (O5 output) uses how many of the 64 cells?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>16</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>32</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>48</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>64</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb3">
+                  Correct! LUT5 mode uses inputs A1–A5 only (2<sup>5</sup> = 32 cells). A6 is not
+                  used, so only the first 32 of the 64 SRAM cells are addressed.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <div class="quiz-q">
+                  4. Can a LUT6 output two independent functions simultaneously?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>No — one LUT can only produce one output</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span
+                      >Yes — using O5 and O6 outputs for two 5-input functions sharing A1–A5</span
+                    >
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>Yes — but only for XOR functions</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>Only with external multiplexers</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb4">
+                  Correct! When two 5-input functions share the same inputs A1–A5, O5 gives one
+                  function (lower 32 bits of INIT) and O6 gives another (upper 32 bits). This is LUT
+                  fractioning.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <div class="quiz-q">
+                  5. Which Slice type allows the LUT to be used as distributed RAM?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>Slice L only</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>Slice M only</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>Both Slice L and Slice M</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>Any Slice with a BRAM adjacent</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb5">
+                  Correct! Only Slice M has the write circuitry needed to use the LUT SRAM as
+                  distributed RAM or SRL. Slice L LUTs are read-only (used purely as logic).
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q6">
+                <div class="quiz-q">6. What is F7MUX used for?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Connecting two CLBs across the routing matrix</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Multiplexing flip-flop outputs to I/O pins</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Combining two LUT6 outputs for 7-input functions</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Selecting between clock domains</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb6">
+                  Correct! F7MUX is a dedicated multiplexer inside the Slice that combines the O6
+                  outputs of two LUT6s with a select input to implement any 7-input function in just
+                  two LUT delays.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div
+                style="
+                  background: var(--bg-card);
+                  border: 1px solid var(--border);
+                  border-radius: 12px;
+                  padding: 24px;
+                  margin: 16px 0;
+                "
+              >
+                <p style="font-weight: 700; color: var(--text-base); margin-bottom: 12px">
+                  Manual LUT Mapping
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(a)</strong> Write the 64-bit INIT value for a 3-input majority function.
+                  The output is 1 when 2 or more of A1, A2, A3 are high. Which address entries
+                  (0–63) should have output = 1? (Hint: {A3,A2,A1} must have popcount ≥ 2.)
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(b)</strong> Write the INIT for a 6-input XOR gate. The output is 1 when
+                  an odd number of inputs are high. (Hint: try toggling inputs in the simulator
+                  above — the XOR preset shows you the answer.)
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(c)</strong> In Vivado, create a Verilog module:
+                  <code
+                    style="
+                      font-family: monospace;
+                      background: var(--bg-muted);
+                      padding: 2px 6px;
+                      border-radius: 4px;
+                    "
+                    >assign y = a &amp; b &amp; c;</code
+                  >
+                  After synthesis, open the schematic (F4), double-click the LUT primitive, and find
+                  its INIT value in the properties panel. Does it match your hand-calculated value?
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8">
+                  <strong>(d)</strong> Change the logic to a 7-input AND. Re-synthesize. How many
+                  LUTs does Vivado use now? What F7/F8 MUX structures appear in the schematic?
+                </p>
+              </div>
+              <div class="lesson-nav">
+                <a href="10-slices.html">← Slices</a>
+                <a href="12-flip-flops.html">Flip-Flops →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-11';
+      const TOTAL = 25;
+
+      // LUT Simulator
+      const PRESETS = {
+        and4: {
+          fn: a => ((a & 0xf) === 0xf ? 1 : 0),
+          label: '4-input AND',
+          initHi: BigInt('0x0000000000008000'),
+        },
+        or4: {
+          fn: a => ((a & 0xf) !== 0 ? 1 : 0),
+          label: '4-input OR',
+          initHi: BigInt('0xFFFFFFFFFFFE0000'),
+        },
+        xor6: {
+          fn: a => {
+            let b = a,
+              p = 0;
+            while (b) {
+              p ^= b & 1;
+              b >>= 1;
+            }
+            return p;
+          },
+          label: '6-input XOR',
+          initHi: BigInt('0x6996966996696996'),
+        },
+        maj3: {
+          fn: a => {
+            const b = a & 7;
+            return b === 3 || b === 5 || b === 6 || b === 7 ? 1 : 0;
+          },
+          label: '3-input Majority',
+          initHi: BigInt('0x00000000E8E8E8E8'),
+        },
+        mux21: {
+          fn: a => {
+            const sel = (a >> 4) & 1,
+              d0 = a & 1,
+              d1 = (a >> 1) & 1;
+            return sel ? d1 : d0;
+          },
+          label: '2:1 MUX (A5=sel,A1=d0,A2=d1)',
+          initHi: BigInt('0xAAAA0000AAAA0000'),
+        },
+      };
+      let currentPreset = 'and4';
+      let inputVals = [0, 0, 0, 0, 0, 0]; // A1..A6
+
+      function bigIntToHex64(n) {
+        let h = n.toString(16).toUpperCase();
+        while (h.length < 16) h = '0' + h;
+        return "64'h" + h;
+      }
+
+      function buildInputs() {
+        const c = document.getElementById('lut-inputs');
+        c.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+          const g = document.createElement('div');
+          g.className = 'lut-input-group';
+          g.innerHTML = `<input type="checkbox" id="inp${i}" onchange="toggleInput(${i})"><label for="inp${i}">A${i + 1}</label>`;
+          c.appendChild(g);
+        }
+      }
+
+      function toggleInput(i) {
+        inputVals[i] = document.getElementById('inp' + i).checked ? 1 : 0;
+        updateLUT();
+      }
+
+      function updateLUT() {
+        const addr = inputVals.reduce((acc, v, i) => acc | (v << i), 0);
+        const p = PRESETS[currentPreset];
+        const out = p.fn(addr);
+        const addrBin = addr.toString(2).padStart(6, '0');
+        document.getElementById('lut-addr').textContent = addrBin + ' = ' + addr;
+        const outEl = document.getElementById('lut-out');
+        outEl.textContent = out;
+        outEl.className = 'lut-output-val ' + (out ? 'one' : 'zero');
+        buildTruthTable(addr);
+      }
+
+      function buildTruthTable(selAddr) {
+        const p = PRESETS[currentPreset];
+        const tb = document.getElementById('lut-truth-body');
+        tb.innerHTML = '';
+        for (let i = 0; i < 64; i++) {
+          const tr = document.createElement('tr');
+          if (i === selAddr) tr.className = 'selected';
+          const out = p.fn(i);
+          const bin = i.toString(2).padStart(6, '0');
+          tr.innerHTML = `<td>${i}</td><td>${bin[0]}</td><td>${bin[1]}</td><td>${bin[2]}</td><td>${bin[3]}</td><td>${bin[4]}</td><td>${bin[5]}</td><td>${out}</td>`;
+          tb.appendChild(tr);
+        }
+        if (selAddr >= 0) {
+          const rows = tb.querySelectorAll('tr');
+          if (rows[selAddr]) rows[selAddr].scrollIntoView({ block: 'nearest' });
+        }
+        // Compute INIT
+        let init = BigInt(0);
+        for (let i = 0; i < 64; i++) if (p.fn(i)) init |= BigInt(1) << BigInt(i);
+        document.getElementById('lut-init-display').textContent = bigIntToHex64(init);
+      }
+
+      function setPreset(name) {
+        currentPreset = name;
+        document.querySelectorAll('.lut-preset-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('lut-fn-label').textContent = PRESETS[name].label;
+        inputVals = [0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < 6; i++) {
+          const el = document.getElementById('inp' + i);
+          if (el) el.checked = false;
+        }
+        updateLUT();
+      }
+
+      async function loadProgress() {
+        try {
+          const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const t = s.accessToken || s.token || '';
+          if (!t) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const p = Math.round((done / TOTAL) * 100);
+          const sp = document.getElementById('sb-pct');
+          const sf = document.getElementById('sb-fill');
+          if (sp) sp.textContent = p + '%';
+          if (sf) sf.style.width = p + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          b.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        buildInputs();
+        updateLUT();
+      });
+    </script>
+  </body>
+</html>

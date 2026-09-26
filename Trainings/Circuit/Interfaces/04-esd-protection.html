@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 4: ESD protection front-end for serial interfaces — TVS diode topology, uni vs bidirectional, placement order, IEC 61000-4-2 test levels, and the connector→TVS→series→transceiver schematic with a live ESD strike animation."
+    />
+    <title>04 · ESD Protection Front-End | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/04-esd-protection.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .tvs-card {
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--cyan);
+        border-radius: var(--radius-lg);
+        background: var(--bg-muted);
+        padding: 1rem 1.25rem;
+      }
+      .tvs-card h4 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 0 0 0.35rem;
+      }
+      .tvs-card p {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item active"
+            >04. ESD Protection Front-End</a
+          >
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>04. ESD Protection Front-End</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 04</span>
+                <span class="badge badge-gray">~45 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>ESD Protection Front-End</h1>
+              <p class="subtitle">
+                Any connector reachable by a human finger — or a cable that runs outside the box —
+                will eventually take an electrostatic discharge. This module shows how a TVS diode
+                clamps that strike before it reaches your transceiver, why component order matters,
+                and what IEC 61000-4-2 levels to design against.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- SECTION 1: Strike animation -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>⚡ &nbsp;1. What an ESD Strike Does — Live Demo</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    An ESD event dumps thousands of volts into a signal pin in a nanosecond. Without
+                    protection, that spike hits the transceiver's input and can punch through its
+                    gate oxide instantly. A
+                    <strong>TVS (Transient Voltage Suppression) diode</strong>
+                    sits across the line and turns on the moment voltage exceeds its clamp level,
+                    shunting the surge to ground. Press the button to fire a strike.
+                  </p>
+                  <div class="sim-controls">
+                    <button class="btn btn-sm btn-primary" id="strikeBtn">
+                      ⚡ Fire ±8 kV strike
+                    </button>
+                    <label
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 0.82rem;
+                        color: var(--text-sub);
+                      "
+                    >
+                      <input type="checkbox" id="tvsOn" checked /> TVS fitted
+                    </label>
+                  </div>
+                  <div class="diagram-box">
+                    <canvas id="esdCanvas" width="880" height="240"></canvas>
+                    <div class="diagram-cap" id="esdCaption">
+                      With the TVS fitted, the voltage at the transceiver pin is clamped to a safe
+                      level. Uncheck "TVS fitted" and fire again to see the unclamped spike.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: Schematic -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📐 &nbsp;2. The Protection Front-End Schematic</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    The canonical, reusable topology for every serial line is
+                    <strong>connector → TVS → series element → transceiver</strong>. Order is not
+                    optional: the TVS must be the <em>first</em> thing the surge meets, and the
+                    series resistor/ferrite sits <em>after</em> it to limit any residual current
+                    into the IC.
+                  </p>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 760 200"
+                      width="100%"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="max-width: 760px"
+                    >
+                      <!-- signal line -->
+                      <line
+                        x1="40"
+                        y1="70"
+                        x2="720"
+                        y2="70"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <!-- connector -->
+                      <rect
+                        x="20"
+                        y="50"
+                        width="34"
+                        height="40"
+                        rx="4"
+                        fill="rgba(251,146,60,0.15)"
+                        stroke="#fb923c"
+                        stroke-width="1.5"
+                      />
+                      <text
+                        x="37"
+                        y="115"
+                        text-anchor="middle"
+                        font-size="11"
+                        fill="var(--text-sub)"
+                      >
+                        Connector
+                      </text>
+                      <text
+                        x="37"
+                        y="130"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="var(--text-muted)"
+                      >
+                        (ESD entry)
+                      </text>
+                      <!-- TVS to ground (bidirectional zener symbol) -->
+                      <line
+                        x1="210"
+                        y1="70"
+                        x2="210"
+                        y2="104"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <polygon
+                        points="198,104 222,104 210,120"
+                        fill="none"
+                        stroke="#22d3ee"
+                        stroke-width="2"
+                      />
+                      <polygon
+                        points="198,136 222,136 210,120"
+                        fill="none"
+                        stroke="#22d3ee"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="210"
+                        y1="136"
+                        x2="210"
+                        y2="150"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <!-- ground symbol -->
+                      <line
+                        x1="198"
+                        y1="150"
+                        x2="222"
+                        y2="150"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="202"
+                        y1="156"
+                        x2="218"
+                        y2="156"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="206"
+                        y1="162"
+                        x2="214"
+                        y2="162"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <text x="240" y="120" text-anchor="middle" font-size="11" fill="#22d3ee">
+                        TVS
+                      </text>
+                      <text x="255" y="55" font-size="10" fill="var(--text-muted)">1st: clamp</text>
+                      <!-- series resistor/ferrite -->
+                      <rect
+                        x="380"
+                        y="58"
+                        width="60"
+                        height="24"
+                        rx="3"
+                        fill="rgba(148,163,184,0.15)"
+                        stroke="var(--text-muted)"
+                        stroke-width="1.5"
+                      />
+                      <text
+                        x="410"
+                        y="74"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="var(--text-sub)"
+                      >
+                        R / FB
+                      </text>
+                      <text
+                        x="410"
+                        y="105"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="var(--text-muted)"
+                      >
+                        2nd: limit
+                      </text>
+                      <!-- transceiver -->
+                      <rect
+                        x="640"
+                        y="45"
+                        width="80"
+                        height="50"
+                        rx="4"
+                        fill="rgba(34,211,238,0.12)"
+                        stroke="#22d3ee"
+                        stroke-width="1.5"
+                      />
+                      <text
+                        x="680"
+                        y="74"
+                        text-anchor="middle"
+                        font-size="11"
+                        fill="var(--text-base)"
+                      >
+                        XCVR
+                      </text>
+                      <text
+                        x="680"
+                        y="112"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="var(--text-muted)"
+                      >
+                        (protected)
+                      </text>
+                    </svg>
+                    <div class="diagram-cap">
+                      Surge current takes the low-impedance path through the TVS to ground; only the
+                      clamped remainder passes the series element into the transceiver.
+                    </div>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Layout preview (Module 7):</strong> the TVS must be physically tight to
+                    the connector, with a short, fat path to the ground plane. Even a few nH of
+                    ground inductance ruins the clamp during a nanosecond-scale strike.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: uni vs bidirectional -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>↔️ &nbsp;3. Unidirectional vs Bidirectional TVS</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Choose the TVS by the signal's polarity swing. Get this wrong and the diode
+                    either fails to protect or clamps your own signal.
+                  </p>
+                  <div class="two-col">
+                    <div class="tvs-card">
+                      <h4 style="color: #22d3ee">Bidirectional TVS</h4>
+                      <p>
+                        For lines that swing <strong>both</strong> positive and negative — RS232
+                        (&plusmn;15 V) and RS485/RS422 differential lines that can go negative.
+                        Clamps symmetrically in both directions. Pick a stand-off voltage above the
+                        maximum normal signal swing.
+                      </p>
+                    </div>
+                    <div class="tvs-card">
+                      <h4 style="color: #fb923c">Unidirectional TVS</h4>
+                      <p>
+                        For lines that only swing one polarity (e.g. a 0&ndash;3.3 V logic line).
+                        Lower clamping in that direction, and it conducts like a normal diode the
+                        other way. Wrong choice for a bipolar RS232 line.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    <strong>Stand-off voltage rule:</strong> V<sub>WM</sub> (working/stand-off) must
+                    be ≥ the highest steady signal voltage, or the TVS leaks and loads your signal.
+                    For RS485 data lines a common choice is a bidirectional part rated around
+                    6&ndash;12 V stand-off.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: IEC levels -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📋 &nbsp;4. IEC 61000-4-2 Test Levels</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    The standard the whole industry designs against for ESD immunity is
+                    <strong>IEC 61000-4-2</strong>. It defines discharge levels and two coupling
+                    methods — <em>contact</em> (probe touches the port) and <em>air</em> (probe
+                    approaches until it arcs). A common baseline for a robust port is
+                    <strong>&plusmn;8 kV contact / &plusmn;15 kV air</strong>.
+                  </p>
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Level</th>
+                        <th>Contact discharge</th>
+                        <th>Air discharge</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td>±2 kV</td>
+                        <td>±2 kV</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td>±4 kV</td>
+                        <td>±4 kV</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td>±6 kV</td>
+                        <td>±8 kV</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td>±8 kV</td>
+                        <td>±15 kV</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="info-box">
+                    Match the TVS's rated ESD contact voltage (on its datasheet, also per IEC
+                    61000-4-2) to your target level. Many serial-line TVS arrays are rated to
+                    &plusmn;15 kV+ so they comfortably cover Level 4. Related standards: IEC
+                    61000-4-4 (fast transient/burst) and 61000-4-5 (surge) — covered in Module 8.
+                  </div>
+                </div>
+              </div>
+
+              <!-- QUIZ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;5. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">Answer to reveal instant feedback.</p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="margin-top: 1rem; font-weight: 700; color: var(--cyan); display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="03-connectors-pinouts.html"
+                  >← Connectors &amp; Pinouts</a
+                >
+                <a class="btn btn-primary" href="05-termination-biasing.html"
+                  >Next: Termination &amp; Biasing →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var open = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b) {
+          if (!b.classList.contains('collapsed')) {
+            open++;
+          }
+        });
+        var pct = Math.round((open / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+      function css(name, fb) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return v ? v.trim() : fb;
+      }
+
+      // ESD strike animation
+      (function () {
+        var c = document.getElementById('esdCanvas');
+        var ctx = c.getContext('2d');
+        var btn = document.getElementById('strikeBtn');
+        var tvsOn = document.getElementById('tvsOn');
+        var cap = document.getElementById('esdCaption');
+        var trace = [];
+        var W = c.width,
+          H = c.height;
+        var baseY = H - 50;
+        var maxY = 30;
+        var CLAMP_FRAC = 0.06; // clamped level as fraction of full scale
+        var DAMAGE_FRAC = 0.4;
+
+        function fire() {
+          trace = [];
+          var clamped = tvsOn.checked;
+          var peak = clamped ? CLAMP_FRAC : 1.0;
+          // build a fast-rise, slow-decay pulse
+          for (var i = 0; i < 300; i++) {
+            var x = i / 300;
+            var v;
+            if (x < 0.05) {
+              v = (x / 0.05) * peak; // ns rise
+            } else {
+              v = peak * Math.exp(-(x - 0.05) * 6);
+            }
+            trace.push(v);
+          }
+          animate(clamped);
+        }
+        var frame = 0;
+        var animId = null;
+        function animate(clamped) {
+          if (animId) {
+            cancelAnimationFrame(animId);
+          }
+          frame = 0;
+          function step() {
+            frame += 4;
+            draw(Math.min(frame, trace.length), clamped);
+            if (frame < trace.length) {
+              animId = requestAnimationFrame(step);
+            } else {
+              setResult(clamped);
+            }
+          }
+          step();
+        }
+        function draw(n, clamped) {
+          ctx.clearRect(0, 0, W, H);
+          // baseline + axis
+          ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(50, baseY);
+          ctx.lineTo(W - 20, baseY);
+          ctx.stroke();
+          // clamp threshold line
+          var clampY = baseY - CLAMP_FRAC * (baseY - maxY) * 3;
+          ctx.strokeStyle = 'rgba(34,211,238,0.5)';
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.moveTo(50, clampY);
+          ctx.lineTo(W - 20, clampY);
+          ctx.stroke();
+          // damage line
+          var dmgY = baseY - DAMAGE_FRAC * (baseY - maxY);
+          ctx.strokeStyle = 'rgba(248,113,113,0.5)';
+          ctx.beginPath();
+          ctx.moveTo(50, dmgY);
+          ctx.lineTo(W - 20, dmgY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = css('--text-muted', '#94a3b8');
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText('TVS clamp level', 54, clampY - 6);
+          ctx.fillText('Transceiver damage threshold', 54, dmgY - 6);
+          ctx.fillText('Voltage at transceiver pin', 54, 20);
+          // trace
+          ctx.strokeStyle = clamped ? '#22d3ee' : '#f87171';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          for (var i = 0; i < n; i++) {
+            var x = 50 + (i / trace.length) * (W - 70);
+            var y = baseY - trace[i] * (baseY - maxY);
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+        }
+        function setResult(clamped) {
+          if (clamped) {
+            cap.innerHTML =
+              '✓ TVS clamped the strike well below the damage threshold — transceiver survives.';
+            cap.style.color = '#22d3ee';
+          } else {
+            cap.innerHTML =
+              '✗ No TVS: the spike shoots past the damage threshold — the transceiver input is destroyed.';
+            cap.style.color = '#f87171';
+          }
+        }
+        btn.addEventListener('click', fire);
+        // initial static
+        draw(0, true);
+      })();
+
+      // Quiz
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'What is the correct order of the ESD protection front-end from the connector inward?',
+            options: [
+              'Connector → series resistor → TVS → transceiver',
+              'Connector → TVS → series resistor/ferrite → transceiver',
+              'Connector → transceiver → TVS',
+              'TVS → connector → transceiver',
+            ],
+            correct: 1,
+            fb: 'The TVS must be first (at the connector) to clamp the surge; the series element then limits residual current into the IC.',
+          },
+          {
+            q: 'Which TVS type suits a bipolar RS232 line that swings ±15 V?',
+            options: ['Unidirectional', 'Bidirectional', 'Either works', 'No TVS needed'],
+            correct: 1,
+            fb: "A bidirectional TVS clamps both polarities, matching RS232's ±swing.",
+          },
+          {
+            q: 'IEC 61000-4-2 Level 4 corresponds to what contact/air discharge levels?',
+            options: ['±2 kV / ±2 kV', '±4 kV / ±8 kV', '±8 kV / ±15 kV', '±30 kV / ±60 kV'],
+            correct: 2,
+            fb: 'Level 4 is ±8 kV contact / ±15 kV air — a common robust-port baseline.',
+          },
+          {
+            q: 'Why must the TVS be placed physically close to the connector with a short ground path?',
+            options: [
+              'To save board space',
+              'Ground/lead inductance would spoil the clamp during a nanosecond strike',
+              'So it looks tidy',
+              'To reduce cost',
+            ],
+            correct: 1,
+            fb: 'Even a few nH of inductance develops large V = L·di/dt during the fast strike, defeating the clamp.',
+          },
+          {
+            q: 'The TVS stand-off (working) voltage should be…',
+            options: [
+              'Below the normal signal voltage',
+              'At or above the highest steady signal voltage',
+              'Exactly 0 V',
+              'Equal to the ESD test voltage',
+            ],
+            correct: 1,
+            fb: 'If V_WM is below the signal, the TVS leaks and loads the line. It must sit above the normal swing.',
+          },
+        ];
+        var answered = 0,
+          correctCount = 0;
+        var wrap = document.getElementById('quiz');
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h = document.createElement('div');
+          h.className = 'quiz-question';
+          h.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var s = document.getElementById('quizScore');
+                s.style.display = 'block';
+                s.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

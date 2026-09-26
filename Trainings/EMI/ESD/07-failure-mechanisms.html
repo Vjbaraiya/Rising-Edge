@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="How ESD current physically damages silicon -- gate oxide rupture, junction thermal breakdown, and metallization melt -- plus the difference between catastrophic, latent, and soft failures."
+    />
+    <title>
+      How ESD Damages Electronics &amp; Failure Mechanisms | ESD Immunity Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/ESD/07-failure-mechanisms.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .toggle-tab {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+      }
+      .stage-pill {
+        padding: 7px 12px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .stage-pill.active {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Electrostatic Discharge (ESD) Immunity
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; What Is ESD</a>
+          <a href="02-physics-and-charge.html" class="module-item"
+            >02. Physics of Static Electricity &amp; Charge Build-Up</a
+          >
+          <a href="03-esd-models.html" class="module-item">03. ESD Models: HBM, MM &amp; CDM</a>
+          <a href="04-iec-61000-4-2-and-levels.html" class="module-item"
+            >04. IEC 61000-4-2, Test Levels &amp; Discharge Types</a
+          >
+          <a href="05-generator-and-waveform.html" class="module-item"
+            >05. ESD Generator, Test Setup &amp; Current Waveform</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. Product Categories &amp; Applicable Standards</a
+          >
+          <a href="07-failure-mechanisms.html" class="module-item active"
+            >07. How ESD Damages Electronics &amp; Failure Mechanisms</a
+          >
+          <a href="08-tvs-and-pcb-layout.html" class="module-item"
+            >08. TVS Protection &amp; PCB Layout Best Practices</a
+          >
+          <a href="09-case-studies.html" class="module-item"
+            >09. Engineering Case Studies (12 Failures)</a
+          >
+          <a href="10-debugging-and-summary.html" class="module-item"
+            >10. Debugging Workflow, Simulator &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Electrostatic Discharge (ESD) Immunity</a><span>/</span>
+            <span>How ESD Damages Electronics &amp; Failure Mechanisms</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 7/10</span><span>70%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 70%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 07</div>
+              <h1 style="font-size: 2.2rem">
+                How ESD Damages Electronics &amp; Failure Mechanisms
+              </h1>
+              <p class="subtitle">
+                A discharge that never trips a fuse can still end a product's life. Understanding
+                exactly how nanosecond-scale current damages silicon -- immediately or months later
+                -- is what turns an ESD failure report into a real design fix.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.25rem">Learning Objectives</h3>
+                <div
+                  class="objective-grid"
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                    gap: 12px;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔬</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Explain gate oxide rupture and junction breakdown
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">⏳</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Distinguish catastrophic vs. latent damage
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🌀</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Recognize common soft-failure symptoms
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1: Damage mechanisms -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: Physical Damage Mechanisms (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <div
+                    class="stage-track"
+                    id="mechTrack"
+                    style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px"
+                  >
+                    <button class="stage-pill active" data-mech="0">1. Gate Oxide Rupture</button>
+                    <button class="stage-pill" data-mech="1">2. Junction Thermal Breakdown</button>
+                    <button class="stage-pill" data-mech="2">3. Metallization Melt</button>
+                  </div>
+                  <div
+                    class="stage-detail"
+                    id="mechDetail"
+                    style="
+                      background: var(--bg-muted);
+                      border: 1px solid var(--border);
+                      border-radius: 10px;
+                      padding: 14px 16px;
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      line-height: 1.7;
+                      min-height: 60px;
+                    "
+                  ></div>
+                  <div class="widget-container" style="margin-top: 1rem">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Damage Mechanism &mdash; Real PCB &amp; Component Cross-Section
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      Left: a real SMD package soldered to a 4-layer FR-4 board, sliced open &mdash;
+                      solder fillets, gull-wing leads, lead frame, bond wires and the silicon die.
+                      Watch the ESD pulse enter through the pin, run up the bond wire into the die,
+                      and exit to the ground plane. Right: the die surface magnified, where the
+                      selected mechanism does its damage (layers exaggerated for clarity).
+                    </p>
+                    <div style="position: relative; width: 100%; height: 310px">
+                      <canvas
+                        id="mechDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Latent vs catastrophic -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Catastrophic vs. Latent Failures (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <div
+                    class="model-tabs"
+                    style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px"
+                    id="failTabs"
+                  >
+                    <button class="toggle-tab active" data-fail="0">Catastrophic Failure</button>
+                    <button class="toggle-tab" data-fail="1">
+                      Latent (Walking Wounded) Failure
+                    </button>
+                  </div>
+                  <div
+                    class="stage-detail"
+                    id="failDetail"
+                    style="
+                      background: var(--bg-muted);
+                      border: 1px solid var(--border);
+                      border-radius: 10px;
+                      padding: 14px 16px;
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      line-height: 1.7;
+                      min-height: 60px;
+                    "
+                  ></div>
+                  <div class="warning-box" style="margin-top: 1rem">
+                    Latent damage is the more insidious of the two: the part passes production test,
+                    ships, and only fails weeks or months later in the field under normal thermal or
+                    electrical stress -- by which point tracing the failure back to an ESD event
+                    during handling can be extremely difficult.
+                  </div>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                      gap: 14px;
+                      margin-top: 1rem;
+                    "
+                  >
+                    <figure style="margin: 0">
+                      <img
+                        src="images/pcb-trace-burn-damage.jpg"
+                        alt="PCB with carbonized, burned traces and discolored solder joints"
+                        loading="lazy"
+                        style="
+                          width: 100%;
+                          border-radius: 10px;
+                          border: 1px solid var(--border);
+                          display: block;
+                        "
+                        onerror="this.parentElement.style.display = 'none'"
+                      />
+                      <figcaption
+                        style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px"
+                      >
+                        Catastrophic, board-level: carbonized FR-4 and burned copper where transient
+                        current found its path. Damage this visible makes diagnosis easy &mdash; ESD
+                        damage usually is not this obliging.
+                      </figcaption>
+                    </figure>
+                    <figure style="margin: 0">
+                      <img
+                        src="images/burned-smd-components.jpg"
+                        alt="Charred SMD ICs and bulged electrolytic capacitors on a circuit board"
+                        loading="lazy"
+                        style="
+                          width: 100%;
+                          border-radius: 10px;
+                          border: 1px solid var(--border);
+                          display: block;
+                        "
+                        onerror="this.parentElement.style.display = 'none'"
+                      />
+                      <figcaption
+                        style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px"
+                      >
+                        Secondary casualties: a transient that latches up a regulator can cook
+                        downstream parts &mdash; charred packages and vented capacitors are the
+                        follow-on failure, not the root cause. Trace the event, not just the debris.
+                      </figcaption>
+                    </figure>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: soft failure symptoms -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Section 3: Common Soft-Failure Symptoms</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Not every ESD event leaves physical damage. A transient can simply corrupt a
+                    signal or state without harming any component -- these are the symptoms that
+                    performance criteria B and C (Module 04) are designed to capture.
+                  </p>
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Symptom</th>
+                        <th>Likely mechanism</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Microcontroller reset / reboot</td>
+                        <td>
+                          Transient coupled into the reset pin or brown-out detector tripped by a
+                          supply-rail glitch
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Frozen or corrupted display</td>
+                        <td>
+                          Bit-level corruption in a serial display interface (SPI/I2C) with no
+                          CRC/retry
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Dropped USB / peripheral connection</td>
+                        <td>PHY-level bit errors or ESD-induced enumeration fault</td>
+                      </tr>
+                      <tr>
+                        <td>False touch/button trigger</td>
+                        <td>Transient coupled into a capacitive-touch or GPIO input</td>
+                      </tr>
+                      <tr>
+                        <td>Communication bus error / dropped packet</td>
+                        <td>
+                          Common-mode transient exceeding a transceiver's common-mode range
+                          momentarily
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Data corruption in non-volatile memory</td>
+                        <td>
+                          Write cycle interrupted mid-operation by a reset or brown-out during the
+                          event
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 7 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">10</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">10</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 10%;
+                        background: linear-gradient(90deg, #3b82f6, #facc15);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="06-product-categories.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="08-tvs-and-pcb-layout.html">Next Lesson &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+    </script>
+
+    <!-- Section 1: mechanisms -->
+    <script>
+      var MECHS = [
+        {
+          name: 'Gate Oxide Rupture',
+          detail:
+            'MOSFET gate oxide layers are only a few nanometers thick and can only withstand a limited electric field before they break down permanently. An ESD transient coupled onto a gate can exceed that field for just long enough to punch a conductive filament straight through the oxide, permanently shorting gate to channel.',
+        },
+        {
+          name: 'Junction Thermal (Secondary) Breakdown',
+          detail:
+            "A reverse-biased p-n junction (such as a protection diode or a transistor's collector-base junction) can survive brief avalanche current -- until localized heating causes current to constrict into a tiny hot filament. Once that filament reaches silicon's melting point, the junction fails permanently, often visible as a small melted crater under microscopic inspection.",
+        },
+        {
+          name: 'Metallization Melt',
+          detail:
+            'Even if the silicon junction survives, the thin aluminum or copper interconnect traces on top of the die have a finite current-carrying capacity. A high enough ESD current density can locally melt or vaporize a trace, opening or shorting a connection -- this is often what limits how much current an on-chip protection structure can safely shunt.',
+        },
+      ];
+      var currentMech = 0;
+      function renderMechDetail() {
+        document.getElementById('mechDetail').innerHTML =
+          '<strong>' + MECHS[currentMech].name + '</strong> &mdash; ' + MECHS[currentMech].detail;
+      }
+      document.querySelectorAll('#mechTrack .stage-pill').forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          document.querySelectorAll('#mechTrack .stage-pill').forEach(function (p) {
+            p.classList.remove('active');
+          });
+          pill.classList.add('active');
+          currentMech = parseInt(pill.getAttribute('data-mech'));
+          renderMechDetail();
+          drawMechDiagram();
+        });
+      });
+      renderMechDetail();
+
+      // Continuous animation below repaints every frame; explicit redraw calls
+      // (pill clicks, resize) don't need to do anything themselves.
+      function drawMechDiagram() {}
+
+      (function () {
+        var LOOP = 4200; // ms per pulse cycle
+
+        function clamp01(v) {
+          return Math.max(0, Math.min(1, v));
+        }
+
+        // Interpolate a point along a polyline at fraction f of its length
+        function alongPath(pts, f) {
+          var lens = [];
+          var total = 0;
+          for (var i = 1; i < pts.length; i++) {
+            var L = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+            lens.push(L);
+            total += L;
+          }
+          var d = f * total;
+          for (var j = 0; j < lens.length; j++) {
+            if (d <= lens[j]) {
+              var t = lens[j] === 0 ? 0 : d / lens[j];
+              return [
+                pts[j][0] + (pts[j + 1][0] - pts[j][0]) * t,
+                pts[j][1] + (pts[j + 1][1] - pts[j][1]) * t,
+              ];
+            }
+            d -= lens[j];
+          }
+          return pts[pts.length - 1];
+        }
+
+        function strokePath(ctx, pts) {
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+          ctx.stroke();
+        }
+
+        function mechAnim(ts) {
+          var canvas = document.getElementById('mechDiagram');
+          if (!canvas) return;
+          var rect = canvas.parentElement.getBoundingClientRect();
+          var w = Math.max(0, rect.width);
+          var h = Math.max(0, rect.height);
+          if (w === 0 || h === 0) {
+            requestAnimationFrame(mechAnim);
+            return;
+          }
+          var dpr = window.devicePixelRatio || 1;
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
+          var ctx = canvas.getContext('2d');
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, w, h);
+
+          var pT = (ts % LOOP) / LOOP;
+          var travel = clamp01(pT / 0.32); // pulse in
+          var dmg = clamp01((pT - 0.34) / 0.14); // damage ramps
+          var exitP = clamp01((pT - 0.52) / 0.22); // pulse out to GND
+          var flicker = 0.5 + 0.5 * Math.sin(ts / 110);
+
+          /* ════════ LEFT: PCB + package cross-section ════════ */
+          var L = w * 0.58;
+          var boardY = h * 0.68;
+          var boardH = h * 0.2;
+          var light = isLightTheme();
+
+          // FR-4 substrate
+          ctx.fillStyle = light ? 'rgba(163,177,109,0.5)' : 'rgba(138,154,91,0.35)';
+          ctx.fillRect(8, boardY, L - 16, boardH);
+          ctx.strokeStyle = inkColor(0.35);
+          ctx.strokeRect(8, boardY, L - 16, boardH);
+
+          // Copper layers (4-layer board)
+          var cu = '#d97706';
+          var inner1 = boardY + boardH * 0.35;
+          var inner2 = boardY + boardH * 0.65;
+          ctx.fillStyle = cu;
+          ctx.fillRect(8, boardY, L - 16, 3); // top copper
+          ctx.fillRect(8, inner1, L - 16, 3); // inner plane (GND)
+          ctx.fillRect(8, inner2, L - 16, 3); // inner plane (PWR)
+          ctx.fillRect(8, boardY + boardH - 3, L - 16, 3); // bottom copper
+          labelPlate(ctx, 'FR-4 (4-layer)', L * 0.5, boardY + boardH + 16, 'center', 9);
+          labelPlate(ctx, 'GND plane', L - 14, inner1 + 14, 'right', 8);
+
+          // Solder mask (green) over top copper, gaps at the two pads
+          var padLx = L * 0.16;
+          var padRx = L * 0.74;
+          var padW = L * 0.1;
+          ctx.fillStyle = light ? 'rgba(21,128,61,0.8)' : 'rgba(22,101,52,0.9)';
+          ctx.fillRect(8, boardY - 2, padLx - 8, 3);
+          ctx.fillRect(padLx + padW, boardY - 2, padRx - padLx - padW, 3);
+          ctx.fillRect(padRx + padW, boardY - 2, L - 16 - padRx - padW + 8, 3);
+          // Exposed pads
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(padLx, boardY - 3, padW, 5);
+          ctx.fillRect(padRx, boardY - 3, padW, 5);
+
+          // Package body (mold compound)
+          var bodyX = L * 0.26;
+          var bodyW = L * 0.44;
+          var bodyY = h * 0.16;
+          var bodyB = boardY - 22;
+          var bodyH2 = bodyB - bodyY;
+          ctx.fillStyle = light ? '#374151' : '#111827';
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(bodyX, bodyY, bodyW, bodyH2);
+          ctx.strokeRect(bodyX, bodyY, bodyW, bodyH2);
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Mold compound', bodyX + bodyW / 2, bodyY - 8, 'center', 9);
+
+          // Gull-wing leads + lead frame stubs inside the body
+          var leadY = bodyY + bodyH2 * 0.55;
+          var lead = '#9ca3af';
+          ctx.strokeStyle = lead;
+          ctx.lineWidth = 4;
+          var leadL = [
+            [bodyX + bodyW * 0.18, leadY],
+            [bodyX, leadY],
+            [padLx + padW * 0.2, leadY],
+            [padLx + padW * 0.2, boardY - 8],
+            [padLx + padW * 0.85, boardY - 8],
+          ];
+          var leadR = [
+            [bodyX + bodyW * 0.82, leadY],
+            [bodyX + bodyW, leadY],
+            [padRx + padW * 0.8, leadY],
+            [padRx + padW * 0.8, boardY - 8],
+            [padRx + padW * 0.15, boardY - 8],
+          ];
+          strokePath(ctx, leadL);
+          strokePath(ctx, leadR);
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Lead frame', bodyX + bodyW * 0.14, leadY - 10, 'left', 8);
+
+          // Solder fillets
+          ctx.fillStyle = light ? '#94a3b8' : '#cbd5e1';
+          ctx.beginPath();
+          ctx.moveTo(padLx, boardY - 2);
+          ctx.lineTo(padLx + padW * 0.2, boardY - 12);
+          ctx.lineTo(padLx + padW * 0.2, boardY - 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(padRx + padW, boardY - 2);
+          ctx.lineTo(padRx + padW * 0.8, boardY - 12);
+          ctx.lineTo(padRx + padW * 0.8, boardY - 2);
+          ctx.closePath();
+          ctx.fill();
+          labelPlate(ctx, 'Solder', padLx - 4, boardY - 14, 'right', 8);
+
+          // Die paddle + die + bond wires
+          var padY2 = bodyY + bodyH2 * 0.72;
+          var paddleX = bodyX + bodyW * 0.3;
+          var paddleW = bodyW * 0.4;
+          ctx.fillStyle = lead;
+          ctx.fillRect(paddleX, padY2, paddleW, 4);
+          var dieW2 = paddleW * 0.76;
+          var dieH2 = bodyH2 * 0.2;
+          var dieX2 = paddleX + (paddleW - dieW2) / 2;
+          var dieY2 = padY2 - dieH2;
+          ctx.fillStyle = '#64748b';
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.fillRect(dieX2, dieY2, dieW2, dieH2);
+          ctx.strokeRect(dieX2, dieY2, dieW2, dieH2);
+          labelPlate(ctx, 'Si die', dieX2 + dieW2 / 2, dieY2 + dieH2 / 2 + 4, 'center', 8);
+          // Bond wires (gold arcs)
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(bodyX + bodyW * 0.18, leadY);
+          ctx.quadraticCurveTo((bodyX + bodyW * 0.18 + dieX2) / 2, dieY2 - 16, dieX2 + 4, dieY2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(bodyX + bodyW * 0.82, leadY);
+          ctx.quadraticCurveTo(
+            (bodyX + bodyW * 0.82 + dieX2 + dieW2) / 2,
+            dieY2 - 16,
+            dieX2 + dieW2 - 4,
+            dieY2
+          );
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Bond wire', dieX2 + dieW2 / 2, dieY2 - 22, 'center', 8);
+
+          // ── ESD pulse in: board trace → pad → lead → bond wire → die ──
+          var inPath = [
+            [12, boardY - 1],
+            [padLx + padW * 0.5, boardY - 1],
+            [padLx + padW * 0.2, boardY - 10],
+            [padLx + padW * 0.2, leadY],
+            [bodyX + bodyW * 0.18, leadY],
+            [(bodyX + bodyW * 0.18 + dieX2) / 2, dieY2 - 14],
+            [dieX2 + 4, dieY2],
+          ];
+          if (pT < 0.34) {
+            // Entry spark at the board edge
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(4, boardY - 22);
+            ctx.lineTo(12, boardY - 12);
+            ctx.lineTo(7, boardY - 8);
+            ctx.lineTo(14, boardY - 1);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            labelPlate(ctx, 'ESD in', 16, boardY - 26, 'left', 9);
+            // Glowing pulse with trail
+            for (var k = 0; k < 6; k++) {
+              var f = clamp01(travel - k * 0.03);
+              var pos = alongPath(inPath, f);
+              ctx.fillStyle = 'rgba(250,204,21,' + (0.9 - k * 0.14) + ')';
+              ctx.beginPath();
+              ctx.arc(pos[0], pos[1], 5 - k * 0.6, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          // Impact flash on the die
+          if (pT >= 0.32 && pT < 0.5) {
+            ctx.fillStyle = 'rgba(250,204,21,' + 0.5 * flicker + ')';
+            ctx.fillRect(dieX2, dieY2, dieW2, dieH2);
+          }
+          if (dmg > 0) {
+            ctx.strokeStyle = 'rgba(239,68,68,' + (0.4 + 0.4 * flicker) + ')';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(dieX2 - 2, dieY2 - 2, dieW2 + 4, dieH2 + 4);
+            ctx.lineWidth = 1;
+          }
+
+          // ── Pulse out: die → paddle → right lead → pad → via → GND plane ──
+          var viaX = padRx + padW * 0.5;
+          var outPath = [
+            [dieX2 + dieW2 - 4, dieY2],
+            [bodyX + bodyW * 0.82, leadY],
+            [padRx + padW * 0.8, leadY],
+            [padRx + padW * 0.8, boardY - 2],
+            [viaX, boardY],
+            [viaX, inner1 + 1],
+            [L - 14, inner1 + 1],
+          ];
+          // Via barrel
+          ctx.strokeStyle = cu;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(viaX, boardY);
+          ctx.lineTo(viaX, inner1 + 3);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          if (exitP > 0 && exitP < 1) {
+            ctx.strokeStyle = 'rgba(239,68,68,0.9)';
+            ctx.lineWidth = 2.5;
+            // draw the exit path progressively
+            var seg = Math.max(2, Math.ceil(exitP * (outPath.length - 1)) + 1);
+            var partial = outPath.slice(0, seg);
+            var tip = alongPath(outPath, exitP);
+            partial[partial.length - 1] = tip;
+            strokePath(ctx, partial);
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(tip[0], tip[1], 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          if (exitP >= 1) labelPlate(ctx, 'to GND', L - 16, inner1 - 8, 'right', 9);
+
+          /* ════════ RIGHT: magnified die surface ════════ */
+          var rx = w * 0.63;
+          var rw = w - rx - 10;
+          var ry = h * 0.08;
+          var rh = h * 0.74;
+          ctx.setLineDash([5, 4]);
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.strokeRect(rx, ry, rw, rh);
+          // magnifier connectors from the die to the inset
+          ctx.beginPath();
+          ctx.moveTo(dieX2 + dieW2, dieY2);
+          ctx.lineTo(rx, ry);
+          ctx.moveTo(dieX2 + dieW2, dieY2 + dieH2);
+          ctx.lineTo(rx, ry + rh);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          labelPlate(
+            ctx,
+            'Die surface, magnified (not to scale)',
+            rx + rw / 2,
+            ry - 6,
+            'center',
+            9
+          );
+
+          // Layer stack inside the inset
+          var passH = rh * 0.09;
+          var metH = rh * 0.16;
+          var oxH = rh * 0.12;
+          var metY = ry + passH;
+          var oxY = metY + metH;
+          var siY = oxY + oxH;
+          // Passivation
+          ctx.fillStyle = 'rgba(148,163,184,0.35)';
+          ctx.fillRect(rx + 1, ry + 1, rw - 2, passH);
+          labelPlate(ctx, 'Passivation', rx + 6, ry + passH - 2, 'left', 8);
+          // Metallization (interrupted in the middle when mech 2 melts it)
+          var gapC = rx + rw * 0.5;
+          var gapHalf = currentMech === 2 ? dmg * rw * 0.07 : 0;
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(rx + 1, metY, gapC - gapHalf - rx - 1, metH);
+          ctx.fillRect(gapC + gapHalf, metY, rx + rw - 1 - (gapC + gapHalf), metH);
+          labelPlate(ctx, 'Al/Cu metallization', rx + 6, metY + metH - 3, 'left', 8);
+          // Oxide (SiO2) with thin gate oxide line at its base
+          ctx.fillStyle = 'rgba(59,130,246,0.4)';
+          ctx.fillRect(rx + 1, oxY, rw - 2, oxH);
+          ctx.fillStyle = '#60a5fa';
+          ctx.fillRect(rx + 1, siY - 3, rw - 2, 3);
+          labelPlate(ctx, 'SiO2 / gate oxide', rx + 6, oxY + oxH - 4, 'left', 8);
+          // Poly gate
+          ctx.fillStyle = '#a78bfa';
+          ctx.fillRect(gapC - rw * 0.09, oxY - 4, rw * 0.18, 5);
+          // Silicon substrate + n+ wells (junction at the well edge)
+          ctx.fillStyle = light ? '#94a3b8' : '#334155';
+          ctx.fillRect(rx + 1, siY, rw - 2, ry + rh - siY - 1);
+          ctx.fillStyle = light ? '#cbd5e1' : '#475569';
+          var wellH = rh * 0.14;
+          ctx.fillRect(rx + rw * 0.12, siY, rw * 0.22, wellH);
+          ctx.fillRect(rx + rw * 0.66, siY, rw * 0.22, wellH);
+          labelPlate(ctx, 'n+', rx + rw * 0.23, siY + wellH - 4, 'center', 8);
+          labelPlate(ctx, 'n+', rx + rw * 0.77, siY + wellH - 4, 'center', 8);
+          labelPlate(ctx, 'p-substrate (Si)', rx + rw / 2, ry + rh - 8, 'center', 8);
+
+          // ── Mechanism-specific damage in the inset ──
+          if (dmg > 0) {
+            if (currentMech === 0) {
+              // Filament punched through the gate oxide under the poly gate
+              ctx.strokeStyle = 'rgba(239,68,68,' + (0.55 + 0.45 * flicker) + ')';
+              ctx.lineWidth = 3 * dmg;
+              ctx.beginPath();
+              ctx.moveTo(gapC, oxY - 2);
+              ctx.lineTo(gapC + rw * 0.015, siY + 6);
+              ctx.stroke();
+              ctx.lineWidth = 1;
+              if (dmg > 0.6) {
+                labelPlate(
+                  ctx,
+                  'Oxide rupture: gate shorted to channel',
+                  gapC,
+                  siY + 26,
+                  'center',
+                  9
+                );
+              }
+            } else if (currentMech === 1) {
+              // Hot filament at the n+/p junction edge
+              var hx2 = rx + rw * 0.34;
+              var hy2 = siY + wellH * 0.6;
+              var grad2 = ctx.createRadialGradient(hx2, hy2, 2, hx2, hy2, 18 * dmg + 4);
+              grad2.addColorStop(0, 'rgba(239,68,68,' + (0.7 + 0.3 * flicker) + ')');
+              grad2.addColorStop(1, 'rgba(239,68,68,0)');
+              ctx.fillStyle = grad2;
+              ctx.beginPath();
+              ctx.arc(hx2, hy2, 18 * dmg + 4, 0, Math.PI * 2);
+              ctx.fill();
+              if (dmg > 0.6) {
+                labelPlate(
+                  ctx,
+                  'Junction melt: current filament reaches Si melting point',
+                  rx + rw / 2,
+                  siY + wellH + 20,
+                  'center',
+                  8
+                );
+              }
+            } else if (dmg > 0.6) {
+              // Melt gap already drawn into the metal layer above
+              ctx.fillStyle = 'rgba(239,68,68,' + (0.35 + 0.3 * flicker) + ')';
+              ctx.beginPath();
+              ctx.arc(gapC, metY + metH / 2, gapHalf + 5, 0, Math.PI * 2);
+              ctx.fill();
+              labelPlate(ctx, 'Trace melted open', gapC, metY - 6, 'center', 9);
+            }
+          }
+
+          requestAnimationFrame(mechAnim);
+        }
+        requestAnimationFrame(mechAnim);
+      })();
+      window.addEventListener('resize', drawMechDiagram);
+    </script>
+
+    <!-- Section 2: catastrophic vs latent -->
+    <script>
+      var FAILS = [
+        {
+          name: 'Catastrophic Failure',
+          detail:
+            'Damage is immediate and complete: a shorted gate, an open trace, or a destroyed junction that makes the part non-functional right away. Catastrophic failures are caught quickly because the device fails production test or fails obviously in first use.',
+        },
+        {
+          name: 'Latent ("Walking Wounded") Failure',
+          detail:
+            'The ESD event partially weakens a structure -- a thinned gate oxide, a partially degraded junction -- without destroying it outright. The part passes every production test and works fine initially, then fails weeks or months later in the field once normal thermal cycling or electrical stress finishes the job the ESD event started.',
+        },
+      ];
+      var currentFail = 0;
+      function renderFailDetail() {
+        document.getElementById('failDetail').innerHTML =
+          '<strong>' + FAILS[currentFail].name + '</strong> &mdash; ' + FAILS[currentFail].detail;
+      }
+      document.querySelectorAll('#failTabs .toggle-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#failTabs .toggle-tab').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentFail = parseInt(tab.getAttribute('data-fail'));
+          renderFailDetail();
+        });
+      });
+      renderFailDetail();
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What happens during gate oxide rupture?',
+          opts: [
+            "An ESD transient exceeds the oxide's breakdown field and punches a permanent conductive filament through it",
+            'The gate oxide simply gets thicker over time',
+            'Gate oxide rupture only affects passive resistors',
+            'It is a reversible, self-healing process',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is gate oxide especially vulnerable to ESD damage?',
+          opts: [
+            'It is typically only a few nanometers thick and can only withstand a limited electric field',
+            'Gate oxide is immune to electric fields',
+            'Gate oxide is thicker than any other structure on the die',
+            'Gate oxide has no relationship to electric field strength',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What causes junction thermal (secondary) breakdown?',
+          opts: [
+            "Localized heating causes current to constrict into a hot filament that reaches silicon's melting point",
+            'The junction cools down rapidly, causing a crack',
+            'It only occurs in forward-biased junctions, never reverse-biased ones',
+            'Thermal breakdown is unrelated to current density',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What limits how much ESD current an on-chip protection structure can safely shunt?',
+          opts: [
+            'The color of the die',
+            'The finite current-carrying capacity of the metallization (interconnect) traces, which can melt under high current density',
+            'The size of the package only, never the die itself',
+            'Metallization has unlimited current capacity',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What distinguishes a catastrophic ESD failure from a latent one?',
+          opts: [
+            'Catastrophic failure is immediate and complete; latent failure partially weakens a structure without destroying it outright',
+            'They are identical in every respect',
+            'Latent failures are always caught during production test',
+            'Catastrophic failures never happen',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is latent ("walking wounded") damage considered especially insidious?',
+          opts: [
+            'It always causes immediate, obvious failure',
+            'The part passes production test and works initially, then fails weeks or months later in the field',
+            'Latent damage is easier to trace than catastrophic damage',
+            'Latent damage only affects mechanical parts',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What can trigger a latent-damage part to finally fail in the field?',
+          opts: [
+            'Nothing -- latent damage never progresses to failure',
+            'Normal thermal cycling or electrical stress finishing the degradation the ESD event started',
+            'Only a second identical ESD event can trigger failure',
+            'Latent damage spontaneously repairs itself over time',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is a "soft failure" in the context of ESD?',
+          opts: [
+            'A transient that corrupts a signal or state without physically harming any component',
+            'A type of catastrophic hardware damage',
+            'A failure that only occurs in mechanical assemblies',
+            'A failure that always requires board replacement',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is a likely mechanism behind a microcontroller reset triggered by an ESD event?',
+          opts: [
+            'The transient coupled into the reset pin or tripped a brown-out detector via a supply-rail glitch',
+            'The microcontroller intentionally resets itself daily',
+            'ESD events cannot affect digital logic',
+            'Resets only occur due to firmware bugs, never ESD',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why can an ESD transient cause dropped packets on a communication bus without any physical damage?',
+          opts: [
+            "A common-mode transient can momentarily exceed a transceiver's common-mode range, corrupting the signal",
+            'Communication buses are completely immune to ESD',
+            'Dropped packets are always caused by software bugs',
+            'ESD only affects power supplies, never signal buses',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0,
+          score = 0,
+          answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

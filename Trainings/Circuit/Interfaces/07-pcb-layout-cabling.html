@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 7: PCB layout and cabling for RS485/RS422 — controlled-impedance differential pairs, length matching, ground-plane continuity, TVS placement, shielded twisted pair, and one-end shield grounding, with a differential-impedance calculator."
+    />
+    <title>07 · PCB Layout &amp; Cabling | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/07-pcb-layout-cabling.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .rule-good {
+        border-left: 4px solid #34d399;
+      }
+      .rule-bad {
+        border-left: 4px solid #f87171;
+      }
+      .rule-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--bg-muted);
+        padding: 0.9rem 1.15rem;
+        margin-bottom: 0.6rem;
+      }
+      .rule-card p {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        margin: 0;
+      }
+      .rule-card strong {
+        color: var(--text-base);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item active"
+            >07. PCB Layout &amp; Cabling</a
+          >
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>07. PCB Layout &amp; Cabling</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 07</span>
+                <span class="badge badge-gray">~45 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>PCB Layout &amp; Cabling</h1>
+              <p class="subtitle">
+                Everything you learned about differential signaling only pays off if the board and
+                cable preserve symmetry. Route the pair as a controlled-impedance, length-matched
+                couple over a continuous ground plane, keep the TVS at the connector, then carry it
+                out on shielded twisted pair grounded at one end. Tune a differential pair with the
+                built-in calculator.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- SECTION 1: diff pair anatomy -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🛤️ &nbsp;1. Differential Pair Anatomy</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Route the two lines as a <strong>coupled pair</strong> — close together,
+                    parallel, the same length — over an <strong>unbroken reference plane</strong>.
+                    The geometry (trace width W, spacing S, and height H above the plane) sets the
+                    <strong>differential impedance</strong>, which you target at ~120 Ω to match the
+                    cable and terminators.
+                  </p>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 620 200"
+                      width="100%"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="max-width: 560px"
+                    >
+                      <!-- ground plane -->
+                      <rect
+                        x="40"
+                        y="150"
+                        width="540"
+                        height="24"
+                        fill="rgba(52,211,153,0.18)"
+                        stroke="#34d399"
+                        stroke-width="1.5"
+                      />
+                      <text x="310" y="167" text-anchor="middle" font-size="11" fill="#34d399">
+                        Continuous ground plane (reference)
+                      </text>
+                      <!-- dielectric -->
+                      <rect
+                        x="40"
+                        y="90"
+                        width="540"
+                        height="60"
+                        fill="rgba(148,163,184,0.08)"
+                        stroke="var(--border)"
+                        stroke-width="1"
+                      />
+                      <text
+                        x="560"
+                        y="124"
+                        text-anchor="end"
+                        font-size="10"
+                        fill="var(--text-muted)"
+                      >
+                        FR-4
+                      </text>
+                      <!-- two traces -->
+                      <rect x="250" y="78" width="40" height="14" fill="#22d3ee" />
+                      <rect x="330" y="78" width="40" height="14" fill="#a78bfa" />
+                      <text x="270" y="70" text-anchor="middle" font-size="11" fill="#22d3ee">
+                        A
+                      </text>
+                      <text x="350" y="70" text-anchor="middle" font-size="11" fill="#a78bfa">
+                        B
+                      </text>
+                      <!-- dims -->
+                      <line
+                        x1="250"
+                        y1="100"
+                        x2="290"
+                        y2="100"
+                        stroke="var(--text-muted)"
+                        stroke-width="1"
+                      />
+                      <text
+                        x="270"
+                        y="113"
+                        text-anchor="middle"
+                        font-size="9"
+                        fill="var(--text-muted)"
+                      >
+                        W
+                      </text>
+                      <line
+                        x1="290"
+                        y1="85"
+                        x2="330"
+                        y2="85"
+                        stroke="var(--text-muted)"
+                        stroke-width="1"
+                      />
+                      <text
+                        x="310"
+                        y="80"
+                        text-anchor="middle"
+                        font-size="9"
+                        fill="var(--text-muted)"
+                      >
+                        S
+                      </text>
+                      <line
+                        x1="410"
+                        y1="92"
+                        x2="410"
+                        y2="150"
+                        stroke="var(--text-muted)"
+                        stroke-width="1"
+                      />
+                      <text x="420" y="124" font-size="9" fill="var(--text-muted)">H</text>
+                    </svg>
+                    <div class="diagram-cap">
+                      Coupled microstrip pair over a solid plane. W, S and H set the differential
+                      impedance.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: impedance calculator -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🧮 &nbsp;2. Differential Impedance Calculator</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    An approximate edge-coupled microstrip model. Adjust the geometry to hit ~120 Ω
+                    differential. (For a real stack-up, always confirm with your fab's field solver
+                    — this is a design-intuition tool.)
+                  </p>
+                  <div class="calc-grid">
+                    <div class="calc-inputs">
+                      <div class="calc-field">
+                        <label for="w">Trace width W (mil)</label>
+                        <input type="number" id="w" value="8" step="0.5" />
+                      </div>
+                      <div class="calc-field">
+                        <label for="s">Spacing S (mil)</label>
+                        <input type="number" id="s" value="8" step="0.5" />
+                      </div>
+                      <div class="calc-field">
+                        <label for="h">Height above plane H (mil)</label>
+                        <input type="number" id="h" value="10" step="0.5" />
+                      </div>
+                      <div class="calc-field">
+                        <label for="er">Dielectric constant εr</label>
+                        <input type="number" id="er" value="4.2" step="0.1" />
+                      </div>
+                    </div>
+                    <div class="calc-results">
+                      <div class="calc-result-item">
+                        <span class="calc-result-label">Single-ended Z₀ (approx.)</span>
+                        <span class="calc-result-value" id="z0">—</span>
+                      </div>
+                      <div class="calc-result-item">
+                        <span class="calc-result-label">Differential Z_diff (approx.)</span>
+                        <span class="calc-result-value" id="zdiff">—</span>
+                      </div>
+                      <div class="calc-result-item">
+                        <span class="calc-result-label">Target ~120 Ω</span>
+                        <span class="calc-result-value" id="zverdict">—</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="info-box">
+                    Tighter spacing S increases coupling and <em>lowers</em> Z_diff; wider traces or
+                    a thinner dielectric also lower impedance. To raise Z_diff toward 120 Ω, narrow
+                    the traces, increase spacing, or use a thicker dielectric to the plane.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: layout rules -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;3. Layout Rules — Do &amp; Don't</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <div class="rule-card rule-good">
+                    <p>
+                      <strong>✓ Length-match the pair.</strong> Keep A and B within a few mils of
+                      each other so noise couples equally and skew stays low.
+                    </p>
+                  </div>
+                  <div class="rule-card rule-good">
+                    <p>
+                      <strong>✓ Keep the TVS/ESD tight to the connector.</strong> Short, wide path
+                      to the plane — before the protected boundary reaches the transceiver (Module
+                      4).
+                    </p>
+                  </div>
+                  <div class="rule-card rule-good">
+                    <p>
+                      <strong>✓ Maintain a continuous ground plane</strong> directly under the pair
+                      for the whole run.
+                    </p>
+                  </div>
+                  <div class="rule-card rule-good">
+                    <p>
+                      <strong>✓ Place terminators at the true bus ends</strong> and biasing near one
+                      transceiver (Module 5).
+                    </p>
+                  </div>
+                  <div class="rule-card rule-bad">
+                    <p>
+                      <strong>✗ Don't cross a plane split or slot</strong> with the pair — the
+                      return current has to detour, destroying symmetry and radiating.
+                    </p>
+                  </div>
+                  <div class="rule-card rule-bad">
+                    <p>
+                      <strong>✗ Don't route the pair near noisy nets</strong> (switchers, clocks) or
+                      let A and B diverge around obstacles.
+                    </p>
+                  </div>
+                  <div class="warning-box">
+                    The single worst layout mistake for a differential interface is routing the pair
+                    <strong>across a gap in the ground plane</strong>. It converts common-mode noise
+                    rejection into common-mode noise <em>generation</em>.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: cabling -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🧵 &nbsp;4. Cabling &amp; Shield Grounding</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Off the board, use <strong>shielded twisted pair (STP)</strong>. The twist keeps
+                    A and B seeing identical interference (preserving common-mode rejection); the
+                    shield intercepts external fields. Match the cable's characteristic impedance
+                    (~120 Ω) to your traces and terminators.
+                  </p>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 620 150"
+                      width="100%"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="max-width: 560px"
+                    >
+                      <!-- shield -->
+                      <rect
+                        x="60"
+                        y="55"
+                        width="500"
+                        height="40"
+                        rx="20"
+                        fill="none"
+                        stroke="var(--text-muted)"
+                        stroke-width="1.5"
+                        stroke-dasharray="4 3"
+                      />
+                      <!-- twisted pair -->
+                      <path
+                        d="M80 75 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0"
+                        fill="none"
+                        stroke="#22d3ee"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M80 75 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0 q20 -18 40 0 q20 18 40 0"
+                        fill="none"
+                        stroke="#a78bfa"
+                        stroke-width="2"
+                      />
+                      <!-- ground at one end -->
+                      <line x1="70" y1="95" x2="70" y2="120" stroke="#34d399" stroke-width="2" />
+                      <line x1="60" y1="120" x2="80" y2="120" stroke="#34d399" stroke-width="2" />
+                      <line x1="64" y1="126" x2="76" y2="126" stroke="#34d399" stroke-width="2" />
+                      <line x1="67" y1="132" x2="73" y2="132" stroke="#34d399" stroke-width="2" />
+                      <text x="70" y="146" text-anchor="middle" font-size="10" fill="#34d399">
+                        shield GND
+                      </text>
+                      <!-- other end: no connect -->
+                      <circle
+                        cx="552"
+                        cy="110"
+                        r="4"
+                        fill="none"
+                        stroke="#f87171"
+                        stroke-width="1.5"
+                      />
+                      <line
+                        x1="548"
+                        y1="106"
+                        x2="556"
+                        y2="114"
+                        stroke="#f87171"
+                        stroke-width="1.5"
+                      />
+                      <line
+                        x1="556"
+                        y1="106"
+                        x2="548"
+                        y2="114"
+                        stroke="#f87171"
+                        stroke-width="1.5"
+                      />
+                      <text x="552" y="132" text-anchor="middle" font-size="10" fill="#f87171">
+                        no connect
+                      </text>
+                    </svg>
+                    <div class="diagram-cap">
+                      Ground the shield at <strong>one end only</strong> to avoid a shield ground
+                      loop.
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    <strong>Why one end only:</strong> grounding both ends lets circulating current
+                    flow through the shield if the two grounds differ in potential — a ground loop
+                    that injects noise. Single-point grounding drains static and intercepts fields
+                    without forming that loop.
+                  </div>
+                </div>
+              </div>
+
+              <!-- QUIZ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;5. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">Answer to reveal instant feedback.</p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="margin-top: 1rem; font-weight: 700; color: var(--cyan); display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="06-transceiver-selection.html"
+                  >← Transceiver Selection</a
+                >
+                <a class="btn btn-primary" href="08-standards-decision-guide.html"
+                  >Next: Standards &amp; Decision Guide →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var open = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b) {
+          if (!b.classList.contains('collapsed')) {
+            open++;
+          }
+        });
+        var pct = Math.round((open / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+
+      // Differential impedance calculator (approximate edge-coupled microstrip)
+      (function () {
+        var w = document.getElementById('w');
+        var s = document.getElementById('s');
+        var h = document.getElementById('h');
+        var er = document.getElementById('er');
+        var z0El = document.getElementById('z0');
+        var zdEl = document.getElementById('zdiff');
+        var zvEl = document.getElementById('zverdict');
+        function calc() {
+          var W = parseFloat(w.value) || 1;
+          var S = parseFloat(s.value) || 1;
+          var H = parseFloat(h.value) || 1;
+          var Er = parseFloat(er.value) || 4.2;
+          // IPC-2141 style single-ended microstrip approximation
+          var z0 =
+            (87 / Math.sqrt(Er + 1.41)) *
+            Math.log(
+              (5.98 * H) / (0.8 * W + parseFloat(document.getElementById('w').dataset.t || 1.4))
+            );
+          if (!isFinite(z0) || z0 < 0) {
+            z0 = 0;
+          }
+          // differential coupling factor based on S/H
+          var coupling = 0.48 * Math.exp(-0.96 * (S / H));
+          var zdiff = 2 * z0 * (1 - coupling);
+          z0El.textContent = z0.toFixed(0) + ' Ω';
+          zdEl.textContent = zdiff.toFixed(0) + ' Ω';
+          if (zdiff >= 108 && zdiff <= 132) {
+            zvEl.textContent = '✓ On target';
+            zvEl.style.color = '#34d399';
+          } else if (zdiff < 108) {
+            zvEl.textContent = 'Low — narrow traces / widen S';
+            zvEl.style.color = '#fb923c';
+          } else {
+            zvEl.textContent = 'High — widen traces / tighten S';
+            zvEl.style.color = '#fb923c';
+          }
+        }
+        [w, s, h, er].forEach(function (el) {
+          el.addEventListener('input', calc);
+        });
+        calc();
+      })();
+
+      // Quiz
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'What is the target differential impedance for an RS485/RS422 pair?',
+            options: ['50 Ω', '75 Ω', '~120 Ω (to match cable and terminators)', '300 Ω'],
+            correct: 2,
+            fb: 'Match the ~120 Ω twisted-pair impedance and the 120 Ω terminators to avoid reflections.',
+          },
+          {
+            q: 'Why must A and B be length-matched?',
+            options: [
+              'To save copper',
+              'So noise couples equally and skew between the two lines stays low',
+              'To increase capacitance',
+              'It has no effect',
+            ],
+            correct: 1,
+            fb: 'Equal length keeps the pair symmetric, preserving common-mode rejection and minimizing skew.',
+          },
+          {
+            q: 'The worst layout mistake for a differential pair is…',
+            options: [
+              'Using 45° corners',
+              'Routing across a split/slot in the ground plane',
+              'Placing a silkscreen label nearby',
+              'Using a thicker dielectric',
+            ],
+            correct: 1,
+            fb: 'Crossing a plane gap forces the return current to detour, wrecking symmetry and radiating.',
+          },
+          {
+            q: 'Where should the cable shield be grounded?',
+            options: ['Both ends', 'One end only', 'Never', 'To the A line'],
+            correct: 1,
+            fb: 'Grounding one end only prevents a shield ground loop from circulating noise current.',
+          },
+          {
+            q: "To raise a differential pair's impedance toward 120 Ω you can…",
+            options: [
+              'Widen the traces and tighten spacing',
+              'Narrow the traces, increase spacing, or thicken the dielectric',
+              'Remove the ground plane',
+              'Add more vias',
+            ],
+            correct: 1,
+            fb: 'Narrower traces, more spacing, and a thicker dielectric all raise impedance.',
+          },
+        ];
+        var answered = 0,
+          correctCount = 0;
+        var wrap = document.getElementById('quiz');
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h2 = document.createElement('div');
+          h2.className = 'quiz-question';
+          h2.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h2);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var sc = document.getElementById('quizScore');
+                sc.style.display = 'block';
+                sc.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

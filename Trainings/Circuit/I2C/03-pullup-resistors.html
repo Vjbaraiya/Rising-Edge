@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="How to select I2C pull-up resistors: Rmin and Rmax formulas with worked examples, interactive Plotly rise-time and design-window charts, bus capacitance estimation, and a calculator that outputs the recommended E24 value."
+    />
+    <title>Pull-up Resistor Design | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/03-pullup-resistors.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .formula-card {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: var(--radius-lg);
+        padding: 16px 18px;
+        margin: 14px 0;
+        font-size: 0.95rem;
+        color: var(--text-base);
+        overflow-x: auto;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 8px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin: 6px 0 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item active"
+            >03. Pull-up Resistor Design</a
+          >
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>Pull-up Resistor Design</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 03</span>
+              <span class="badge badge-purple">Plotly</span>
+              <span class="badge badge-green">Calculator</span>
+              <h1>Selecting Pull-up Resistors</h1>
+              <p class="subtitle">
+                The most-asked I2C design question, answered properly: two formulas, one design
+                window, and an interactive calculator. Too weak and your edges are slow; too strong
+                and your lows aren't low. Let's find the window.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- why it matters -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why the value matters</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  A falling edge is fast — a transistor yanks the line down. A
+                  <strong>rising edge is passive</strong>: the pull-up must charge the entire bus
+                  capacitance \(C_{bus}\) through an RC curve. Meanwhile every LOW burns
+                  \(V_{CC}/R_p\) of current through the pulling device, which must still keep the
+                  line under \(V_{OL(max)}\) (0.4 V). Hence a window:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>R too large</strong> → rise time \(t_r\) exceeds spec → data corruption
+                    at speed, works "sometimes".
+                  </li>
+                  <li>
+                    <strong>R too small</strong> → device can't sink enough current → \(V_{OL}\)
+                    creeps up, noise margin gone, extra power.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Rmin -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Lower limit: R<sub>min</sub> (sink current)</h3>
+                </div>
+                <div class="formula-card">\( R_{min} = \dfrac{V_{CC} - V_{OL(max)}}{I_{OL}} \)</div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  With the standard values \(V_{OL(max)} = 0.4\,\text{V}\) and \(I_{OL} =
+                  3\,\text{mA}\):
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>V<sub>CC</sub></th>
+                        <th>R<sub>min</sub></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1.8 V</td>
+                        <td>(1.8 − 0.4) / 3 mA ≈ <strong>467 Ω</strong></td>
+                      </tr>
+                      <tr>
+                        <td>3.3 V</td>
+                        <td>(3.3 − 0.4) / 3 mA ≈ <strong>967 Ω</strong></td>
+                      </tr>
+                      <tr>
+                        <td>5.0 V</td>
+                        <td>(5.0 − 0.4) / 3 mA ≈ <strong>1.53 kΩ</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Rmax -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Upper limit: R<sub>max</sub> (rise time)</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  The spec measures \(t_r\) between 30 % and 70 % of \(V_{CC}\). Solving the RC
+                  charging equation between those two points gives \(t_r = R_p C_{bus}\,(\ln
+                  0.7^{-1}... )\) — the constant works out to 0.8473:
+                </p>
+                <div class="formula-card">\( R_{max} = \dfrac{t_r}{0.8473 \cdot C_{bus}} \)</div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Mode</th>
+                        <th>t<sub>r</sub> max</th>
+                        <th>R<sub>max</sub> @ 100 pF</th>
+                        <th>R<sub>max</sub> @ 200 pF</th>
+                        <th>R<sub>max</sub> @ 400 pF</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Standard 100 kHz</td>
+                        <td>1000 ns</td>
+                        <td>11.8 kΩ</td>
+                        <td>5.9 kΩ</td>
+                        <td>2.95 kΩ</td>
+                      </tr>
+                      <tr>
+                        <td>Fast 400 kHz</td>
+                        <td>300 ns</td>
+                        <td>3.54 kΩ</td>
+                        <td>1.77 kΩ</td>
+                        <td>885 Ω ⚠</td>
+                      </tr>
+                      <tr>
+                        <td>Fast+ 1 MHz</td>
+                        <td>120 ns</td>
+                        <td>1.42 kΩ</td>
+                        <td>708 Ω ⚠</td>
+                        <td>— ⚠</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  ⚠ Where \(R_{max} &lt; R_{min}\) the window has closed: the bus is too capacitive
+                  for that speed. Fix it by lowering C<sub>bus</sub>, dropping the speed, or adding
+                  a bus buffer (Module 04).
+                </div>
+              </div>
+
+              <!-- Plotly rise time -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Interactive: watch the rising edge</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  SDA rising edges for four pull-up values at 3.3 V — drag the C<sub>bus</sub>
+                  slider and watch which resistors stop meeting Fast-mode's 300 ns limit (dashed
+                  line at 70 % V<sub>CC</sub>).
+                </p>
+                <div class="sim-controls">
+                  <label
+                    >C<sub>bus</sub>:
+                    <strong><span id="cbusVal">150</span> pF</strong>
+                  </label>
+                  <input
+                    type="range"
+                    id="cbusSlider"
+                    min="50"
+                    max="400"
+                    step="10"
+                    value="150"
+                    style="flex: 1; min-width: 180px"
+                  />
+                </div>
+                <div class="plot-box">
+                  <div id="risePlot" style="width: 100%; height: 340px"></div>
+                  <p class="diagram-caption">
+                    RC rise curves: v(t) = V<sub>CC</sub>(1 − e<sup>−t/RC</sup>). The circles mark
+                    where each curve crosses 70 % V<sub>CC</sub> — the end of the measured rise.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Plotly design window -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Interactive: the design window</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  The full picture: R<sub>max</sub> falls as bus capacitance grows, while R<sub
+                    >min</sub
+                  >
+                  stays flat. Your pull-up must live in the shaded region. Note the Fast+ window
+                  slamming shut just past 140 pF.
+                </p>
+                <div class="plot-box">
+                  <div id="windowPlot" style="width: 100%; height: 360px"></div>
+                  <p class="diagram-caption">
+                    Valid pull-up region vs C<sub>bus</sub> at 3.3 V (I<sub>OL</sub> = 3 mA).
+                    Log-scaled Y axis.
+                  </p>
+                </div>
+              </div>
+
+              <!-- capacitance estimation -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Estimating C<sub>bus</sub></h3>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>Each device pin: <strong>~10 pF</strong> max per the spec (typ. 3–7 pF).</li>
+                  <li>
+                    PCB trace: <strong>~1 pF/cm</strong> on outer layers (more over thin
+                    dielectrics).
+                  </li>
+                  <li>Connector + cable: 30–100 pF/m — cables eat your budget fastest.</li>
+                  <li>Spec ceiling: <strong>400 pF</strong> (Sm/Fm), 550 pF (Fm+).</li>
+                </ul>
+                <div class="tip-box">
+                  Example: 6 devices (60 pF) + 25 cm of trace (25 pF) + controller pin (10 pF) ≈
+                  <strong>95 pF</strong> → comfortably inside Fast-mode with 2.2 kΩ.
+                </div>
+              </div>
+
+              <!-- calculator -->
+              <div class="widget-container" id="calc">
+                <div class="widget-header">
+                  <h3>Pull-up calculator</h3>
+                  <span class="badge badge-green">Interactive</span>
+                </div>
+                <div class="calc-grid">
+                  <div class="calc-inputs">
+                    <div class="calc-field">
+                      <label class="slider-label" for="calcVcc">Bus voltage V<sub>CC</sub></label>
+                      <select id="calcVcc">
+                        <option value="1.8">1.8 V</option>
+                        <option value="2.5">2.5 V</option>
+                        <option value="3.3" selected>3.3 V</option>
+                        <option value="5">5.0 V</option>
+                      </select>
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="calcSpeed">Speed class</label>
+                      <select id="calcSpeed">
+                        <option value="1000">Standard — 100 kHz (t_r 1000 ns)</option>
+                        <option value="300" selected>Fast — 400 kHz (t_r 300 ns)</option>
+                        <option value="120">Fast+ — 1 MHz (t_r 120 ns)</option>
+                      </select>
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="calcCbus"
+                        >Bus capacitance C<sub>bus</sub> (pF)</label
+                      >
+                      <input type="number" id="calcCbus" value="150" min="10" max="600" step="10" />
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="calcIol"
+                        >Sink current I<sub>OL</sub> (mA)</label
+                      >
+                      <input type="number" id="calcIol" value="3" min="0.5" max="20" step="0.5" />
+                    </div>
+                  </div>
+                  <div class="calc-results">
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">R<sub>min</sub></span>
+                      <span class="calc-result-value" id="outRmin">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">R<sub>max</sub></span>
+                      <span class="calc-result-value" id="outRmax">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Recommended E24 value</span>
+                      <span class="calc-result-value" id="outE24">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Rise time with that value</span>
+                      <span class="calc-result-value" id="outTr">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Static power per line (LOW)</span>
+                      <span class="calc-result-value" id="outPwr">—</span>
+                    </div>
+                    <p
+                      id="calcWarn"
+                      style="
+                        display: none;
+                        color: var(--danger, #f87171);
+                        font-size: 0.8rem;
+                        line-height: 1.5;
+                      "
+                    ></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- practical notes -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Practical rules</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Situation</th>
+                        <th>Starting value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>3.3 V, 100 kHz, small bus</td>
+                        <td>4.7 kΩ – 10 kΩ</td>
+                      </tr>
+                      <tr>
+                        <td>3.3 V, 400 kHz (typical design)</td>
+                        <td><strong>2.2 kΩ</strong></td>
+                      </tr>
+                      <tr>
+                        <td>3.3 V, 1 MHz Fast+</td>
+                        <td>1 kΩ</td>
+                      </tr>
+                      <tr>
+                        <td>Battery-powered, slow bus</td>
+                        <td>10 kΩ (accept slow edges)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>One pull-up pair per bus</strong> — never per device. Duplicated
+                    pull-ups combine in parallel and can breach R<sub>min</sub>.
+                  </li>
+                  <li>Place them near the controller or electrical center of the bus.</li>
+                  <li>
+                    <strong>Internal MCU pull-ups (30–50 kΩ) are not enough</strong> for anything
+                    beyond one device at 100 kHz on a tiny board.
+                  </li>
+                  <li>SDA and SCL get the same value; keep them matched.</li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="02-protocol-essentials.html"
+                  >← Protocol Essentials</a
+                >
+                <a class="btn btn-primary" href="04-multi-slave.html"
+                  >Next: One Master, Many Slaves →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        var VCC = 3.3;
+        var E24 = [
+          100, 110, 120, 130, 150, 160, 180, 200, 220, 240, 270, 300, 330, 360, 390, 430, 470, 510,
+          560, 620, 680, 750, 820, 910,
+        ];
+
+        function e24Series(min, max) {
+          var out = [];
+          for (var dec = 1; dec <= 100000; dec *= 10) {
+            for (var i = 0; i < E24.length; i++) {
+              var v = E24[i] * dec * 0.01;
+              if (v >= min && v <= max) out.push(v);
+            }
+          }
+          return out;
+        }
+        function fmtR(r) {
+          if (!isFinite(r) || r <= 0) return '—';
+          return r >= 1000
+            ? (r / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kΩ'
+            : Math.round(r) + ' Ω';
+        }
+
+        /* theme-aware Plotly layout */
+        function baseLayout(extra) {
+          var cs = getComputedStyle(document.documentElement);
+          var text = (cs.getPropertyValue('--text-sub') || '#94a3b8').trim();
+          var grid = 'rgba(128,140,160,0.18)';
+          var layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: text, family: 'Inter, sans-serif', size: 11 },
+            margin: { l: 60, r: 20, t: 10, b: 45 },
+            xaxis: { gridcolor: grid, zerolinecolor: grid },
+            yaxis: { gridcolor: grid, zerolinecolor: grid },
+            legend: { orientation: 'h', y: -0.22 },
+          };
+          for (var k in extra) layout[k] = Object.assign({}, layout[k] || {}, extra[k]);
+          return layout;
+        }
+
+        /* ── Chart 1: rise curves ── */
+        var R_SET = [1000, 2200, 4700, 10000];
+        var COLORS = ['#34d399', '#22d3ee', '#fb923c', '#f87171'];
+
+        function drawRise(cbusPF) {
+          var C = cbusPF * 1e-12;
+          var traces = [];
+          var tEnd = 1200; /* ns */
+          for (var i = 0; i < R_SET.length; i++) {
+            var R = R_SET[i];
+            var xs = [],
+              ys = [];
+            for (var t = 0; t <= tEnd; t += 8) {
+              xs.push(t);
+              ys.push(VCC * (1 - Math.exp((-t * 1e-9) / (R * C))));
+            }
+            traces.push({
+              x: xs,
+              y: ys,
+              mode: 'lines',
+              name: fmtR(R),
+              line: { color: COLORS[i], width: 2 },
+            });
+            /* 70% crossing marker */
+            var t70 = -R * C * Math.log(1 - 0.7) * 1e9;
+            if (t70 <= tEnd) {
+              traces.push({
+                x: [t70],
+                y: [0.7 * VCC],
+                mode: 'markers',
+                marker: { color: COLORS[i], size: 8, symbol: 'circle-open' },
+                showlegend: false,
+                hovertemplate: fmtR(R) + ' reaches 70% at %{x:.0f} ns<extra></extra>',
+              });
+            }
+          }
+          var layout = baseLayout({
+            xaxis: { title: { text: 'time (ns)' }, range: [0, tEnd] },
+            yaxis: { title: { text: 'SDA voltage (V)' }, range: [0, VCC * 1.05] },
+            shapes: [
+              {
+                type: 'line',
+                x0: 0,
+                x1: tEnd,
+                y0: 0.7 * VCC,
+                y1: 0.7 * VCC,
+                line: { dash: 'dot', color: 'rgba(148,163,184,0.6)', width: 1 },
+              },
+              {
+                type: 'line',
+                x0: 300,
+                x1: 300,
+                y0: 0,
+                y1: VCC * 1.05,
+                line: { dash: 'dash', color: '#f87171', width: 1.5 },
+              },
+            ],
+            annotations: [
+              {
+                x: 300,
+                y: VCC * 1.02,
+                text: 'Fast-mode t_r limit (300 ns)',
+                showarrow: false,
+                font: { color: '#f87171', size: 10 },
+                xanchor: 'left',
+              },
+              {
+                x: 8,
+                y: 0.7 * VCC,
+                text: '70% V<sub>CC</sub>',
+                showarrow: false,
+                yanchor: 'bottom',
+                xanchor: 'left',
+                font: { size: 10 },
+              },
+            ],
+          });
+          Plotly.react('risePlot', traces, layout, { displayModeBar: false, responsive: true });
+        }
+
+        /* ── Chart 2: design window ── */
+        function drawWindow() {
+          var xs = [],
+            rmaxFm = [],
+            rmaxFmp = [],
+            rmaxSm = [];
+          for (var c = 20; c <= 500; c += 5) {
+            xs.push(c);
+            var C = c * 1e-12;
+            rmaxSm.push(1000e-9 / (0.8473 * C));
+            rmaxFm.push(300e-9 / (0.8473 * C));
+            rmaxFmp.push(120e-9 / (0.8473 * C));
+          }
+          var rmin = (VCC - 0.4) / 0.003;
+          var traces = [
+            {
+              x: xs,
+              y: rmaxSm,
+              mode: 'lines',
+              name: 'R_max 100 kHz',
+              line: { color: '#34d399', width: 2 },
+            },
+            {
+              x: xs,
+              y: rmaxFm,
+              mode: 'lines',
+              name: 'R_max 400 kHz',
+              line: { color: '#22d3ee', width: 2.5 },
+              fill: 'tonexty',
+              fillcolor: 'rgba(34,211,238,0.0)',
+            },
+            {
+              x: xs,
+              y: rmaxFmp,
+              mode: 'lines',
+              name: 'R_max 1 MHz',
+              line: { color: '#fb923c', width: 2 },
+            },
+            {
+              x: [20, 500],
+              y: [rmin, rmin],
+              mode: 'lines',
+              name: 'R_min (3 mA sink)',
+              line: { color: '#f87171', width: 2.5, dash: 'dash' },
+            },
+            /* shaded valid region for Fast mode */
+            {
+              x: xs.concat(xs.slice().reverse()),
+              y: rmaxFm
+                .map(function (v) {
+                  return Math.max(v, rmin);
+                })
+                .concat(
+                  xs
+                    .map(function () {
+                      return rmin;
+                    })
+                    .reverse()
+                ),
+              fill: 'toself',
+              fillcolor: 'rgba(34,211,238,0.10)',
+              line: { width: 0 },
+              name: 'valid @ 400 kHz',
+              hoverinfo: 'skip',
+            },
+          ];
+          var layout = baseLayout({
+            xaxis: { title: { text: 'bus capacitance C_bus (pF)' } },
+            yaxis: { title: { text: 'pull-up resistance (Ω)' }, type: 'log', range: [2.5, 4.3] },
+          });
+          Plotly.react('windowPlot', traces, layout, { displayModeBar: false, responsive: true });
+        }
+
+        /* ── Calculator ── */
+        function calc() {
+          var vcc = parseFloat(document.getElementById('calcVcc').value);
+          var tr = parseFloat(document.getElementById('calcSpeed').value) * 1e-9;
+          var cbus = parseFloat(document.getElementById('calcCbus').value) * 1e-12;
+          var iol = parseFloat(document.getElementById('calcIol').value) * 1e-3;
+          var warn = document.getElementById('calcWarn');
+          warn.style.display = 'none';
+
+          if (!(vcc > 0) || !(cbus > 0) || !(iol > 0)) return;
+          var rmin = (vcc - 0.4) / iol;
+          var rmax = tr / (0.8473 * cbus);
+          document.getElementById('outRmin').textContent = fmtR(rmin);
+          document.getElementById('outRmax').textContent = fmtR(rmax);
+
+          if (rmax < rmin) {
+            document.getElementById('outE24').textContent = '—';
+            document.getElementById('outTr').textContent = '—';
+            document.getElementById('outPwr').textContent = '—';
+            warn.textContent =
+              'No valid value: the bus is too capacitive for this speed. Reduce C_bus, drop a speed class, or split the bus with a buffer/mux (see Module 04).';
+            warn.style.display = '';
+            return;
+          }
+          /* pick E24 nearest the geometric middle of the window, biased toward Rmax for power */
+          var candidates = e24Series(rmin, rmax);
+          var pick;
+          if (candidates.length) {
+            var target = Math.sqrt(rmin * rmax);
+            pick = candidates.reduce(function (best, v) {
+              return Math.abs(v - target) < Math.abs(best - target) ? v : best;
+            }, candidates[0]);
+          } else {
+            pick = (rmin + rmax) / 2;
+          }
+          var trPick = 0.8473 * pick * cbus;
+          document.getElementById('outE24').textContent = fmtR(pick);
+          document.getElementById('outTr').textContent = (trPick * 1e9).toFixed(0) + ' ns';
+          document.getElementById('outPwr').textContent =
+            (((vcc * vcc) / pick) * 1000).toFixed(1) + ' mW';
+        }
+
+        ['calcVcc', 'calcSpeed', 'calcCbus', 'calcIol'].forEach(function (id) {
+          document.getElementById(id).addEventListener('input', calc);
+          document.getElementById(id).addEventListener('change', calc);
+        });
+
+        var slider = document.getElementById('cbusSlider');
+        slider.addEventListener('input', function () {
+          document.getElementById('cbusVal').textContent = slider.value;
+          drawRise(parseFloat(slider.value));
+        });
+
+        function init() {
+          drawRise(150);
+          drawWindow();
+          calc();
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>

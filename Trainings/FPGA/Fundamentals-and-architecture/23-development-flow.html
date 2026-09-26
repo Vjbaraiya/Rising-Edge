@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Master the complete FPGA development flow — RTL coding, simulation, synthesis, implementation, timing closure, bitstream generation, and hardware debugging with ILA."
+    />
+    <title>FPGA Development Flow | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/23-development-flow.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      pre {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        color: var(--text-base);
+        overflow-x: auto;
+        margin: 12px 0 16px;
+      }
+      .flow-step {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin: 10px 0;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .flow-step-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.85rem;
+        color: #fff;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .flow-step-body h4 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 0 0 4px;
+      }
+      .flow-step-body p {
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        margin: 0;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">--</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item active" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>FPGA Development Flow</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 23/25</span><span>92%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 92%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 23 OF 25</span>
+                <span class="badge">20 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                FPGA Development Flow Overview
+              </h1>
+              <p class="subtitle">
+                The complete journey from design specification to running hardware — RTL coding,
+                simulation, synthesis, place and route, timing closure, bitstream generation, and
+                in-system debug with ILA.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Why the FPGA Design Flow is Different
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In software development, compiling translates source code into machine instructions
+                that run on a fixed processor. In FPGA development, the equivalent process
+                <strong>physically places hardware</strong> — it assigns each logic primitive to a
+                real location on silicon and routes actual interconnects between them. This is why
+                FPGA compilation (called <em>implementation</em>) takes minutes to hours rather than
+                seconds, and why understanding the flow is essential before writing a single line of
+                RTL.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>Key Insight</strong>
+                Unlike an MCU where you flash firmware onto fixed hardware, an FPGA design becomes
+                the hardware. Each synthesis and implementation run produces a unique physical
+                circuit tailored to your design and device.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                The Complete FPGA Design Flow
+              </h3>
+              <div class="mermaid">
+                graph TD A[Design Specification] --> B[RTL Coding Verilog VHDL SystemVerilog] B -->
+                C[Functional Simulation Vivado xSim ModelSim] C --> D{Sim Pass?} D -->|No fix bugs|
+                B D -->|Yes| E[Synthesis synth_design] E --> F[Check Utilization and Synthesis
+                Warnings] F --> G[Implementation Place and Route] G --> H[Static Timing Analysis
+                report_timing_summary] H --> I{WNS >= 0?} I -->|No timing fail| J[Timing Closure
+                Pipeline Floorplan Strategy] J --> G I -->|Yes| K[Bitstream Generation
+                write_bitstream] K --> L[Program FPGA Vivado Hardware Manager] L --> M[Hardware
+                Debug ILA VIO JTAG] M --> N{Design OK?} N -->|No RTL bug| B N -->|Yes| O[Design
+                Complete]
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 16px;
+                "
+              >
+                Step-by-Step Walkthrough
+              </h3>
+
+              <div class="flow-step">
+                <div class="flow-step-num">1</div>
+                <div class="flow-step-body">
+                  <h4>Design Specification</h4>
+                  <p>
+                    Define clock frequencies, interfaces, latency requirements, and resource budgets
+                    before writing code. Create a block diagram identifying major functional modules
+                    — which go in PL fabric vs PS (for Zynq) and which will use Xilinx IP Catalog
+                    cores. Poorly specified requirements are the number one cause of FPGA project
+                    overruns.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">2</div>
+                <div class="flow-step-body">
+                  <h4>RTL Coding — Verilog / VHDL / SystemVerilog</h4>
+                  <p>
+                    Write synthesizable Register Transfer Level (RTL) code describing how data flows
+                    between registers on each clock edge. Verilog is dominant in industry.
+                    High-Level Synthesis (HLS via Vitis HLS) lets you describe behaviour in C/C++
+                    and the tool generates RTL automatically.
+                  </p>
+                </div>
+              </div>
+
+              <pre>
+// Synthesizable 4-bit synchronous counter
+module counter #(parameter WIDTH = 4) (
+  input  wire             clk,
+  input  wire             rst_n,
+  input  wire             en,
+  output reg  [WIDTH-1:0] count
+);
+  always @(posedge clk) begin
+    if (!rst_n)   count &lt;= {WIDTH{1'b0}};
+    else if (en)  count &lt;= count + 1'b1;
+  end
+endmodule</pre>
+
+              <div class="callout callout-tip">
+                <strong>RTL Best Practices</strong>
+                Register all module outputs. Never create combinational loops. Use parameters for
+                data widths. Keep each module to one clock domain. These habits eliminate 90% of
+                common synthesis and timing problems.
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">3</div>
+                <div class="flow-step-body">
+                  <h4>Functional Simulation</h4>
+                  <p>
+                    Simulate RTL behaviorally — no gate delays, pure logic checking. Write a
+                    testbench that drives inputs and verifies outputs. Vivado includes xSim (free);
+                    ModelSim/QuestaSim are industry standards. Catch all logical bugs here —
+                    simulation is 10-100x faster to debug than hardware. Aim for more than 90%
+                    statement coverage before synthesis.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">4</div>
+                <div class="flow-step-body">
+                  <h4>Synthesis</h4>
+                  <p>
+                    Vivado maps your RTL to FPGA primitives: LUT6, FDRE, CARRY4, RAMB36E1, DSP48E1.
+                    Run <code>synth_design -top mydesign -part xc7a35tcpg236-1</code>. Check the
+                    synthesis report for utilization and warnings. Fix all critical warnings —
+                    especially inferred latches and undriven nets — before proceeding.
+                  </p>
+                </div>
+              </div>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Synthesis Warning</th>
+                    <th>Cause</th>
+                    <th>Fix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Inferred latch for signal X</td>
+                    <td>Combinational always block missing else clause</td>
+                    <td>Add default assignment or else branch</td>
+                  </tr>
+                  <tr>
+                    <td>Net X is undriven</td>
+                    <td>Signal declared but never assigned</td>
+                    <td>Remove or connect the signal</td>
+                  </tr>
+                  <tr>
+                    <td>Multiple drivers on net X</td>
+                    <td>Two always blocks drive same signal</td>
+                    <td>Merge into one always block</td>
+                  </tr>
+                  <tr>
+                    <td>Timing not met during synthesis</td>
+                    <td>Very long combinational paths</td>
+                    <td>Add pipeline registers</td>
+                  </tr>
+                  <tr>
+                    <td>Black box instantiation</td>
+                    <td>Module not found in project</td>
+                    <td>Add missing file to project sources</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="flow-step">
+                <div class="flow-step-num">5</div>
+                <div class="flow-step-body">
+                  <h4>Implementation — Place and Route</h4>
+                  <p>
+                    Vivado places each primitive at a physical FPGA location then connects them
+                    through the routing fabric. This is timing-driven: the tool uses your XDC clock
+                    constraints to optimize for speed. Runtime ranges from 2 minutes (small design)
+                    to 8+ hours (large Virtex-7 design). Vivado offers multiple implementation
+                    strategies — Default is fastest; Performance_ExplorePostRoutePhysOpt recovers
+                    5-15% timing margin at 3x longer runtime.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">6</div>
+                <div class="flow-step-body">
+                  <h4>Static Timing Analysis (STA)</h4>
+                  <p>
+                    After routing, Vivado calculates actual signal delays through every path. Run
+                    <code>report_timing_summary -file timing.rpt</code>. The key metric is
+                    <strong>Worst Negative Slack (WNS)</strong> — must be 0 or positive for timing
+                    to be met. Worst Hold Slack (WHS) must also be non-negative. Total Negative
+                    Slack (TNS) shows the total extent of all failing paths.
+                  </p>
+                </div>
+              </div>
+
+              <div class="callout callout-warning">
+                <strong>Critical Rule</strong>
+                A design with negative WNS will have random, intermittent failures in hardware — the
+                flip-flop sometimes samples data before it has settled. Never ship a design with
+                timing violations. The failures are non-deterministic and extremely difficult to
+                debug in the field.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Timing Closure Techniques
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Problem</th>
+                    <th>Root Cause</th>
+                    <th>Solution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Setup violation on long path</td>
+                    <td>Too much logic between registers</td>
+                    <td>Insert pipeline register to break the path</td>
+                  </tr>
+                  <tr>
+                    <td>High routing congestion</td>
+                    <td>Too much logic packed in one area</td>
+                    <td>Create Pblock to spread logic across fabric</td>
+                  </tr>
+                  <tr>
+                    <td>Clock skew causing hold violations</td>
+                    <td>BUFG placement issue</td>
+                    <td>Check BUFG placement; add set_clock_groups</td>
+                  </tr>
+                  <tr>
+                    <td>False path showing as critical</td>
+                    <td>Missing XDC constraint</td>
+                    <td>Add set_false_path or set_multicycle_path</td>
+                  </tr>
+                  <tr>
+                    <td>High fanout net slowing timing</td>
+                    <td>One register drives 10,000+ loads</td>
+                    <td>Use BUFG or replicate the register</td>
+                  </tr>
+                  <tr>
+                    <td>Marginal timing across the board</td>
+                    <td>Sub-optimal implementation</td>
+                    <td>Switch to Performance_ExplorePostRoutePhysOpt</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="flow-step">
+                <div class="flow-step-num">7</div>
+                <div class="flow-step-body">
+                  <h4>Bitstream Generation</h4>
+                  <p>
+                    Once timing is met, generate the binary configuration file:
+                    <code>write_bitstream -force design.bit</code>. The bitstream encodes all LUT
+                    INIT values, routing switch settings, IO standards, clock configurations, and
+                    BRAM initial contents. Enable compression and AES-256 encryption for production
+                    to protect IP and reduce flash size.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">8</div>
+                <div class="flow-step-body">
+                  <h4>Hardware Programming</h4>
+                  <p>
+                    Open Vivado Hardware Manager, connect to the JTAG cable, right-click the device,
+                    and select Program Device. DONE pin goes high on the board. For production, the
+                    bitstream is stored in SPI flash so the FPGA loads automatically on every
+                    power-up.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flow-step">
+                <div class="flow-step-num">9</div>
+                <div class="flow-step-body">
+                  <h4>Hardware Debug with ILA and VIO</h4>
+                  <p>
+                    <strong>ILA (Integrated Logic Analyzer)</strong> is Xilinx's built-in logic
+                    analyzer. Add <code>(* mark_debug = "true" *)</code> to any RTL net; Vivado
+                    inserts an ILA core and connects it to those signals. After programming, set a
+                    trigger condition in Hardware Manager and capture up to 64K samples per channel
+                    at full clock speed. <strong>VIO (Virtual IO)</strong> lets you drive signals
+                    and read status in real time from the PC without physical IO pins.
+                  </p>
+                </div>
+              </div>
+
+              <pre>
+// Mark signals for ILA capture in RTL before synthesis
+(* mark_debug = "true" *) wire [15:0] data_bus;
+(* mark_debug = "true" *) wire        valid;
+(* mark_debug = "true" *) wire        overflow_flag;
+
+// After synthesis: Vivado Set Up Debug wizard connects ILA automatically</pre>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Essential XDC Constraints Reference
+              </h3>
+              <pre>
+# Define primary clock at 100 MHz
+create_clock -period 10.000 -name sys_clk [get_ports sys_clk_p]
+
+# Clock from MMCM output
+create_generated_clock -name clk_250 -source [get_pins mmcm_inst/CLKIN1] \
+  -multiply_by 5 -divide_by 2 [get_pins mmcm_inst/CLKOUT0]
+
+# IO timing
+set_input_delay  -clock sys_clk -max 3.0 [get_ports {data_in[*]}]
+set_output_delay -clock sys_clk -max 2.0 [get_ports {data_out[*]}]
+
+# Ignore paths between unrelated clock domains
+set_clock_groups -asynchronous -group {sys_clk} -group {clk_250}
+
+# Pin assignments
+set_property PACKAGE_PIN E3       [get_ports sys_clk_p]
+set_property IOSTANDARD  LVDS     [get_ports sys_clk_p]
+set_property PACKAGE_PIN T22      [get_ports {led[0]}]
+set_property IOSTANDARD  LVCMOS33 [get_ports {led[*]}]</pre>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Typical Design Flow Time Distribution
+              </h3>
+              <div id="flow-time-chart" style="height: 320px; margin: 16px 0"></div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: What is the difference between setup and hold timing violations in FPGA
+                design?<br /><br />
+                A: A setup violation means data arrives at a flip-flop less than t_setup before the
+                clock edge — fix by reducing logic depth (pipeline stages) or lowering clock
+                frequency. A hold violation means data changes less than t_hold after the clock edge
+                — fix by adding delay buffers on the data path. Setup violations are the common case
+                in FPGA designs; hold violations are typically fixed automatically by Vivado's
+                router inserting delay cells.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Pro Tip</strong>
+                Run <code>report_cdc</code> and <code>report_methodology</code> after every
+                implementation. These commands catch CDC hazards (missing synchronizers),
+                unconstrained clocks, and common design rule violations that do not appear as timing
+                failures but cause real, hard-to-diagnose hardware failures.
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q1" data-answered="">
+                  1. What does Worst Negative Slack (WNS) greater than or equal to zero indicate?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    The design has unused logic resources
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    All timing paths meet their constraints — timing is closed
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    The implementation ran in under one hour
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    The bitstream file is ready with no further checks needed
+                  </li>
+                </ul>
+                <div id="fb1" class="quiz-fb">
+                  WNS &ge; 0 means every flip-flop has adequate setup margin. All paths meet timing.
+                  This is required before generating a bitstream for production hardware.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q2" data-answered="">
+                  2. What does an "inferred latch" synthesis warning mean?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    A RAMB36E1 was automatically used for memory inference
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    A DSP48E1 replaced a LUT multiplier
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    A combinational always block has a missing else clause — creating unintended
+                    sequential state
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    The tool inferred a FIFO from the RTL pattern
+                  </li>
+                </ul>
+                <div id="fb2" class="quiz-fb">
+                  An inferred latch is almost always a bug. It happens when a combinational always
+                  block assigns a signal in some conditions but not all, so the synthesizer creates
+                  a latch to hold the last value. Fix: add a default assignment at the top of the
+                  always block.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q3" data-answered="">
+                  3. What Xilinx debug core captures internal FPGA signals like a logic analyzer?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    VIO — Virtual IO core
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    ILA — Integrated Logic Analyzer
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    JTAG boundary scan
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    IBERT — Integrated Bit Error Ratio Tester
+                  </li>
+                </ul>
+                <div id="fb3" class="quiz-fb">
+                  ILA captures internal FPGA signals in real time, storing up to 64K samples per
+                  channel in BRAM. You trigger it on specific conditions from Vivado Hardware
+                  Manager and view waveforms just like an external oscilloscope — no physical probe
+                  needed.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q4" data-answered="">
+                  4. What is the correct fix for a setup timing violation caused by too many LUTs in
+                  series?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    Switch to a faster FPGA package
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    Insert a pipeline register to break the long combinational path
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    Add a set_false_path constraint to ignore the path
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    Reduce the clock period in the XDC file
+                  </li>
+                </ul>
+                <div id="fb4" class="quiz-fb">
+                  Adding a pipeline register splits the long path into two shorter paths, each
+                  meeting the clock period requirement. This adds one cycle of latency but is the
+                  correct, sustainable fix. Using set_false_path would hide a real timing issue.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q5" data-answered="">
+                  5. What RTL attribute marks a net for automatic ILA connection in Vivado?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <code>(* keep = "true" *)</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <code>(* dont_touch = "true" *)</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <code>(* mark_debug = "true" *)</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <code>(* use_dsp = "yes" *)</code>
+                  </li>
+                </ul>
+                <div id="fb5" class="quiz-fb">
+                  The (* mark_debug = "true" *) attribute tells Vivado to preserve this net through
+                  optimization and connect it to an ILA probe. After synthesis, use "Set Up Debug"
+                  to configure the ILA depth, trigger, and capture settings.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q6" data-answered="">
+                  6. What XDC command declares a clock generated by an MMCM output?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <code>create_clock</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    <code>create_generated_clock</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <code>set_clock_groups</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <code>set_output_delay</code>
+                  </li>
+                </ul>
+                <div id="fb6" class="quiz-fb">
+                  create_generated_clock defines a clock derived from another clock — such as an
+                  MMCM output. It specifies the multiply/divide relationship to the source clock,
+                  allowing Vivado's timing engine to correctly analyze all paths in both domains.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-tip">
+                <strong>Mini Design Challenge — Complete Flow on Artix-7</strong>
+                Work through these steps targeting XC7A35TCPG236-1 in Vivado:<br /><br />
+                <strong>Step 1 — RTL:</strong> Write a Verilog 8-bit up/down counter with
+                synchronous reset and direction control.<br />
+                <strong>Step 2 — Testbench:</strong> Verify count increments, decrements, and resets
+                over 100 clock cycles.<br />
+                <strong>Step 3 — Simulate:</strong> Run behavioral simulation in xSim. Check the
+                waveform.<br />
+                <strong>Step 4 — XDC:</strong> Create constraints:
+                <code>create_clock -period 5.0 [get_ports clk]</code> (200 MHz target).<br />
+                <strong>Step 5 — Synthesize:</strong> Check utilization — expect ~8 FFs, ~4 LUTs, 0
+                BRAM, 0 DSP.<br />
+                <strong>Step 6 — Implement:</strong> Run implementation. Check WNS in timing
+                summary.<br />
+                <strong>Step 7 — Timing Report:</strong> Run
+                <code>report_timing -max_paths 5</code>. Identify the critical path.<br />
+                <strong>Step 8 — ILA:</strong> Add <code>(* mark_debug = "true" *)</code> to the
+                count output. Re-synthesize, set up debug, program, and observe.
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Summary
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                The FPGA design flow transforms RTL source code into a physical circuit through nine
+                distinct stages: specification, RTL coding, functional simulation, synthesis,
+                implementation, static timing analysis, bitstream generation, hardware programming,
+                and in-system debug. Unlike software compilation, each stage has physical
+                significance — timing closure ensures every flip-flop has adequate setup margin, and
+                the ILA debug core lets you observe internal signals without an oscilloscope probe
+                on every pin. Master this flow and you have the foundation for any FPGA project.
+              </p>
+
+              <nav class="lesson-nav" aria-label="Lesson navigation">
+                <a href="22-configuration-process.html">&#8592; Config Process</a>
+                <a href="24-architecture-walkthrough.html">Architecture Tour &#8594;</a>
+              </nav>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-23';
+      const TOTAL = 25;
+
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+
+      function renderCharts() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        const tc = isDark ? '#94a3b8' : '#475569';
+        Plotly.newPlot(
+          'flow-time-chart',
+          [
+            {
+              type: 'pie',
+              labels: [
+                'Specification',
+                'RTL Coding',
+                'Simulation & Verification',
+                'Synthesis',
+                'Implementation',
+                'Timing Closure',
+                'Hardware Debug',
+              ],
+              values: [5, 20, 30, 8, 12, 10, 15],
+              hole: 0.42,
+              marker: {
+                colors: [
+                  '#818cf8',
+                  '#22d3ee',
+                  '#34d399',
+                  '#fb923c',
+                  '#f472b6',
+                  '#facc15',
+                  '#f87171',
+                ],
+              },
+              textinfo: 'label+percent',
+              textfont: { color: tc, size: 11 },
+            },
+          ],
+          {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: tc },
+            showlegend: false,
+            margin: { t: 10, b: 10, l: 10, r: 10 },
+            annotations: [
+              {
+                text: 'Design<br>Time',
+                x: 0.5,
+                y: 0.5,
+                font: { size: 13, color: tc },
+                showarrow: false,
+              },
+            ],
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      }
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        renderCharts();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="I2C protocol essentials for hardware designers: START/STOP conditions, 7-bit and 10-bit addressing, ACK/NACK, clock stretching, and the three standard transactions — with animated waveforms."
+    />
+    <title>Protocol Essentials | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/02-protocol-essentials.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .frame-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-family: monospace;
+        font-size: 0.72rem;
+        margin: 12px 0;
+      }
+      .frame-bit {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+        background: var(--bg-muted);
+        color: var(--text-sub);
+        text-align: center;
+        min-width: 40px;
+      }
+      .frame-bit.s {
+        border-color: var(--success, #34d399);
+        color: var(--success, #34d399);
+        font-weight: 700;
+      }
+      .frame-bit.a {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .frame-bit.k {
+        border-color: var(--warning, #fb923c);
+        color: var(--warning, #fb923c);
+      }
+      .frame-bit.p {
+        border-color: var(--danger, #f87171);
+        color: var(--danger, #f87171);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item active"
+            >02. Protocol Essentials</a
+          >
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>Protocol Essentials</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 02</span>
+              <h1>Protocol Essentials</h1>
+              <p class="subtitle">
+                Just enough protocol to design hardware well: how transfers start and stop, how
+                addressing works, what ACK really is electrically, and why clock stretching can make
+                or break your design.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- START/STOP -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>START, STOP and repeated START</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Data on SDA is only allowed to change while SCL is <em>low</em>. The two
+                  deliberate violations of that rule are the framing signals:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>START (S):</strong> SDA falls while SCL is high — "everyone listen".
+                  </li>
+                  <li><strong>STOP (P):</strong> SDA rises while SCL is high — "bus is free".</li>
+                  <li>
+                    <strong>Repeated START (Sr):</strong> a second START without an intervening STOP
+                    — keeps the bus ownership between two transfers (essential for register reads
+                    and multi-master safety).
+                  </li>
+                </ul>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 660 170"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Animated waveform showing SCL held high while SDA falls (START), data bits toggling while SCL clocks, then SDA rising while SCL is high (STOP)."
+                  >
+                    <text
+                      x="8"
+                      y="40"
+                      fill="var(--warning,#fb923c)"
+                      font-size="11"
+                      font-weight="700"
+                    >
+                      SCL
+                    </text>
+                    <text x="8" y="118" fill="var(--cyan,#22d3ee)" font-size="11" font-weight="700">
+                      SDA
+                    </text>
+                    <!-- SCL: high, then clocking, then high -->
+                    <path
+                      d="M40 30 H150 V60 H180 V30 H210 V60 H240 V30 H270 V60 H300 V30 H330 V60 H360 V30 H390 V60 H420 V30 H540 H650"
+                      fill="none"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <!-- SDA: high, falls during SCL high (START), bits, rises during SCL high (STOP) -->
+                    <path
+                      d="M40 96 H90 V126 H165 V96 H225 V126 H285 V96 H345 V126 H465 V96 H650"
+                      fill="none"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <!-- moving playhead -->
+                    <rect
+                      x="40"
+                      y="20"
+                      width="3"
+                      height="120"
+                      fill="var(--text-base)"
+                      opacity="0.55"
+                    >
+                      <animate
+                        attributeName="x"
+                        values="40;640;40"
+                        keyTimes="0;0.94;1"
+                        dur="6s"
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                    <!-- markers -->
+                    <g font-size="10" font-weight="800">
+                      <rect
+                        x="78"
+                        y="140"
+                        width="26"
+                        height="18"
+                        rx="4"
+                        fill="rgba(52,211,153,.15)"
+                        stroke="var(--success,#34d399)"
+                      />
+                      <text x="91" y="153" text-anchor="middle" fill="var(--success,#34d399)">
+                        S
+                      </text>
+                      <text
+                        x="270"
+                        y="153"
+                        text-anchor="middle"
+                        fill="var(--text-muted)"
+                        font-weight="600"
+                      >
+                        data bits (change only while SCL low)
+                      </text>
+                      <rect
+                        x="452"
+                        y="140"
+                        width="26"
+                        height="18"
+                        rx="4"
+                        fill="rgba(248,113,113,.15)"
+                        stroke="var(--danger,#f87171)"
+                      />
+                      <text x="465" y="153" text-anchor="middle" fill="var(--danger,#f87171)">
+                        P
+                      </text>
+                    </g>
+                  </svg>
+                  <p class="diagram-caption">
+                    START: SDA falls while SCL is high. STOP: SDA rises while SCL is high. In
+                    between, SDA may only change while SCL is low.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Addressing -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Addressing: 7-bit (and 10-bit)</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Every transfer begins with the controller broadcasting an address byte: 7 address
+                  bits plus a <strong>R/W̄ bit</strong> (1 = read, 0 = write). The one target that
+                  recognizes the address ACKs; everyone else ignores the rest of the transfer.
+                </p>
+                <div class="frame-strip" aria-label="I2C address byte layout">
+                  <div class="frame-bit s">S</div>
+                  <div class="frame-bit a">A6</div>
+                  <div class="frame-bit a">A5</div>
+                  <div class="frame-bit a">A4</div>
+                  <div class="frame-bit a">A3</div>
+                  <div class="frame-bit a">A2</div>
+                  <div class="frame-bit a">A1</div>
+                  <div class="frame-bit a">A0</div>
+                  <div class="frame-bit">R/W̄</div>
+                  <div class="frame-bit k">ACK</div>
+                </div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Address range</th>
+                        <th>Reserved for</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>0000 000</td>
+                        <td>General call (0x00) / START byte</td>
+                      </tr>
+                      <tr>
+                        <td>0000 001 – 0000 111</td>
+                        <td>CBUS, reserved, Hs-mode controller code</td>
+                      </tr>
+                      <tr>
+                        <td>1111 0XX</td>
+                        <td>10-bit addressing prefix</td>
+                      </tr>
+                      <tr>
+                        <td>1111 1XX</td>
+                        <td>Device ID / reserved</td>
+                      </tr>
+                      <tr>
+                        <td><strong>0x08 – 0x77</strong></td>
+                        <td><strong>Usable 7-bit device addresses (112)</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  <strong>Datasheet trap:</strong> some vendors quote the "8-bit address" (7-bit
+                  address already shifted left with R/W̄ = 0). If a part claims address 0x90, its
+                  7-bit address is 0x48. When a device doesn't respond, this is the first thing to
+                  check.
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  <strong>10-bit addressing</strong> exists (prefix 11110XX + second address byte)
+                  but is rare in practice; support it only when a specific part needs it.
+                </p>
+              </div>
+
+              <!-- ACK -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>ACK / NACK — a hardware signal, not a courtesy</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  After every 8 bits, the transmitter releases SDA for one clock. If the receiver
+                  pulls SDA low, that's <strong>ACK</strong>; if SDA stays high (pull-up wins),
+                  that's <strong>NACK</strong>. Electrically, an ACK proves a real device sits at
+                  that address <em>and</em> that your pull-up, V<sub>OL</sub> and timing are all
+                  within spec — which is why a scope shot of the ACK bit is the single most useful
+                  I2C bring-up measurement (Module 07).
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>NACK on address:</strong> nobody home — wrong address, wrong bus, or
+                    device unpowered.
+                  </li>
+                  <li>
+                    <strong>NACK on data (write):</strong> target can't accept more (buffer full,
+                    busy).
+                  </li>
+                  <li>
+                    <strong>NACK by controller (read):</strong> deliberate — "last byte, I'm done".
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Clock stretching -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Clock stretching</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  A slow target can hold <strong>SCL low</strong> after an ACK until it's ready —
+                  the controller must detect that SCL hasn't actually risen and wait. That's only
+                  possible because SCL is open-drain too.
+                </p>
+                <div class="info-box">
+                  <strong>Hardware checklist implications:</strong> (1) verify your controller's I2C
+                  peripheral supports clock stretching — bit-banged and some low-end implementations
+                  don't; (2) if a target datasheet mentions stretching (many EEPROMs, SMBus devices,
+                  sensor hubs), never drive SCL push-pull; (3) a stuck stretch looks exactly like a
+                  hung bus — set a timeout in firmware.
+                </div>
+              </div>
+
+              <!-- Transactions -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The three transactions you'll actually use</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  <strong>1. Plain write</strong> — set a register, send a command:
+                </p>
+                <div class="frame-strip">
+                  <div class="frame-bit s">S</div>
+                  <div class="frame-bit a">ADDR+W</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">DATA</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">DATA</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit p">P</div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  <strong>2. Plain read</strong> — read from the target's current position:
+                </p>
+                <div class="frame-strip">
+                  <div class="frame-bit s">S</div>
+                  <div class="frame-bit a">ADDR+R</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">DATA</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">DATA</div>
+                  <div class="frame-bit k">N̄</div>
+                  <div class="frame-bit p">P</div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  <strong>3. Register read (write-then-read)</strong> — the pattern 95 % of sensor
+                  traffic uses. Note the <strong>repeated START</strong>: the bus is never released
+                  between pointing at the register and reading it.
+                </p>
+                <div class="frame-strip">
+                  <div class="frame-bit s">S</div>
+                  <div class="frame-bit a">ADDR+W</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">REG</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit s">Sr</div>
+                  <div class="frame-bit a">ADDR+R</div>
+                  <div class="frame-bit k">A</div>
+                  <div class="frame-bit">DATA</div>
+                  <div class="frame-bit k">N̄</div>
+                  <div class="frame-bit p">P</div>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    START/STOP are SDA transitions while SCL is high; everything else changes only
+                    while SCL is low.
+                  </li>
+                  <li>112 usable 7-bit addresses; watch out for "8-bit address" datasheets.</li>
+                  <li>
+                    ACK is electrical proof your bus works; the ACK bit is your best scope target.
+                  </li>
+                  <li>
+                    Support clock stretching in the controller, and set a firmware timeout for it.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="01-what-is-i2c.html">← What is I2C</a>
+                <a class="btn btn-primary" href="03-pullup-resistors.html"
+                  >Next: Pull-up Resistor Design →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

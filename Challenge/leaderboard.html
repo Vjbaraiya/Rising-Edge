@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Weekly Hardware Design Challenge leaderboard — this week's rankings, all-time points leaders, and standings by engineering discipline."
+    />
+    <title>Leaderboard | Weekly Hardware Design Challenge | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Challenge/leaderboard.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="challenge.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="page-header">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span> <a href="index.html">Weekly Challenge</a
+          ><span>/</span><span>Leaderboard</span>
+        </nav>
+        <h1 style="margin-top: 6px">Leaderboard</h1>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top: 1rem">
+      <div class="container" style="max-width: 900px">
+        <!-- track selector (scopes "This week" + "By discipline" to one track) -->
+        <div
+          style="
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            margin-bottom: 10px;
+          "
+        >
+          Choose your track
+        </div>
+        <div class="wc-tabs" id="trackTabs" style="margin-bottom: 14px"></div>
+
+        <div class="wc-tabs" id="lbTabs">
+          <button class="wc-tab active" data-tab="week">This week</button>
+          <button class="wc-tab" data-tab="alltime">All-time points</button>
+          <button class="wc-tab" data-tab="role">By discipline</button>
+        </div>
+
+        <!-- role filter (only for role tab) -->
+        <div id="roleFilter" style="display: none; margin-bottom: 1rem">
+          <select id="roleSelect" class="wc-num-input" style="width: 260px">
+            <option value="FPGA Engineer">FPGA Engineers</option>
+            <option value="SI Engineer">Signal Integrity Engineers</option>
+            <option value="PCB Designer">PCB Designers</option>
+            <option value="Embedded Eng.">Embedded Engineers</option>
+            <option value="DV Engineer">Design Verification Engineers</option>
+            <option value="EMC Engineer">EMC Engineers</option>
+            <option value="Hardware Engineer">Hardware Engineers</option>
+            <option value="Engineer">Engineers</option>
+          </select>
+        </div>
+
+        <!-- podium -->
+        <div class="wc-podium" id="podium"></div>
+
+        <!-- your rank pinned (shown only when you're on this board) -->
+        <div
+          class="wc-panel"
+          id="yourRankPanel"
+          style="
+            padding: 0;
+            margin-bottom: 1.2rem;
+            border-color: var(--cyan, #22d3ee);
+            display: none;
+          "
+        >
+          <table class="wc-lb">
+            <tbody>
+              <tr class="you">
+                <td class="wc-rank" id="yourRank">—</td>
+                <td>
+                  <div class="wc-user">
+                    <div class="wc-avatar" id="yourAv">?</div>
+                    <div>
+                      <div style="color: var(--text-base); font-weight: 700" id="yourName">You</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted)" id="yourMeta"></div>
+                    </div>
+                  </div>
+                </td>
+                <td style="text-align: right"><span class="wc-score" id="yourScore">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="wc-panel" style="padding: 0.4rem 0.6rem">
+          <table class="wc-lb">
+            <thead>
+              <tr>
+                <th style="width: 60px">Rank</th>
+                <th>Engineer</th>
+                <th id="metricHead" style="text-align: right">Score</th>
+              </tr>
+            </thead>
+            <tbody id="lbBody"></tbody>
+          </table>
+        </div>
+
+        <p
+          style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; text-align: center"
+        >
+          Engineers appear by display name only and opt in to public visibility. Rankings freeze
+          when each week closes.
+        </p>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script src="challenge-api.js"></script>
+    <script>
+      // Live data only — populated from the public API.
+      var WEEK = [];
+      var ALLTIME = [];
+      var loaded = { week: false, alltime: false };
+      var mode = 'week';
+
+      // Track selector — "This week" and "By discipline" are scoped to one
+      // track at a time since each track runs its own challenge/leaderboard.
+      var CATEGORIES = [
+        { id: 'BASIC_HW', label: 'Basic Hardware Design' },
+        { id: 'ADVANCED_HW', label: 'Advanced Hardware Design' },
+        { id: 'PCB_DESIGN', label: 'PCB Design' },
+      ];
+      var currentCategory = '';
+      try {
+        currentCategory = new URLSearchParams(window.location.search).get('category') || '';
+      } catch (e) {}
+      if (!currentCategory) currentCategory = localStorage.getItem('whdc_category') || '';
+      if (
+        !CATEGORIES.some(function (c) {
+          return c.id === currentCategory;
+        })
+      )
+        currentCategory = CATEGORIES[0].id;
+
+      function renderTrackTabs() {
+        var wrap = document.getElementById('trackTabs');
+        wrap.innerHTML = CATEGORIES.map(function (c) {
+          return (
+            '<button class="wc-tab' +
+            (c.id === currentCategory ? ' active' : '') +
+            '" data-cat="' +
+            c.id +
+            '">' +
+            c.label +
+            '</button>'
+          );
+        }).join('');
+        wrap.querySelectorAll('.wc-tab').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var cat = btn.getAttribute('data-cat');
+            if (cat === currentCategory) return;
+            currentCategory = cat;
+            localStorage.setItem('whdc_category', currentCategory);
+            renderTrackTabs();
+            loaded.week = false;
+            WEEK = [];
+            if (mode !== 'alltime') render();
+            loadWeek();
+          });
+        });
+      }
+      renderTrackTabs();
+
+      function fmt(n) {
+        return Number(n).toLocaleString('en-US');
+      }
+      function initials(name) {
+        return (name || '?')
+          .split(/\s+/)
+          .map(function (w) {
+            return w[0] || '';
+          })
+          .join('')
+          .slice(0, 2)
+          .toUpperCase();
+      }
+      function myName() {
+        try {
+          var u = JSON.parse(localStorage.getItem('re_user') || '{}');
+          return u.fullName || u.full_name || '';
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function render() {
+        var data = mode === 'alltime' ? ALLTIME.slice() : WEEK.slice();
+        if (mode === 'role') {
+          var role = document.getElementById('roleSelect').value;
+          data = WEEK.filter(function (u) {
+            return u.role === role;
+          });
+        }
+        var isLoaded = mode === 'alltime' ? loaded.alltime : loaded.week;
+        var podium = document.getElementById('podium');
+        var lbBody = document.getElementById('lbBody');
+        document.getElementById('metricHead').textContent = mode === 'alltime' ? 'Points' : 'Score';
+
+        // Empty / loading states
+        if (!data.length) {
+          podium.style.display = 'none';
+          var msg = !isLoaded
+            ? 'Loading…'
+            : mode === 'role'
+              ? 'No engineers in this discipline yet.'
+              : mode === 'alltime'
+                ? 'No points earned yet — the all-time board fills as challenges are played.'
+                : 'No entries yet. Once a challenge closes, standings appear here.';
+          lbBody.innerHTML =
+            '<tr><td colspan="3" style="color:var(--text-muted);padding:20px;text-align:center;font-size:0.9rem">' +
+            msg +
+            '</td></tr>';
+          updatePinned(data);
+          return;
+        }
+
+        // podium (top 3)
+        var medals = ['🥇', '🥈', '🥉'];
+        var order = [1, 0, 2];
+        if (data.length >= 3) {
+          podium.style.display = 'grid';
+          podium.innerHTML = order
+            .map(function (idx) {
+              var u = data[idx];
+              return (
+                '<div class="wc-podium-card' +
+                (idx === 0 ? ' p1' : '') +
+                '">' +
+                '<div class="wc-podium-medal">' +
+                medals[idx] +
+                '</div>' +
+                '<div class="wc-podium-av">' +
+                initials(u.name) +
+                '</div>' +
+                '<div class="wc-podium-name">' +
+                u.name +
+                '</div>' +
+                '<div class="wc-podium-role">' +
+                (u.role || '') +
+                '</div>' +
+                '<div class="wc-podium-score">' +
+                fmt(u.score) +
+                '</div></div>'
+              );
+            })
+            .join('');
+        } else {
+          podium.style.display = 'none';
+        }
+
+        var me = myName();
+        lbBody.innerHTML = data
+          .map(function (u, i) {
+            var rc = i < 3 ? ' r' + (i + 1) : '';
+            var isYou = me && u.name === me;
+            return (
+              '<tr' +
+              (isYou ? ' class="you"' : '') +
+              '>' +
+              '<td class="wc-rank' +
+              rc +
+              '">' +
+              (i + 1) +
+              '</td>' +
+              '<td><div class="wc-user"><div class="wc-avatar">' +
+              initials(u.name) +
+              '</div>' +
+              '<div><div style="color:var(--text-base);font-weight:600">' +
+              u.name +
+              '</div>' +
+              '<div style="font-size:0.7rem;color:var(--text-muted)">' +
+              (u.role || '') +
+              '</div></div></div></td>' +
+              '<td class="wc-score" style="text-align:right">' +
+              fmt(u.score) +
+              '</td></tr>'
+            );
+          })
+          .join('');
+
+        updatePinned(data);
+      }
+
+      function updatePinned(data) {
+        var panel = document.getElementById('yourRankPanel');
+        var me = myName();
+        if (!me) {
+          panel.style.display = 'none';
+          return;
+        }
+        var idx = data.findIndex(function (u) {
+          return u.name === me;
+        });
+        if (idx < 0) {
+          panel.style.display = 'none';
+          return;
+        }
+        var u = data[idx];
+        panel.style.display = '';
+        document.getElementById('yourRank').textContent = '#' + (idx + 1);
+        document.getElementById('yourAv').textContent = initials(u.name);
+        document.getElementById('yourName').textContent = 'You (' + u.name + ')';
+        document.getElementById('yourMeta').textContent = u.role || '';
+        document.getElementById('yourScore').textContent = fmt(u.score);
+      }
+
+      document.querySelectorAll('#lbTabs .wc-tab').forEach(function (t) {
+        t.addEventListener('click', function () {
+          document.querySelectorAll('#lbTabs .wc-tab').forEach(function (x) {
+            x.classList.remove('active');
+          });
+          t.classList.add('active');
+          mode = t.getAttribute('data-tab');
+          document.getElementById('roleFilter').style.display = mode === 'role' ? 'block' : 'none';
+          render();
+        });
+      });
+      document.getElementById('roleSelect').addEventListener('change', render);
+      render();
+
+      // ── Load live data from the public API ──
+      // Ranks update the instant a participant submits — the backend never
+      // waits for the whole week's challenge to close. But this page used to
+      // fetch once on load and never again, so an already-open tab looked
+      // "frozen" until manually reloaded. Poll so it stays live.
+      if (window.WHDC) {
+        var LB_POLL_MS = 30000;
+        var weekInFlight = false;
+
+        function loadWeek() {
+          if (weekInFlight) return;
+          weekInFlight = true;
+          WHDC.current(currentCategory)
+            .then(function (ch) {
+              if (!ch) {
+                loaded.week = true;
+                return;
+              }
+              return WHDC.challengeLeaderboard(ch.id).then(function (rows) {
+                WEEK = (rows || []).map(function (r) {
+                  return {
+                    name: r.full_name,
+                    role: r.role || '',
+                    score: Math.round(Number(r.score)),
+                  };
+                });
+                loaded.week = true;
+              });
+            })
+            .catch(function () {
+              loaded.week = true;
+            })
+            .finally(function () {
+              weekInFlight = false;
+              if (mode !== 'alltime') render();
+            });
+        }
+
+        function loadAllTime() {
+          WHDC.allTimeLeaderboard()
+            .then(function (rows) {
+              ALLTIME = (rows || []).map(function (r) {
+                return {
+                  name: r.full_name,
+                  role: r.role || '',
+                  score: Math.round(Number(r.score)),
+                };
+              });
+            })
+            .catch(function () {})
+            .finally(function () {
+              loaded.alltime = true;
+              if (mode === 'alltime') render();
+            });
+        }
+
+        loadWeek();
+        loadAllTime();
+        var lbPollTimer = setInterval(function () {
+          loadWeek();
+          loadAllTime();
+        }, LB_POLL_MS);
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) {
+            clearInterval(lbPollTimer);
+          } else {
+            loadWeek();
+            loadAllTime();
+            lbPollTimer = setInterval(function () {
+              loadWeek();
+              loadAllTime();
+            }, LB_POLL_MS);
+          }
+        });
+      } else {
+        loaded.week = true;
+        loaded.alltime = true;
+        render();
+      }
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 design checklist, common mistakes, and bring-up guide: a consolidated pre-fabrication checklist, the most common root causes of a board that fails to calibrate, and a symptom-to-module debugging map."
+    />
+    <title>
+      Checklist &amp; Bring-Up | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/11-checklist-bringup.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .check-list {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0;
+        display: grid;
+        gap: 8px;
+      }
+      .check-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        transition: all 0.15s ease;
+      }
+      .check-list li.checked {
+        border-color: var(--success, #34d399);
+        color: var(--text-base);
+      }
+      .check-list input {
+        margin-top: 2px;
+        accent-color: var(--success, #34d399);
+      }
+      .cat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin: 16px 0 4px;
+      }
+      .cat-label:first-child {
+        margin-top: 0;
+      }
+      .flow-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        white-space: nowrap;
+      }
+      .flow-step.current {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--text-base);
+        background: rgba(34, 211, 238, 0.1);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item active"
+            >11. Checklist &amp; Bring-Up</a
+          >
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Checklist &amp; Bring-Up</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 11</span>
+              <span class="badge badge-green">Checklist</span>
+              <h1>Design Checklist, Common Mistakes &amp; Bring-Up</h1>
+              <p class="subtitle">
+                Before fabrication: one consolidated checklist across every module. After
+                fabrication: what to look at first when the board powers up, and how to map a
+                bring-up symptom back to the module that explains it.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Master checklist -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Pre-fabrication master checklist</h3></div>
+                <p class="cat-label">Component &amp; datasheet (Module 02)</p>
+                <ul class="check-list" id="masterCheckList">
+                  <li>
+                    <input type="checkbox" /> DRAM speed grade confirmed compatible with FPGA
+                    memory-controller Fmax
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Timing table, IDD current tables, and package/ball map
+                    all reviewed, not just the summary page
+                  </li>
+                </ul>
+                <p class="cat-label">Topology (Module 04)</p>
+                <ul class="check-list">
+                  <li>
+                    <input type="checkbox" /> Fly-by used for all CA/CK/control nets (never
+                    T-branch) on discrete DDR4
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Devices-per-byte-lane fan-out within the FPGA's
+                    supported limit
+                  </li>
+                </ul>
+                <p class="cat-label">Signal integrity &amp; termination (Modules 06–07)</p>
+                <ul class="check-list">
+                  <li>
+                    <input type="checkbox" /> Via stubs on critical nets minimized or back-drilled
+                  </li>
+                  <li>
+                    <input type="checkbox" /> VTT termination present at the true end of the CA
+                    fly-by bus
+                  </li>
+                  <li>
+                    <input type="checkbox" /> ODT modes (RTT_NOM/WR/PARK) selected to match topology
+                    and loading
+                  </li>
+                </ul>
+                <p class="cat-label">Decoupling &amp; PDN (Module 08)</p>
+                <ul class="check-list">
+                  <li>
+                    <input type="checkbox" /> Decoupling stack covers DC through several hundred MHz
+                    with no impedance gap over target
+                  </li>
+                  <li>
+                    <input type="checkbox" /> High-frequency MLCCs placed with shortest possible
+                    loop to each power ball
+                  </li>
+                </ul>
+                <p class="cat-label">Layout &amp; routing (Module 09)</p>
+                <ul class="check-list">
+                  <li>
+                    <input type="checkbox" /> All length-matching tolerances verified against the
+                    vendor's routing guide, not general rules of thumb
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Continuous reference plane under every DDR signal
+                    layer
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Fly-by device order preserved consistently across
+                    every CA/CK/control net
+                  </li>
+                </ul>
+                <p class="cat-label">FPGA-specific (Module 10)</p>
+                <ul class="check-list">
+                  <li>
+                    <input type="checkbox" /> DCI/OCT reference resistor present at the correct
+                    value and pin
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Pin assignment cross-checked against the vendor
+                    memory-interface IP wizard's report
+                  </li>
+                  <li>
+                    <input type="checkbox" /> I/O bank fully dedicated to the DDR4 voltage standard,
+                    VREF pins accounted for
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Common mistakes -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The most common mistakes, ranked by how often they bite</h3>
+                </div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Mistake</th>
+                        <th>Symptom</th>
+                        <th>Module</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td>T-branch/star routing of CA/CK on discrete DDR4</td>
+                        <td>Interface never trains at power-up</td>
+                        <td>04</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td>Missing or misplaced VTT termination on the fly-by bus</td>
+                        <td>Never trains, or trains intermittently</td>
+                        <td>07</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td>Reordered fly-by device sequence on one net</td>
+                        <td>One bit consistently fails at higher speed grades only</td>
+                        <td>04 / 09</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td>Insufficient high-frequency decoupling near power balls</td>
+                        <td>Random, data-pattern-dependent bit errors</td>
+                        <td>08</td>
+                      </tr>
+                      <tr>
+                        <td>5</td>
+                        <td>Byte lane length matching out of tolerance</td>
+                        <td>
+                          Marginal read/write margins, fails only at high speed grade or temperature
+                          extremes
+                        </td>
+                        <td>09</td>
+                      </tr>
+                      <tr>
+                        <td>6</td>
+                        <td>Wrong or missing DCI/OCT reference resistor</td>
+                        <td>Whole bank shows impedance-related SI issues</td>
+                        <td>10</td>
+                      </tr>
+                      <tr>
+                        <td>7</td>
+                        <td>VREF trace routed too close to a switching aggressor</td>
+                        <td>Elevated bit-error rate, worse under sustained traffic</td>
+                        <td>05 / 06</td>
+                      </tr>
+                      <tr>
+                        <td>8</td>
+                        <td>Speed grade mismatch between FPGA controller and DRAM part</td>
+                        <td>Interface trains but throughput/Fmax falls short of spec</td>
+                        <td>02</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Bring up flow -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Bring-up sequence</h3></div>
+                <div class="flow-row">
+                  <div class="flow-step current">1. Power rails up, sequencing correct</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step current">2. RESET# release, CKE/clock stable</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">3. Mode register init (CL, RTT, DCI)</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">4. Write leveling</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">5. Read (DQS gating/centering) leveling</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">6. Calibration pass / traffic test</div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Most memory-interface IP reports calibration status per stage (often over
+                  JTAG/UART or a status LED/register). Knowing which stage failed narrows the search
+                  dramatically — a failure at stage 1–2 is almost always power/reset sequencing; a
+                  failure at stage 4–5 almost always points back to Modules 04, 06, 07, or 09.
+                </p>
+              </div>
+
+              <!-- Symptom to module map -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Symptom → likely cause → module to revisit</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Symptom</th>
+                        <th>Likely cause</th>
+                        <th>Revisit</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Board never leaves reset / no calibration attempt</td>
+                        <td>Power sequencing, reset timing, or clock not stable</td>
+                        <td>Module 08 (PDN), datasheet power-up sequence</td>
+                      </tr>
+                      <tr>
+                        <td>Calibration fails every time, same stage</td>
+                        <td>Structural SI/termination/topology issue</td>
+                        <td>Modules 04, 06, 07, 09</td>
+                      </tr>
+                      <tr>
+                        <td>Calibration passes, but fails intermittently under load</td>
+                        <td>Marginal SI or PDN margin, temperature/voltage sensitive</td>
+                        <td>Modules 06, 08</td>
+                      </tr>
+                      <tr>
+                        <td>Works fine at low speed grade, fails at rated speed</td>
+                        <td>
+                          Length matching, termination, or decoupling margin too tight for the
+                          timing budget
+                        </td>
+                        <td>Modules 07, 08, 09</td>
+                      </tr>
+                      <tr>
+                        <td>One specific bit/lane always fails</td>
+                        <td>That lane's routing, termination, or pin assignment</td>
+                        <td>Modules 05, 09, 10</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  Bring-up debugging is almost always a matter of mapping a symptom back to one of
+                  Modules 04–10 rather than a brand-new problem — the checklist above exists so you
+                  rarely need this table at all.
+                </div>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    A pre-fabrication checklist that spans every module catches the overwhelming
+                    majority of "board never trains" failures before they happen.
+                  </li>
+                  <li>
+                    Topology and termination mistakes (T-branch routing, missing VTT) are the single
+                    most common root cause of total calibration failure.
+                  </li>
+                  <li>
+                    Bring-up failures map cleanly back to a small set of modules — use the
+                    calibration stage that failed to narrow the search immediately.
+                  </li>
+                  <li>
+                    "Works at low speed, fails at rated speed" almost always means a margin problem,
+                    not a broken connection — revisit termination, decoupling, and routing
+                    tolerances together.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="10-fpga-considerations.html"
+                  >← FPGA-Specific Considerations</a
+                >
+                <a class="btn btn-primary" href="12-capstone-bridge.html"
+                  >Next: Capstone Bridge →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      document.querySelectorAll('.check-list input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          cb.closest('li').classList.toggle('checked', cb.checked);
+        });
+      });
+    </script>
+  </body>
+</html>

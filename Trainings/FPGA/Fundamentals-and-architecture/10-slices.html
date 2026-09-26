@@ -1,0 +1,1620 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Understand Slice L and Slice M in Xilinx 7-series FPGAs — the two slice types, distributed RAM, SRL shift registers, and how they differ from UltraScale."
+    />
+    <title>Slices | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/10-slices.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      @media (max-width: 600px) {
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .slice-card {
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .slice-card.slice-l {
+        border-color: #6366f1;
+      }
+      .slice-card.slice-m {
+        border-color: #22d3ee;
+      }
+      .slice-card h4 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item active" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Slices</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 10/25</span><span>40%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 40%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 10 OF 25</span>
+                <span class="badge">10 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Slices — Slice L and Slice M
+              </h1>
+              <p class="subtitle">
+                Explore the two types of Slices in Xilinx 7-series FPGAs: Slice L for pure logic,
+                and Slice M which adds distributed RAM and shift register capability. Understand
+                when each is used and why.
+              </p>
+            </div>
+          </section>
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Two Types of Slices
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The Slice is the smallest independently routable unit in Xilinx 7-series FPGAs.
+                While all Slices share the same LUT6, FF, and CARRY4 resources, Xilinx makes a
+                critical distinction between two types:
+              </p>
+
+              <div class="compare-grid">
+                <div class="slice-card slice-l">
+                  <h4 style="color: #818cf8">Slice L — Logic</h4>
+                  <ul
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.875rem;
+                      line-height: 2;
+                      padding-left: 16px;
+                      margin: 0;
+                    "
+                  >
+                    <li>4× LUT6 (logic mode only)</li>
+                    <li>8× Flip-Flop / Latch</li>
+                    <li>1× CARRY4</li>
+                    <li>F7MUX, F8MUX</li>
+                    <li><strong style="color: #818cf8">No distributed RAM</strong></li>
+                    <li><strong style="color: #818cf8">No SRL shift register</strong></li>
+                    <li>Constitutes ~75% of all Slices</li>
+                  </ul>
+                </div>
+                <div class="slice-card slice-m">
+                  <h4 style="color: #22d3ee">Slice M — Memory</h4>
+                  <ul
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.875rem;
+                      line-height: 2;
+                      padding-left: 16px;
+                      margin: 0;
+                    "
+                  >
+                    <li>4× LUT6 (logic, RAM, or SRL)</li>
+                    <li>8× Flip-Flop / Latch</li>
+                    <li>1× CARRY4</li>
+                    <li>F7MUX, F8MUX</li>
+                    <li><strong style="color: #22d3ee">+ Distributed RAM (64×1-bit)</strong></li>
+                    <li><strong style="color: #22d3ee">+ SRL16 / SRL32 shift registers</strong></li>
+                    <li>Constitutes ~25% of all Slices</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Slice L vs M SVG Diagram -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Slice L vs Slice M — Internal Comparison
+              </h3>
+              <svg
+                viewBox="0 0 700 310"
+                xmlns="http://www.w3.org/2000/svg"
+                style="
+                  width: 100%;
+                  max-width: 700px;
+                  display: block;
+                  margin: 0 auto 20px;
+                  border-radius: 12px;
+                  border: 1px solid var(--border);
+                "
+              >
+                <rect width="700" height="310" rx="8" fill="#0f172a" />
+                <!-- Slice L -->
+                <rect
+                  x="20"
+                  y="20"
+                  width="310"
+                  height="270"
+                  rx="8"
+                  fill="#1a2035"
+                  stroke="#6366f1"
+                  stroke-width="2"
+                />
+                <text
+                  x="175"
+                  y="45"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="13"
+                  font-weight="800"
+                  font-family="Inter,sans-serif"
+                >
+                  SLICE L
+                </text>
+                <text
+                  x="175"
+                  y="62"
+                  text-anchor="middle"
+                  fill="#6366f1"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  Logic Only
+                </text>
+                <!-- LUT boxes -->
+                <rect
+                  x="40"
+                  y="75"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="90"
+                  y="93"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic
+                </text>
+                <rect
+                  x="40"
+                  y="110"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="90"
+                  y="128"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic
+                </text>
+                <rect
+                  x="40"
+                  y="145"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="90"
+                  y="163"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic
+                </text>
+                <rect
+                  x="40"
+                  y="180"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="90"
+                  y="198"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic
+                </text>
+                <!-- FF stack L -->
+                <rect
+                  x="160"
+                  y="75"
+                  width="70"
+                  height="133"
+                  rx="4"
+                  fill="#1c2230"
+                  stroke="#a78bfa"
+                  stroke-width="1"
+                />
+                <text
+                  x="195"
+                  y="136"
+                  text-anchor="middle"
+                  fill="#a78bfa"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,195,136)"
+                >
+                  8 × FF / LATCH
+                </text>
+                <!-- Carry L -->
+                <rect
+                  x="40"
+                  y="225"
+                  width="190"
+                  height="26"
+                  rx="4"
+                  fill="#1a2c1a"
+                  stroke="#34d399"
+                  stroke-width="1"
+                />
+                <text
+                  x="135"
+                  y="242"
+                  text-anchor="middle"
+                  fill="#34d399"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  CARRY4
+                </text>
+                <!-- No RAM label -->
+                <rect
+                  x="40"
+                  y="258"
+                  width="190"
+                  height="22"
+                  rx="4"
+                  fill="#2a1a1a"
+                  stroke="#f87171"
+                  stroke-width="1"
+                  stroke-dasharray="4,3"
+                />
+                <text
+                  x="135"
+                  y="273"
+                  text-anchor="middle"
+                  fill="#f87171"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  No RAM / SRL capability
+                </text>
+
+                <!-- Slice M -->
+                <rect
+                  x="370"
+                  y="20"
+                  width="310"
+                  height="270"
+                  rx="8"
+                  fill="#1a2035"
+                  stroke="#22d3ee"
+                  stroke-width="2"
+                />
+                <text
+                  x="525"
+                  y="45"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="13"
+                  font-weight="800"
+                  font-family="Inter,sans-serif"
+                >
+                  SLICE M
+                </text>
+                <text
+                  x="525"
+                  y="62"
+                  text-anchor="middle"
+                  fill="#06b6d4"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  Logic + Memory + SRL
+                </text>
+                <!-- LUT boxes with mode selector -->
+                <rect
+                  x="390"
+                  y="75"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="440"
+                  y="93"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic/RAM/SRL
+                </text>
+                <rect
+                  x="390"
+                  y="110"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="440"
+                  y="128"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic/RAM/SRL
+                </text>
+                <rect
+                  x="390"
+                  y="145"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="440"
+                  y="163"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic/RAM/SRL
+                </text>
+                <rect
+                  x="390"
+                  y="180"
+                  width="100"
+                  height="28"
+                  rx="4"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="440"
+                  y="198"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 → Logic/RAM/SRL
+                </text>
+                <!-- FF stack M -->
+                <rect
+                  x="510"
+                  y="75"
+                  width="70"
+                  height="133"
+                  rx="4"
+                  fill="#1c2230"
+                  stroke="#06b6d4"
+                  stroke-width="1"
+                />
+                <text
+                  x="545"
+                  y="136"
+                  text-anchor="middle"
+                  fill="#06b6d4"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,545,136)"
+                >
+                  8 × FF / LATCH
+                </text>
+                <!-- Carry M -->
+                <rect
+                  x="390"
+                  y="225"
+                  width="190"
+                  height="26"
+                  rx="4"
+                  fill="#1a2c1a"
+                  stroke="#34d399"
+                  stroke-width="1"
+                />
+                <text
+                  x="485"
+                  y="242"
+                  text-anchor="middle"
+                  fill="#34d399"
+                  font-size="10"
+                  font-weight="600"
+                  font-family="Inter,sans-serif"
+                >
+                  CARRY4
+                </text>
+                <!-- RAM/SRL label -->
+                <rect
+                  x="390"
+                  y="258"
+                  width="190"
+                  height="22"
+                  rx="4"
+                  fill="#162032"
+                  stroke="#22d3ee"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="485"
+                  y="273"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  + Distributed RAM + SRL32
+                </text>
+              </svg>
+              <p
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.8rem;
+                  text-align: center;
+                  margin-top: -8px;
+                  margin-bottom: 24px;
+                "
+              >
+                Slice L (left) vs Slice M (right) — Slice M adds distributed RAM and SRL shift
+                register modes to each LUT6
+              </p>
+
+              <!-- Distribution Donut Chart -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Slice Type Distribution in 7-Series
+              </h3>
+              <div
+                id="slice-donut"
+                style="width: 100%; max-width: 420px; height: 300px; margin: 0 auto 24px"
+              ></div>
+
+              <!-- Distributed RAM Section -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Distributed RAM (Slice M Only)
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In Slice M, the LUT6's 64-bit storage array (normally holding the truth table) can
+                instead be used as
+                <strong>64×1-bit synchronous-write, asynchronous-read SRAM</strong>. This is
+                distributed RAM — scattered across the fabric wherever Slice M resources are
+                available, as opposed to the dedicated BRAM columns.
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Configuration</th>
+                    <th>Depth</th>
+                    <th>Width</th>
+                    <th>LUTs Used</th>
+                    <th>Ports</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RAM64X1S (single-port)</td>
+                    <td>64</td>
+                    <td>1-bit</td>
+                    <td>1</td>
+                    <td>1 read/write</td>
+                  </tr>
+                  <tr>
+                    <td>RAM64X1D (simple dual-port)</td>
+                    <td>64</td>
+                    <td>1-bit</td>
+                    <td>2</td>
+                    <td>1 read + 1 write</td>
+                  </tr>
+                  <tr>
+                    <td>RAM32X2S</td>
+                    <td>32</td>
+                    <td>2-bit</td>
+                    <td>2</td>
+                    <td>1 read/write</td>
+                  </tr>
+                  <tr>
+                    <td>RAM32M (true dual-port)</td>
+                    <td>32</td>
+                    <td>8-bit (4×2)</td>
+                    <td>4</td>
+                    <td>2 independent ports</td>
+                  </tr>
+                  <tr>
+                    <td>RAM128X1S</td>
+                    <td>128</td>
+                    <td>1-bit</td>
+                    <td>2 + F7MUX</td>
+                    <td>1 read/write</td>
+                  </tr>
+                  <tr>
+                    <td>RAM256X1S</td>
+                    <td>256</td>
+                    <td>1-bit</td>
+                    <td>4 + MUXes</td>
+                    <td>1 read/write</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Key characteristic: distributed RAM has
+                <strong>synchronous write and asynchronous read</strong>. Data written on the rising
+                clock edge appears at the output immediately (without an extra clock cycle). This
+                can create timing problems if not accounted for — output registers are often added
+                to resolve setup violations.
+              </p>
+
+              <!-- SRL Section -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                SRL — Shift Register LUT (Slice M Only)
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In SRL mode, the LUT6 implements a
+                <strong>shift register with a programmable tap depth</strong>. Data shifts in on
+                every clock edge, and a 5-bit address selects which bit position to read (dynamic
+                length).
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Primitive</th>
+                    <th>Length</th>
+                    <th>LUTs</th>
+                    <th>Address</th>
+                    <th>Equivalent FFs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>SRL16E</td>
+                    <td>1–16 bits</td>
+                    <td>1</td>
+                    <td>4-bit (A3:A0)</td>
+                    <td>16</td>
+                  </tr>
+                  <tr>
+                    <td>SRL32E (SRLC32E)</td>
+                    <td>1–32 bits</td>
+                    <td>1</td>
+                    <td>5-bit (A4:A0)</td>
+                    <td>32</td>
+                  </tr>
+                  <tr>
+                    <td>2× SRL32 cascaded</td>
+                    <td>1–64 bits</td>
+                    <td>2</td>
+                    <td>6-bit</td>
+                    <td>64</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                An SRL32 shift register replaces <strong>32 D flip-flops</strong> using a
+                <strong>single LUT6</strong>. This is a massive resource saving for pipeline
+                alignment, FIFO delays, and delay matching between parallel paths. The dynamic
+                address makes it suitable for variable-length pipelines configurable at runtime.
+              </p>
+
+              <!-- Slice M Modes Mermaid -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Slice M LUT Operating Modes
+              </h3>
+              <div class="mermaid">
+                graph TD LUT6_M[LUT6 in Slice M] --> LOGIC_MODE[Logic Mode\nAny 6-input Boolean
+                function\nDefault — all Slices] LUT6_M --> RAM_MODE[Distributed RAM Mode\n64×1-bit
+                SRAM\nSynchronous write\nAsynchronous read] LUT6_M --> SRL_MODE[Shift Register
+                Mode\nSRL16E: 16-bit depth\nSRL32E: 32-bit depth\nDynamic tap address] LOGIC_MODE
+                --> FF[Optional FF\nRegistered output] RAM_MODE --> RDOUT[Async read output\nor
+                registered via FF] SRL_MODE --> TAP[Programmable tap\n5-bit A4:A0 address] TAP -->
+                CASCADE[Cascade to next SRL\nfor longer delays]
+              </div>
+
+              <!-- Feature Comparison Table -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Slice L vs Slice M — Full Comparison
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Slice L</th>
+                    <th>Slice M</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>LUT as logic</td>
+                    <td style="color: #34d399">Yes</td>
+                    <td style="color: #34d399">Yes</td>
+                  </tr>
+                  <tr>
+                    <td>LUT as distributed RAM</td>
+                    <td style="color: #f87171">No</td>
+                    <td style="color: #34d399">Yes (64×1-bit)</td>
+                  </tr>
+                  <tr>
+                    <td>LUT as SRL16</td>
+                    <td style="color: #f87171">No</td>
+                    <td style="color: #34d399">Yes</td>
+                  </tr>
+                  <tr>
+                    <td>LUT as SRL32</td>
+                    <td style="color: #f87171">No</td>
+                    <td style="color: #34d399">Yes</td>
+                  </tr>
+                  <tr>
+                    <td>Flip-flops</td>
+                    <td>8</td>
+                    <td>8</td>
+                  </tr>
+                  <tr>
+                    <td>CARRY4</td>
+                    <td>1</td>
+                    <td>1</td>
+                  </tr>
+                  <tr>
+                    <td>F7MUX / F8MUX</td>
+                    <td style="color: #34d399">Yes</td>
+                    <td style="color: #34d399">Yes</td>
+                  </tr>
+                  <tr>
+                    <td>Proportion in 7-series</td>
+                    <td>~75%</td>
+                    <td>~25%</td>
+                  </tr>
+                  <tr>
+                    <td>Silicon area overhead</td>
+                    <td>Lower</td>
+                    <td>Higher (write circuitry)</td>
+                  </tr>
+                  <tr>
+                    <td>UltraScale equivalent</td>
+                    <td colspan="2" style="text-align: center; color: var(--text-sub)">
+                      No L/M split — all Slices support RAM and SRL
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Why Two Types -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Why Have Two Slice Types?
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Slice M requires additional silicon circuitry compared to Slice L — specifically,
+                write enable logic, write address decode, and the data input path for RAM mode, plus
+                the shift input for SRL mode. Making all Slices type M would increase die area and
+                power consumption with no benefit for designs that don't use distributed RAM or SRL.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Statistical analysis of typical FPGA designs showed that only ~25% of Slices need
+                RAM/SRL capability. So Xilinx distributes Slice M (25%) and Slice L (75%) across the
+                die, reducing area overhead while ensuring sufficient Slice M resources for most
+                designs.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In <strong>UltraScale and UltraScale+</strong>, Xilinx eliminated the L/M
+                distinction. All Slices support distributed RAM and SRL in every LUT. The improved
+                16nm process made the overhead acceptable, simplifying the architecture and
+                improving placement flexibility.
+              </p>
+
+              <!-- Callouts -->
+              <div class="callout callout-info">
+                <strong>Reading Tool Reports: Slice Memory Usage</strong>
+                In Vivado utilization reports, look for these lines under "Slice Logic":
+                <ul style="margin: 6px 0 0; padding-left: 18px; line-height: 2">
+                  <li>"LUT Flip Flop Pairs" — packed pairs using both LUT and FF</li>
+                  <li>"Slice LUTs used as Memory" — these are using Slice M distributed RAM</li>
+                  <li>"Slice LUTs used as Shift Register" — SRL16/SRL32 usage</li>
+                </ul>
+                All of these consume Slice M resources. If you're hitting Slice M exhaustion, the
+                tool will warn you.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip: Use SRL32 for Pipeline Alignment</strong>
+                When aligning pipeline paths, SRL32 is far more efficient than chains of flip-flops.
+                A 20-stage pipeline delay using 20 FFs (20 LUTs + 20 FFs) can be reduced to 1 SRL32
+                (1 LUT, 1 FF for the registered output). Use the Vivado synthesis attribute
+                <code
+                  style="
+                    background: var(--bg-muted);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                  "
+                  >SHREG_EXTRACT</code
+                >
+                set to "YES" to infer SRLs automatically from pipeline shift-register patterns in
+                HDL.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question: Why is Distributed RAM Limited to Slice M?</strong>
+                Q: Why can't Slice L implement distributed RAM?<br />
+                A: Distributed RAM requires a synchronous write port — this involves write enable
+                decode, address multiplexing, and write data steering that is only present in Slice
+                M. Slice L contains only the LUT6 truth table storage and output routing; it has no
+                provision for writing to the LUT contents at runtime (outside of configuration).
+                Slice M adds the extra circuitry needed to write to the 64-bit LUT memory on each
+                clock cycle.
+              </div>
+
+              <div class="callout callout-danger">
+                <strong>Common Mistake: Exhausting Slice M Resources</strong>
+                If your design uses heavy distributed RAM (e.g., many small FIFOs, register files,
+                scratchpads) and the tool reports placement failures or poor timing, check whether
+                Slice M resources are exhausted. You have roughly one Slice M for every three Slice
+                Ls. Replace some distributed RAMs with BRAM, or reduce the number of SRLs, to free
+                up Slice M. In UltraScale+, this problem doesn't arise since all Slices support RAM
+                mode.
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <p class="quiz-q">
+                  1. What is the key capability that Slice M has but Slice L does not?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>A</span> More flip-flops per LUT
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>B</span> Faster carry chain
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>C</span> LUTs configurable as distributed RAM or SRL shift registers
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>D</span> Support for differential IO signals
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb1">
+                  Correct! Slice M adds the ability to configure LUT6s as 64×1-bit distributed RAM
+                  or SRL16/SRL32 shift registers. Slice L can only use LUTs for logic functions.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <p class="quiz-q">
+                  2. How many bits can a single SRL32 shift register (one LUT6 in Slice M) store?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>A</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>B</span> 32
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>C</span> 64
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>D</span> 8
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb2">
+                  Correct! SRL32 (SRLC32E) uses one LUT6 to implement a 32-bit shift register with a
+                  5-bit dynamic address select. This replaces 32 flip-flops with a single LUT —
+                  extremely efficient for pipeline alignment.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <p class="quiz-q">
+                  3. What percentage of Slices in a Xilinx 7-series FPGA are type M?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>A</span> 50%
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>B</span> 10%
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>C</span> 25%
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>D</span> 75%
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb3">
+                  Correct! Approximately 25% of 7-series Slices are type M, and 75% are type L. This
+                  ratio was chosen based on typical design statistics showing only ~25% of slices
+                  need RAM/SRL capability.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <p class="quiz-q">
+                  4. In UltraScale+, how does the Slice M / Slice L split differ from 7-series?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>A</span> UltraScale+ has 50% Slice M, 50% Slice L
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>B</span> UltraScale+ has 100% Slice L (no distributed RAM)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>C</span> UltraScale+ has no L/M distinction — all Slices support RAM and
+                    SRL
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>D</span> UltraScale+ has 0% Slice M (uses HBM instead)
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb4">
+                  Correct! UltraScale and UltraScale+ eliminated the Slice L/M distinction. Every
+                  Slice supports distributed RAM and SRL in all LUTs, simplifying placement and
+                  eliminating Slice M exhaustion issues.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <p class="quiz-q">
+                  5. What is the read behavior of distributed RAM (Slice M) by default?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>A</span> Synchronous read — output appears one cycle after the address
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>B</span> Asynchronous read — output appears immediately as address changes
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>C</span> Pipelined read with 2-cycle latency
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>D</span> Read requires a separate clock enable signal
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb5">
+                  Correct! Distributed RAM has asynchronous (combinatorial) read — the output
+                  changes immediately when the address changes, without a clock edge. Writes are
+                  synchronous. This can create timing challenges, so output registers are often
+                  added.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-info">
+                <strong>SRL Efficiency Comparison in Vivado</strong>
+                Implement a 20-stage pipeline delay register for a 1-bit signal in two ways:
+                <ol style="margin: 8px 0 0; padding-left: 18px; line-height: 2">
+                  <li>
+                    Using 20 standard D flip-flops:
+                    <code
+                      style="
+                        background: var(--bg-muted);
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-family: monospace;
+                      "
+                      >reg [19:0] pipe; always @(posedge clk) pipe &lt;= {pipe[18:0],
+                      data_in};</code
+                    >
+                  </li>
+                  <li>
+                    Using an SRL32 with address 19:
+                    <code
+                      style="
+                        background: var(--bg-muted);
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-family: monospace;
+                      "
+                      >SRLC32E #(.INIT(32'h0)) srl (.D(data_in), .CE(1'b1), .CLK(clk), .A(5'd19),
+                      .Q(data_out));</code
+                    >
+                  </li>
+                </ol>
+                For each: note LUT count, FF count, and timing result. Which implementation is more
+                efficient? Does the synthesis tool automatically infer SRL for Option 1? (Hint:
+                check synthesis attribute SHREG_EXTRACT.)
+              </div>
+              <div class="lesson-nav">
+                <a href="09-clb.html">← Configurable Logic Blocks</a>
+                <a href="11-lut.html">Lookup Tables (LUT) →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-10';
+      const TOTAL = 25;
+
+      (function () {
+        var isDark = document.documentElement.dataset.theme === 'dark';
+        var bg = isDark ? '#0f172a' : '#ffffff';
+        var paper = isDark ? '#1e293b' : '#f8fafc';
+        var txt = isDark ? '#94a3b8' : '#475569';
+        Plotly.newPlot(
+          'slice-donut',
+          [
+            {
+              values: [75, 25],
+              labels: ['Slice L (Logic Only)', 'Slice M (Logic + RAM + SRL)'],
+              type: 'pie',
+              hole: 0.55,
+              marker: { colors: ['#6366f1', '#22d3ee'] },
+              textinfo: 'label+percent',
+              textfont: { family: 'Inter,sans-serif', size: 12 },
+              hovertemplate: '%{label}<br>%{percent}<extra></extra>',
+            },
+          ],
+          {
+            paper_bgcolor: paper,
+            font: { family: 'Inter', color: txt },
+            showlegend: false,
+            margin: { t: 20, b: 20, l: 20, r: 20 },
+            annotations: [
+              {
+                text: '7-Series<br>Slice Split',
+                x: 0.5,
+                y: 0.5,
+                font: { size: 13, family: 'Inter', color: txt },
+                showarrow: false,
+              },
+            ],
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      })();
+
+      async function loadProgress() {
+        try {
+          var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          var token = session.accessToken || session.token || '';
+          if (!token) return;
+          var r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          var data = await r.json();
+          var done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              var link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          var pct = Math.round((done / TOTAL) * 100);
+          var sbp = document.getElementById('sb-pct');
+          var sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        var token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          var r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        var btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        var fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

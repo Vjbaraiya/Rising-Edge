@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="CE vs. RE compared, the three conducted-emission paths (AC mains, DC, signal cable), and the most important distinction in CE debugging: common-mode vs. differential-mode noise."
+    />
+    <title>
+      CE vs. RE, Noise Paths &amp; Common/Differential Mode | Conducted Emissions (CE) Testing
+      Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/CE/02-noise-modes.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .toggle-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+      .toggle-tab {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #3b82f6;
+        color: #fff;
+        border-color: transparent;
+      }
+      .slider-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .slider-wrap input[type='range'] {
+        flex: 1;
+        accent-color: #3b82f6;
+      }
+      .slider-endlabel {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        min-width: 76px;
+        text-align: center;
+      }
+      .slider-endlabel.active {
+        color: #3b82f6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Conducted Emissions (CE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Is Conducted Emission</a
+          >
+          <a href="02-noise-modes.html" class="module-item active"
+            >02. CE vs. RE, Noise Paths &amp; Common/Differential Mode</a
+          >
+          <a href="03-frequency-and-standards.html" class="module-item"
+            >03. Frequency Ranges &amp; CE Standards</a
+          >
+          <a href="04-product-categories.html" class="module-item"
+            >04. CE Requirements by Product Category</a
+          >
+          <a href="05-lisn-and-test-setup.html" class="module-item"
+            >05. LISN, EMI Receiver &amp; Test Setup</a
+          >
+          <a href="06-measurement-and-detectors.html" class="module-item"
+            >06. Reading CE Graphs &amp; Detector Types</a
+          >
+          <a href="07-case-studies.html" class="module-item"
+            >07. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="08-debugging-and-pcb-design.html" class="module-item"
+            >08. Debugging Workflow &amp; PCB Design</a
+          >
+          <a href="09-filtering-and-power-design.html" class="module-item"
+            >09. Filtering, Power Supply &amp; Cable/Shielding</a
+          >
+          <a href="10-precompliance-and-summary.html" class="module-item"
+            >10. Pre-Compliance Testing &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Conducted Emissions (CE) Testing</a><span>/</span>
+            <span>CE vs. RE, Noise Paths &amp; Common/Differential Mode</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 2/10</span><span>20%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 20%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 02</div>
+              <h1 style="font-size: 2.2rem">
+                CE vs. RE, Noise Paths &amp; Common/Differential Mode
+              </h1>
+              <p class="subtitle">
+                Conducted emissions travel on wires, not through the air &mdash; a distinction that
+                changes everything about how they're measured and fixed. This module compares CE to
+                RE, walks through the three physical paths noise takes out of a product, and covers
+                the single most important idea in CE debugging: common-mode vs. differential-mode
+                current.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Section 1: CE vs RE -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="secCeRe">
+                  <span>Section 1: Difference Between Conducted and Radiated Emissions</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="secCeRe">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    CE and RE are two views of the same underlying noise problem, separated mainly
+                    by frequency and by which physical medium carries the energy to the measurement
+                    equipment.
+                  </p>
+
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Interactive: Slide Between Conducted and Radiated
+                    </h3>
+                    <div class="slider-wrap">
+                      <span class="slider-endlabel active" id="labelConducted">CONDUCTED</span>
+                      <input type="range" id="ceReSlider" min="0" max="100" value="0" />
+                      <span class="slider-endlabel" id="labelRadiated">RADIATED</span>
+                    </div>
+                    <div style="position: relative; width: 100%; height: 240px">
+                      <canvas
+                        id="ceReDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+
+                  <table class="data-table" style="width: 100%; margin-top: 1.25rem">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>Conducted</th>
+                        <th>Radiated</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Medium</td>
+                        <td>Cable / conductor</td>
+                        <td>Air (free space)</td>
+                      </tr>
+                      <tr>
+                        <td>Typical frequency</td>
+                        <td>Lower (150 kHz&ndash;30 MHz)</td>
+                        <td>Higher (30 MHz&ndash;40 GHz)</td>
+                      </tr>
+                      <tr>
+                        <td>What's measured</td>
+                        <td>Voltage (dBµV) on the cable</td>
+                        <td>Electric field strength (dBµV/m) at a distance</td>
+                      </tr>
+                      <tr>
+                        <td>Equipment</td>
+                        <td>LISN + EMI receiver</td>
+                        <td>Antenna + EMI receiver, in a shielded/anechoic environment</td>
+                      </tr>
+                      <tr>
+                        <td>Representative standard</td>
+                        <td>CISPR 11 / CISPR 32 conducted limits</td>
+                        <td>CISPR 32 radiated limits</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="info-box" style="margin-top: 1rem">
+                    The two aren't independent: a cable carrying conducted common-mode noise is
+                    often also the product's single largest radiating "antenna." Fixing conducted
+                    common-mode emissions frequently improves the radiated result for free.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Types of CE -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secTypes">
+                  <span>Section 2: The Three Conducted-Emission Paths</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secTypes">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Conducted emissions aren't limited to the AC mains cord &mdash; any conductor
+                    leaving the enclosure is a potential path. Switch between the three tabs below.
+                  </p>
+                  <div class="toggle-tabs">
+                    <button class="toggle-tab active" data-path="ac">AC Mains</button>
+                    <button class="toggle-tab" data-path="dc">DC Input</button>
+                    <button class="toggle-tab" data-path="signal">Signal Cable</button>
+                  </div>
+                  <div class="widget-container">
+                    <div style="position: relative; width: 100%; height: 240px">
+                      <canvas
+                        id="pathDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                    <p
+                      id="pathCaption"
+                      style="
+                        color: var(--text-sub);
+                        font-size: 0.85rem;
+                        line-height: 1.7;
+                        margin-top: 10px;
+                      "
+                    ></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: CM vs DM -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secCmDm">
+                  <span>Section 3: Common Mode vs. Differential Mode Noise</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secCmDm">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    This is arguably the single most important distinction in CE work. Every filter
+                    component, every debugging step, and every fix targets one mode or the other
+                    &mdash; get the mode wrong and the fix won't work no matter how well it's
+                    executed.
+                  </p>
+
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Interactive: Switch Between Differential and Common Mode
+                    </h3>
+                    <div class="toggle-tabs">
+                      <button class="toggle-tab active" data-mode="dm">Differential Mode</button>
+                      <button class="toggle-tab" data-mode="cm">Common Mode</button>
+                    </div>
+                    <div style="position: relative; width: 100%; height: 280px">
+                      <canvas
+                        id="cmDmDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                    <div class="stage-detail" id="cmDmDetail" style="margin-top: 10px"></div>
+                  </div>
+
+                  <table class="data-table" style="width: 100%; margin-top: 1.25rem">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>Differential Mode (DM)</th>
+                        <th>Common Mode (CM)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Return path</td>
+                        <td>The opposite power conductor</td>
+                        <td>Chassis / earth ground, via parasitic capacitance</td>
+                      </tr>
+                      <tr>
+                        <td>Current direction on the two conductors</td>
+                        <td>Opposite (out on one, back on the other)</td>
+                        <td>Same direction on both conductors together</td>
+                      </tr>
+                      <tr>
+                        <td>Typical dominant frequency range</td>
+                        <td>Lower conducted frequencies (150 kHz&ndash;few MHz)</td>
+                        <td>Higher conducted frequencies (few MHz&ndash;30 MHz and above)</td>
+                      </tr>
+                      <tr>
+                        <td>Primary filter component</td>
+                        <td>X-capacitor, differential-mode inductor</td>
+                        <td>Y-capacitor, common-mode choke</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="widget-container" style="margin-top: 1.5rem">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Interactive: Typical DM vs. CM Contribution Across Frequency
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      On a typical switching supply, differential-mode noise dominates the lower
+                      conducted band while common-mode noise takes over as frequency rises &mdash;
+                      the crossover point varies by design but is often somewhere in the low-MHz
+                      range.
+                    </p>
+                    <div id="plotlyDmCm" style="width: 100%; height: 320px"></div>
+                  </div>
+
+                  <div class="tip-box" style="margin-top: 1rem">
+                    Quick diagnostic: measuring only total noise on the LISN can't tell you which
+                    mode dominates. Dedicated DM/CM separation networks (or a current probe used
+                    correctly on each conductor) are needed to split the two apart before choosing a
+                    filter component.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 2 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 8.3%;
+                        background: linear-gradient(90deg, #3b82f6, #22c55e);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="01-introduction.html">&larr; Previous Lesson</a>
+                <a class="btn btn-primary" href="03-frequency-and-standards.html"
+                  >Next Lesson &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <!-- Accordion toggle -->
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <!-- Theme-aware helpers -->
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+      function drawPcbBoard(ctx, x, y, w, h) {
+        var grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#0f4a36');
+        grad.addColorStop(1, '#0a3527');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+        ctx.lineWidth = 1;
+      }
+      function drawIcPackage(ctx, cx, cy, bodyW, bodyH, pinsPerSide) {
+        ctx.fillStyle = '#1c1c1c';
+        ctx.strokeStyle = '#5a5a5a';
+        ctx.lineWidth = 1;
+        ctx.fillRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH);
+        ctx.strokeRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH);
+        ctx.fillStyle = '#e2b84b';
+        for (var i = 0; i < pinsPerSide; i++) {
+          var py = cy - bodyH / 2 + ((i + 0.5) * bodyH) / pinsPerSide;
+          ctx.fillRect(cx - bodyW / 2 - 7, py - 1.5, 7, 3);
+          ctx.fillRect(cx + bodyW / 2, py - 1.5, 7, 3);
+        }
+        ctx.lineWidth = 1;
+      }
+    </script>
+
+    <!-- Section 1: CE vs RE slider diagram -->
+    <script>
+      var ceReSlider = document.getElementById('ceReSlider');
+      var ceReAmount = 0;
+      ceReSlider.addEventListener('input', function () {
+        ceReAmount = parseInt(ceReSlider.value) / 100;
+        document.getElementById('labelConducted').classList.toggle('active', ceReAmount < 0.5);
+        document.getElementById('labelRadiated').classList.toggle('active', ceReAmount >= 0.5);
+      });
+      var ceReStart = null;
+      function drawCeReDiagram(ts) {
+        var canvas = document.getElementById('ceReDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawCeReDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (ceReStart === null) ceReStart = ts;
+        var elapsed = (ts - ceReStart) / 1000;
+
+        var srcX = w * 0.18,
+          srcY = h * 0.5;
+        drawIcPackage(ctx, srcX, srcY, 30, 22, 3);
+        labelPlate(ctx, 'Noise source', srcX, srcY - 22, 'center');
+
+        // conducted path: straight line along a cable to a LISN box
+        var cableEndX = w * 0.62;
+        ctx.strokeStyle = inkColor(0.5 * (1 - ceReAmount) + 0.15);
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(srcX + 16, srcY);
+        ctx.lineTo(cableEndX, srcY);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        if (1 - ceReAmount > 0.15) {
+          var cT = (elapsed / 1.2) % 1;
+          var cx = srcX + 16 + (cableEndX - srcX - 16) * cT;
+          ctx.fillStyle = 'rgba(59,130,246,' + (1 - ceReAmount).toFixed(2) + ')';
+          ctx.beginPath();
+          ctx.arc(cx, srcY, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#3a3f47';
+        ctx.strokeStyle = '#7a828c';
+        ctx.globalAlpha = 1 - ceReAmount + 0.15;
+        ctx.fillRect(cableEndX, srcY - 18, 40, 36);
+        ctx.strokeRect(cableEndX, srcY - 18, 40, 36);
+        ctx.globalAlpha = 1;
+        labelPlate(ctx, 'LISN', cableEndX + 20, srcY + 32, 'center');
+
+        // radiated path: expanding rings through air
+        if (ceReAmount > 0.15) {
+          for (var i = 0; i < 4; i++) {
+            var rp = (elapsed / 1.5 + i / 4) % 1;
+            var radius = rp * (w * 0.35);
+            ctx.beginPath();
+            ctx.arc(srcX, srcY, radius, -0.6, 0.6);
+            ctx.strokeStyle = 'rgba(239,68,68,' + (ceReAmount * (1 - rp) * 0.6).toFixed(2) + ')';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+          ctx.lineWidth = 1;
+          var antX = w * 0.82,
+            antY = srcY - 10;
+          ctx.globalAlpha = ceReAmount;
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.beginPath();
+          ctx.moveTo(antX, srcY + 30);
+          ctx.lineTo(antX, antY - 30);
+          ctx.stroke();
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(antX - 10, antY - 30);
+          ctx.lineTo(antX + 10, antY - 30);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = 1;
+          labelPlate(ctx, 'Antenna', antX, srcY + 46, 'center');
+        }
+
+        requestAnimationFrame(drawCeReDiagram);
+      }
+      requestAnimationFrame(drawCeReDiagram);
+      window.addEventListener('resize', function () {
+        ceReStart = null;
+      });
+    </script>
+
+    <!-- Section 2: Path tabs -->
+    <script>
+      var pathData = {
+        ac: {
+          caption:
+            'AC Mains Conducted Emission: the most commonly tested path. Any AC-powered product routes switching noise straight onto the mains cord, where the LISN measures it directly. Regulated over 150 kHz–30 MHz for most commercial products.',
+        },
+        dc: {
+          caption:
+            'DC Conducted Emission: automotive, industrial, and battery-powered systems drive noise onto a DC input or battery cable instead of AC mains. A buck/boost converter feeding off a battery is a classic source -- the noise travels straight down the battery leads.',
+        },
+        signal: {
+          caption:
+            'Signal Cable Emissions: USB, Ethernet, RS-485, and CAN cables can carry conducted noise too, especially common-mode current picked up from a nearby switching regulator. These paths are less universally tested but matter heavily for telecom and automotive network standards.',
+        },
+      };
+      var currentPath = 'ac';
+      function setPathCaption() {
+        document.getElementById('pathCaption').textContent = pathData[currentPath].caption;
+      }
+      document.querySelectorAll('[data-path]').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('[data-path]').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentPath = tab.getAttribute('data-path');
+          setPathCaption();
+          drawPathDiagram();
+        });
+      });
+      setPathCaption();
+
+      function drawPathDiagram() {
+        var canvas = document.getElementById('pathDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        var boardX = 16,
+          boardY = h * 0.3,
+          boardW = w * 0.28,
+          boardH = h * 0.4;
+        drawPcbBoard(ctx, boardX, boardY, boardW, boardH);
+        drawIcPackage(ctx, boardX + boardW / 2, boardY + boardH / 2, 26, 18, 2);
+        labelPlate(ctx, 'Equipment / EUT', boardX + boardW / 2, boardY + boardH + 16, 'center');
+
+        var srcX = boardX + boardW,
+          srcY = boardY + boardH / 2;
+        var endX = w * 0.9;
+
+        if (currentPath === 'ac') {
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(srcX, srcY - 6);
+          ctx.lineTo(endX, srcY - 6);
+          ctx.moveTo(srcX, srcY + 6);
+          ctx.lineTo(endX, srcY + 6);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#3a3f47';
+          ctx.strokeStyle = '#7a828c';
+          ctx.fillRect(endX, srcY - 20, 30, 40);
+          ctx.strokeRect(endX, srcY - 20, 30, 40);
+          labelPlate(ctx, 'LISN (AC mains)', endX + 15, srcY + 36, 'center');
+          labelPlate(ctx, '150 kHz–30 MHz', (srcX + endX) / 2, srcY - 20, 'center');
+        } else if (currentPath === 'dc') {
+          ctx.fillStyle = '#3a3f47';
+          ctx.strokeStyle = '#7a828c';
+          ctx.fillRect(endX + 10, srcY - 16, 24, 32);
+          ctx.strokeRect(endX + 10, srcY - 16, 24, 32);
+          labelPlate(ctx, 'Battery', endX + 22, srcY + 30, 'center');
+          ctx.strokeStyle = '#4cdf8b';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(srcX, srcY - 6);
+          ctx.lineTo(endX + 10, srcY - 6);
+          ctx.moveTo(srcX, srcY + 6);
+          ctx.lineTo(endX + 10, srcY + 6);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'DC input cable', (srcX + endX) / 2, srcY - 20, 'center');
+        } else {
+          ctx.strokeStyle = '#8b5cf6';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(srcX, srcY);
+          ctx.lineTo(endX, srcY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#3a3f47';
+          ctx.strokeStyle = '#7a828c';
+          ctx.fillRect(endX, srcY - 16, 30, 32);
+          ctx.strokeRect(endX, srcY - 16, 30, 32);
+          labelPlate(ctx, 'Ethernet / USB / CAN', endX + 15, srcY + 30, 'center');
+        }
+      }
+      drawPathDiagram();
+      window.addEventListener('resize', drawPathDiagram);
+    </script>
+
+    <!-- Section 3: CM vs DM interactive diagram -->
+    <script>
+      var cmDmInfo = {
+        dm: 'Differential-mode current flows out on one power conductor, through the load, and returns on the other conductor -- the same physical path as the wanted power current, just riding at a much higher (noise) frequency. The two conductors carry current in opposite directions, so their magnetic fields partially cancel with distance.',
+        cm: 'Common-mode current flows out on both power conductors together (same direction) and returns through a completely different path -- typically the chassis and earth ground, via parasitic capacitance. Because both conductors carry current in the same direction, their magnetic fields add rather than cancel, which is part of why CM noise radiates so effectively once it reaches a cable.',
+      };
+      var currentMode = 'dm';
+      document.querySelectorAll('[data-mode]').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('[data-mode]').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentMode = tab.getAttribute('data-mode');
+          document.getElementById('cmDmDetail').textContent = cmDmInfo[currentMode];
+        });
+      });
+      document.getElementById('cmDmDetail').textContent = cmDmInfo.dm;
+
+      var cmDmStart = null;
+      function drawCmDmDiagram(ts) {
+        var canvas = document.getElementById('cmDmDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawCmDmDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (cmDmStart === null) cmDmStart = ts;
+        var elapsed = (ts - cmDmStart) / 1000;
+
+        var srcX = w * 0.14,
+          srcY1 = h * 0.35,
+          srcY2 = h * 0.65;
+        var loadX = w * 0.7;
+
+        drawIcPackage(ctx, srcX, (srcY1 + srcY2) / 2, 26, 40, 3);
+        labelPlate(ctx, 'Source', srcX, srcY1 - 20, 'center');
+
+        // load box
+        ctx.fillStyle = '#3a3f47';
+        ctx.strokeStyle = '#7a828c';
+        ctx.fillRect(loadX, (srcY1 + srcY2) / 2 - 18, 26, 36);
+        ctx.strokeRect(loadX, (srcY1 + srcY2) / 2 - 18, 26, 36);
+        labelPlate(ctx, 'Load', loadX + 13, srcY1 - 20, 'center');
+
+        // two conductors
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(srcX + 13, srcY1);
+        ctx.lineTo(loadX, srcY1);
+        ctx.moveTo(srcX + 13, srcY2);
+        ctx.lineTo(loadX, srcY2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+
+        var t = (elapsed / 1.3) % 1;
+
+        if (currentMode === 'dm') {
+          // top conductor: current flows right (source to load)
+          var x1 = srcX + 13 + (loadX - srcX - 13) * t;
+          ctx.fillStyle = '#3b82f6';
+          ctx.beginPath();
+          ctx.arc(x1, srcY1, 5, 0, Math.PI * 2);
+          ctx.fill();
+          // arrow indicating direction
+          drawDirArrow(ctx, x1, srcY1, 1);
+          // bottom conductor: current flows left (load to source) -- return path
+          var x2 = loadX - (loadX - srcX - 13) * t;
+          ctx.fillStyle = '#3b82f6';
+          ctx.beginPath();
+          ctx.arc(x2, srcY2, 5, 0, Math.PI * 2);
+          ctx.fill();
+          drawDirArrow(ctx, x2, srcY2, -1);
+          labelPlate(
+            ctx,
+            'DM: opposite directions, same magnitude',
+            (srcX + loadX) / 2,
+            h - 12,
+            'center',
+            11
+          );
+        } else {
+          // both conductors: current flows right together
+          var xc1 = srcX + 13 + (loadX - srcX - 13) * t;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(xc1, srcY1, 5, 0, Math.PI * 2);
+          ctx.fill();
+          drawDirArrow(ctx, xc1, srcY1, 1);
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(xc1, srcY2, 5, 0, Math.PI * 2);
+          ctx.fill();
+          drawDirArrow(ctx, xc1, srcY2, 1);
+
+          // return path through chassis/ground below
+          var gndY = h * 0.9;
+          ctx.strokeStyle = inkColor(0.3);
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(loadX + 13, (srcY1 + srcY2) / 2 + 18);
+          ctx.lineTo(loadX + 13, gndY);
+          ctx.lineTo(srcX, gndY);
+          ctx.lineTo(srcX, (srcY1 + srcY2) / 2 + 20);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          labelPlate(ctx, 'chassis / earth return', (srcX + loadX) / 2, gndY - 6, 'center', 10);
+
+          var gT = (elapsed / 1.3 + 0.5) % 1;
+          var gPathLen = loadX + 13 - srcX + (gndY - (srcY1 + srcY2) / 2 - 18) * 2;
+          var gd = gT * gPathLen;
+          var gx, gy;
+          var seg1 = gndY - (srcY1 + srcY2) / 2 - 18;
+          var seg2 = loadX + 13 - srcX;
+          if (gd < seg1) {
+            gx = loadX + 13;
+            gy = (srcY1 + srcY2) / 2 + 18 + gd;
+          } else if (gd < seg1 + seg2) {
+            gx = loadX + 13 - (gd - seg1);
+            gy = gndY;
+          } else {
+            gx = srcX;
+            gy = gndY - (gd - seg1 - seg2);
+          }
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(gx, gy, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          labelPlate(
+            ctx,
+            'CM: same direction on both, returns via chassis',
+            (srcX + loadX) / 2,
+            h - 12,
+            'center',
+            11
+          );
+        }
+
+        requestAnimationFrame(drawCmDmDiagram);
+      }
+      function drawDirArrow(ctx, x, y, dir) {
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x - 8 * dir, y - 10);
+        ctx.lineTo(x, y - 4);
+        ctx.lineTo(x - 8 * dir, y + 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+      requestAnimationFrame(drawCmDmDiagram);
+      window.addEventListener('resize', function () {
+        cmDmStart = null;
+      });
+    </script>
+
+    <!-- Section 3: Plotly DM vs CM contribution -->
+    <script>
+      function drawPlotlyDmCm() {
+        var el = document.getElementById('plotlyDmCm');
+        if (!el || !window.Plotly) return;
+        var freqs = [];
+        for (var f = 0.15; f <= 30; f *= 1.05) freqs.push(f);
+        var dm = freqs.map(function (f) {
+          return 62 - 14 * Math.log10(f / 0.15);
+        });
+        var cm = freqs.map(function (f) {
+          return 30 + 16 * Math.log10(f / 0.15);
+        });
+        var total = freqs.map(function (f, i) {
+          return 10 * Math.log10(Math.pow(10, dm[i] / 10) + Math.pow(10, cm[i] / 10));
+        });
+        var layout = Object.assign({}, getPlotlyLayoutBase(), {
+          xaxis: {
+            title: 'Frequency (MHz)',
+            type: 'log',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          yaxis: {
+            title: 'dBµV',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          legend: { orientation: 'h', y: -0.25 },
+        });
+        Plotly.newPlot(
+          el,
+          [
+            {
+              x: freqs,
+              y: dm,
+              name: 'Differential mode',
+              mode: 'lines',
+              line: { color: '#3b82f6', width: 2 },
+            },
+            {
+              x: freqs,
+              y: cm,
+              name: 'Common mode',
+              mode: 'lines',
+              line: { color: '#ef4444', width: 2 },
+            },
+            {
+              x: freqs,
+              y: total,
+              name: 'Total (measured)',
+              mode: 'lines',
+              line: { color: '#94a3b8', width: 1.5, dash: 'dot' },
+            },
+          ],
+          layout,
+          { displayModeBar: false, responsive: true }
+        );
+      }
+      drawPlotlyDmCm();
+      window.addEventListener('resize', drawPlotlyDmCm);
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What medium carries conducted emissions to the measurement equipment?',
+          opts: ['Free-space air', 'A cable or conductor', 'Water', 'Fiber optic light'],
+          correct: 1,
+        },
+        {
+          q: 'What is typically measured for a conducted emission, versus a radiated emission?',
+          opts: [
+            'Voltage on the cable (dBµV) vs. electric field strength at a distance (dBµV/m)',
+            'Both are measured identically as electric field strength',
+            'Conducted emissions are measured in watts, radiated in volts',
+            'There is no measurable difference',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why can fixing conducted common-mode emissions also improve radiated results?',
+          opts: [
+            'It never does -- the two are completely unrelated',
+            "The same cable carrying common-mode noise is often the product's dominant unintentional radiating antenna",
+            'Radiated testing uses the exact same LISN as conducted testing',
+            'Common-mode noise only exists above 1 GHz',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Which of these is NOT one of the three conducted-emission paths discussed?',
+          opts: [
+            'AC mains',
+            'DC input / battery cable',
+            'Signal cable (USB, Ethernet, CAN)',
+            'Optical fiber',
+          ],
+          correct: 3,
+        },
+        {
+          q: 'Typical conducted-emission testing on AC mains covers roughly what frequency range for most commercial products?',
+          opts: ['9 kHz–150 kHz', '150 kHz–30 MHz', '30 MHz–1 GHz', '1 GHz–18 GHz'],
+          correct: 1,
+        },
+        {
+          q: 'In differential-mode noise, current on the two power conductors flows...',
+          opts: [
+            'In the same direction on both',
+            'In opposite directions, following the same path as the wanted power current',
+            'Only on the ground wire',
+            'Nowhere -- DM noise has no defined current path',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the typical return path for common-mode current?',
+          opts: [
+            'The opposite power conductor',
+            'Chassis / earth ground, via parasitic capacitance',
+            'It has no return path',
+            'The signal cable shield only',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why do common-mode currents on a cable tend to radiate more effectively than differential-mode currents of similar magnitude?',
+          opts: [
+            'CM currents flow in the same direction on both conductors, so their magnetic fields add rather than cancel',
+            "CM currents are always DC and don't generate fields",
+            'CM currents only exist at frequencies below 9 kHz',
+            'There is no difference in radiating effectiveness',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Which filter component primarily targets differential-mode noise?',
+          opts: [
+            'Y-capacitor',
+            'Common-mode choke only',
+            'X-capacitor / differential-mode inductor',
+            'Chassis bonding strap',
+          ],
+          correct: 2,
+        },
+        {
+          q: 'Which filter component primarily targets common-mode noise?',
+          opts: [
+            'X-capacitor',
+            'Y-capacitor / common-mode choke',
+            'A simple series resistor',
+            'An electrolytic bulk capacitor',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'As frequency rises across the conducted range, which noise mode typically becomes dominant?',
+          opts: [
+            'Differential mode always dominates at every frequency',
+            'Common mode typically takes over at higher conducted frequencies',
+            'Neither mode changes with frequency',
+            'Only differential mode exists above 1 MHz',
+          ],
+          correct: 1,
+        },
+        {
+          q: "Why can't a single LISN measurement alone tell an engineer which mode (DM or CM) dominates a failure?",
+          opts: [
+            'The LISN measures total noise; dedicated DM/CM separation networks or correctly-used current probes are needed to split the two apart',
+            'The LISN only measures differential mode, never common mode',
+            'The LISN only works below 9 kHz',
+            'Mode separation is never useful for debugging',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Introduction to DDR memory interface design with FPGA: DDR3/DDR4/DDR5/LPDDR4-5 landscape, hard vs soft FPGA memory controllers, and where this design course fits before SI verification."
+    />
+    <title>
+      Introduction &amp; DDR Landscape | DDR4 Memory Interface Design Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/01-introduction.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .figure-card img {
+        width: 100%;
+        border-radius: var(--radius-lg);
+        display: block;
+        background: #0b0f14;
+        max-height: 260px;
+        object-fit: cover;
+      }
+      .flow-step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        white-space: nowrap;
+      }
+      .flow-step.current {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+        background: rgba(34, 211, 238, 0.08);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+      }
+      .flow-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item active"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Introduction &amp; DDR Landscape</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 01</span>
+              <h1>Introduction &amp; the DDR Landscape</h1>
+              <p class="subtitle">
+                Memory-interface design is one of the least forgiving parts of a board: hundreds of
+                megabits per second per pin, dense BGA breakout, and a timing budget measured in
+                picoseconds. This module maps the territory — which DDR generation to reach for,
+                what your FPGA actually gives you, and where this design course fits in your overall
+                project flow.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Why hard -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why this interface is uniquely hard</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Most interfaces on a board tolerate sloppy layout. DDR does not, for three reasons
+                  that this course keeps coming back to:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Speed.</strong> DDR4-3200 toggles data at 3200 MT/s — a bit period of
+                    just 312.5 ps. A few hundred picoseconds of uncontrolled skew is the entire
+                    margin budget.
+                  </li>
+                  <li>
+                    <strong>Pin density.</strong> A x72 (ECC) DDR4 interface is well over 150 signal
+                    pins on both the FPGA and the DRAM devices, almost all in fine-pitch BGA
+                    packages — breakout alone is a real routing challenge (Module 09).
+                  </li>
+                  <li>
+                    <strong>It's a bus, not a link.</strong> Multiple DRAM devices share the same
+                    command/address/clock lines (Module 04), so topology and length-matching choices
+                    affect every device at once.
+                  </li>
+                </ul>
+                <div class="tip-box">
+                  The payoff for getting it right: DDR is by far the cheapest way to get gigabytes
+                  of fast, byte-addressable memory next to your FPGA. There's no shortcut around
+                  learning to design the interface properly.
+                </div>
+              </div>
+
+              <!-- DDR generation landscape -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The DDR generation landscape</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Five memory families cover almost every FPGA project you'll meet. Module 02 turns
+                  this into a decision matrix with an actual recommendation; for now, get the shape
+                  of each one:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Family</th>
+                        <th>Typical data rate</th>
+                        <th>I/O voltage</th>
+                        <th>Topology norm</th>
+                        <th>Where it's used</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>DDR3</td>
+                        <td>800–1866 MT/s</td>
+                        <td>1.5 V (1.35 V DDR3L)</td>
+                        <td>Fly-by, VTT termination</td>
+                        <td>Cost-sensitive / legacy designs, mature tool support</td>
+                      </tr>
+                      <tr>
+                        <td>DDR4</td>
+                        <td>1600–3200 MT/s</td>
+                        <td>1.2 V</td>
+                        <td>Fly-by, on-die + VTT-light</td>
+                        <td>Mainstream FPGA memory today — this course's primary focus</td>
+                      </tr>
+                      <tr>
+                        <td>DDR5</td>
+                        <td>3200–6400+ MT/s</td>
+                        <td>1.1 V</td>
+                        <td>Fly-by, on-die decision-feedback</td>
+                        <td>Newest high-bandwidth designs; fewer FPGA families support it yet</td>
+                      </tr>
+                      <tr>
+                        <td>LPDDR4/4x</td>
+                        <td>1600–4266 MT/s</td>
+                        <td>1.1 V (VDDQ), low power</td>
+                        <td>Point-to-point (Module 04)</td>
+                        <td>Mobile, battery, thermally-constrained boards</td>
+                      </tr>
+                      <tr>
+                        <td>LPDDR5</td>
+                        <td>up to 6400+ MT/s</td>
+                        <td>0.5 V (VDDQ)</td>
+                        <td>Point-to-point</td>
+                        <td>High-bandwidth low-power (edge AI, handhelds)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="info-box">
+                  This course uses <strong>DDR4</strong> as the running example throughout — it's
+                  still the most common choice for new FPGA designs — but every principle (topology,
+                  signal groups, SI, termination, decoupling, routing) transfers directly to
+                  DDR3/DDR5, with LPDDR simplifying several of them (flagged as we go).
+                </div>
+              </div>
+
+              <!-- FPGA angle -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The FPGA-specific angle: hard vs. soft controller</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Unlike a fixed SoC with one memory controller, an FPGA's memory interface
+                  capability depends entirely on the silicon family you picked:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Hard memory controller / PHY</th>
+                        <th>Soft (fabric-based) controller</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Max speed</strong></td>
+                        <td>Highest the family supports (often 3200+ MT/s)</td>
+                        <td>Lower — fabric timing becomes the limit</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Fabric resources</strong></td>
+                        <td>Minimal — controller is dedicated silicon</td>
+                        <td>Consumes LUTs/FFs/PLLs you might want elsewhere</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Design effort</strong></td>
+                        <td>Configure via vendor wizard (Module 10)</td>
+                        <td>More manual timing closure work</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Typical use</strong></td>
+                        <td>Default choice whenever the family has one</td>
+                        <td>Smaller/cheaper FPGAs without a hard controller</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Either way, the <em>board design</em> problem — this course — barely changes: the
+                  DRAM side doesn't know or care whether the controller is hard or soft. What
+                  changes is which pins on the FPGA are eligible for which DDR signal, covered in
+                  Module 10.
+                </p>
+              </div>
+
+              <!-- Positioning -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Where this course fits</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Rising Edge's Signal Integrity Academy already has a
+                  <a href="../../SI/capstone-ddr4.html">DDR4 SI Verification capstone</a> — but it
+                  starts from an assumption: <em>the interface already exists on a board</em>. This
+                  course is the missing piece before that: how to actually design it.
+                </p>
+                <div class="flow-row">
+                  <div class="flow-step current">Select components</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step current">Design (this course)</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">Route the board</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">Verify (SI capstone)</div>
+                  <span class="flow-arrow">→</span>
+                  <div class="flow-step">Bring-up</div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Module 12 hands you off explicitly into that capstone with a concrete mini-project
+                  brief.
+                </p>
+              </div>
+
+              <!-- Real image -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>What you're actually wiring together</h3></div>
+                <div class="figure-card">
+                  <img
+                    src="https://commons.wikimedia.org/wiki/Special:FilePath/ALTERA_DE2_FPGA_Board.jpg"
+                    alt="An FPGA development board with the FPGA package and surrounding memory/support circuitry visible"
+                    loading="lazy"
+                  />
+                  <p class="diagram-caption">
+                    An FPGA board — the memory controller lives inside the large FPGA package; DRAM
+                    devices sit nearby, connected by the fly-by topology covered in Module 04.
+                    Source:
+                    <a
+                      href="https://commons.wikimedia.org/wiki/File:ALTERA_DE2_FPGA_Board.jpg"
+                      target="_blank"
+                      rel="noopener"
+                      >Wikimedia Commons</a
+                    >.
+                  </p>
+                </div>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    DDR4 is the mainstream FPGA memory choice today; DDR3/DDR5/LPDDR4-5 trade cost,
+                    bandwidth and power differently — Module 02 gives you a decision matrix.
+                  </li>
+                  <li>
+                    Speed, pin density and shared-bus topology are what make DDR interfaces
+                    unforgiving to lay out — every later module traces back to one of these three.
+                  </li>
+                  <li>
+                    Hard vs. soft memory controller changes fabric resources and achievable speed,
+                    but barely changes the board-design problem this course covers.
+                  </li>
+                  <li>
+                    This course designs the interface; the existing SI Academy DDR4 capstone
+                    verifies it. Together they cover the full lifecycle.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="index.html">← Course Home</a>
+                <a class="btn btn-primary" href="02-component-selection-datasheets.html"
+                  >Next: Component Selection &amp; Datasheets →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="How to select a DDR memory component and read DRAM and FPGA memory-interface datasheets: part-number decoding, timing tables, voltage specs, package/pinout, DCI/OCT options, and a selection checklist."
+    />
+    <title>
+      Component Selection &amp; Datasheets | DDR4 Memory Interface Design Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/02-component-selection-datasheets.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .pn-decoder {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.95rem;
+        margin: 10px 0 4px;
+      }
+      .pn-seg {
+        background: var(--bg-muted);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 6px;
+        padding: 4px 8px;
+        color: var(--text-base);
+        font-weight: 700;
+      }
+      .pn-legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .pn-legend-item {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.5;
+      }
+      .pn-legend-item strong {
+        color: var(--cyan, #22d3ee);
+        font-family: monospace;
+      }
+      .check-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .check-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 0.85rem;
+        color: var(--text-sub);
+      }
+      .check-list input[type='checkbox'] {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+      .check-list li.checked {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        border-color: rgba(52, 211, 153, 0.35);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item active"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Component Selection &amp; Datasheets</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 02</span>
+              <span class="badge badge-green">Checklist</span>
+              <h1>Component Selection &amp; Reading Datasheets</h1>
+              <p class="subtitle">
+                Before a single trace gets routed, two decisions lock in most of your design
+                constraints: which memory device, and which FPGA family/speed grade. Get these right
+                by actually reading the datasheets — here's how.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Decision matrix -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>DDR technology decision matrix</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Beyond the speed/voltage numbers from Module 01, weigh these four practical
+                  factors before locking in a memory family:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Factor</th>
+                        <th>DDR3</th>
+                        <th>DDR4</th>
+                        <th>DDR5</th>
+                        <th>LPDDR4/5</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Cost</strong></td>
+                        <td>Lowest (mature, high volume)</td>
+                        <td>Moderate</td>
+                        <td>Highest (newest)</td>
+                        <td>Moderate–high (packaging cost)</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Density available</strong></td>
+                        <td>Up to 8 Gb typical</td>
+                        <td>Up to 16 Gb per die, more with stacking</td>
+                        <td>Higher per-die density</td>
+                        <td>Package-on-package, moderate density</td>
+                      </tr>
+                      <tr>
+                        <td><strong>EOL / availability risk</strong></td>
+                        <td>Rising — being phased out</td>
+                        <td>Low — mainstream today</td>
+                        <td>Low risk but limited second sources yet</td>
+                        <td>Low, but fewer vendors than standard DDR</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Design effort</strong></td>
+                        <td>Well-understood, many reference designs</td>
+                        <td>Well-supported by FPGA tool flows</td>
+                        <td>Newer tool flows, less community reference</td>
+                        <td>Simplified topology, but tight package routing</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  <strong>Default recommendation:</strong> unless you have a specific reason
+                  (extreme low power → LPDDR, cutting-edge bandwidth → DDR5, legacy BOM → DDR3),
+                  DDR4 remains the safest first choice — best combination of tool support, reference
+                  designs and component availability.
+                </div>
+              </div>
+
+              <!-- FPGA compatibility -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Step 1: Confirm FPGA memory-controller compatibility</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Before choosing a specific DRAM part, confirm your FPGA family actually supports
+                  it. In the FPGA vendor's memory-interface datasheet/user guide, look for:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Supported memory standards</strong> — which of DDR3/4/5/LPDDR4/5 this
+                    family's hard controller (if any) supports.
+                  </li>
+                  <li>
+                    <strong>Max supported data rate per speed grade</strong> — a "-1" (slowest)
+                    grade might cap out well below the DRAM's rated speed.
+                  </li>
+                  <li>
+                    <strong>Number of memory interfaces available</strong> and which I/O banks
+                    they're restricted to (Module 10).
+                  </li>
+                  <li>
+                    <strong>Hard vs. soft controller availability</strong> for your chosen standard
+                    — not every family has a hard controller for every standard.
+                  </li>
+                </ul>
+                <div class="warning-box">
+                  ⚠ A common first-project mistake: picking a DDR4-3200 DRAM, then discovering the
+                  chosen FPGA's hard controller (or the affordable speed grade) tops out at 2400
+                  MT/s. Check the FPGA side <em>first</em> — it constrains everything downstream.
+                </div>
+              </div>
+
+              <!-- Reading a DRAM datasheet -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Step 2: Reading a DRAM datasheet</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Every DRAM datasheet follows a similar shape. Here's a typical DDR4 part number
+                  decoded (values are illustrative — always confirm against the specific
+                  manufacturer's decoder table):
+                </p>
+                <div class="pn-decoder">
+                  <span class="pn-seg">MT40A</span><span class="pn-seg">512M</span
+                  ><span class="pn-seg">16</span><span class="pn-seg">LSA</span
+                  ><span class="pn-seg">-062E</span>
+                </div>
+                <div class="pn-legend">
+                  <div class="pn-legend-item">
+                    <strong>MT40A</strong> — manufacturer + DDR4 family prefix
+                  </div>
+                  <div class="pn-legend-item">
+                    <strong>512M</strong> — density per I/O (512M × organization)
+                  </div>
+                  <div class="pn-legend-item">
+                    <strong>16</strong> — organization: x16 (also seen: x4, x8)
+                  </div>
+                  <div class="pn-legend-item"><strong>LSA</strong> — package/die revision code</div>
+                  <div class="pn-legend-item">
+                    <strong>-062E</strong> — speed grade (e.g., 062 ≈ DDR4-3200, CL22)
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-sub);
+                    line-height: 1.75;
+                    margin-top: 12px;
+                  "
+                >
+                  Once you've decoded the part number, the rest of the datasheet has four sections
+                  you'll return to constantly:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Section</th>
+                        <th>What to look for</th>
+                        <th>Used in</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Timing parameter table</td>
+                        <td>tCK, CL, tRCD, tRP, tRAS, tRC, tRFC, tFAW, tWTR, tRRD, tCCD</td>
+                        <td>Module 03</td>
+                      </tr>
+                      <tr>
+                        <td>Electrical characteristics (DC/AC)</td>
+                        <td>VDD, VDDQ, VPP, VREF, VIH/VIL, ODT resistance options</td>
+                        <td>Modules 03, 07, 08</td>
+                      </tr>
+                      <tr>
+                        <td>IDD current tables</td>
+                        <td>Per-operation current draw — sizes your power rails</td>
+                        <td>Module 08</td>
+                      </tr>
+                      <tr>
+                        <td>Package &amp; ball map</td>
+                        <td>Physical pinout, ball pitch, thermal pad if present</td>
+                        <td>Module 09</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Reading FPGA memory interface guide -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Step 3: Reading the FPGA memory-interface guide</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  The FPGA vendor's memory-interface (e.g. MIG/EMIF-class) documentation has its own
+                  must-read sections:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>On-chip termination / DCI / OCT options</strong> — what impedances the
+                    I/O can present without a discrete resistor (feeds Module 07).
+                  </li>
+                  <li>
+                    <strong>Calibration requirements</strong> — what the controller needs at
+                    power-up to perform read/write leveling (feeds Modules 04, 10).
+                  </li>
+                  <li>
+                    <strong>Pin-swap rules</strong> — which pins within a byte lane or bank can be
+                    freely reassigned during layout without breaking function, and which are fixed
+                    (dedicated clock/config pins). Critical input for Module 09's routing.
+                  </li>
+                  <li>
+                    <strong>I/O bank voltage &amp; grouping rules</strong> — which bank(s) must be
+                    dedicated to the memory interface and at what voltage (Module 10).
+                  </li>
+                </ul>
+                <div class="info-box">
+                  Treat the FPGA memory-interface guide as equally important as the DRAM datasheet —
+                  most real-world bring-up issues trace back to a pin-swap or termination rule that
+                  was in this document and got missed.
+                </div>
+              </div>
+
+              <!-- Checklist -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Component-selection checklist</h3>
+                  <span class="badge badge-green">Interactive</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px">
+                  Reusable per project — check items off as you confirm them.
+                </p>
+                <ul class="check-list" id="selCheckList">
+                  <li>
+                    <input type="checkbox" /> FPGA family/speed grade supports the target DDR
+                    standard and data rate
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Hard controller available for this standard, or
+                    soft-controller resource budget confirmed
+                  </li>
+                  <li>
+                    <input type="checkbox" /> DRAM density and organization (x8/x16) match required
+                    bus width and ECC needs
+                  </li>
+                  <li>
+                    <input type="checkbox" /> DRAM speed grade (CL, tCK) is at or above the
+                    interface's target rate
+                  </li>
+                  <li>
+                    <input type="checkbox" /> On-die termination options in both DRAM and FPGA
+                    datasheets reviewed (Module 07)
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Pin-swap rules and dedicated pins identified in the
+                    FPGA memory-interface guide
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Package/ball map obtained for both devices (needed for
+                    Module 09 breakout planning)
+                  </li>
+                  <li>
+                    <input type="checkbox" /> Second-source / EOL risk checked for the specific part
+                    number
+                  </li>
+                </ul>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Confirm FPGA memory-controller compatibility before selecting a specific DRAM
+                    part — the FPGA side constrains everything else.
+                  </li>
+                  <li>
+                    A DRAM part number encodes density, organization, package and speed grade —
+                    always decode it against the manufacturer's own table.
+                  </li>
+                  <li>
+                    Four datasheet sections matter most: timing table, electrical characteristics,
+                    IDD current tables, and the package/ball map.
+                  </li>
+                  <li>
+                    The FPGA memory-interface guide's termination, calibration and pin-swap rules
+                    are just as important as the DRAM datasheet.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="01-introduction.html"
+                  >← Introduction &amp; DDR Landscape</a
+                >
+                <a class="btn btn-primary" href="03-key-parameters.html"
+                  >Next: Key Electrical &amp; Timing Parameters →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      document.querySelectorAll('#selCheckList input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          cb.closest('li').classList.toggle('checked', cb.checked);
+        });
+      });
+    </script>
+  </body>
+</html>

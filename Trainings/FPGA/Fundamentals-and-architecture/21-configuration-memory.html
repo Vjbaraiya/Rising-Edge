@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Understand how FPGA bitstreams, SRAM configuration cells, and external non-volatile memory work to program an FPGA."
+    />
+    <title>Configuration Memory | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/21-configuration-memory.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .lesson-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        margin-bottom: 12px;
+      }
+      .section-heading {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 32px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .lesson-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-base);
+        line-height: 1.2;
+        margin-bottom: 12px;
+      }
+      .lesson-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        font-size: 0.825rem;
+        color: var(--text-muted);
+      }
+      .lesson-lead {
+        font-size: 1rem;
+        color: var(--text-sub);
+        line-height: 1.75;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .gif-placeholder {
+        background: var(--bg-muted);
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        margin: 24px 0;
+        color: var(--text-faint);
+        font-size: 0.875rem;
+        font-style: italic;
+        line-height: 1.7;
+      }
+      code {
+        background: var(--bg-muted);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-family: 'Courier New', monospace;
+        color: #22d3ee;
+      }
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      .tag {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+        border-radius: 12px;
+        background: var(--bg-muted);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item active" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div style="max-width: 860px; margin: 0 auto; padding: var(--sp-6) var(--sp-5)">
+          <div class="lesson-badge">Lesson 21 of 25 &nbsp;·&nbsp; 12 min read</div>
+          <h1 class="lesson-title">Configuration Memory</h1>
+          <div class="lesson-meta">
+            <span>FPGA Fundamentals &amp; Architecture</span>
+            <span>·</span>
+            <span>84% complete</span>
+            <span>·</span>
+            <span>12 MIN</span>
+          </div>
+          <p class="lesson-lead">
+            FPGA fabric is built from SRAM cells — they are volatile, fast, and infinitely
+            rewritable, but they forget everything when power is removed. This lesson explains the
+            bitstream format, how configuration memory is organized into frames, what external
+            non-volatile memory options exist, and advanced topics like partial reconfiguration and
+            bitstream security.
+          </p>
+
+          <h2 class="section-heading">FPGA Configuration Fundamentals</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Modern SRAM-based FPGAs — which includes virtually all high-performance devices from
+            Xilinx/AMD, Intel/Altera, and Lattice — store their configuration in on-chip SRAM cells.
+            These cells are fast, can be written millions of times, and offer excellent radiation
+            performance, but they are fundamentally
+            <strong style="color: var(--text-base)">volatile</strong>: the instant power is removed,
+            all configuration is lost.
+          </p>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            This means every time the FPGA powers on, it must reload its configuration from an
+            external non-volatile memory source. The configuration file — called a
+            <strong style="color: var(--text-base)">bitstream</strong> — is computed by the Vivado
+            toolchain and encodes every aspect of the design onto the FPGA fabric.
+          </p>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The SRAM configuration cells program the following aspects of the FPGA:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">LUT INIT values</strong> — the 64-bit truth
+              table stored in every LUT6, defining the Boolean function it computes
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Routing switches</strong> — which wire
+              segments connect to which logic cells via programmable interconnect points (PIPs)
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">IO standards</strong> — voltage levels, drive
+              strength, slew rate, differential termination for every IO pin
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Clock settings</strong> — BUFG enables,
+              MMCM/PLL multiplier and divider values, BUFR configurations
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">BRAM initial contents</strong> — if INIT
+              values are specified in RTL, they are embedded directly in the bitstream
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">DSP48E1 mode bits</strong> — cascade enables,
+              pipeline register enables, operational modes
+            </li>
+          </ul>
+
+          <div class="callout callout-info">
+            <strong>Key Concept</strong>
+            FPGA configuration memory is purely SRAM — it draws power to maintain state. The moment
+            power is removed, all configuration is lost. This is why external NVM is mandatory in
+            production systems.
+          </div>
+
+          <h2 class="section-heading">Bitstream Format</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Vivado generates the bitstream as a <code>.bit</code> file (for JTAG/Vivado programming)
+            or a <code>.bin</code> file (for direct SPI flash writing). The binary format is
+            standardized and contains several distinct fields:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">Dummy words and sync word</strong> —
+              <code>0xAA995566</code> marks the start of valid configuration data; the FPGA searches
+              for this pattern after reset and ignores everything before it
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Header section</strong> — .bit files include
+              design name, part number, build date, and Vivado version as ASCII strings before the
+              binary payload
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Configuration packets</strong> — type-1 and
+              type-2 packets carry register write commands and bulk data
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">FAR (Frame Address Register)</strong> — sets
+              the destination frame address before each data write
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">FDRI (Frame Data Register Input)</strong> —
+              the packet type that carries the actual frame configuration bits
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">CRC packets</strong> — cyclic redundancy check
+              values verified after each major section; a mismatch aborts configuration
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Bitstream sizes scale with device density. The complete bitstream must be loaded
+            sequentially into the configuration controller on every power cycle:
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Device</th>
+                <th>Family</th>
+                <th>Logic Cells</th>
+                <th>Bitstream Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>XC7A35T</td>
+                <td>Artix-7</td>
+                <td>33,280</td>
+                <td>~17 MB</td>
+              </tr>
+              <tr>
+                <td>XC7A200T</td>
+                <td>Artix-7</td>
+                <td>215,360</td>
+                <td>~78 MB</td>
+              </tr>
+              <tr>
+                <td>XC7K325T</td>
+                <td>Kintex-7</td>
+                <td>326,080</td>
+                <td>~130 MB</td>
+              </tr>
+              <tr>
+                <td>XC7VX690T</td>
+                <td>Virtex-7</td>
+                <td>693,120</td>
+                <td>~230 MB</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Bitstream encryption is supported via
+            <strong style="color: var(--text-base)">AES-256</strong>. When enabled in Vivado, the
+            bitstream payload is encrypted with a 256-bit key stored in battery-backed BBRAM or
+            one-time-programmable eFUSE cells on the device. Only a device programmed with the
+            matching key can decrypt and load the bitstream, protecting proprietary IP against
+            cloning or reverse-engineering.
+          </p>
+
+          <h2 class="section-heading">Configuration Cell Organization</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The bitstream is organized into
+            <strong style="color: var(--text-base)">frames</strong> — the smallest independently
+            addressable unit of configuration memory. In Xilinx 7-series devices, the frame
+            structure is:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              Each frame =
+              <strong style="color: var(--text-base)">101 words × 32 bits = 3,232 bits</strong>
+            </li>
+            <li>
+              Frames are addressed hierarchically: Block Type → Row → Column → Minor frame number
+              within column
+            </li>
+            <li>
+              Block types: CLB frames, BRAM data frames, BRAM address frames, IOB frames, clock/CMT
+              frames
+            </li>
+            <li>
+              XC7A35T contains approximately
+              <strong style="color: var(--text-base)">7,000 total frames</strong>; XC7K325T contains
+              approximately <strong style="color: var(--text-base)">24,000 frames</strong>
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            The frame-based organization is what enables partial reconfiguration. By writing only
+            the frames belonging to a specific region, the FPGA can update that region while all
+            surrounding logic continues to operate undisturbed. The FAR register in the
+            configuration controller tracks which frame is currently being programmed.
+          </p>
+
+          <div class="mermaid">
+            graph TD BS["Bitstream .bit file"] --> SM["Sync Word + Header\n0xAA995566 + Device ID +
+            Date"] BS --> FR["Configuration Frames\n(FAR addressed units)"] FR --> CLB_F["CLB
+            Frames\nLUT INIT values + routing switches"] FR --> BRAM_F["BRAM Frames\nInitial memory
+            contents"] FR --> IOB_F["IOB Frames\nIO standards + drive strength"] FR --> CLK_F["Clock
+            Frames\nBUFG enables + MMCM settings"]
+          </div>
+
+          <div class="gif-placeholder">
+            Suggested GIF: animation showing configuration frames loading one by one from SPI flash
+            into the FPGA — each CLB column lighting up as its LUT INIT values are programmed,
+            progressing left to right across the die, ending with the DONE pin going high and the
+            design becoming active.
+          </div>
+
+          <h2 class="section-heading">External Memory Options</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Since FPGA configuration is volatile, every production design requires an external
+            non-volatile memory to store the bitstream. The choice of memory type affects boot time,
+            cost, density, board area, and interface complexity:
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Memory Type</th>
+                <th>Capacity</th>
+                <th>Interface</th>
+                <th>Boot Time</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>SPI Flash</strong></td>
+                <td>32Mb–2Gb</td>
+                <td>Serial SPI (1/2/4-bit)</td>
+                <td>200ms–2s</td>
+                <td>Low</td>
+              </tr>
+              <tr>
+                <td><strong>BPI Flash (NOR)</strong></td>
+                <td>64Mb–2Gb</td>
+                <td>Parallel 8/16-bit</td>
+                <td>50–200ms</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td><strong>NAND Flash</strong></td>
+                <td>1Gb–32Gb</td>
+                <td>Parallel</td>
+                <td>Slow (ECC overhead)</td>
+                <td>Very low</td>
+              </tr>
+              <tr>
+                <td><strong>SD Card</strong></td>
+                <td>4GB+</td>
+                <td>SPI mode</td>
+                <td>500ms+</td>
+                <td>Very low</td>
+              </tr>
+              <tr>
+                <td><strong>JTAG (cable)</strong></td>
+                <td>N/A</td>
+                <td>JTAG 4-wire</td>
+                <td>10–60s</td>
+                <td>Cable cost only</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            <strong style="color: var(--text-base)"
+              >SPI Flash is the dominant choice for production hardware</strong
+            >
+            — it needs only 4 PCB traces (CS_B, CLK, MOSI, MISO), is available from many vendors
+            including Micron, Winbond, and Spansion, and Quad-SPI mode (x4) can halve load times
+            compared to standard SPI. The FPGA's internal configuration controller natively drives
+            SPI flash with no external logic required.
+          </p>
+
+          <h2 class="section-heading">Configuration Modes</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Three dedicated <strong style="color: var(--text-base)">MODE pins (M[2:0])</strong> on
+            the FPGA package determine which configuration interface is used at power-on. These pins
+            are sampled after POR deasserts and must be stable before that event. On the PCB they
+            are typically tied to fixed logic levels via 1k–10k pull-up or pull-down resistors:
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>M[2:0]</th>
+                <th>Mode</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>000</code></td>
+                <td>Master SPI</td>
+                <td>
+                  FPGA drives SPI flash clock, asserts CS_B, reads bitstream autonomously from
+                  address 0
+                </td>
+              </tr>
+              <tr>
+                <td><code>001</code></td>
+                <td>Master BPI</td>
+                <td>
+                  FPGA drives parallel NOR flash with address bus and control signals (OE_B, WE_B)
+                </td>
+              </tr>
+              <tr>
+                <td><code>010</code></td>
+                <td>Master Serial</td>
+                <td>
+                  FPGA clocks data in from external shift register — legacy mode for older boards
+                </td>
+              </tr>
+              <tr>
+                <td><code>011</code></td>
+                <td>JTAG</td>
+                <td>Configured exclusively via JTAG cable — no autonomous boot from flash</td>
+              </tr>
+              <tr>
+                <td><code>100</code></td>
+                <td>Slave SelectMAP</td>
+                <td>Host CPU sends bitstream over 8/16/32-bit parallel bus to the FPGA</td>
+              </tr>
+              <tr>
+                <td><code>101</code></td>
+                <td>Slave Serial</td>
+                <td>Host CPU sends bitstream bit-by-bit via dedicated serial interface</td>
+              </tr>
+              <tr>
+                <td><code>110</code></td>
+                <td>Master SelectMAP</td>
+                <td>FPGA autonomously reads from parallel NOR flash using wide data bus</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout callout-warning">
+            <strong>Production Warning</strong>
+            Never use JTAG as the sole configuration method in production hardware. JTAG programming
+            is slow (tens of seconds to minutes) and non-persistent — the configuration is lost on
+            every power cycle. Always provision SPI flash for field units so the device boots
+            autonomously. JTAG remains available as a secondary debug/override path regardless of
+            MODE pin settings.
+          </div>
+
+          <h2 class="section-heading">Bitstream Security</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            When FPGA designs contain proprietary algorithms or licensed IP, the bitstream must be
+            protected against unauthorized readback, cloning, or reverse-engineering. Xilinx
+            7-series and later devices provide a layered security architecture:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">AES-256 Encryption</strong> — the bitstream is
+              encrypted in Vivado using a 256-bit key. The AES-256 decryption engine is embedded in
+              the FPGA configuration controller and operates transparently during boot. The SPI
+              flash contains only ciphertext — useless without the device key.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">eFUSE key storage</strong> — one-time
+              programmable (OTP) eFUSE cells permanently burn the AES key into the device during
+              factory programming. Once programmed, eFUSE keys cannot be erased or read back via any
+              interface. BBRAM provides an alternative battery-backed volatile key store that can be
+              updated in the field.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">JTAG readback disable</strong> — bitstream
+              readback and partial readback via JTAG can be permanently disabled via eFUSE
+              programming, preventing IP extraction even if a deployed device is captured.
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Xilinx Secure Boot</strong> — available on
+              UltraScale and Zynq devices, combining AES-256 encryption with RSA-2048 or ECDSA-256
+              authentication. This ensures both confidentiality (no one can read the design) and
+              authenticity (only genuine Xilinx-toolchain-generated bitstreams load).
+            </li>
+          </ul>
+
+          <h2 class="section-heading">Partial Reconfiguration (PR)</h2>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            One of the most powerful features enabled by the frame-based configuration architecture
+            is <strong style="color: var(--text-base)">Partial Reconfiguration (PR)</strong>. PR
+            allows a designated region of the FPGA — called a Reconfigurable Partition (RP) — to be
+            reconfigured while the rest of the device continues operating without any interruption
+            or glitching.
+          </p>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            A <strong style="color: var(--text-base)">partial bitstream</strong> is generated by
+            Vivado and contains only the configuration frames that fall within the RP boundaries.
+            When loaded via ICAP (Internal Configuration Access Port) or an external interface, only
+            those frames are overwritten — the surrounding logic is untouched and continues
+            clocking. The RP boundary pins remain stable during reconfiguration, isolating the rest
+            of the design from any transient state.
+          </p>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            Common applications of partial reconfiguration:
+          </p>
+          <ul
+            style="
+              color: var(--text-sub);
+              line-height: 1.9;
+              padding-left: 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <li>
+              <strong style="color: var(--text-base)">Adaptive computing</strong> — swap in
+              different processing kernels (FFT, FIR, AES, compression) based on runtime workload
+              without stopping the system
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Multi-function overlays</strong> — a single
+              FPGA chip time-multiplexes multiple independent applications by reconfiguring the RP
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Field design updates</strong> — update a
+              specific subsystem in a deployed product (e.g., upgrade the signal processing core)
+              without rebooting the host CPU or disrupting live data links
+            </li>
+            <li>
+              <strong style="color: var(--text-base)">Fault recovery in space/defense</strong> — if
+              radiation-induced errors corrupt a module, reconfigure it from a stored golden image
+              while the rest of the system continues operating
+            </li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.75; margin-bottom: 16px">
+            In Vivado, enable PR via:
+            <em
+              >Tools → Enable Partial Reconfiguration → define Reconfigurable Modules for each
+              partition → synthesize each RM independently → implement with PR DRC rules enabled →
+              generate full and partial bitstreams.</em
+            >
+          </p>
+
+          <div class="callout callout-tip">
+            <strong>Pro Tip: Compressed Bitstreams</strong>
+            Use compressed bitstreams (Vivado → Bitstream Settings → Enable Bitstream Compression)
+            to reduce SPI flash storage requirements by up to 50% and significantly speed up boot
+            time. Compression is especially effective for designs with many unused resources — a
+            sparse design on a large device can compress to 20% of its original size. Compression is
+            lossless and fully transparent to the configuration controller.
+          </div>
+
+          <div class="callout callout-interview">
+            <strong>Interview Question</strong>
+            Q: Why are FPGAs SRAM-based rather than using non-volatile memory for configuration?<br /><br />
+            A: SRAM can be written and erased millions of times at extremely high speed, enabling
+            rapid reconfiguration (including partial reconfiguration in milliseconds) with no
+            wear-out concerns. Flash memory — as used in flash-based FPGAs from Lattice and
+            Microchip — has limited write endurance (typically 100,000 cycles), slower write speeds,
+            and is susceptible to single-event upsets (SEUs) from cosmic radiation in space
+            applications where the upset is permanent until reprogrammed. SRAM FPGAs can be
+            continuously scrubbed and reconfigured to recover from SEUs, which is critical in
+            defense and space systems.
+          </div>
+
+          <h2 class="section-heading">Knowledge Check</h2>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              1. What file extension is Vivado's primary bitstream output format used for JTAG and
+              Hardware Manager programming?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>.bin
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb21-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>.bit
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>.hex
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-1',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>.mcs
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb21-1">
+              Correct! The .bit file is the primary Vivado bitstream output. It contains an ASCII
+              header with design metadata (device, date, version) followed by the binary
+              configuration payload. The .bin file is a raw binary without the header, typically
+              used for direct SPI flash programming via write_cfgmem.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              2. FPGA SRAM configuration cells lose their state when:
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>A new bitstream is received via JTAG
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb21-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>Power is removed from the device
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>The device reaches operating temperature
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-2',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>The DONE pin goes high
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb21-2">
+              Correct! SRAM is volatile by nature — it requires continuous power (VCC above the
+              retention voltage) to hold its data. The moment VCC drops, all configuration bits
+              reset and the entire FPGA design is erased. This is a fundamental characteristic of
+              SRAM technology, not a defect, and is why external NVM is always required.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              3. Which configuration mode is selected when M[2:0] = 000?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>JTAG
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>Slave SelectMAP
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb21-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>Master SPI
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-3',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>Master BPI
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb21-3">
+              Correct! M[2:0] = 000 selects Master SPI mode — the most common production boot mode.
+              In this mode the FPGA autonomously drives the SPI flash clock, asserts CS_B, sends the
+              read command, and clocks in the full bitstream starting at address 0. Only 4 PCB
+              signals are needed: CS_B, CLK, MOSI, and MISO.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              4. What encryption standard protects Xilinx 7-series FPGA bitstreams?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>DES-56
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>RSA-2048
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>3DES-168
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb21-4',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>AES-256
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb21-4">
+              Correct! AES-256 (Advanced Encryption Standard with a 256-bit key) is the bitstream
+              encryption algorithm for Xilinx 7-series and later devices. The decryption engine is
+              embedded in the FPGA's configuration controller. The 256-bit key is stored in either
+              battery-backed BBRAM or permanently in one-time-programmable eFUSE cells.
+            </div>
+          </div>
+
+          <div class="quiz-wrap">
+            <div class="quiz-q" data-answered="">
+              5. Partial Reconfiguration (PR) enables which capability?
+            </div>
+            <ul class="quiz-opts">
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>A</span>Faster boot from SPI flash by skipping unused frames
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>B</span>Running the FPGA without any external flash memory
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    true,
+                    'fb21-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>C</span>Updating one FPGA region without stopping the rest of the design
+              </li>
+              <li
+                class="quiz-opt"
+                onclick="
+                  answerQuiz(
+                    this,
+                    false,
+                    'fb21-5',
+                    this.closest('.quiz-wrap').querySelector('.quiz-q')
+                  )
+                "
+              >
+                <span>D</span>Encrypting the bitstream automatically at runtime
+              </li>
+            </ul>
+            <div class="quiz-fb correct" id="fb21-5">
+              Correct! Partial Reconfiguration allows a defined Reconfigurable Partition to be
+              reprogrammed with a partial bitstream while all surrounding logic continues operating
+              undisturbed. This is possible because configuration memory is organized as
+              independently addressable frames — only the frames within the RP boundary are
+              overwritten.
+            </div>
+          </div>
+
+          <h2 class="section-heading">Practical Exercise</h2>
+          <div class="callout callout-tip">
+            <strong>Hands-On: Explore Vivado Bitstream Settings and the .bit File Format</strong>
+            <p style="margin-top: 8px">
+              In Vivado, generate a bitstream for any target device. Open Bitstream Settings via
+              Flow Navigator → Generate Bitstream → right-click → Bitstream Settings. Work through
+              these steps:
+            </p>
+            <ol style="margin-top: 10px; padding-left: 20px; line-height: 1.9">
+              <li>
+                Enable <strong>Bitstream Compression</strong> (Configuration tab → Enable Bitstream
+                Compression = Yes). Regenerate the bitstream and note the original vs compressed
+                .bit file sizes. Typical savings are 30–50% for moderately utilized designs.
+              </li>
+              <li>
+                Enable <strong>AES Encryption</strong> with a test key (Security tab → Encryption =
+                Enable). Choose BBRAM as the key storage location to avoid permanently burning eFUSE
+                during experimentation. Compare encrypted vs unencrypted file sizes.
+              </li>
+              <li>
+                Open the .bit file in a hex editor (e.g., HxD on Windows). The file begins with
+                ASCII text — the design name and part number. Scroll until you find the sync word:
+                <code>AA 99 55 66</code>. Everything after this is the binary configuration packet
+                stream.
+              </li>
+              <li>
+                In Vivado TCL console, run
+                <code
+                  >write_cfgmem -format mcs -size 32 -interface SPIx4 -loadbit "up 0x0 design.bit"
+                  design.mcs</code
+                >
+                to generate an MCS file for SPI flash programming. Note how the flash address map is
+                organized.
+              </li>
+            </ol>
+          </div>
+
+          <div class="tag-list">
+            <span class="tag">Bitstream</span>
+            <span class="tag">SRAM Configuration</span>
+            <span class="tag">SPI Flash</span>
+            <span class="tag">AES-256</span>
+            <span class="tag">Partial Reconfiguration</span>
+            <span class="tag">Configuration Frames</span>
+            <span class="tag">MODE Pins</span>
+            <span class="tag">eFUSE</span>
+            <span class="tag">MultiBoot</span>
+          </div>
+
+          <nav class="lesson-nav">
+            <a href="20-transceivers.html">&#8592; Transceivers</a>
+            <a href="22-configuration-process.html">Config Process &#8594;</a>
+          </nav>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-21';
+      const TOTAL = 25;
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+    </script>
+  </body>
+</html>

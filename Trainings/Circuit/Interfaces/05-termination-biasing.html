@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 5: Termination and fail-safe biasing for RS485/RS422 — 120 Ω end termination, reflections, fail-safe pull-up/pull-down bias resistors, idle-bus indeterminate state, with a live reflection animation and a bias calculator."
+    />
+    <title>05 · Termination &amp; Biasing | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/05-termination-biasing.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item active"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>05. Termination &amp; Biasing</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 05</span>
+                <span class="badge badge-gray">~45 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Termination &amp; Fail-Safe Biasing</h1>
+              <p class="subtitle">
+                Two small resistor networks separate a reliable RS485 bus from an intermittent one:
+                the 120 Ω terminators that kill reflections, and the fail-safe bias resistors that
+                keep the idle bus in a defined state. Watch reflections form and vanish, then size a
+                bias network yourself.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- SECTION 1: reflections -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>〰️ &nbsp;1. Why 120 Ω — Reflections, Live</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    A signal edge travelling down a twisted pair sees the cable's
+                    <strong>characteristic impedance</strong> (~120 Ω for typical RS485 cable). When
+                    it reaches the far end, any impedance <em>mismatch</em> reflects part of the
+                    energy back — ringing that can be misread as extra bits. A 120 Ω resistor at
+                    each end <strong>matches</strong> the line so the energy is absorbed instead of
+                    bounced.
+                  </p>
+                  <div class="sim-controls">
+                    <div class="slider-group" style="min-width: 280px">
+                      <div class="slider-label">
+                        <span>End termination resistance</span
+                        ><span class="slider-value" id="rtVal">120 Ω</span>
+                      </div>
+                      <input type="range" id="rt" min="0" max="100" value="50" />
+                    </div>
+                    <span style="font-size: 0.78rem; color: var(--text-muted)" id="rtNote"></span>
+                  </div>
+                  <div class="diagram-box">
+                    <canvas id="reflCanvas" width="880" height="220"></canvas>
+                    <div class="diagram-cap" id="reflCap">
+                      Matched at 120 Ω — the edge is absorbed cleanly, no ringing.
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    <strong>Where to place them:</strong> exactly one terminator at
+                    <em>each physical end</em> of the bus — not on every node. Two 120 Ω across the
+                    pair present ~60 Ω total DC load to the drivers, which is by design.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: fail-safe bias -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🪝 &nbsp;2. Fail-Safe Biasing — The Idle-Bus Problem</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    On a half-duplex bus, there are moments when <em>no</em> driver is enabled — the
+                    bus is idle. With only terminators, the differential voltage collapses toward 0
+                    V, which sits in the receiver's
+                    <strong>&plusmn;200 mV indeterminate zone</strong>. The receiver output then
+                    chatters randomly, and the UART sees phantom bytes.
+                  </p>
+                  <p class="lead">
+                    <strong>Fail-safe bias</strong> fixes this with a pull-up on the non-inverting
+                    line (B/D+) and a pull-down on the inverting line (A/D−). These gently force the
+                    idle bus to a valid <em>mark</em> (&gt; +200 mV), so an idle line reads as a
+                    clean logic 1.
+                  </p>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 620 220"
+                      width="100%"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="max-width: 600px"
+                    >
+                      <text
+                        x="310"
+                        y="18"
+                        text-anchor="middle"
+                        font-size="12"
+                        fill="var(--text-base)"
+                      >
+                        Fail-safe bias network
+                      </text>
+                      <!-- Vcc rail -->
+                      <line x1="60" y1="40" x2="560" y2="40" stroke="#fb923c" stroke-width="2" />
+                      <text x="30" y="44" font-size="11" fill="#fb923c">Vcc</text>
+                      <!-- GND rail -->
+                      <line
+                        x1="60"
+                        y1="200"
+                        x2="560"
+                        y2="200"
+                        stroke="var(--text-muted)"
+                        stroke-width="2"
+                      />
+                      <text x="30" y="204" font-size="11" fill="var(--text-muted)">GND</text>
+                      <!-- pull-up to B -->
+                      <rect
+                        x="180"
+                        y="70"
+                        width="20"
+                        height="46"
+                        fill="none"
+                        stroke="#22d3ee"
+                        stroke-width="1.5"
+                      />
+                      <line x1="190" y1="40" x2="190" y2="70" stroke="#22d3ee" stroke-width="2" />
+                      <line x1="190" y1="116" x2="190" y2="130" stroke="#22d3ee" stroke-width="2" />
+                      <text x="210" y="98" font-size="10" fill="#22d3ee">R_up</text>
+                      <!-- B line -->
+                      <line
+                        x1="120"
+                        y1="130"
+                        x2="500"
+                        y2="130"
+                        stroke="#22d3ee"
+                        stroke-width="2.5"
+                      />
+                      <text x="505" y="134" font-size="11" fill="#22d3ee">B (+)</text>
+                      <!-- termination -->
+                      <rect
+                        x="300"
+                        y="130"
+                        width="16"
+                        height="40"
+                        fill="none"
+                        stroke="var(--text-muted)"
+                        stroke-width="1.5"
+                      />
+                      <text x="322" y="155" font-size="10" fill="var(--text-muted)">120Ω</text>
+                      <!-- A line -->
+                      <line
+                        x1="120"
+                        y1="170"
+                        x2="500"
+                        y2="170"
+                        stroke="#a78bfa"
+                        stroke-width="2.5"
+                      />
+                      <text x="505" y="174" font-size="11" fill="#a78bfa">A (−)</text>
+                      <line
+                        x1="308"
+                        y1="130"
+                        x2="308"
+                        y2="170"
+                        stroke="var(--text-muted)"
+                        stroke-width="0"
+                      />
+                      <!-- pull-down from A -->
+                      <rect
+                        x="180"
+                        y="176"
+                        width="20"
+                        height="16"
+                        fill="none"
+                        stroke="#a78bfa"
+                        stroke-width="1.5"
+                      />
+                      <line x1="190" y1="170" x2="190" y2="176" stroke="#a78bfa" stroke-width="2" />
+                      <line x1="190" y1="192" x2="190" y2="200" stroke="#a78bfa" stroke-width="2" />
+                      <text x="210" y="190" font-size="10" fill="#a78bfa">R_dn</text>
+                    </svg>
+                    <div class="diagram-cap">
+                      Pull-up on B, pull-down on A, with the 120 Ω across the pair: idle bus is
+                      forced to a valid mark.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: bias calculator -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🧮 &nbsp;3. Bias Resistor Calculator</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    The bias resistors and both terminators form a divider from Vcc to GND. To
+                    guarantee a fail-safe mark, the idle differential voltage across the parallel
+                    termination must exceed the receiver threshold (use 200 mV; many designs target
+                    250&ndash;300 mV for margin). Enter your values:
+                  </p>
+                  <div class="calc-grid">
+                    <div class="calc-inputs">
+                      <div class="calc-field">
+                        <label for="vcc">Supply voltage Vcc (V)</label>
+                        <input type="number" id="vcc" value="5" step="0.1" />
+                      </div>
+                      <div class="calc-field">
+                        <label for="rbias">Each bias resistor R (Ω) — assume R_up = R_dn</label>
+                        <input type="number" id="rbias" value="560" step="10" />
+                      </div>
+                      <div class="calc-field">
+                        <label for="rterm">Effective termination across pair (Ω)</label>
+                        <input type="number" id="rterm" value="60" step="1" />
+                      </div>
+                    </div>
+                    <div class="calc-results">
+                      <div class="calc-result-item">
+                        <span class="calc-result-label">Idle differential voltage</span>
+                        <span class="calc-result-value" id="vdiff">—</span>
+                      </div>
+                      <div class="calc-result-item">
+                        <span class="calc-result-label">Fail-safe margin (need &gt; 200 mV)</span>
+                        <span class="calc-result-value" id="verdict">—</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="info-box">
+                    Model: the two bias resistors (2R total in series with the termination) drop Vcc
+                    across the effective termination R<sub>t</sub>. Idle V<sub>diff</sub> ≈ Vcc ·
+                    R<sub>t</sub> / (2R + R<sub>t</sub>). Smaller bias resistors give a stronger
+                    mark but load the bus more and raise idle current — a trade-off.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: RS232 note + failure table -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📋 &nbsp;4. When You Don't Need Termination — and Failure Modes</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    <strong>RS232 point-to-point links need no bus termination.</strong> The cable
+                    is short relative to the (slow) edge rate, so reflections settle long before
+                    they matter. Termination and biasing are a differential-bus concern.
+                  </p>
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Symptom</th>
+                        <th>Likely cause</th>
+                        <th>Fix</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Occasional glitches / extra bytes at high speed or long cable</td>
+                        <td>Missing or wrong termination → reflections</td>
+                        <td>120 Ω at each end</td>
+                      </tr>
+                      <tr>
+                        <td>Random garbage on an idle bus</td>
+                        <td>No fail-safe bias → indeterminate idle</td>
+                        <td>Add pull-up/pull-down bias</td>
+                      </tr>
+                      <tr>
+                        <td>No communication at all, no damage</td>
+                        <td>A/B swapped</td>
+                        <td>Reverse the pair (Module 3)</td>
+                      </tr>
+                      <tr>
+                        <td>Signal fine on scope but data corrupt</td>
+                        <td>Common-mode range exceeded</td>
+                        <td>Isolation / shared ground (Module 2 &amp; 8)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- QUIZ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;5. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">Answer to reveal instant feedback.</p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="margin-top: 1rem; font-weight: 700; color: var(--cyan); display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="04-esd-protection.html">← ESD Protection</a>
+                <a class="btn btn-primary" href="06-transceiver-selection.html"
+                  >Next: Transceiver Selection →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var open = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b) {
+          if (!b.classList.contains('collapsed')) {
+            open++;
+          }
+        });
+        var pct = Math.round((open / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+      function css(name, fb) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return v ? v.trim() : fb;
+      }
+
+      // Reflection animation
+      (function () {
+        var c = document.getElementById('reflCanvas');
+        var ctx = c.getContext('2d');
+        var rt = document.getElementById('rt');
+        var rtVal = document.getElementById('rtVal');
+        var rtNote = document.getElementById('rtNote');
+        var cap = document.getElementById('reflCap');
+        var t = 0;
+        var Z0 = 120;
+
+        function rval() {
+          // map slider 0..100 to 0..1000 Ω, but center 50 -> ~120
+          var s = parseInt(rt.value, 10);
+          if (s <= 50) {
+            return Math.round((s / 50) * 120);
+          }
+          return Math.round(120 + ((s - 50) / 50) * 880);
+        }
+
+        function draw() {
+          var R = rval();
+          rtVal.textContent = R + ' Ω';
+          // reflection coefficient
+          var gamma = (R - Z0) / (R + Z0);
+          if (R === 0) {
+            gamma = -1;
+          }
+          var W = c.width,
+            H = c.height,
+            mid = H / 2;
+          ctx.clearRect(0, 0, W, H);
+          ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+          ctx.beginPath();
+          ctx.moveTo(0, mid);
+          ctx.lineTo(W, mid);
+          ctx.stroke();
+          // incident pulse travels right, reflected travels left scaled by gamma
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#22d3ee';
+          ctx.beginPath();
+          for (var x = 0; x <= W; x++) {
+            var incident = pulse(x - (t % (W * 2)));
+            var refl = gamma * pulse(2 * W - x - (t % (W * 2)));
+            var v = incident + refl;
+            var y = mid - v * (H * 0.32);
+            if (x === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+          // far-end marker
+          ctx.strokeStyle = 'rgba(251,146,60,0.6)';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(W - 2, 20);
+          ctx.lineTo(W - 2, H - 20);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = css('--text-muted', '#94a3b8');
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText('driver', 6, 18);
+          ctx.fillText('far end (R)', W - 78, 18);
+
+          if (R >= 100 && R <= 140) {
+            cap.innerHTML =
+              'Matched near 120 Ω — the edge is absorbed cleanly, minimal reflection.';
+            cap.style.color = '#22d3ee';
+            rtNote.textContent = '≈ matched to 120 Ω line';
+          } else if (R < 100) {
+            cap.innerHTML =
+              '⚠ Under-terminated — a negative reflection bounces back (undershoot/ringing).';
+            cap.style.color = '#f87171';
+            rtNote.textContent = 'too low → reflections';
+          } else {
+            cap.innerHTML =
+              '⚠ Over-terminated / open — a positive reflection bounces back (overshoot/ringing).';
+            cap.style.color = '#f87171';
+            rtNote.textContent = 'too high → reflections';
+          }
+        }
+        function pulse(p) {
+          // a moving bump 60px wide
+          if (p < 0 || p > 120) {
+            return 0;
+          }
+          return Math.sin((p / 120) * Math.PI);
+        }
+        rt.addEventListener('input', draw);
+        function loop() {
+          t += 6;
+          draw();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
+
+      // Bias calculator
+      (function () {
+        var vcc = document.getElementById('vcc');
+        var rbias = document.getElementById('rbias');
+        var rterm = document.getElementById('rterm');
+        var vdiff = document.getElementById('vdiff');
+        var verdict = document.getElementById('verdict');
+        function calc() {
+          var V = parseFloat(vcc.value) || 0;
+          var R = parseFloat(rbias.value) || 0;
+          var Rt = parseFloat(rterm.value) || 0;
+          var vd = (V * Rt) / (2 * R + Rt);
+          vdiff.textContent = (vd * 1000).toFixed(0) + ' mV';
+          if (vd * 1000 >= 200) {
+            verdict.textContent = '✓ OK (' + (vd * 1000).toFixed(0) + ' mV)';
+            verdict.style.color = '#34d399';
+          } else {
+            verdict.textContent = '✗ Too weak — reduce R';
+            verdict.style.color = '#f87171';
+          }
+        }
+        [vcc, rbias, rterm].forEach(function (el) {
+          el.addEventListener('input', calc);
+        });
+        calc();
+      })();
+
+      // Quiz
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'Why is 120 Ω the standard termination value for RS485?',
+            options: [
+              'It limits driver current to a safe value',
+              'It matches the characteristic impedance of typical twisted-pair cable, absorbing reflections',
+              'It is the receiver input impedance',
+              'It sets the baud rate',
+            ],
+            correct: 1,
+            fb: 'Matching the ~120 Ω line impedance absorbs the incident energy so it does not reflect and ring.',
+          },
+          {
+            q: 'Where do the terminating resistors go?',
+            options: [
+              'On every node',
+              'One at each physical end of the bus',
+              'Only at the driver',
+              'Across the power rails',
+            ],
+            correct: 1,
+            fb: 'Exactly one terminator at each end of the bus — not on every node.',
+          },
+          {
+            q: 'What problem does fail-safe biasing solve?',
+            options: [
+              'Reflections at high speed',
+              'ESD strikes',
+              'An idle bus floating into the ±200 mV indeterminate zone, causing random bytes',
+              'Excessive power draw',
+            ],
+            correct: 2,
+            fb: 'Bias resistors force the idle bus to a valid mark so the receiver output does not chatter.',
+          },
+          {
+            q: 'Fail-safe bias uses which arrangement?',
+            options: [
+              'Pull-down on B, pull-up on A',
+              'Pull-up on the non-inverting line (B/D+), pull-down on the inverting line (A/D−)',
+              'Two pull-ups',
+              'A single resistor to ground',
+            ],
+            correct: 1,
+            fb: 'Pull-up on B and pull-down on A biases the idle differential to a defined positive (mark) level.',
+          },
+          {
+            q: 'Does an RS232 point-to-point link need bus termination?',
+            options: [
+              'Yes, 120 Ω each end',
+              'No — short single-ended link, reflections settle',
+              'Only above 9600 baud',
+              'Only with a DE-9',
+            ],
+            correct: 1,
+            fb: 'RS232 point-to-point does not need bus termination; it is a differential-bus concern.',
+          },
+        ];
+        var answered = 0,
+          correctCount = 0;
+        var wrap = document.getElementById('quiz');
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h = document.createElement('div');
+          h.className = 'quiz-question';
+          h.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var s = document.getElementById('quizScore');
+                s.style.display = 'block';
+                s.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="How to connect an FPGA power supply: input-to-point-of-load topologies, which rails may share a regulator, ferrite isolation rules, and a complete annotated Zynq-7000 power tree."
+    />
+    <title>Building the Power Tree | FPGA Power Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/03-power-tree.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item active">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Building the Power Tree</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 03</span>
+              <h1>How to Connect: Building the Power Tree</h1>
+              <p class="subtitle">
+                From one input connector to nine happy rails: cascade vs parallel, which rails may
+                legally share a regulator, and where a ferrite bead is enough isolation — all on one
+                worked example.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- topology -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Topology: input → intermediate → point-of-load</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  With a 12 V (or 24 V) input, don't buck every rail straight from the input — duty
+                  cycles get tiny and efficiency suffers. The standard pattern is an
+                  <strong>intermediate bus</strong> (5 V or 3.3 V) feeding point-of-load (PoL) bucks
+                  and LDOs:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Parallel from input:</strong> fine for 12 V→3.3 V and 12 V→1.0 V
+                    synchronous bucks with reasonable duty cycles.
+                  </li>
+                  <li>
+                    <strong>Cascade:</strong> 12 V→1.8 V→LDOs for analog rails; watch that the
+                    intermediate rail's current includes everything downstream.
+                  </li>
+                  <li>
+                    <strong>Sharing with companions:</strong> DDR VDDQ can share the FPGA's matching
+                    VCCO bank rail; clock chips can share VCCAUX's 1.8 V — but transceiver rails
+                    share with nobody.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- merging -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Rail-merging rules</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Merge candidate</th>
+                        <th>Verdict</th>
+                        <th>Condition</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>VCCINT + VCCBRAM</td>
+                        <td class="ok">Usually yes</td>
+                        <td>Same voltage; check the vendor's "supply consolidation" table</td>
+                      </tr>
+                      <tr>
+                        <td>VCCAUX + VCCADC</td>
+                        <td>Often yes</td>
+                        <td>Through a ferrite + local decoupling for the ADC side</td>
+                      </tr>
+                      <tr>
+                        <td>VCCO banks at same voltage</td>
+                        <td>Yes</td>
+                        <td>Unless one bank is a noisy switching interface next to a quiet one</td>
+                      </tr>
+                      <tr>
+                        <td>VCCINT + VMGTAVCC (same 1.0 V!)</td>
+                        <td><strong>No</strong></td>
+                        <td>
+                          Transceiver jitter budget dies from core noise — separate regulator/LDO
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>VMGTAVCC + VMGTAVTT</td>
+                        <td>No</td>
+                        <td>Different voltages and both noise-critical; dedicated LDOs</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  <strong>Ferrite bead isolation is not free:</strong> a bead + local caps forms a
+                  resonant LC. Used on quiet, low-current analog rails it's fine; on a rail with
+                  transient load steps it can <em>amplify</em> noise at resonance. Damp it (small
+                  series R or lossy bead) and never put one in a high-current core path — the DC
+                  drop breaks your tolerance stack.
+                </div>
+              </div>
+
+              <!-- worked tree -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Worked example: Zynq-7020 power tree</h3></div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 700 320"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Complete power tree: 12 volt input feeds three bucks producing 1.0, 1.8, and 3.3 volts plus a 1.5 volt DDR buck; the 1.8 volt rail feeds two LDOs for transceiver rails; sequencing order labels 1 to 4 shown."
+                  >
+                    <!-- input -->
+                    <rect
+                      x="4"
+                      y="130"
+                      width="80"
+                      height="52"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--text-muted)"
+                    />
+                    <text
+                      x="44"
+                      y="152"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="11"
+                      font-weight="800"
+                    >
+                      12 V
+                    </text>
+                    <text
+                      x="44"
+                      y="168"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8"
+                    >
+                      input
+                    </text>
+                    <!-- vertical distribution -->
+                    <line
+                      x1="84"
+                      y1="156"
+                      x2="120"
+                      y2="156"
+                      stroke="var(--text-muted)"
+                      stroke-width="2.5"
+                    />
+                    <line
+                      x1="120"
+                      y1="40"
+                      x2="120"
+                      y2="280"
+                      stroke="var(--text-muted)"
+                      stroke-width="2.5"
+                    />
+                    <!-- buck 1: VCCINT -->
+                    <line
+                      x1="120"
+                      y1="52"
+                      x2="160"
+                      y2="52"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="160"
+                      y="30"
+                      width="120"
+                      height="44"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="220"
+                      y="48"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      Buck 1.0 V / 4 A
+                    </text>
+                    <text
+                      x="220"
+                      y="63"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8"
+                    >
+                      fast loop + remote sense
+                    </text>
+                    <line
+                      x1="280"
+                      y1="52"
+                      x2="470"
+                      y2="52"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="330"
+                      y="44"
+                      fill="var(--danger,#f87171)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      VCCINT + VCCBRAM ①
+                    </text>
+                    <!-- buck 2: 1.8 -->
+                    <line
+                      x1="120"
+                      y1="120"
+                      x2="160"
+                      y2="120"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="160"
+                      y="98"
+                      width="120"
+                      height="44"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="220"
+                      y="116"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      Buck 1.8 V / 2.5 A
+                    </text>
+                    <text
+                      x="220"
+                      y="131"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8"
+                    >
+                      aux + LDO feed
+                    </text>
+                    <line
+                      x1="280"
+                      y1="120"
+                      x2="470"
+                      y2="120"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="315"
+                      y="112"
+                      fill="var(--warning,#fb923c)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      VCCAUX + VCCADC ②
+                    </text>
+                    <!-- LDOs off 1.8 -->
+                    <line
+                      x1="340"
+                      y1="120"
+                      x2="340"
+                      y2="176"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="300"
+                      y="176"
+                      width="90"
+                      height="38"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="#a78bfa"
+                    />
+                    <text
+                      x="345"
+                      y="192"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      LDO 1.0 V LN
+                    </text>
+                    <text
+                      x="345"
+                      y="205"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7.5"
+                    >
+                      &lt;100 µV RMS
+                    </text>
+                    <line x1="390" y1="195" x2="470" y2="195" stroke="#a78bfa" stroke-width="2.5" />
+                    <text x="398" y="188" fill="#a78bfa" font-size="9" font-weight="700">
+                      VMGTAVCC ④
+                    </text>
+                    <line
+                      x1="340"
+                      y1="214"
+                      x2="340"
+                      y2="238"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="300"
+                      y="238"
+                      width="90"
+                      height="38"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="#a78bfa"
+                    />
+                    <text
+                      x="345"
+                      y="254"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      LDO 1.2 V LN
+                    </text>
+                    <text
+                      x="345"
+                      y="267"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7.5"
+                    >
+                      termination
+                    </text>
+                    <line x1="390" y1="257" x2="470" y2="257" stroke="#a78bfa" stroke-width="2.5" />
+                    <text x="398" y="250" fill="#a78bfa" font-size="9" font-weight="700">
+                      VMGTAVTT ④
+                    </text>
+                    <!-- buck 3: 1.5 DDR -->
+                    <line
+                      x1="120"
+                      y1="160"
+                      x2="160"
+                      y2="160"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="160"
+                      y="150"
+                      width="120"
+                      height="20"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="220"
+                      y="164"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      Buck 1.5 V / 2 A
+                    </text>
+                    <line
+                      x1="280"
+                      y1="160"
+                      x2="470"
+                      y2="160"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="300"
+                      y="153"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      VCCO (DDR3) + VDDQ ③
+                    </text>
+                    <!-- buck 4: 3.3 -->
+                    <line
+                      x1="120"
+                      y1="280"
+                      x2="160"
+                      y2="280"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="160"
+                      y="270"
+                      width="120"
+                      height="20"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="220"
+                      y="284"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      Buck 3.3 V / 2 A
+                    </text>
+                    <line
+                      x1="280"
+                      y1="280"
+                      x2="470"
+                      y2="280"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="330"
+                      y="273"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      VCCO (3.3 V banks) ③
+                    </text>
+                    <!-- FPGA -->
+                    <rect
+                      x="470"
+                      y="28"
+                      width="150"
+                      height="266"
+                      rx="12"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="545"
+                      y="60"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="13"
+                      font-weight="800"
+                    >
+                      Zynq-7020
+                    </text>
+                    <text
+                      x="545"
+                      y="78"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8.5"
+                    >
+                      XC7Z020-CLG484
+                    </text>
+                    <g font-size="8" fill="var(--text-sub)" text-anchor="middle">
+                      <text x="545" y="110">① core first</text>
+                      <text x="545" y="126">② aux second</text>
+                      <text x="545" y="142">③ I/O third</text>
+                      <text x="545" y="158">④ MGT rails last</text>
+                      <text x="545" y="186">power-down:</text>
+                      <text x="545" y="200">reverse order</text>
+                    </g>
+                  </svg>
+                  <p class="diagram-caption">
+                    Five regulators, one supervisor (not shown), circled numbers = power-up order
+                    (Module 04). Transceiver rails come off the 1.8 V intermediate through low-noise
+                    LDOs — never off VCCINT.
+                  </p>
+                </div>
+              </div>
+
+              <!-- connection notes -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Connection rules that save respins</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Every FPGA power ball connects.</strong> No floating VCCO on "unused"
+                    banks — tie unused banks per the datasheet (usually to a valid rail) or
+                    configuration may fail.
+                  </li>
+                  <li>
+                    <strong>Remote sense</strong> from the VCCINT regulator to a sense point under
+                    the FPGA; route as a quiet Kelvin pair (Module 06).
+                  </li>
+                  <li>
+                    <strong>PGOOD outputs</strong> are open-drain — pull them up to a rail that
+                    exists <em>before</em> they're read (a classic chicken-and-egg bug in sequence
+                    chains).
+                  </li>
+                  <li>
+                    <strong>Enable-pin thresholds:</strong> check EN V<sub>IH</sub> against the
+                    driving rail; a 1.0 V PGOOD can't reliably enable a buck whose EN needs 1.2 V.
+                  </li>
+                  <li>
+                    <strong>VBATT:</strong> if unused, tie per datasheet (usually GND or VCCAUX via
+                    resistor) — don't leave it floating.
+                  </li>
+                  <li>
+                    Fit <strong>0 Ω links</strong> (or current-loop pads) in each rail for bring-up
+                    current measurement — Module 07 will thank you.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>Intermediate-bus topology keeps duty cycles and efficiency sane.</li>
+                  <li>
+                    Merge rails only where the vendor's consolidation table says you may;
+                    transceiver rails never merge.
+                  </li>
+                  <li>Ferrite isolation needs damping and belongs only on quiet analog rails.</li>
+                  <li>
+                    The power tree diagram (with sequence numbers) is a deliverable — put it on
+                    schematic page 1.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="02-component-selection.html"
+                  >← Selecting Components</a
+                >
+                <a class="btn btn-primary" href="04-sequencing.html">Next: Power Sequencing →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

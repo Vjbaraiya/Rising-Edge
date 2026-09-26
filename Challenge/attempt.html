@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta name="description" content="Weekly Hardware Design Challenge — timed attempt." />
+    <title>Attempt — Week 34 | Weekly Hardware Design Challenge</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Challenge/attempt.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="challenge.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      id="MathJax-script"
+      async
+    ></script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <section class="section" style="padding-top: 1.25rem">
+      <div class="container" style="max-width: 820px">
+        <!-- sticky runner bar -->
+        <div class="wc-runner-bar">
+          <div>
+            <h1
+              style="
+                font-size: 0.72rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-weight: 700;
+              "
+              id="runnerTitle"
+            >
+              Weekly Challenge
+            </h1>
+            <div style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px">
+              <span id="answeredCount">0</span>/<span id="totalCount">0</span> answered ·
+              <span style="color: var(--success, #10b981)">Autosaved ✓</span>
+            </div>
+          </div>
+          <div style="text-align: right">
+            <div
+              style="
+                font-size: 0.62rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                font-weight: 700;
+              "
+            >
+              Closes in
+            </div>
+            <div class="wc-timer" id="timer">—</div>
+          </div>
+        </div>
+
+        <!-- question nav dots -->
+        <div class="wc-qnav" id="qnav" style="margin-bottom: 1.25rem"></div>
+
+        <!-- question -->
+        <div class="wc-question" id="questionCard"></div>
+
+        <!-- controls -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.25rem;
+            gap: 10px;
+            flex-wrap: wrap;
+          "
+        >
+          <button class="btn btn-secondary" id="prevBtn">&larr; Previous</button>
+          <div style="display: flex; gap: 10px">
+            <button class="btn btn-secondary" id="nextBtn">Next &rarr;</button>
+            <button class="btn btn-primary" id="submitBtn">Submit challenge</button>
+          </div>
+        </div>
+
+        <p
+          style="font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; text-align: center"
+        >
+          One scored attempt per week. Question and option order are randomized. Answer keys are
+          revealed only after you submit.
+        </p>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script src="challenge-api.js"></script>
+    <script>
+      // Questions are loaded from the live challenge via the API (see bootstrap()).
+      var apiMode = false;
+      var attemptId = null;
+      var serverQ = []; // parallel to QUESTIONS: server question records (with ids)
+      var QUESTIONS = []; // loaded from the live challenge via the API
+      var challengeTitle = '';
+      var current = 0;
+      var answers = {}; // idx -> value (number for mcq, array for multi, string for numeric)
+
+      function renderNav() {
+        var nav = document.getElementById('qnav');
+        nav.innerHTML = QUESTIONS.map(function (_, i) {
+          var cls = 'wc-qdot';
+          if (i === current) cls += ' current';
+          else if (
+            answers[i] !== undefined &&
+            answers[i] !== '' &&
+            !(Array.isArray(answers[i]) && answers[i].length === 0)
+          )
+            cls += ' answered';
+          return '<div class="' + cls + '" data-i="' + i + '">' + (i + 1) + '</div>';
+        }).join('');
+        nav.querySelectorAll('.wc-qdot').forEach(function (d) {
+          d.addEventListener('click', function () {
+            current = parseInt(d.getAttribute('data-i'));
+            renderQuestion();
+          });
+        });
+        var count = Object.keys(answers).filter(function (k) {
+          var v = answers[k];
+          return v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0);
+        }).length;
+        document.getElementById('answeredCount').textContent = count;
+        document.getElementById('totalCount').textContent = QUESTIONS.length;
+      }
+
+      function typeLabel(t) {
+        return {
+          mcq: 'Single choice',
+          multi: 'Select all that apply',
+          numeric: 'Numeric answer',
+          mathjax: 'Numeric answer',
+          svg: 'Single choice',
+        }[t];
+      }
+
+      function renderQuestion() {
+        var q = QUESTIONS[current];
+        var card = document.getElementById('questionCard');
+        var html =
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<span class="badge badge-cyan">Question ' +
+          (current + 1) +
+          ' of ' +
+          QUESTIONS.length +
+          '</span>' +
+          '<span class="badge badge-gray">' +
+          typeLabel(q.type) +
+          '</span></div>';
+        html += '<div class="wc-q-prompt">' + q.prompt + '</div>';
+        if (q.image) {
+          html +=
+            '<img src="' +
+            q.image +
+            '" alt="Question image" style="max-width:100%;border:1px solid var(--border);border-radius:10px;margin-bottom:14px;display:block" />';
+        }
+
+        if (q.type === 'svg') {
+          html +=
+            '<svg viewBox="0 0 420 90" style="width:100%;max-width:420px;height:auto;margin-bottom:14px" role="img" aria-label="trace and reference plane cross section">' +
+            '<rect x="10" y="18" width="400" height="8" rx="2" fill="#f59e0b"/>' +
+            '<text x="14" y="14" fill="#9aa3b5" font-size="9" font-family="Inter,sans-serif">signal trace</text>' +
+            '<rect x="10" y="50" width="180" height="10" fill="#22c55e"/>' +
+            '<rect x="230" y="50" width="180" height="10" fill="#22c55e"/>' +
+            '<text x="14" y="76" fill="#9aa3b5" font-size="9" font-family="Inter,sans-serif">reference plane (with a gap)</text>' +
+            '<path d="M120 26 Q120 50 90 50" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>' +
+            '<text x="196" y="58" fill="#ef4444" font-size="9" font-family="Inter,sans-serif">gap</text></svg>';
+        }
+
+        if (q.type === 'numeric' || q.type === 'mathjax') {
+          html +=
+            '<input type="number" class="wc-num-input" id="numInput" placeholder="Enter value" ' +
+            'value="' +
+            (answers[current] !== undefined ? answers[current] : '') +
+            '" /> ' +
+            '<span style="color:var(--text-muted);font-size:0.85rem;margin-left:8px">' +
+            (q.unit || '') +
+            '</span>';
+        } else {
+          var multi = q.type === 'multi';
+          html += q.opts
+            .map(function (opt, oi) {
+              var sel = false;
+              if (multi)
+                sel = Array.isArray(answers[current]) && answers[current].indexOf(oi) !== -1;
+              else sel = answers[current] === oi;
+              var key = multi ? '' : String.fromCharCode(65 + oi);
+              return (
+                '<div class="wc-opt' +
+                (multi ? ' multi' : '') +
+                (sel ? ' selected' : '') +
+                '" data-oi="' +
+                oi +
+                '">' +
+                '<div class="wc-opt-key">' +
+                (multi ? (sel ? '✓' : '') : key) +
+                '</div>' +
+                '<div>' +
+                opt +
+                '</div></div>'
+              );
+            })
+            .join('');
+        }
+        card.innerHTML = html;
+
+        if (q.type === 'numeric' || q.type === 'mathjax') {
+          document.getElementById('numInput').addEventListener('input', function () {
+            answers[current] = this.value;
+            renderNav();
+            pushAutosave(current);
+          });
+          if (q.type === 'mathjax' && window.MathJax && MathJax.typesetPromise)
+            MathJax.typesetPromise([card]);
+        } else {
+          card.querySelectorAll('.wc-opt').forEach(function (o) {
+            o.addEventListener('click', function () {
+              var oi = parseInt(o.getAttribute('data-oi'));
+              if (q.type === 'multi') {
+                if (!Array.isArray(answers[current])) answers[current] = [];
+                var pos = answers[current].indexOf(oi);
+                if (pos === -1) answers[current].push(oi);
+                else answers[current].splice(pos, 1);
+              } else {
+                answers[current] = oi;
+              }
+              renderQuestion();
+              renderNav();
+              pushAutosave(current);
+            });
+          });
+        }
+
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('prevBtn').style.opacity = current === 0 ? '0.4' : '1';
+        document.getElementById('nextBtn').style.display =
+          current === QUESTIONS.length - 1 ? 'none' : 'inline-flex';
+        renderNav();
+      }
+
+      document.getElementById('prevBtn').addEventListener('click', function () {
+        if (current > 0) {
+          current--;
+          renderQuestion();
+        }
+      });
+      document.getElementById('nextBtn').addEventListener('click', function () {
+        if (current < QUESTIONS.length - 1) {
+          current++;
+          renderQuestion();
+        }
+      });
+      // Build the server response shape for a given question index.
+      function buildResponse(idx) {
+        var q = QUESTIONS[idx];
+        var v = answers[idx];
+        if (q.type === 'multi') return { choices: Array.isArray(v) ? v : [] };
+        if (q.type === 'numeric' || q.type === 'mathjax') return { value: v };
+        return { choice: v }; // mcq / svg / truefalse
+      }
+      function pushAutosave(idx) {
+        if (!apiMode || !attemptId || !serverQ[idx]) return;
+        WHDC.autosave(attemptId, serverQ[idx].id, buildResponse(idx)).catch(function () {});
+      }
+
+      document.getElementById('submitBtn').addEventListener('click', function () {
+        var count = Object.keys(answers).length;
+        if (
+          count < QUESTIONS.length &&
+          !confirm(
+            'You have answered ' + count + ' of ' + QUESTIONS.length + ' questions. Submit anyway?'
+          )
+        )
+          return;
+        if (apiMode && attemptId) {
+          var payload = QUESTIONS.map(function (q, i) {
+            return { questionId: serverQ[i].id, response: buildResponse(i) };
+          });
+          document.getElementById('submitBtn').disabled = true;
+          WHDC.submit(attemptId, payload)
+            .then(function (res) {
+              try {
+                sessionStorage.setItem('whdc_attempt', res.attemptId || attemptId);
+                res.challengeTitle = challengeTitle;
+                sessionStorage.setItem('whdc_result', JSON.stringify(res));
+              } catch (e) {}
+              window.location.href = 'results.html';
+            })
+            .catch(function () {
+              window.location.href = 'results.html';
+            });
+        } else {
+          window.location.href = 'results.html';
+        }
+      });
+
+      // ── Load the live challenge from the API (no mock data) ──
+      function mapServerQuestion(sq) {
+        var opts = Array.isArray(sq.options)
+          ? sq.options.map(function (o) {
+              return typeof o === 'string' ? o : o.text;
+            })
+          : [];
+        return {
+          type: sq.type,
+          prompt: sq.prompt,
+          opts: opts,
+          unit: sq.assets && sq.assets.unit ? sq.assets.unit : undefined,
+          image: sq.assets && sq.assets.image ? sq.assets.image : undefined,
+        };
+      }
+      function showEmpty(title, message, cta) {
+        // Hide the runner chrome and show a message in place of the question.
+        var nav = document.getElementById('qnav');
+        if (nav) nav.style.display = 'none';
+        ['prevBtn', 'nextBtn', 'submitBtn'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        var t = document.getElementById('timer');
+        if (t) t.textContent = '—';
+        document.getElementById('questionCard').innerHTML =
+          '<div style="text-align:center;padding:2rem 1rem">' +
+          '<h3 style="color:var(--text-base);margin-bottom:8px">' +
+          title +
+          '</h3>' +
+          '<p style="color:var(--text-sub);font-size:0.9rem;line-height:1.6;max-width:460px;margin:0 auto 16px">' +
+          message +
+          '</p>' +
+          (cta || '') +
+          '</div>';
+      }
+      function bootstrap() {
+        if (!window.WHDC || !WHDC.loggedIn()) {
+          showEmpty(
+            'Sign in to take the challenge',
+            'The weekly challenge is available to signed-in members. Log in to start your attempt.',
+            '<a href="../Login-pages/login.html" class="btn btn-primary">Log in</a> ' +
+              '<a href="index.html" class="btn btn-secondary">Back to hub</a>'
+          );
+          return;
+        }
+        var category = '';
+        try {
+          category = new URLSearchParams(window.location.search).get('category') || '';
+        } catch (e) {}
+        WHDC.current(category)
+          .then(function (ch) {
+            if (!ch || !ch.id) {
+              showEmpty(
+                'No live challenge right now',
+                'There is no challenge running this week for this track. Check back soon, or explore past challenges from the hub.',
+                '<a href="index.html" class="btn btn-primary">Back to hub</a>'
+              );
+              return;
+            }
+            challengeTitle = (ch.week_number ? 'Week ' + ch.week_number + ' · ' : '') + ch.title;
+            document.title = 'Attempt — ' + ch.title + ' | WHDC';
+            var rt = document.getElementById('runnerTitle');
+            if (rt) rt.textContent = challengeTitle;
+            return WHDC.startAttempt(ch.id, ch.status !== 'live')
+              .then(function (data) {
+                if (!data.questions || !data.questions.length) {
+                  showEmpty(
+                    'This challenge has no questions yet',
+                    'The challenge is being prepared. Please check back shortly.',
+                    '<a href="index.html" class="btn btn-primary">Back to hub</a>'
+                  );
+                  return;
+                }
+                serverQ = data.questions;
+                QUESTIONS = data.questions.map(mapServerQuestion);
+                attemptId = data.attempt.id;
+                apiMode = true;
+                (data.answers || []).forEach(function (a) {
+                  var idx = serverQ.findIndex(function (q) {
+                    return q.id === a.question_id;
+                  });
+                  if (idx < 0 || !a.response) return;
+                  var r = a.response;
+                  if (r.choices) answers[idx] = r.choices;
+                  else if (r.value !== undefined) answers[idx] = r.value;
+                  else if (r.choice !== undefined) answers[idx] = r.choice;
+                });
+                current = 0;
+                renderQuestion();
+                startTimer(data.attempt.deadline_at);
+              })
+              .catch(function (e) {
+                var msg = (e && e.message) || '';
+                if (msg.toLowerCase().indexOf('already') !== -1) {
+                  showEmpty(
+                    'You’ve already completed this challenge',
+                    'Each challenge allows one scored attempt. View your results or the leaderboard.',
+                    '<a href="results.html" class="btn btn-primary">View results</a> ' +
+                      '<a href="leaderboard.html" class="btn btn-secondary">Leaderboard</a>'
+                  );
+                } else {
+                  showEmpty(
+                    'Could not start the challenge',
+                    'Something went wrong loading this challenge. Please try again shortly.',
+                    '<a href="index.html" class="btn btn-primary">Back to hub</a>'
+                  );
+                }
+              });
+          })
+          .catch(function () {
+            showEmpty(
+              'Challenge unavailable',
+              'We could not reach the challenge service. Please try again shortly.',
+              '<a href="index.html" class="btn btn-primary">Back to hub</a>'
+            );
+          });
+      }
+      bootstrap();
+
+      // ---- countdown to the challenge's close date (server-authoritative) ----
+      // Challenges no longer carry a fixed per-attempt time limit — an
+      // attempt stays open to work on until the challenge itself closes.
+      // Practice attempts (on non-live challenges) get no deadline at all.
+      var timerEl = document.getElementById('timer');
+      function fmtT(s) {
+        var d = Math.floor(s / 86400);
+        var h = Math.floor((s % 86400) / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        var sec = s % 60;
+        if (d > 0) return d + 'd ' + h + 'h';
+        if (h > 0) return h + 'h ' + (m < 10 ? '0' + m : m) + 'm';
+        return m + ':' + (sec < 10 ? '0' + sec : sec);
+      }
+      function startTimer(deadlineIso) {
+        if (!deadlineIso) {
+          timerEl.textContent = 'No limit';
+          var label = timerEl.previousElementSibling;
+          if (label) label.textContent = 'Practice mode';
+          return;
+        }
+        var deadline = new Date(deadlineIso).getTime();
+        function tick() {
+          var remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+          if (remaining <= 0) {
+            timerEl.textContent = 'Closed';
+            document.getElementById('submitBtn').click();
+            return;
+          }
+          timerEl.textContent = fmtT(remaining);
+          timerEl.classList.toggle('warn', remaining <= 300 && remaining > 60);
+          timerEl.classList.toggle('crit', remaining <= 60);
+          setTimeout(tick, 1000);
+        }
+        tick();
+      }
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

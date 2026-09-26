@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 6 — Common-mode chokes and filtering for EMC: CM vs DM noise, choosing and placing CM chokes, pi/T/L line filters, feedthrough/Y-caps and safety, ferrite beads, and measuring real insertion loss."
+    />
+    <title>
+      06 · Common-Mode Chokes &amp; Filtering | EMC Pre-Compliance | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Pre-Comp/06-chokes-and-filtering.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .cmdm-tabs {
+        display: flex;
+        gap: 6px;
+        margin: 1rem 0 0.75rem;
+      }
+      .cmdm-tab {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .cmdm-tab.active {
+        border-color: var(--cyan);
+        color: var(--cyan);
+        background: rgba(34, 211, 238, 0.08);
+      }
+      .cmdm-panel {
+        display: none;
+      }
+      .cmdm-panel.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >EMC Pre-Compliance Testing &amp; Debugging</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-why-pre-compliance.html" class="module-item">01. Why Pre-Compliance</a>
+          <a href="02-building-a-bench.html" class="module-item"
+            >02. Building an Affordable Bench</a
+          >
+          <a href="03-measurement-technique.html" class="module-item"
+            >03. Measurement Technique &amp; Toolkit</a
+          >
+          <a href="04-spectrum-signatures.html" class="module-item">04. Reading the Spectrum</a>
+          <a href="05-fixing-at-the-source.html" class="module-item"
+            >05. Fixing at the Source (PCB/IC)</a
+          >
+          <a href="06-chokes-and-filtering.html" class="module-item active"
+            >06. Common-Mode Chokes &amp; Filtering</a
+          >
+          <a href="07-shielding.html" class="module-item">07. Shielding &amp; Enclosures</a>
+          <a href="08-cables-and-grounding.html" class="module-item"
+            >08. Cables, Connectors &amp; Grounding</a
+          >
+          <a href="09-immunity-debug.html" class="module-item"
+            >09. Immunity Pre-Compliance &amp; Debug</a
+          >
+          <a href="10-methodology-and-cases.html" class="module-item"
+            >10. Debug Methodology + Case Studies</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">EMC Pre-Compliance</a><span>/</span>
+            <span>06. Common-Mode Chokes &amp; Filtering</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">EMI/EMC Academy</span>
+                <span class="badge badge-gray">~35 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Common-Mode Chokes &amp; Filtering</h1>
+              <p class="subtitle">
+                When the source is as quiet as it'll get, filtering removes the rest. The key
+                insight: most EMI is <em>common-mode</em>, so the hero component is the common-mode
+                choke — which passes your signal untouched while blocking the noise riding on both
+                conductors.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <div class="callout" style="margin-bottom: 1.5rem">
+                <strong>Learning objectives.</strong> Distinguish common-mode from differential-mode
+                noise; select and place a CM choke; recognize π/T/L filter topologies and Y-caps
+                (with safety); use ferrite beads correctly; and measure a filter's real insertion
+                loss on the bench.
+              </div>
+
+              <!-- SECTION 1 : CM vs DM tabs -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="s1">
+                  <span>↔️ &nbsp;1. Common-Mode vs Differential-Mode (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body open" id="s1">
+                  <p class="lead">
+                    Noise on a two-wire interface comes in two flavors. You must know which one you
+                    have, because the cure is different.
+                  </p>
+                  <div class="cmdm-tabs" id="cmdmTabs">
+                    <button class="cmdm-tab active" data-cmdm="dm">Differential-mode</button>
+                    <button class="cmdm-tab" data-cmdm="cm">Common-mode</button>
+                  </div>
+                  <div class="cmdm-panel active" id="dm">
+                    <div class="info-box">
+                      <strong>Differential-mode (DM).</strong> Current flows out on one conductor
+                      and back on the other — equal and opposite. It's the intended signal path; DM
+                      noise is usually your own supply ripple. Cured by DM filtering (X-caps, series
+                      inductors). Radiates relatively little because the two currents cancel.
+                    </div>
+                  </div>
+                  <div class="cmdm-panel" id="cm">
+                    <div class="info-box">
+                      <strong>Common-mode (CM).</strong> Noise current flows the
+                      <em>same direction</em> on both conductors, returning through
+                      ground/chassis/free space. It's the main cause of radiated failures because
+                      the currents <em>add</em> and the cable becomes an antenna. Cured by the CM
+                      choke and Y-caps to chassis.
+                    </div>
+                  </div>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 600 150"
+                      width="100%"
+                      style="max-width: 600px"
+                      role="img"
+                      aria-label="Differential-mode currents oppose; common-mode currents add"
+                    >
+                      <text
+                        x="150"
+                        y="20"
+                        text-anchor="middle"
+                        font-size="12"
+                        fill="currentColor"
+                        font-weight="700"
+                      >
+                        DM (oppose → cancel)
+                      </text>
+                      <line
+                        x1="60"
+                        y1="50"
+                        x2="240"
+                        y2="50"
+                        stroke="#22c55e"
+                        stroke-width="3"
+                        marker-end="url(#a1)"
+                      />
+                      <line
+                        x1="240"
+                        y1="80"
+                        x2="60"
+                        y2="80"
+                        stroke="#22c55e"
+                        stroke-width="3"
+                        marker-end="url(#a1)"
+                      />
+                      <text
+                        x="450"
+                        y="20"
+                        text-anchor="middle"
+                        font-size="12"
+                        fill="currentColor"
+                        font-weight="700"
+                      >
+                        CM (same dir → add)
+                      </text>
+                      <line
+                        x1="360"
+                        y1="50"
+                        x2="540"
+                        y2="50"
+                        stroke="#ef4444"
+                        stroke-width="3"
+                        marker-end="url(#a2)"
+                      />
+                      <line
+                        x1="360"
+                        y1="80"
+                        x2="540"
+                        y2="80"
+                        stroke="#ef4444"
+                        stroke-width="3"
+                        marker-end="url(#a2)"
+                      />
+                      <text x="450" y="115" text-anchor="middle" font-size="10" fill="#ef4444">
+                        returns via ground/free space → radiates
+                      </text>
+                      <defs>
+                        <marker
+                          id="a1"
+                          markerWidth="8"
+                          markerHeight="8"
+                          refX="6"
+                          refY="3"
+                          orient="auto"
+                        >
+                          <path d="M0 0 L6 3 L0 6 z" fill="#22c55e" />
+                        </marker>
+                        <marker
+                          id="a2"
+                          markerWidth="8"
+                          markerHeight="8"
+                          refX="6"
+                          refY="3"
+                          orient="auto"
+                        >
+                          <path d="M0 0 L6 3 L0 6 z" fill="#ef4444" />
+                        </marker>
+                      </defs>
+                    </svg>
+                    <div class="diagram-cap">
+                      A CM choke presents high impedance to the red (common) currents but near-zero
+                      to the green (differential) signal.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2 : CM choke impedance chart -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s2">
+                  <span>📈 &nbsp;2. CM Choke Impedance vs Frequency (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s2">
+                  <p class="lead">
+                    A CM choke is not a perfect inductor — it has a self-resonant peak, after which
+                    parasitic capacitance takes over and impedance falls. Choose a part whose
+                    impedance peak sits at <em>your</em> problem frequency. Drag the slider to move
+                    the peak.
+                  </p>
+                  <div class="calc-wrap">
+                    <label
+                      for="peakFreq"
+                      style="
+                        display: block;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        color: var(--text-sub);
+                        margin-bottom: 6px;
+                      "
+                    >
+                      Choke impedance peak:
+                      <span id="peakVal" style="color: var(--cyan); font-weight: 800">100</span> MHz
+                    </label>
+                    <input
+                      type="range"
+                      id="peakFreq"
+                      min="30"
+                      max="300"
+                      value="100"
+                      step="5"
+                      style="width: 100%; max-width: 360px"
+                    />
+                  </div>
+                  <div id="chokePlot" style="width: 100%; height: 300px"></div>
+                  <div class="diagram-cap">
+                    Illustrative |Z| curve. Match the peak to the emission you measured in Module 4.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3 : filters + ferrites -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s3">
+                  <span>🔌 &nbsp;3. Line Filters, Y-Caps &amp; Ferrite Beads</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s3">
+                  <p class="lead">
+                    Line filters combine components into <strong>π, T, or L</strong> topologies. The
+                    rule of thumb: face a <em>high</em> source/load impedance with a shunt
+                    capacitor, and a <em>low</em> impedance with a series inductor. A π filter
+                    (C–L–C) suits high-impedance environments on both sides; an L filter suits a
+                    high/low pairing.
+                  </p>
+                  <div class="two-col">
+                    <div class="info-box">
+                      <strong>Y-caps (line/neutral → chassis)</strong> shunt CM noise to ground.
+                      They are <strong>safety-critical</strong>: use only certified Y-rated
+                      capacitors and respect leakage-current limits. Never substitute an ordinary
+                      cap here.
+                    </div>
+                    <div class="warning-box">
+                      <strong>Ferrite beads — common mistakes:</strong> using one on a
+                      high-DC-current rail (it saturates and does nothing), or on a signal that
+                      needs the bandwidth (it slows the edge and breaks SI). Pick the bead's
+                      impedance <em>at the noise frequency</em>, not its "value."
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    A ferrite over a whole cable is a snap-on CM choke — quick to try on the bench
+                    with a current probe. If the peak drops, design in a proper CM choke; if it
+                    doesn't, the emission isn't CM current on that cable.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4 : filter-corner calc + quiz -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s4">
+                  <span>🧮 &nbsp;4. Filter-Corner Calculator</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s4">
+                  <p class="lead">
+                    For a simple LC low-pass, the corner is <em>f<sub>c</sub> = 1 / (2π√(LC))</em>.
+                    Set the corner about a decade below your problem frequency for meaningful
+                    attenuation.
+                  </p>
+                  <div class="calc-wrap">
+                    <div
+                      class="calc-grid"
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                        gap: 12px;
+                      "
+                    >
+                      <div class="calc-field">
+                        <label
+                          for="lVal"
+                          style="
+                            display: block;
+                            font-size: 0.8rem;
+                            color: var(--text-sub);
+                            margin-bottom: 4px;
+                          "
+                          >Inductance L (µH)</label
+                        >
+                        <input type="number" id="lVal" value="1" min="0.001" step="0.1" />
+                      </div>
+                      <div class="calc-field">
+                        <label
+                          for="cVal"
+                          style="
+                            display: block;
+                            font-size: 0.8rem;
+                            color: var(--text-sub);
+                            margin-bottom: 4px;
+                          "
+                          >Capacitance C (nF)</label
+                        >
+                        <input type="number" id="cVal" value="10" min="0.001" step="1" />
+                      </div>
+                    </div>
+                    <div class="calc-result" id="fcResult" style="margin-top: 12px"></div>
+                    <div class="diagram-cap" id="fcNote" style="text-align: left"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="callout" style="margin-top: 1.5rem">
+                <strong>Key takeaways.</strong> Identify CM vs DM, then pick a CM choke whose
+                impedance peaks at your problem frequency; add Y-caps (certified) and use ferrites
+                by impedance, not value. Next: when filtering isn't enough, we shield.
+              </div>
+
+              <div
+                class="lesson-nav"
+                style="display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem"
+              >
+                <a class="btn btn-secondary" href="05-fixing-at-the-source.html">← Previous</a>
+                <a class="btn btn-primary" href="07-shielding.html"
+                  >Next: Shielding &amp; Enclosures →</a
+                >
+              </div>
+
+              <div id="global-bottom-nav"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        var fill = document.getElementById('progFill');
+        var pctEl = document.getElementById('progPct');
+        var total = document.querySelectorAll('.section-collapsible').length;
+        function updateProgress() {
+          var open = document.querySelectorAll('.section-body.open').length;
+          var p = total ? Math.round((open / total) * 100) : 0;
+          if (fill) fill.style.width = p + '%';
+          if (pctEl) pctEl.textContent = p + '%';
+        }
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+            updateProgress();
+            if (target.id === 's2') drawChoke();
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+        updateProgress();
+      })();
+      (function () {
+        document.querySelectorAll('.quiz-question').forEach(function (q) {
+          var fb = q.querySelector('.quiz-feedback');
+          q.querySelectorAll('.quiz-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (q.getAttribute('data-answered')) return;
+              q.setAttribute('data-answered', '1');
+              var correct = opt.getAttribute('data-correct') === 'true';
+              q.querySelectorAll('.quiz-option').forEach(function (o) {
+                if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+              });
+              if (!correct) opt.classList.add('incorrect');
+              if (fb) fb.style.display = 'block';
+            });
+          });
+        });
+      })();
+      /* CM/DM tabs */
+      (function () {
+        var tabs = document.querySelectorAll('#cmdmTabs .cmdm-tab');
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function () {
+            tabs.forEach(function (x) {
+              x.classList.remove('active');
+            });
+            document.querySelectorAll('.cmdm-panel').forEach(function (p) {
+              p.classList.remove('active');
+            });
+            t.classList.add('active');
+            var panel = document.getElementById(t.getAttribute('data-cmdm'));
+            if (panel) panel.classList.add('active');
+          });
+        });
+      })();
+      /* CM choke impedance plot */
+      function cssVar(name, fallback) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return (v && v.trim()) || fallback;
+      }
+      function drawChoke() {
+        if (typeof Plotly === 'undefined') return;
+        var peak = parseFloat(document.getElementById('peakFreq').value) || 100;
+        var f = [],
+          z = [],
+          i;
+        for (i = 1; i <= 1000; i += 5) f.push(i);
+        z = f.map(function (x) {
+          var q = 1.4;
+          var val = 1200 / (1 + Math.pow(Math.log(x / peak) * q, 2) * 4);
+          return val;
+        });
+        var text = cssVar('--text-sub', '#94a3b8');
+        var grid = 'rgba(148,163,184,0.18)';
+        var trace = {
+          x: f,
+          y: z,
+          mode: 'lines',
+          line: { color: cssVar('--cyan', '#22d3ee'), width: 2 },
+          name: '|Z|',
+        };
+        var layout = {
+          margin: { l: 52, r: 12, t: 10, b: 42 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: text, size: 11 },
+          xaxis: { title: 'Frequency (MHz)', type: 'log', gridcolor: grid, zeroline: false },
+          yaxis: {
+            title: 'Impedance |Z| (Ω)',
+            gridcolor: grid,
+            zeroline: false,
+            rangemode: 'tozero',
+          },
+          showlegend: false,
+        };
+        Plotly.react('chokePlot', [trace], layout, { displayModeBar: false, responsive: true });
+      }
+      (function () {
+        var slider = document.getElementById('peakFreq');
+        var val = document.getElementById('peakVal');
+        if (slider) {
+          slider.addEventListener('input', function () {
+            val.textContent = slider.value;
+            drawChoke();
+          });
+        }
+        window.addEventListener('resize', function () {
+          drawChoke();
+        });
+      })();
+      /* Filter-corner calculator */
+      (function () {
+        var l = document.getElementById('lVal');
+        var c = document.getElementById('cVal');
+        var out = document.getElementById('fcResult');
+        var note = document.getElementById('fcNote');
+        if (!l || !c || !out) return;
+        function upd() {
+          var L = parseFloat(l.value) * 1e-6;
+          var C = parseFloat(c.value) * 1e-9;
+          if (!(L > 0) || !(C > 0)) {
+            out.textContent = 'Enter positive values.';
+            note.textContent = '';
+            return;
+          }
+          var fc = 1 / (2 * Math.PI * Math.sqrt(L * C));
+          var disp = fc >= 1e6 ? (fc / 1e6).toFixed(2) + ' MHz' : (fc / 1e3).toFixed(1) + ' kHz';
+          out.textContent = 'Corner frequency f_c ≈ ' + disp;
+          note.textContent =
+            'Aim ~a decade below your problem frequency for solid attenuation (≈40 dB/decade for a 2nd-order LC).';
+        }
+        l.addEventListener('input', upd);
+        c.addEventListener('input', upd);
+        upd();
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

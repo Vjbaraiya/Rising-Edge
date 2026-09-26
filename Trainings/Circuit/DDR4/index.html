@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="DDR4 Memory Interface Design Academy — component selection, datasheet reading, topologies, signal groups, signal integrity, termination, decoupling and PCB routing for DDR4-with-FPGA designs."
+    />
+    <title>DDR4 Memory Interface Design Academy | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .text-gradient {
+        background: linear-gradient(90deg, var(--cyan, #22d3ee), #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .ddr-hero {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-alt) 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl, 16px);
+        padding: 2.5rem 2rem;
+        margin-bottom: 2.5rem;
+      }
+      .ddr-hero h1 {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 800;
+        color: var(--text-base);
+        line-height: 1.25;
+        margin-bottom: 1rem;
+      }
+      .course-stat {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 0.875rem 1.25rem;
+        min-width: 90px;
+        text-align: center;
+      }
+      .course-stat-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        line-height: 1;
+        margin-bottom: 3px;
+      }
+      .course-stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 0.75rem;
+      }
+      .module-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 1.1rem 1.25rem;
+        text-decoration: none;
+        color: inherit;
+        transition:
+          border-color 0.18s,
+          box-shadow 0.18s,
+          transform 0.15s;
+      }
+      .module-card:hover {
+        border-color: var(--cyan, #22d3ee);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+        transform: translateY(-1px);
+      }
+      .module-num {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-md, 8px);
+        font-size: 0.7rem;
+        font-weight: 800;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+      }
+      .module-card h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 3px;
+      }
+      .module-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      .module-tags {
+        margin-top: 6px;
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .hero-bus-svg {
+        width: 100%;
+        max-width: 560px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            DDR4 Memory Interface Design Academy
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <span>DDR4 Academy</span>
+          </nav>
+        </div>
+        <div class="lesson-body">
+          <!-- HERO -->
+          <section class="ddr-hero">
+            <div class="container">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  margin-bottom: 10px;
+                  flex-wrap: wrap;
+                "
+              >
+                <span class="badge badge-cyan">DDR4 Memory Interface Design Academy</span>
+                <span class="badge badge-blue">12 Modules</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>
+                Design a DDR4-with-FPGA Interface<br /><span class="text-gradient"
+                  >from Component Selection to Routed Board</span
+                >
+              </h1>
+              <p
+                style="
+                  font-size: 1rem;
+                  color: var(--text-sub);
+                  line-height: 1.75;
+                  max-width: 680px;
+                  margin-bottom: 20px;
+                "
+              >
+                A hands-on hardware-design course covering the full DDR4 memory-interface lifecycle:
+                choosing DDR3/DDR4/DDR5/LPDDR and reading real datasheets, understanding every
+                timing parameter that matters, picking a topology, mapping signal groups, mastering
+                the signal-integrity/termination/decoupling trio, and routing the board — with
+                animated diagrams, interactive Plotly charts, and worked examples throughout.
+              </p>
+
+              <svg
+                class="hero-bus-svg"
+                viewBox="0 0 560 100"
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="Animated diagram of an FPGA memory controller sending command, address, clock and data pulses along a fly-by topology to three DDR4 DRAM devices"
+              >
+                <rect
+                  x="2"
+                  y="18"
+                  width="96"
+                  height="64"
+                  rx="8"
+                  fill="var(--bg-muted)"
+                  stroke="var(--cyan,#22d3ee)"
+                />
+                <text
+                  x="50"
+                  y="46"
+                  text-anchor="middle"
+                  fill="var(--text-base)"
+                  font-size="11"
+                  font-weight="700"
+                >
+                  FPGA
+                </text>
+                <text x="50" y="62" text-anchor="middle" fill="var(--text-muted)" font-size="8">
+                  MC + PHY
+                </text>
+                <g stroke="var(--text-muted)" stroke-width="1.5">
+                  <line x1="98" y1="34" x2="556" y2="34" />
+                  <line x1="98" y1="66" x2="556" y2="66" />
+                </g>
+                <text x="106" y="28" fill="var(--warning,#fb923c)" font-size="8" font-weight="700">
+                  CA / CK (fly-by)
+                </text>
+                <text x="106" y="80" fill="var(--cyan,#22d3ee)" font-size="8" font-weight="700">
+                  DQ / DQS (byte lane)
+                </text>
+                <circle r="3" fill="var(--warning,#fb923c)">
+                  <animate
+                    attributeName="cx"
+                    values="102;552"
+                    dur="2.4s"
+                    repeatCount="indefinite"
+                  />
+                  <animate attributeName="cy" values="34;34" dur="2.4s" repeatCount="indefinite" />
+                </circle>
+                <circle r="3" fill="var(--cyan,#22d3ee)">
+                  <animate
+                    attributeName="cx"
+                    values="102;552"
+                    dur="1.7s"
+                    repeatCount="indefinite"
+                  />
+                  <animate attributeName="cy" values="66;66" dur="1.7s" repeatCount="indefinite" />
+                </circle>
+                <g>
+                  <rect
+                    x="190"
+                    y="4"
+                    width="72"
+                    height="24"
+                    rx="6"
+                    fill="var(--bg-muted)"
+                    stroke="var(--border)"
+                  />
+                  <text
+                    x="226"
+                    y="20"
+                    text-anchor="middle"
+                    fill="var(--text-sub)"
+                    font-size="9"
+                    font-weight="600"
+                  >
+                    DRAM 0
+                  </text>
+                  <line x1="226" y1="28" x2="226" y2="66" stroke="var(--border)" />
+                  <rect
+                    x="320"
+                    y="4"
+                    width="72"
+                    height="24"
+                    rx="6"
+                    fill="var(--bg-muted)"
+                    stroke="var(--border)"
+                  />
+                  <text
+                    x="356"
+                    y="20"
+                    text-anchor="middle"
+                    fill="var(--text-sub)"
+                    font-size="9"
+                    font-weight="600"
+                  >
+                    DRAM 1
+                  </text>
+                  <line x1="356" y1="28" x2="356" y2="66" stroke="var(--border)" />
+                  <rect
+                    x="450"
+                    y="4"
+                    width="72"
+                    height="24"
+                    rx="6"
+                    fill="var(--bg-muted)"
+                    stroke="var(--border)"
+                  />
+                  <text
+                    x="486"
+                    y="20"
+                    text-anchor="middle"
+                    fill="var(--text-sub)"
+                    font-size="9"
+                    font-weight="600"
+                  >
+                    DRAM 2
+                  </text>
+                  <line x1="486" y1="28" x2="486" y2="66" stroke="var(--border)" />
+                </g>
+              </svg>
+
+              <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 24px">
+                <div class="course-stat">
+                  <div class="course-stat-val">12</div>
+                  <div class="course-stat-label">Modules</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">4h+</div>
+                  <div class="course-stat-label">Learning Time</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">3</div>
+                  <div class="course-stat-label">Calculators</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">25+</div>
+                  <div class="course-stat-label">Diagrams &amp; Charts</div>
+                </div>
+              </div>
+
+              <!-- Populated by assets/js/training-progress.js for logged-in
+                   users with prior progress — shows a progress bar and a
+                   "Continue where you left off" button. Empty/hidden
+                   otherwise, so "Start Learning" below stays the default. -->
+              <div id="course-resume-banner" style="margin-top: 24px; max-width: 420px"></div>
+
+              <div style="margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap">
+                <a class="btn btn-primary btn-lg" href="01-introduction.html"
+                  >Start Learning
+                  <svg
+                    fill="none"
+                    height="15"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="15"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"></path></svg
+                ></a>
+                <a class="btn btn-outline" href="09-layout-routing.html"
+                  >Jump to Layout &amp; Routing</a
+                >
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULES -->
+          <div class="section" style="padding-top: 0">
+            <div class="container">
+              <h2
+                style="
+                  font-size: 1.125rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin-bottom: 6px;
+                "
+              >
+                Course Modules
+              </h2>
+              <p style="font-size: 0.875rem; color: var(--text-sub); margin-bottom: 20px">
+                Work through in order — component selection through routing — or jump straight to
+                the module you need today.
+              </p>
+              <div class="module-grid">
+                <a class="module-card" href="01-introduction.html">
+                  <div class="module-num">01</div>
+                  <div>
+                    <h3>Introduction &amp; DDR Landscape</h3>
+                    <p>
+                      DDR3/DDR4/DDR5/LPDDR4-5 at a glance, and hard vs. soft FPGA memory
+                      controllers.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-cyan">Animated</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="02-component-selection-datasheets.html">
+                  <div class="module-num">02</div>
+                  <div>
+                    <h3>Component Selection &amp; Datasheets</h3>
+                    <p>
+                      A decision matrix, and how to actually read a DRAM and FPGA memory-interface
+                      datasheet.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-green">Checklist</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="03-key-parameters.html">
+                  <div class="module-num">03</div>
+                  <div>
+                    <h3>Key Electrical &amp; Timing Parameters</h3>
+                    <p>
+                      tCK, CL, tRCD, tRP, tRAS, tRFC, ODT, VREF — the JEDEC glossary, demystified.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-purple">Plotly</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="04-topologies.html">
+                  <div class="module-num">04</div>
+                  <div>
+                    <h3>Memory Topologies</h3>
+                    <p>Fly-by vs. T-branch vs. point-to-point, and why DDR4 mandates fly-by.</p>
+                    <div class="module-tags"><span class="badge badge-cyan">Animated</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="05-signal-groups.html">
+                  <div class="module-num">05</div>
+                  <div>
+                    <h3>Signal Groups &amp; Roles</h3>
+                    <p>CK/CA/Control/DQ/DQS/DM/VREF/ZQ, and byte-lane grouping.</p>
+                    <div class="module-tags"><span class="badge badge-cyan">Diagrams</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="06-signal-integrity.html">
+                  <div class="module-num">06</div>
+                  <div>
+                    <h3>Signal Integrity for DDR</h3>
+                    <p>
+                      Impedance targets, reflections, crosstalk, and simultaneous switching noise.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-purple">Plotly</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="07-termination.html">
+                  <div class="module-num">07</div>
+                  <div>
+                    <h3>Termination Strategies</h3>
+                    <p>ODT vs. discrete VTT termination, and why LPDDR needs almost none.</p>
+                    <div class="module-tags">
+                      <span class="badge badge-purple">Plotly</span>
+                      <span class="badge badge-green">Calculator</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="08-decoupling-pdn.html">
+                  <div class="module-num">08</div>
+                  <div>
+                    <h3>Decoupling &amp; PDN</h3>
+                    <p>
+                      VDD/VDDQ/VPP/VREF decoupling strategy and the power-delivery-network concept.
+                    </p>
+                    <div class="module-tags">
+                      <span class="badge badge-purple">Plotly</span>
+                      <span class="badge badge-green">Calculator</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="09-layout-routing.html">
+                  <div class="module-num">09</div>
+                  <div>
+                    <h3>Layout &amp; Routing Guidelines</h3>
+                    <p>Length matching, fly-by routing, layer stack-up, and BGA breakout.</p>
+                    <div class="module-tags">
+                      <span class="badge badge-purple">Plotly</span>
+                      <span class="badge badge-green">Calculator</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="10-fpga-considerations.html">
+                  <div class="module-num">10</div>
+                  <div>
+                    <h3>FPGA-Specific Considerations</h3>
+                    <p>
+                      I/O bank rules, pin swapping, and what read/write leveling needs from your
+                      layout.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-cyan">Diagrams</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="11-checklist-bringup.html">
+                  <div class="module-num">11</div>
+                  <div>
+                    <h3>Checklist, Common Mistakes &amp; Bring-Up</h3>
+                    <p>
+                      A consolidated pre-layout checklist, failure signatures, and scope-probing
+                      tips.
+                    </p>
+                    <div class="module-tags"><span class="badge badge-green">Checklist</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="12-capstone-bridge.html">
+                  <div class="module-num">12</div>
+                  <div>
+                    <h3>Capstone Bridge &amp; Mini-Project</h3>
+                    <p>Hand off your design to the SI Academy's DDR4 verification capstone.</p>
+                    <div class="module-tags"><span class="badge badge-orange">Project</span></div>
+                  </div>
+                </a>
+                <a class="module-card" href="13-example-design-versal.html">
+                  <div class="module-num">B</div>
+                  <div>
+                    <h3>Worked Example: Versal SoC + Dual x16 DDR4</h3>
+                    <p>
+                      A real AMD Versal SoC (XCVC1902) paired with two real Micron x16 DDR4 devices
+                      (MT40A512M16) for a 32-bit interface — every value traced to a specific
+                      datasheet parameter.
+                    </p>
+                    <div class="module-tags">
+                      <span class="badge badge-orange">Bonus</span>
+                      <span class="badge badge-cyan">Real Parts</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <!-- Cross-sell -->
+              <div class="info-box" style="margin-top: 28px">
+                Already have a routed DDR4 interface and need to verify it? Continue with the
+                <a href="../../SI/capstone-ddr4.html">DDR4 SI Verification capstone</a> in the
+                Signal Integrity Academy. New to transmission lines and impedance first? Start with
+                the <a href="../../SI/index.html">Signal Integrity Academy</a> fundamentals, or
+                brush up on FPGA architecture in the
+                <a href="../../FPGA/Fundamentals-and-architecture/01-introduction.html"
+                  >FPGA Fundamentals course</a
+                >.
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+  </body>
+</html>

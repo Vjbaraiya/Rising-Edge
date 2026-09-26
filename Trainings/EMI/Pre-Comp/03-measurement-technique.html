@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 3 — EMC pre-compliance measurement technique: near-field probing (H vs E), current probes on cables, delta (before/after) measurements, capturing a spectrum, and a detectors recap."
+    />
+    <title>
+      03 · Measurement Technique &amp; Toolkit | EMC Pre-Compliance | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Pre-Comp/03-measurement-technique.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >EMC Pre-Compliance Testing &amp; Debugging</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-why-pre-compliance.html" class="module-item">01. Why Pre-Compliance</a>
+          <a href="02-building-a-bench.html" class="module-item"
+            >02. Building an Affordable Bench</a
+          >
+          <a href="03-measurement-technique.html" class="module-item active"
+            >03. Measurement Technique &amp; Toolkit</a
+          >
+          <a href="04-spectrum-signatures.html" class="module-item">04. Reading the Spectrum</a>
+          <a href="05-fixing-at-the-source.html" class="module-item"
+            >05. Fixing at the Source (PCB/IC)</a
+          >
+          <a href="06-chokes-and-filtering.html" class="module-item"
+            >06. Common-Mode Chokes &amp; Filtering</a
+          >
+          <a href="07-shielding.html" class="module-item">07. Shielding &amp; Enclosures</a>
+          <a href="08-cables-and-grounding.html" class="module-item"
+            >08. Cables, Connectors &amp; Grounding</a
+          >
+          <a href="09-immunity-debug.html" class="module-item"
+            >09. Immunity Pre-Compliance &amp; Debug</a
+          >
+          <a href="10-methodology-and-cases.html" class="module-item"
+            >10. Debug Methodology + Case Studies</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">EMC Pre-Compliance</a><span>/</span>
+            <span>03. Measurement Technique &amp; Toolkit</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">EMI/EMC Academy</span>
+                <span class="badge badge-gray">~30 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Measurement Technique &amp; the Diagnostic Toolkit</h1>
+              <p class="subtitle">
+                Good technique beats good equipment. The same probe in trained hands localizes a
+                source in minutes; in untrained hands it produces noise. This module is the
+                <em>how</em>: probe motion, current-probe use, and the delta method that underpins
+                all debugging.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <div class="callout" style="margin-bottom: 1.5rem">
+                <strong>Learning objectives.</strong> Use H- vs E-field probes correctly; scan for
+                hotspots and read <em>relative</em> amplitude; measure cable current with a clamp;
+                run a disciplined before/after (delta) measurement; and recall which detector
+                (Peak/Quasi-Peak/Average) applies where.
+              </div>
+
+              <!-- SECTION 1 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="s1">
+                  <span>🧲 &nbsp;1. Near-Field Probing — H vs E</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body open" id="s1">
+                  <p class="lead">
+                    In the near field, the electric and magnetic fields are <strong>not</strong> in
+                    the fixed 377 Ω ratio of a plane wave, so you probe them separately. An
+                    <strong>H-field loop</strong> couples to <em>current</em> — hold it flat over a
+                    trace so the changing magnetic field threads the loop. An
+                    <strong>E-field stub</strong> couples to <em>voltage</em> — bring its tip near a
+                    hot node, heatsink, or connector pin.
+                  </p>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 620 210"
+                      width="100%"
+                      style="max-width: 620px"
+                      role="img"
+                      aria-label="H-field loop over a current trace and E-field stub near a hot node"
+                    >
+                      <rect
+                        x="20"
+                        y="150"
+                        width="580"
+                        height="40"
+                        rx="6"
+                        fill="rgba(6,182,212,0.08)"
+                        stroke="#22d3ee"
+                      />
+                      <text
+                        x="310"
+                        y="205"
+                        text-anchor="middle"
+                        font-size="11"
+                        fill="currentColor"
+                        opacity="0.7"
+                      >
+                        PCB (ground plane / traces)
+                      </text>
+                      <!-- current trace -->
+                      <line x1="70" y1="150" x2="70" y2="120" stroke="#f59e0b" stroke-width="3" />
+                      <line x1="70" y1="120" x2="230" y2="120" stroke="#f59e0b" stroke-width="3" />
+                      <text x="150" y="112" text-anchor="middle" font-size="10" fill="#f59e0b">
+                        high-di/dt trace
+                      </text>
+                      <!-- H loop -->
+                      <ellipse
+                        cx="150"
+                        cy="85"
+                        rx="26"
+                        ry="16"
+                        fill="none"
+                        stroke="#22c55e"
+                        stroke-width="3"
+                      />
+                      <line
+                        x1="150"
+                        y1="101"
+                        x2="150"
+                        y2="120"
+                        stroke="#22c55e"
+                        stroke-width="2"
+                        opacity="0.6"
+                      />
+                      <text
+                        x="150"
+                        y="60"
+                        text-anchor="middle"
+                        font-size="11"
+                        fill="#22c55e"
+                        font-weight="700"
+                      >
+                        H-field loop
+                      </text>
+                      <text
+                        x="150"
+                        y="46"
+                        text-anchor="middle"
+                        font-size="9"
+                        fill="currentColor"
+                        opacity="0.7"
+                      >
+                        flat over current
+                      </text>
+                      <!-- hot node -->
+                      <circle cx="430" cy="120" r="7" fill="#ef4444" />
+                      <text x="430" y="112" text-anchor="middle" font-size="10" fill="#ef4444">
+                        hot node (V)
+                      </text>
+                      <line x1="430" y1="95" x2="430" y2="112" stroke="#818cf8" stroke-width="3" />
+                      <circle
+                        cx="430"
+                        cy="88"
+                        r="6"
+                        fill="none"
+                        stroke="#818cf8"
+                        stroke-width="3"
+                      />
+                      <text
+                        x="430"
+                        y="66"
+                        text-anchor="middle"
+                        font-size="11"
+                        fill="#818cf8"
+                        font-weight="700"
+                      >
+                        E-field stub
+                      </text>
+                      <text
+                        x="430"
+                        y="52"
+                        text-anchor="middle"
+                        font-size="9"
+                        fill="currentColor"
+                        opacity="0.7"
+                      >
+                        tip near voltage
+                      </text>
+                    </svg>
+                    <div class="diagram-cap">
+                      Orientation is everything: the loop must face the current, the stub must
+                      approach the voltage.
+                    </div>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Common mistake:</strong> chasing absolute numbers with a near-field
+                    probe. Coupling depends on distance and angle, so a 6 dB change from moving your
+                    hand means nothing. Keep the probe fixed and change the <em>board</em>.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2 : probe selector -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s2">
+                  <span>🛠️ &nbsp;2. Probe-Selection Tool (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s2">
+                  <p class="lead">
+                    Pick what you're hunting and the recommended probe/technique appears.
+                  </p>
+                  <div class="calc-wrap">
+                    <div class="calc-field" style="margin-bottom: 12px">
+                      <label
+                        for="huntSel"
+                        style="
+                          display: block;
+                          font-size: 0.8rem;
+                          font-weight: 600;
+                          color: var(--text-sub);
+                          margin-bottom: 6px;
+                        "
+                        >What are you trying to find?</label
+                      >
+                      <select id="huntSel">
+                        <option value="trace">A noisy trace / current loop on the PCB</option>
+                        <option value="node">A radiating hot node, heatsink or oscillator</option>
+                        <option value="cable">Which cable is carrying the emission</option>
+                        <option value="seam">A leaking enclosure seam or aperture</option>
+                        <option value="which">Whether a fix actually helped</option>
+                      </select>
+                    </div>
+                    <div
+                      class="calc-result"
+                      id="huntResult"
+                      style="font-size: 0.95rem; line-height: 1.5"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3 : delta method -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s3">
+                  <span>➖ &nbsp;3. The Delta (Before/After) Method</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s3">
+                  <p class="lead">
+                    Because bench numbers are relative, the unit of progress is the
+                    <strong>delta</strong>. The discipline: capture a reference trace, use
+                    <strong>max-hold</strong> so intermittent peaks are caught, change
+                    <strong>exactly one thing</strong>, and overlay the new trace on the reference.
+                    The difference at the peak of interest is your result.
+                  </p>
+                  <ol class="lead" style="padding-left: 1.2rem">
+                    <li>Freeze the setup — probe position, cable dress, EUT mode all fixed.</li>
+                    <li>Capture reference (save trace / screenshot with markers).</li>
+                    <li>Apply one change (add ferrite, short a stitch, fit a choke).</li>
+                    <li>Re-measure without moving anything else; read Δ at the marker.</li>
+                    <li>Keep or revert, then move to the next hypothesis.</li>
+                  </ol>
+                  <div class="tip-box">
+                    Change one variable at a time. If you add a choke <em>and</em> reroute a cable
+                    at once, a 10 dB improvement tells you nothing about which change did it.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4 : detectors + quiz -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s4">
+                  <span>📏 &nbsp;4. Detectors Recap</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s4">
+                  <p class="lead">
+                    Limits are usually specified with <strong>Quasi-Peak</strong> and
+                    <strong>Average</strong> detectors. On the bench, debug with
+                    <strong>Peak</strong> (fastest, always ≥ QP) — if Peak is under the limit, QP
+                    certainly is. Only switch to QP/Average near the end when you need a realistic
+                    margin estimate. This is covered in depth in the
+                    <a href="../RE/08-setup-and-measurement.html">RE measurement module</a>.
+                  </p>
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Detector</th>
+                        <th>Reads</th>
+                        <th>Use on bench</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Peak</td>
+                        <td>Highest instantaneous level</td>
+                        <td>Primary debug — fast, conservative</td>
+                      </tr>
+                      <tr>
+                        <td>Quasi-Peak</td>
+                        <td>Weighted by pulse repetition</td>
+                        <td>Late-stage margin check</td>
+                      </tr>
+                      <tr>
+                        <td>Average</td>
+                        <td>Mean level</td>
+                        <td>Narrowband/CW near limit</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="callout" style="margin-top: 1.5rem">
+                <strong>Key takeaways.</strong> Probe by field type, read relative not absolute,
+                hunt cables with a current clamp, and prove every fix with a single-variable delta.
+                Next we learn to read what the spectrum is telling us.
+              </div>
+
+              <div
+                class="lesson-nav"
+                style="display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem"
+              >
+                <a class="btn btn-secondary" href="02-building-a-bench.html">← Previous</a>
+                <a class="btn btn-primary" href="04-spectrum-signatures.html"
+                  >Next: Reading the Spectrum →</a
+                >
+              </div>
+
+              <div id="global-bottom-nav"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        var fill = document.getElementById('progFill');
+        var pctEl = document.getElementById('progPct');
+        var total = document.querySelectorAll('.section-collapsible').length;
+        function updateProgress() {
+          var open = document.querySelectorAll('.section-body.open').length;
+          var p = total ? Math.round((open / total) * 100) : 0;
+          if (fill) fill.style.width = p + '%';
+          if (pctEl) pctEl.textContent = p + '%';
+        }
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+            updateProgress();
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+        updateProgress();
+      })();
+      (function () {
+        document.querySelectorAll('.quiz-question').forEach(function (q) {
+          var fb = q.querySelector('.quiz-feedback');
+          q.querySelectorAll('.quiz-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (q.getAttribute('data-answered')) return;
+              q.setAttribute('data-answered', '1');
+              var correct = opt.getAttribute('data-correct') === 'true';
+              q.querySelectorAll('.quiz-option').forEach(function (o) {
+                if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+              });
+              if (!correct) opt.classList.add('incorrect');
+              if (fb) fb.style.display = 'block';
+            });
+          });
+        });
+      })();
+      /* Probe selector */
+      (function () {
+        var sel = document.getElementById('huntSel');
+        var out = document.getElementById('huntResult');
+        if (!sel || !out) return;
+        var map = {
+          trace:
+            '<strong>H-field loop (small).</strong> Scan flat, ~1–3 mm above suspect traces; the loudest spot on the analyzer is the culprit. Read deltas only.',
+          node: '<strong>E-field stub.</strong> Approach hot nodes, oscillator pins, unheatsinked regulators and heatsinks; peak reading locates the strongest voltage radiator.',
+          cable:
+            '<strong>Clamp-on current probe.</strong> Clamp each cable in turn; the one with the highest common-mode current at the problem frequency is the dominant radiator.',
+          seam: '<strong>Small H-field loop along seams/apertures.</strong> Run it along enclosure joints and slots; leakage shows as a local peak — see Module 7 (Shielding).',
+          which:
+            '<strong>Fixed probe + delta method.</strong> Leave the probe untouched, apply one change, and compare against the saved reference trace (Module 3, §3).',
+        };
+        function upd() {
+          out.innerHTML = map[sel.value] || '';
+        }
+        sel.addEventListener('change', upd);
+        upd();
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

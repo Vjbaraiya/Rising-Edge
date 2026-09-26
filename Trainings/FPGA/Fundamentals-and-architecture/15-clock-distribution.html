@@ -1,0 +1,1634 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Master the FPGA clock network — BUFG, BUFH, BUFR, BUFIO, MMCM, and PLL — and learn how to design robust multi-clock systems with proper CDC handling."
+    />
+    <title>Clock Distribution | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/15-clock-distribution.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .code-block {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+        line-height: 1.8;
+        color: var(--text-sub);
+        overflow-x: auto;
+        margin: 16px 0;
+        white-space: pre;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      @media (max-width: 680px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .compare-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .compare-card h4 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 0 0 8px;
+      }
+      .compare-card ul {
+        color: var(--text-sub);
+        font-size: 0.83rem;
+        line-height: 1.9;
+        padding-left: 18px;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item active" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Clock Distribution</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 15/25</span><span>60%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 60%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 15 OF 25</span>
+                <span class="badge">18 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Clock Distribution Network
+              </h1>
+              <p class="subtitle">
+                Master the FPGA clock network — BUFG, BUFH, BUFR, BUFIO, MMCM, and PLL — and learn
+                how to design robust multi-clock systems with proper CDC handling.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Why Clocks Need Dedicated Networks
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                A clock signal is the most demanding signal in any synchronous digital system. It
+                must arrive at
+                <strong style="color: var(--text-base)">every flip-flop simultaneously</strong> — or
+                as close to simultaneously as possible. The difference in clock arrival time between
+                two flip-flops is called
+                <strong style="color: var(--text-base)">clock skew</strong>. Even a few hundred
+                picoseconds of skew between the source and destination registers of a timing path
+                can cause setup or hold violations.
+              </p>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                If you were to route a clock through general routing fabric (SL1/SL2/SL6 segments),
+                the clock would experience 3–5 ns of skew across a large FPGA — completely
+                unacceptable at any frequency above a few hundred MHz. Even at 100 MHz (10 ns
+                period), 3–5 ns of skew would consume half the entire timing budget just for clock
+                distribution.
+              </p>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Xilinx FPGAs solve this with a
+                <strong style="color: var(--text-base)"
+                  >dedicated H-tree clock distribution network</strong
+                >
+                — a symmetric, balanced tree of metal wires specifically designed to deliver the
+                clock to all flip-flops with &lt;100 ps of skew across the entire device. This
+                network is separate from general routing fabric and cannot be used for data signals
+                — it is exclusively for clocks. Knowing how to properly use this network is
+                non-negotiable for correct FPGA design.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>Clock Skew Impact</strong>
+                Every clock in your design must enter through an IBUF (input buffer at the FPGA pin)
+                and then pass through a BUFG or MMCM to reach the dedicated clock network. Routing a
+                clock through LUT outputs or general fabric introduces unpredictable, large skew —
+                setup violations at the destination flip-flops will follow immediately.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Clock Network Hierarchy (7-Series)
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Xilinx 7-series FPGAs provide five types of clock buffers, each serving a different
+                scope and purpose:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Buffer Type</th>
+                    <th>Scope</th>
+                    <th>Drive Capability</th>
+                    <th>Use Case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>BUFG</strong></td>
+                    <td>Global (full chip)</td>
+                    <td>All FFs, BRAM, DSP, IO</td>
+                    <td>Primary system clocks — highest fanout, symmetric H-tree delivery</td>
+                  </tr>
+                  <tr>
+                    <td><strong>BUFH</strong></td>
+                    <td>Half chip (one clock region)</td>
+                    <td>All FFs in one half-chip region</td>
+                    <td>Regional high-fanout signals, saves power vs BUFG for localized clocks</td>
+                  </tr>
+                  <tr>
+                    <td><strong>BUFR</strong></td>
+                    <td>One clock region</td>
+                    <td>FFs + ISERDES/OSERDES in region</td>
+                    <td>Regional clocks derived from MMCM for serial interface logic</td>
+                  </tr>
+                  <tr>
+                    <td><strong>BUFIO</strong></td>
+                    <td>IO bank only</td>
+                    <td>ISERDES/OSERDES only</td>
+                    <td>Source-synchronous interface clocks — ultra-low skew to IO primitives</td>
+                  </tr>
+                  <tr>
+                    <td><strong>BUFMR</strong></td>
+                    <td>Multi-region</td>
+                    <td>Multiple BUFRs across 2 regions</td>
+                    <td>Cascading BUFR across adjacent IO clock regions</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                BUFG — Global Clock Buffer
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                The BUFG is the most important clock resource for the majority of designs. Key
+                facts:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 24px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong style="color: var(--text-base)"
+                    >7-series devices have 32 BUFG resources per device</strong
+                  >
+                  — this limits how many independent global clocks a design can have
+                </li>
+                <li>
+                  BUFG drives a dedicated H-tree with symmetric layout — achieves approximately
+                  <strong style="color: var(--text-base)">50–100 ps skew</strong> across the entire
+                  chip
+                </li>
+                <li>
+                  Must be used for: primary system clocks, DDR memory clocks, MGT (transceiver)
+                  reference clocks, any clock driving the entire FPGA
+                </li>
+                <li>
+                  A clock signal from an FPGA input pin must pass through IBUF first, then BUFG —
+                  the tools insert IBUF automatically for top-level clock ports
+                </li>
+                <li>
+                  Cannot be driven directly by LUT outputs without a timing closure violation — the
+                  tools will warn about "Clock signal ... not reaching a dedicated clock buffer"
+                </li>
+              </ul>
+
+              <div class="mermaid">
+                graph LR PIN["FPGA Clock Pin\n(e.g. CLK_P/N)"] IBUF["IBUF or IBUFDS\n(IO Input
+                Buffer)"] BUFG["BUFG\n(Global Clock Buffer)\n32 available per 7-series"]
+                HTREE["H-Tree Clock\nDistribution Network\n&lt;100 ps skew chip-wide"] FF1["FF in
+                CLB\n(left side)"] FF2["FF in CLB\n(right side)"] FF3["FF in BRAM"] FF4["FF in DSP"]
+                PIN --> IBUF --> BUFG --> HTREE HTREE --> FF1 HTREE --> FF2 HTREE --> FF3 HTREE -->
+                FF4
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                MMCM — Mixed-Mode Clock Manager
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                The MMCM is Xilinx's advanced clock synthesis and conditioning primitive. It is a
+                <strong style="color: var(--text-base)">phase-locked loop (PLL)</strong> with
+                additional features beyond basic frequency multiplication/division:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Capability</th>
+                    <th>7-Series Specification</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Input frequency range</td>
+                    <td>10 – 933 MHz</td>
+                  </tr>
+                  <tr>
+                    <td>VCO frequency range</td>
+                    <td>600 – 1200 MHz (must be in range)</td>
+                  </tr>
+                  <tr>
+                    <td>Output frequency</td>
+                    <td>User-defined: F_OUT = F_IN × M / (D × O)</td>
+                  </tr>
+                  <tr>
+                    <td>Clock outputs</td>
+                    <td>7 independent outputs (CLKOUT0–CLKOUT6)</td>
+                  </tr>
+                  <tr>
+                    <td>Phase adjustment</td>
+                    <td>0–360° in steps of 1/8 VCO period</td>
+                  </tr>
+                  <tr>
+                    <td>Duty cycle adjustment</td>
+                    <td>1%–99% on CLKOUT0 only</td>
+                  </tr>
+                  <tr>
+                    <td>Spread spectrum clocking</td>
+                    <td>Supported (for EMI reduction)</td>
+                  </tr>
+                  <tr>
+                    <td>Jitter</td>
+                    <td>Device-dependent; typically 50–150 ps RMS</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin: 12px 0 12px;
+                "
+              >
+                The frequency formula:
+                <strong style="color: var(--text-base)">F_OUT = F_IN × M / (D × O)</strong> where M
+                is the feedback multiplier, D is the input divider, and O is the output divider for
+                that specific output. For example, to generate 500 MHz from a 200 MHz input: F_VCO =
+                200 × 5 / 1 = 1000 MHz (in range), F_OUT = 1000 / 2 = 500 MHz — so M=5, D=1, O=2.
+              </p>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                The VCO frequency must stay within 600–1200 MHz for 7-series. If your M/D
+                combination produces a VCO frequency outside this range, the MMCM will not lock.
+                Vivado's Clocking Wizard IP automatically validates this constraint and finds valid
+                M/D/O combinations for your target frequencies.
+              </p>
+
+              <div class="mermaid">
+                graph LR CLKIN["CLKIN1\n(e.g. 200 MHz)"] MMCM["MMCM\nM=5, D=1\nVCO=1000 MHz"]
+                CLK0["CLKOUT0\nO=2 → 500 MHz"] CLK1["CLKOUT1\nO=10 → 100 MHz"] CLK2["CLKOUT2\nO=20 →
+                50 MHz\n+90° phase shift"] BUFG0["BUFG"] BUFG1["BUFG"] BUFG2["BUFG"] DESIGN0["Design
+                Logic\n(500 MHz domain)"] DESIGN1["Design Logic\n(100 MHz domain)"] DESIGN2["IO
+                Interface\n(50 MHz, 90°)"] CLKIN --> MMCM MMCM --> CLK0 --> BUFG0 --> DESIGN0 MMCM
+                --> CLK1 --> BUFG1 --> DESIGN1 MMCM --> CLK2 --> BUFG2 --> DESIGN2
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                PLL — Phase-Locked Loop
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                The PLL is a simpler version of the MMCM. Both generate synthesized clocks from a
+                reference, but they differ in feature set:
+              </p>
+
+              <div class="two-col">
+                <div class="compare-card">
+                  <h4 style="color: #22d3ee">Use MMCM When...</h4>
+                  <ul>
+                    <li>You need phase shifting (0–360°) on output clocks</li>
+                    <li>You need fractional frequency division (non-integer M/O)</li>
+                    <li>You need spread-spectrum clocking (EMI reduction)</li>
+                    <li>You need more than 6 clock outputs</li>
+                    <li>You need fine duty-cycle control on CLKOUT0</li>
+                  </ul>
+                </div>
+                <div class="compare-card">
+                  <h4 style="color: #818cf8">Use PLL When...</h4>
+                  <ul>
+                    <li>You need maximum frequency with minimum jitter</li>
+                    <li>You don't need phase shifting or fractional dividers</li>
+                    <li>6 clock outputs are sufficient</li>
+                    <li>Power consumption matters and MMCM is overkill</li>
+                    <li>The application is a simple frequency multiplier</li>
+                  </ul>
+                </div>
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Clock Domain Crossing (CDC)
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                Any design with more than one clock domain must carefully handle signals that cross
+                from one domain to another. When a signal generated in clock domain A is sampled by
+                a flip-flop in clock domain B, the signal may not be stable when the B clock edge
+                arrives — this is the
+                <strong style="color: var(--text-base)">metastability</strong> problem. A metastable
+                flip-flop may produce an output that is neither a valid 0 nor a valid 1, and may
+                oscillate for an unpredictable time before settling.
+              </p>
+
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                The standard solutions:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>CDC Scenario</th>
+                    <th>Recommended Solution</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Single-bit control signal</td>
+                    <td>Two-FF synchronizer</td>
+                    <td>Gold standard — two FFs in the destination domain, back-to-back</td>
+                  </tr>
+                  <tr>
+                    <td>Multi-bit data bus</td>
+                    <td>Asynchronous FIFO</td>
+                    <td>Use Xilinx FIFO IP with independent read/write clocks</td>
+                  </tr>
+                  <tr>
+                    <td>Slow-changing configuration</td>
+                    <td>Gray-code encoding + 2FF sync</td>
+                    <td>Only adjacent bits change — ensures valid intermediate state</td>
+                  </tr>
+                  <tr>
+                    <td>Pulse transfer</td>
+                    <td>Pulse synchronizer (toggle FF)</td>
+                    <td>Converts pulse to toggle, synchronizes toggle, re-pulses</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="mermaid">
+                graph LR subgraph DOMA["Clock Domain A (CLK_A)"] SRC_FF["Source FF\n(data_a)"] end
+                subgraph SYNC["2-FF Synchronizer\n(in CLK_B domain)"] FF1["FF1\n(metastability
+                catcher)"] FF2["FF2\n(stable output)"] FF1 -->|"CLK_B"| FF2 end subgraph DOMB["Clock
+                Domain B (CLK_B)"] DST_FF["Destination Logic\n(data_b — safe to use)"] end SRC_FF
+                -->|"async crossing"| FF1 FF2 --> DST_FF
+              </div>
+
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 16px;
+                "
+              >
+                Vivado includes a dedicated CDC analysis command:
+                <code
+                  style="
+                    background: var(--bg-muted);
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 0.82rem;
+                  "
+                  >report_cdc</code
+                >. Run this after implementation to identify all clock domain crossings in your
+                design. Each crossing is categorized by severity — missing synchronizers appear as
+                "CRITICAL" and will cause functional failures in silicon.
+              </p>
+
+              <div id="chart-vco-range" style="width: 100%; height: 360px; margin: 20px 0"></div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                XDC Clock Constraints
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                Correct XDC timing constraints are essential for the MMCM/PLL setup to be analyzed
+                correctly by Vivado's static timing analysis engine. Without proper constraints,
+                timing analysis either over-constrains or under-constrains your design.
+              </p>
+
+              <div class="code-block">
+                # ─── XDC Clock Constraints Example ───────────────────────────────────────── #
+                Primary input clock: 200 MHz from FPGA pin create_clock -period 5.000 -name clk_200
+                [get_ports clk_in_p] # MMCM generates 500 MHz (CLKOUT0) and 100 MHz (CLKOUT1) #
+                Vivado usually auto-generates these with Clocking Wizard IP create_generated_clock \
+                -name clk_500 \ -source [get_pins mmcm_inst/CLKIN1] \ -multiply_by 5 \ -divide_by 2
+                \ [get_pins mmcm_inst/CLKOUT0] create_generated_clock \ -name clk_100 \ -source
+                [get_pins mmcm_inst/CLKIN1] \ -multiply_by 1 \ -divide_by 2 \ [get_pins
+                mmcm_inst/CLKOUT1] # Tell timing analyzer that clk_500 and clk_100 are asynchronous
+                # (they come from the same MMCM so by default they're treated as related) # For
+                truly independent async clocks: set_clock_groups -asynchronous \ -group [get_clocks
+                clk_200] \ -group [get_clocks clk_ext_async] # False paths on CDC synchronizer
+                inputs (prevents over-tightening) # (Applied by Vivado CDC flow automatically when
+                FIFO IP is used)
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Common Clock Mistakes
+              </h3>
+              <p
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                These are the most common clock-related errors seen in FPGA designs:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mistake</th>
+                    <th>Consequence</th>
+                    <th>Correct Approach</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Gated clock: <code>clk_g = clk AND en</code></td>
+                    <td>Glitches on the gated clock edge → metastability, incorrect FF behavior</td>
+                    <td>Use clock enables: <code>always @(posedge clk) if(en) q &lt;= d;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Clock from LUT output</td>
+                    <td>Massive skew through general routing — setup/hold violations everywhere</td>
+                    <td>All clocks must come from BUFG, BUFH, or MMCM/PLL output → BUFG</td>
+                  </tr>
+                  <tr>
+                    <td>Missing <code>set_clock_groups</code> for async domains</td>
+                    <td>Timing analysis reports false failures — impossible to close timing</td>
+                    <td>
+                      Use <code>set_clock_groups -asynchronous</code> between unrelated clock
+                      domains
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Exceeding 32 BUFG limit</td>
+                    <td>Vivado error: cannot place all BUFG — design fails to route</td>
+                    <td>Reuse clocks, use BUFH for regional clocks, reduce clock domain count</td>
+                  </tr>
+                  <tr>
+                    <td>Direct combinational paths across CDC</td>
+                    <td>Metastability — data corruption in silicon even if simulation passes</td>
+                    <td>Always use 2-FF synchronizer, async FIFO, or Xilinx CDC IP</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-warning">
+                <strong>Never Use a Gated Clock in FPGA</strong>
+                In ASICs, gated clocks are a power-saving technique. In FPGAs, they are a serious
+                bug. The expression <code>assign clk_gated = clk AND enable;</code> creates glitches
+                whenever <code>enable</code> changes while <code>clk</code> is high — this produces
+                spurious clock edges that corrupt flip-flop state. Instead, use a clock enable
+                signal on the flip-flop itself:
+                <code>always @(posedge clk) if(enable) q &lt;= d;</code> — the flip-flop ignores
+                data when enable is low but always clocks cleanly on the rising clock edge.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Use Clocking Wizard IP — Always</strong>
+                Xilinx's Clocking Wizard IP (IP Catalog → FPGA Features and Design → Clocking →
+                Clocking Wizard) automatically calculates valid M/D/O values for your target
+                frequencies, verifies VCO range compliance, estimates output jitter, generates
+                proper XDC constraints, and instantiates MMCM or PLL with all ports correctly
+                connected. There is almost never a reason to manually instantiate MMCM or PLL
+                directly.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: What is the difference between BUFG and BUFH in Xilinx 7-series?
+                <br /><br />
+                A: BUFG (Global Clock Buffer) drives the full-chip H-tree clock network, delivering
+                the clock to all flip-flops, BRAM, DSP, and IO primitives across the entire device
+                with &lt;100 ps skew. It consumes more power because it drives the entire chip. BUFH
+                (Half-chip Clock Buffer) drives only one half of the device — one clock region —
+                making it more power-efficient for clocks that only need to reach logic in a
+                specific area. BUFH is typically used for derived clocks from MMCM that feed only a
+                local region of the design, while BUFG is used for the primary system clock that all
+                logic shares.
+              </div>
+            </div>
+          </section>
+
+          <!-- QUIZ SECTION -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1" data-answered="">
+                <p class="quiz-q">
+                  1. How many BUFG (Global Clock Buffer) resources does a Xilinx 7-series FPGA
+                  provide?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>A</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>B</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>C</span> 32
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q1fb', document.getElementById('q1'))"
+                  >
+                    <span>D</span> 64
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q1fb">
+                  Correct! Xilinx 7-series FPGAs provide 32 BUFG resources per device. This limits
+                  the total number of independent global clocks in a design. Designs that require
+                  more than 32 clock domains must use BUFH for regional clocks, share BUFG resources
+                  between related domains, or restructure the clock architecture.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2" data-answered="">
+                <p class="quiz-q">2. What does MMCM stand for?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>A</span> Multi-Mode Clock Multiplexer
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>B</span> Mixed-Mode Clock Manager
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>C</span> Master Module Clock Multiplier
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q2fb', document.getElementById('q2'))"
+                  >
+                    <span>D</span> Multi-Channel Clock Monitor
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q2fb">
+                  Correct! MMCM stands for Mixed-Mode Clock Manager. It is Xilinx's advanced clock
+                  synthesis primitive that combines PLL-based frequency synthesis with additional
+                  features including phase adjustment (0–360°), fractional dividers, spread spectrum
+                  clocking, and 7 independent output clocks. Use the Clocking Wizard IP to
+                  instantiate it automatically.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3" data-answered="">
+                <p class="quiz-q">
+                  3. Which clock buffer type is specifically designed for IO source-synchronous
+                  interfaces, driving ISERDES and OSERDES primitives only?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>A</span> BUFG
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>B</span> BUFH
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>C</span> BUFR
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q3fb', document.getElementById('q3'))"
+                  >
+                    <span>C</span> BUFIO
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q3fb">
+                  Correct! BUFIO (IO Clock Buffer) drives only ISERDES and OSERDES primitives within
+                  the same IO bank. It provides ultra-low skew delivery of the source-synchronous
+                  interface clock directly to the serializer/deserializer primitives. It cannot
+                  drive flip-flops in CLBs — for that, you use BUFR alongside BUFIO in
+                  source-synchronous interface designs.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4" data-answered="">
+                <p class="quiz-q">
+                  4. Which Vivado Tcl command checks your design for clock domain crossing (CDC)
+                  issues and missing synchronizers?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>A</span> <code>check_timing</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>B</span> <code>report_timing</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>C</span> <code>report_cdc</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q4fb', document.getElementById('q4'))"
+                  >
+                    <span>D</span> <code>report_clock_interaction</code>
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q4fb">
+                  Correct! <code>report_cdc</code> is Vivado's dedicated clock domain crossing
+                  analysis command. It identifies every point in your design where a signal crosses
+                  from one clock domain to another, categorizes each crossing by severity (Critical
+                  / Warning / Info), and flags missing synchronizers. Run it after implementation to
+                  catch CDC bugs before they cause intermittent failures in hardware.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5" data-answered="">
+                <p class="quiz-q">
+                  5. The standard two-flip-flop CDC synchronizer uses how many flip-flops in the
+                  destination clock domain?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>A</span> 1
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>B</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>C</span> 3
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q5fb', document.getElementById('q5'))"
+                  >
+                    <span>D</span> 4
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q5fb">
+                  Correct! The standard CDC synchronizer uses 2 flip-flops back-to-back in the
+                  destination clock domain. The first FF may go metastable, but has one full
+                  destination clock period to resolve before its output is sampled by the second FF.
+                  If the first FF's metastability resolves within that period (probability increases
+                  with technology speed), the second FF samples a valid value. This reduces MTBF
+                  (Mean Time Between Failures) from seconds to millions of years for typical
+                  frequencies.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q6" data-answered="">
+                <p class="quiz-q">
+                  6. Which XDC constraint defines a clock that is derived from (generated by) an
+                  MMCM or PLL output?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>A</span> <code>create_clock</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>B</span> <code>create_generated_clock</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>C</span> <code>set_output_delay</code>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q6fb', document.getElementById('q6'))"
+                  >
+                    <span>D</span> <code>set_clock_groups</code>
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q6fb">
+                  Correct! <code>create_generated_clock</code> defines a clock that is derived from
+                  a primary source clock through a divider, multiplier, or MMCM/PLL. It tells the
+                  timing engine the relationship between the parent clock and the derived clock,
+                  enabling correct setup/hold analysis across the design. The Clocking Wizard IP
+                  generates these constraints automatically — one of the key reasons to always use
+                  it.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q7" data-answered="">
+                <p class="quiz-q">
+                  7. Why should you never use a gated clock (e.g.,
+                  <code>assign clk_g = clk AND enable;</code>) in an FPGA design?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q7fb', document.getElementById('q7'))"
+                  >
+                    <span>A</span> It uses too many LUT resources
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q7fb', document.getElementById('q7'))"
+                  >
+                    <span>B</span> BUFG cannot buffer a gated clock signal
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'q7fb', document.getElementById('q7'))"
+                  >
+                    <span>C</span> The AND gate creates glitches on the clock edge when enable
+                    changes, corrupting FF state
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'q7fb', document.getElementById('q7'))"
+                  >
+                    <span>D</span> Gated clocks cannot be analyzed by the static timing tool
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="q7fb">
+                  Correct! When <code>enable</code> transitions while <code>clk</code> is high, the
+                  expression <code>clk AND enable</code> produces a spurious glitch — a short pulse
+                  on the gated clock output. Flip-flops sensitive to that glitch will capture
+                  incorrect data, causing functional failures that are extremely difficult to debug.
+                  The FPGA solution is always to use clock enable inputs on the flip-flops
+                  themselves: <code>always @(posedge clk) if(enable) q &lt;= d;</code>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRACTICAL EXERCISE -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-tip">
+                <strong
+                  >Exercise — Configure an MMCM with Clocking Wizard and Write XDC
+                  Constraints</strong
+                >
+                Open Vivado and create a new IP project. In the IP Catalog, search for "Clocking
+                Wizard" and open it. Configure the MMCM with: Input frequency = 100 MHz, CLKOUT0 =
+                250 MHz, CLKOUT1 = 50 MHz. Record the M, D, O0, and O1 divider values that the
+                wizard selects. Verify the VCO frequency (100 × M / D) falls within 600–1200 MHz.
+                Note the estimated output jitter for each output.
+                <br /><br />
+                Then manually write the XDC constraints for this MMCM setup. Create a file
+                <code>clocks.xdc</code> with: (1) a <code>create_clock</code> for the 100 MHz input;
+                (2) a <code>create_generated_clock</code> for the 250 MHz output; (3) a
+                <code>create_generated_clock</code> for the 50 MHz output. Compare your XDC to the
+                one generated automatically by the Clocking Wizard IP — identify any differences and
+                understand why the wizard may add additional constraints you didn't write.
+              </div>
+            </div>
+          </section>
+
+          <!-- SUMMARY -->
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Summary
+              </h3>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  font-size: 0.9rem;
+                  line-height: 2.1;
+                  padding-left: 20px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  Clocks must use
+                  <strong style="color: var(--text-base)">dedicated H-tree networks</strong> to
+                  achieve &lt;100 ps skew — routing clocks through general fabric introduces 3–5 ns
+                  skew and is never acceptable
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">BUFG</strong> (32 per 7-series device)
+                  drives the full-chip clock network — use for all primary system clocks
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">BUFH</strong> drives one half of the chip
+                  (one clock region) — power-efficient for regional clocks
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">BUFIO</strong> drives ISERDES/OSERDES only
+                  — used exclusively for source-synchronous IO interfaces
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">MMCM</strong> (Mixed-Mode Clock Manager)
+                  provides frequency synthesis, phase adjustment, and 7 output clocks — always
+                  instantiate via Clocking Wizard IP
+                </li>
+                <li>
+                  <strong style="color: var(--text-base)">PLL</strong> is simpler than MMCM — use
+                  for minimum-jitter frequency multiplication without phase shift requirements
+                </li>
+                <li>
+                  Clock Domain Crossing (CDC) requires synchronizers: 2-FF synchronizer for single
+                  bits, async FIFO for data buses
+                </li>
+                <li>
+                  Run <strong style="color: var(--text-base)"><code>report_cdc</code></strong> after
+                  implementation to identify all CDC crossings and missing synchronizers
+                </li>
+                <li>
+                  XDC constraints: <code>create_clock</code> for primary clocks,
+                  <code>create_generated_clock</code> for derived clocks,
+                  <code>set_clock_groups -asynchronous</code> for unrelated domains
+                </li>
+                <li>Never use gated clocks in FPGA — use clock enables on flip-flops instead</li>
+              </ul>
+
+              <nav class="lesson-nav" aria-label="Lesson navigation">
+                <a href="14-routing-architecture.html">← Routing Architecture</a>
+                <a href="16-block-ram.html">Block RAM →</a>
+              </nav>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-15';
+      const TOTAL = 25;
+
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '✓ Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        renderCharts();
+      });
+
+      function renderCharts() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#374151';
+        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+        // MMCM VCO frequency range chart
+        // Show several M/D combinations and whether their VCO falls in range (600-1200 MHz)
+        // Input = 200 MHz
+        const inputFreq = 200;
+        const combos = [
+          { label: 'M=3, D=1', vco: (inputFreq * 3) / 1 },
+          { label: 'M=4, D=1', vco: (inputFreq * 4) / 1 },
+          { label: 'M=5, D=1', vco: (inputFreq * 5) / 1 },
+          { label: 'M=6, D=1', vco: (inputFreq * 6) / 1 },
+          { label: 'M=5, D=2', vco: (inputFreq * 5) / 2 },
+          { label: 'M=7, D=1', vco: (inputFreq * 7) / 1 },
+          { label: 'M=8, D=1', vco: (inputFreq * 8) / 1 },
+          { label: 'M=3, D=2', vco: (inputFreq * 3) / 2 },
+        ];
+
+        const inRange = combos.map(c => c.vco >= 600 && c.vco <= 1200);
+        const colors = inRange.map(v => (v ? '#22d3ee' : '#f87171'));
+        const status = inRange.map((v, i) =>
+          v ? combos[i].vco + ' MHz (OK)' : combos[i].vco + ' MHz (Out of range)'
+        );
+
+        Plotly.newPlot(
+          'chart-vco-range',
+          [
+            {
+              x: combos.map(c => c.label),
+              y: combos.map(c => c.vco),
+              type: 'bar',
+              marker: { color: colors, opacity: 0.85 },
+              text: status,
+              textposition: 'outside',
+              textfont: { size: 10, color: textColor },
+            },
+            {
+              x: [combos[0].label, combos[combos.length - 1].label],
+              y: [600, 600],
+              type: 'scatter',
+              mode: 'lines',
+              line: { color: '#f59e0b', dash: 'dash', width: 2 },
+              name: 'VCO Min (600 MHz)',
+            },
+            {
+              x: [combos[0].label, combos[combos.length - 1].label],
+              y: [1200, 1200],
+              type: 'scatter',
+              mode: 'lines',
+              line: { color: '#f59e0b', dash: 'dash', width: 2 },
+              name: 'VCO Max (1200 MHz)',
+            },
+          ],
+          {
+            title: {
+              text: 'MMCM VCO Frequency for Various M/D Combinations (F_IN = 200 MHz)',
+              font: { color: textColor, size: 13 },
+              x: 0.5,
+            },
+            xaxis: {
+              title: 'M/D Combination',
+              color: textColor,
+              tickfont: { color: textColor, size: 10 },
+              gridcolor: gridColor,
+            },
+            yaxis: {
+              title: 'VCO Frequency (MHz)',
+              color: textColor,
+              tickfont: { color: textColor },
+              gridcolor: gridColor,
+              range: [0, 1700],
+            },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: textColor, family: 'Inter,sans-serif' },
+            legend: {
+              font: { color: textColor, size: 11 },
+              bgcolor: 'transparent',
+              x: 0.6,
+              y: 0.95,
+            },
+            margin: { t: 55, b: 80, l: 70, r: 20 },
+            shapes: [
+              {
+                type: 'rect',
+                xref: 'paper',
+                yref: 'y',
+                x0: 0,
+                x1: 1,
+                y0: 600,
+                y1: 1200,
+                fillcolor: 'rgba(52,211,153,0.06)',
+                line: { width: 0 },
+              },
+            ],
+          },
+          { responsive: true }
+        );
+      }
+    </script>
+  </body>
+</html>

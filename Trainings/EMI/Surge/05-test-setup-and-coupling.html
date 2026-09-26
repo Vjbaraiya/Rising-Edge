@@ -1,0 +1,1525 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f97316" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="The complete IEC 61000-4-5 surge test bench explained component by component: surge generator, coupling/decoupling network, EUT, and ground reference plane, plus common-mode vs differential-mode coupling and line-line/line-ground/line-neutral/neutral-ground configurations."
+    />
+    <title>
+      Test Setup, CDN &amp; Coupling Methods | Surge Immunity Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Surge/05-test-setup-and-coupling.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        margin-top: 1rem;
+      }
+      .objective-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 14px;
+        text-align: center;
+      }
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .cat-card {
+        padding: 14px 10px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .cat-card.active {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.12);
+      }
+      .cat-card .emoji {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 6px;
+      }
+      .cat-card .name {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .toggle-tab {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #f97316;
+        border-color: #f97316;
+        color: #fff;
+      }
+      .canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+      }
+      .canvas-wrap canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-faint);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Surge Immunity (IEC 61000-4-5)
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction to Surge Immunity</a>
+          <a href="02-surge-sources.html" class="module-item">02. What Causes Surge</a>
+          <a href="03-propagation-and-waveforms.html" class="module-item"
+            >03. How Surge Travels &amp; Standard Waveforms</a
+          >
+          <a href="04-iec-61000-4-5-and-levels.html" class="module-item"
+            >04. IEC 61000-4-5, Test Levels &amp; Classes</a
+          >
+          <a href="05-test-setup-and-coupling.html" class="module-item active"
+            >05. Test Setup, CDN &amp; Coupling Methods</a
+          >
+          <a href="06-procedure-and-criteria.html" class="module-item"
+            >06. Test Procedure &amp; Pass/Fail Criteria</a
+          >
+          <a href="07-protection-components.html" class="module-item"
+            >07. Surge Protection Components</a
+          >
+          <a href="08-design-flow-and-interfaces.html" class="module-item"
+            >08. Design Flow &amp; Interface-Wise Protection</a
+          >
+          <a href="09-case-studies.html" class="module-item"
+            >09. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="10-wizard-calculators-and-project.html" class="module-item"
+            >10. Wizard, Calculators &amp; Final Project</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Surge Immunity (IEC 61000-4-5)</a><span>/</span>
+            <span>Test Setup, CDN &amp; Coupling Methods</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 5/10</span><span>50%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 05</div>
+              <h1 style="font-size: 2.2rem">Test Setup, CDN &amp; Coupling Methods</h1>
+              <p class="subtitle">
+                A surge test bench looks deceptively simple -- a generator, a box, some cables --
+                but every component exists to force the surge energy down one specific, repeatable
+                path into the equipment under test.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.25rem">Learning Objectives</h3>
+                <div class="objective-grid">
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🧰</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Identify every component of the surge test bench and its purpose
+                    </div>
+                  </div>
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔀</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Distinguish common-mode from differential-mode coupling
+                    </div>
+                  </div>
+                  <div class="objective-card">
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔌</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Recognize line-line, line-ground, line-neutral &amp; neutral-ground
+                      configurations
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1: Component deep dive -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span
+                    >Section 1: Complete Surge Test Bench -- Component-by-Component
+                    (Interactive)</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Click each component below to see its purpose, the physics behind it, and the
+                    common variants used in real test labs.
+                  </p>
+                  <figure style="margin: 0 0 1rem">
+                    <img
+                      src="image/test setup.jpg"
+                      alt="Complete IEC 61000-4-5 surge test setup circuit diagram showing the surge test generator with energy storage capacitor and spark gap switch, the coupling and decoupling networks, the EUT (solar inverter), the ground busbar, an HV differential probe, and an oscilloscope capturing the voltage and current waveforms"
+                      loading="lazy"
+                      style="
+                        width: 100%;
+                        max-width: 900px;
+                        border-radius: 10px;
+                        border: 1px solid var(--border);
+                        display: block;
+                      "
+                      onerror="this.parentElement.style.display = 'none'"
+                    />
+                    <figcaption
+                      style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px"
+                    >
+                      The complete bench, end to end: the surge generator's internal RLC network and
+                      spark-gap switch on the left, the coupling/decoupling network in the middle,
+                      the EUT bonded to a ground busbar, and the HV differential probe and
+                      oscilloscope capturing the delivered waveform on the right. Every component
+                      explored below is one piece of this same chain.
+                    </figcaption>
+                  </figure>
+                  <div class="cat-grid" id="deepGrid"></div>
+                  <div class="widget-container">
+                    <div class="canvas-wrap"><canvas id="deepCanvas"></canvas></div>
+                    <div id="deepDetail" style="margin-top: 1rem"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: CM vs DM -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Common-Mode vs Differential-Mode Coupling (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <div style="display: flex; gap: 8px; margin-bottom: 1rem">
+                    <button class="toggle-tab active" data-mode="cm" id="tabCM">
+                      Common-Mode (Line-to-Ground)
+                    </button>
+                    <button class="toggle-tab" data-mode="dm" id="tabDM">
+                      Differential-Mode (Line-to-Line)
+                    </button>
+                  </div>
+                  <div class="widget-container">
+                    <div class="canvas-wrap"><canvas id="cmdmCanvas"></canvas></div>
+                    <p
+                      id="cmdmCaption"
+                      style="
+                        font-size: 0.85rem;
+                        color: var(--text-sub);
+                        margin-top: 0.75rem;
+                        line-height: 1.6;
+                      "
+                    ></p>
+                  </div>
+                  <table class="data-table" style="margin-top: 1rem">
+                    <thead>
+                      <tr>
+                        <th>Aspect</th>
+                        <th>Common-Mode</th>
+                        <th>Differential-Mode</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Current path</td>
+                        <td>Both conductors to ground/earth, in phase</td>
+                        <td>Out and back between two conductors</td>
+                      </tr>
+                      <tr>
+                        <td>Typical source</td>
+                        <td>Lightning-induced ground potential rise, indirect strikes</td>
+                        <td>Switching transients, direct line coupling</td>
+                      </tr>
+                      <tr>
+                        <td>Protection component</td>
+                        <td>GDT or MOV line-to-ground</td>
+                        <td>MOV or TVS line-to-line</td>
+                      </tr>
+                      <tr>
+                        <td>Relative real-world frequency</td>
+                        <td>More common on outdoor / long cable runs</td>
+                        <td>More common indoors, closer to the switching source</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Section 3: Coupling configurations -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span
+                    >Section 3: Coupling Configurations on an AC Mains Circuit (Interactive)</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <div class="cat-grid" id="coupGrid"></div>
+                  <div class="widget-container">
+                    <div class="canvas-wrap"><canvas id="coupCanvas"></canvas></div>
+                    <div id="coupDetail" style="margin-top: 1rem"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 5 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #f97316; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 10%;
+                        background: linear-gradient(90deg, #f97316, #facc15);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="04-iec-61000-4-5-and-levels.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="06-procedure-and-criteria.html"
+                  >Next Lesson &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 12;
+        ctx.save();
+        ctx.font = '700 ' + fontPx + 'px Inter, sans-serif';
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        var metrics = ctx.measureText(text);
+        var padX = 6,
+          padY = 3;
+        var w = metrics.width + padX * 2;
+        var h = fontPx + padY * 2;
+        var lx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.85)' : 'rgba(10,14,20,0.75)';
+        ctx.fillRect(lx, y - h / 2, w, h);
+        ctx.fillStyle = inkColor(0.92);
+        ctx.fillText(text, x, y);
+        ctx.restore();
+      }
+      function roundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+      function setupCanvas(canvas) {
+        var wrap = canvas.parentElement;
+        var w = wrap.clientWidth,
+          h = wrap.clientHeight;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, w: w, h: h };
+      }
+    </script>
+
+    <!-- Section 1: Component deep dive -->
+    <script>
+      var DEEP_PARTS = [
+        {
+          name: 'Combination Wave Generator (CWG)',
+          purpose:
+            'Generates the surge itself: an open-circuit 1.2/50 microsecond voltage waveform that collapses to an 8/20 microsecond current waveform once it drives current into a low-impedance load, exactly reproducing the standard combination wave.',
+          physics:
+            "Internally an RLC network is charged to the test voltage, then discharged through a shaping network into the coupling network. The generator's internal 2-ohm source impedance is what defines the fixed 1.2/50 : 8/20 relationship between open-circuit voltage and short-circuit current.",
+          variants: [
+            'Bench-top single-phase CWG (most common, up to 6kV)',
+            'Three-phase CWG for simultaneous multi-line testing',
+            'High-current CWG variants for telecom/lightning-adjacent testing beyond 6kV',
+          ],
+          refImages: [
+            {
+              src: 'image/1.jpg',
+              alt: 'Real modular combination wave generator rack unit with high-voltage control panel, emergency stop, and an internal coupling/decoupling network module showing EUT power input/output terminals',
+              caption:
+                'A real bench-top combination wave generator: the upper unit holds the HV charging supply and control electronics (voltage setpoint, polarity, emergency stop); the lower panel is a plug-in coupling/decoupling network module with EUT power input and output terminals.',
+            },
+          ],
+        },
+        {
+          name: 'Coupling/Decoupling Network (CDN)',
+          purpose:
+            "Couples the surge energy from the generator onto the EUT's power or signal lines in a controlled way (line-line or line-ground), while decoupling the surge from the upstream AC/DC source so it is not damaged and does not absorb the surge.",
+          physics:
+            'Coupling capacitors (typically 9uF or 18uF for AC mains per line configuration) pass the fast surge energy onto the line while blocking 50/60Hz mains current; decoupling inductors/networks on the source side present high impedance to the surge, forcing it toward the EUT instead of back into the supply.',
+          variants: [
+            'CDN for AC/DC power ports (capacitive coupling)',
+            'CDN for unsymmetrical signal/telecom lines',
+            'CDN for symmetrical (balanced) lines such as twisted-pair telecom',
+            'Direct coupling (no CDN) for short unshielded I/O lines under 10 m',
+          ],
+          refImages: [
+            {
+              src: 'image/Decoupling-network.jpg',
+              alt: 'Schematic of a single-phase surge CDN showing the decoupling network with inductors and capacitors on L, N and PE, an 18 microfarad coupling capacitor from the combination wave generator, and the EUT connection',
+              caption:
+                'One standard schematic convention for a single-phase CDN: the decoupling network (left) blocks the surge from reaching the AC/DC source, while the 18µF coupling capacitor (top) injects the surge from the generator onto the line feeding the EUT.',
+            },
+            {
+              src: 'image/Test-setup.jpg',
+              alt: 'Alternate colored schematic of a decoupling network on an AC or DC power supply network, with L, N and PE lines, coupling inductors, a combination wave generator with Rext = 0 ohms, and a green EUT block',
+              caption:
+                "The same topology drawn with a different vendor's schematic convention -- same decoupling inductors and capacitors, same generator coupling path, same earth reference. Real datasheets and standards documents will not always draw a CDN identically.",
+            },
+          ],
+        },
+        {
+          name: 'Equipment Under Test (EUT)',
+          purpose:
+            'The product being qualified. It is powered and, where applicable, operating in its normal exercised mode during the test so that performance criteria (A, B, C, D) can be judged in real time.',
+          physics:
+            "The EUT's own input protection (MOV, TVS, GDT, filtering) is what is actually being validated -- the surge energy must be clamped or diverted before it reaches sensitive downstream ICs.",
+          variants: [
+            'AC-powered equipment (mains input)',
+            'DC-powered equipment (telecom, industrial 24V/48V)',
+            'Signal/data port equipment (Ethernet, RS-485, etc.)',
+          ],
+        },
+        {
+          name: 'Ground Reference Plane (GRP)',
+          purpose:
+            'A low-impedance metal reference plane beneath the test setup that all common-mode surge current returns through, ensuring the test is repeatable and matches real-world grounding conditions.',
+          physics:
+            'Without a well-defined, low-inductance ground return path, common-mode surge current would take an unpredictable path back to the generator, making test results non-repeatable between labs.',
+          variants: [
+            'Copper or galvanized-steel reference plane',
+            'Bonded to the CDN and generator per IEC 61000-4-5 grounding requirements',
+          ],
+          refImages: [
+            {
+              src: 'image/Ground Reference Plane (GRP).jpg',
+              alt: 'Wooden insulating test table with an EUT support surface bonded to a large metal ground reference plane on the floor beneath it, connected by a grounding cable',
+              caption:
+                "A real ground reference plane setup: the EUT sits on an insulating wooden table (per Module 04's test-level requirements) above a large metal floor plane, bonded together by the visible grounding cable -- the low-impedance return path every common-mode surge current takes.",
+            },
+          ],
+        },
+        {
+          name: 'Isolation Transformer / AC Source',
+          purpose:
+            "Powers the EUT while isolating the test bench mains supply from surge energy that could otherwise propagate back into the building's electrical system or damage lab equipment.",
+          physics:
+            "Transformer isolation combined with the CDN's decoupling inductors presents a high impedance path back toward the source at surge frequencies, so essentially all surge energy is forced toward the EUT side.",
+          variants: [
+            'Isolation transformer for AC mains testing',
+            'Isolated DC bench supply for DC-powered EUTs',
+            'Programmable AC source for combined power-quality + surge testing',
+          ],
+        },
+        {
+          name: 'Monitoring Oscilloscope &amp; Current Probe',
+          purpose:
+            'Captures the actual applied voltage and current waveforms at the EUT terminals for verification, and records EUT behavior (resets, error states, degraded operation) during the test for performance-criteria judgment.',
+          physics:
+            'A high-voltage differential probe measures the surge voltage waveform while a current probe (usually a wideband current transformer) captures the 8/20 microsecond current pulse -- both are needed to confirm the delivered surge matches the required test level within tolerance.',
+          variants: [
+            'High-voltage differential probe (>6kV rated)',
+            'Wideband current transformer/probe',
+            'Digital storage oscilloscope with sufficient bandwidth to resolve the 1.2 microsecond front time',
+          ],
+        },
+      ];
+      var currentDeepIdx = 0;
+      var deepCanvasStart = null;
+
+      function renderDeepGrid() {
+        var grid = document.getElementById('deepGrid');
+        var icons = ['⚡', '🔗', '📦', '🛡️', '🔌', '📟'];
+        var html = '';
+        DEEP_PARTS.forEach(function (p, i) {
+          html +=
+            '<div class="cat-card' +
+            (i === currentDeepIdx ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '"><span class="emoji">' +
+            icons[i] +
+            '</span><span class="name">' +
+            p.name +
+            '</span></div>';
+        });
+        grid.innerHTML = html;
+        grid.querySelectorAll('.cat-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            currentDeepIdx = parseInt(card.getAttribute('data-idx'));
+            deepCanvasStart = null;
+            renderDeepGrid();
+            renderDeepDetail();
+          });
+        });
+      }
+
+      function renderDeepDetail() {
+        var p = DEEP_PARTS[currentDeepIdx];
+        var html = '<h3 style="margin-bottom:0.75rem">' + p.name + '</h3>';
+        if (p.refImages && p.refImages.length) {
+          html += '<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:1rem">';
+          p.refImages.forEach(function (img) {
+            html +=
+              '<figure style="margin:0;flex:1 1 260px;max-width:420px">' +
+              '<img src="' +
+              img.src +
+              '" alt="' +
+              img.alt +
+              '" loading="lazy" style="width:100%;border-radius:10px;border:1px solid var(--border);display:block;background:#fff" onerror="this.parentElement.style.display=\'none\'" />' +
+              '<figcaption style="font-size:0.76rem;color:var(--text-muted);margin-top:5px;line-height:1.5">' +
+              img.caption +
+              '</figcaption>' +
+              '</figure>';
+          });
+          html += '</div>';
+        }
+        html +=
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7;margin-bottom:0.75rem"><strong>Purpose:</strong> ' +
+          p.purpose +
+          '</p>';
+        html +=
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7;margin-bottom:0.75rem"><strong>Physics:</strong> ' +
+          p.physics +
+          '</p>';
+        html +=
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7"><strong>Common variants:</strong></p><ul style="font-size:0.85rem;color:var(--text-sub);line-height:1.7;padding-left:1.2rem">';
+        p.variants.forEach(function (v) {
+          html += '<li>' + v + '</li>';
+        });
+        html += '</ul>';
+        document.getElementById('deepDetail').innerHTML = html;
+      }
+
+      function drawDeepDiagram(ts) {
+        var canvas = document.getElementById('deepCanvas');
+        if (!canvas) return;
+        var wrap = canvas.parentElement;
+        if (wrap.clientWidth === 0 || wrap.clientHeight === 0) {
+          requestAnimationFrame(drawDeepDiagram);
+          return;
+        }
+        var setup = setupCanvas(canvas);
+        var ctx = setup.ctx,
+          w = setup.w,
+          h = setup.h;
+        if (deepCanvasStart === null) deepCanvasStart = ts || performance.now();
+        var t = ((ts || performance.now()) - deepCanvasStart) / 1000;
+        ctx.clearRect(0, 0, w, h);
+        var cx = w / 2,
+          cy = h / 2;
+        var pulse = (Math.sin(t * 2.4) + 1) / 2;
+
+        if (currentDeepIdx === 0) {
+          // CWG: capacitor bank + RLC discharge into output
+          roundedRect(ctx, cx - 130, cy - 60, 100, 120, 8);
+          ctx.fillStyle = 'rgba(249,115,22,0.12)';
+          ctx.fill();
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          labelPlate(ctx, 'HV Charging', cx - 80, cy - 75, 'center', 11);
+          // capacitor symbol
+          ctx.strokeStyle = inkColor(0.85);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx - 95, cy - 15);
+          ctx.lineTo(cx - 65, cy - 15);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx - 95, cy + 15);
+          ctx.lineTo(cx - 65, cy + 15);
+          ctx.stroke();
+          ctx.fillStyle = '#facc15' + Math.round(120 + pulse * 100).toString(16);
+          ctx.fillRect(cx - 82, cy - 12, 4, 24);
+          ctx.fillRect(cx - 78, cy - 12, 4, 24);
+          // discharge line to output
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2 + pulse * 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 30, cy);
+          ctx.lineTo(cx + 90, cy);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(cx + 100, cy, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#f97316';
+          ctx.fill();
+          labelPlate(ctx, 'Combination Wave Generator', cx - 30, cy + 70, 'center', 12);
+          labelPlate(ctx, 'Output → CDN', cx + 100, cy - 22, 'center', 10);
+        } else if (currentDeepIdx === 1) {
+          // CDN: coupling capacitor + decoupling inductor
+          ctx.strokeStyle = inkColor(0.8);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 140, cy - 30);
+          ctx.lineTo(cx + 140, cy - 30);
+          ctx.stroke();
+          // decoupling inductor (coil) on source side
+          ctx.beginPath();
+          for (var i = 0; i < 5; i++) {
+            ctx.arc(cx - 90 + i * 12, cy - 30, 6, Math.PI, 0, false);
+          }
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          labelPlate(ctx, 'Decoupling (to source)', cx - 90, cy - 55, 'center', 10);
+          // coupling capacitor toward EUT
+          var capGlow = Math.round(120 + pulse * 100).toString(16);
+          ctx.strokeStyle = inkColor(0.85);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx + 60, cy - 45);
+          ctx.lineTo(cx + 60, cy - 15);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx + 72, cy - 45);
+          ctx.lineTo(cx + 72, cy - 15);
+          ctx.stroke();
+          ctx.fillStyle = '#f97316' + capGlow;
+          ctx.fillRect(cx + 56, cy - 42, 4, 24);
+          ctx.fillRect(cx + 68, cy - 42, 4, 24);
+          labelPlate(ctx, 'Coupling Cap → EUT', cx + 66, cy - 60, 'center', 10);
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 140, cy + 30);
+          ctx.lineTo(cx + 140, cy + 30);
+          ctx.stroke();
+          labelPlate(ctx, 'Neutral / Return', cx, cy + 50, 'center', 10);
+          labelPlate(ctx, 'Coupling / Decoupling Network (CDN)', cx, cy - 80, 'center', 12);
+        } else if (currentDeepIdx === 2) {
+          // EUT box with internal protection
+          roundedRect(ctx, cx - 60, cy - 55, 160, 110, 10);
+          ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.05)' : 'rgba(255,255,255,0.06)';
+          ctx.fill();
+          ctx.strokeStyle = inkColor(0.7);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.fillStyle = inkColor(0.5);
+          ctx.fillRect(cx - 40, cy - 30, 30, 8);
+          ctx.fillRect(cx - 40, cy - 12, 60, 4);
+          ctx.fillRect(cx - 40, cy - 2, 60, 4);
+          labelPlate(ctx, 'EUT internals', cx + 15, cy - 26, 'center', 10);
+          // input protection glowing
+          ctx.beginPath();
+          ctx.arc(cx - 90, cy, 10 + pulse * 3, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(239,68,68,' + (0.25 + pulse * 0.3) + ')';
+          ctx.fill();
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          labelPlate(ctx, 'Input Protection', cx - 90, cy - 22, 'center', 10);
+          ctx.strokeStyle = inkColor(0.7);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 140, cy);
+          ctx.lineTo(cx - 100, cy);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx - 80, cy);
+          ctx.lineTo(cx - 60, cy);
+          ctx.stroke();
+          labelPlate(ctx, 'Equipment Under Test (EUT)', cx, cy + 75, 'center', 12);
+        } else if (currentDeepIdx === 3) {
+          // Ground reference plane
+          roundedRect(ctx, cx - 150, cy + 40, 300, 14, 3);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fill();
+          labelPlate(ctx, 'Ground Reference Plane', cx, cy + 47, 'center', 11);
+          for (var b = -2; b <= 2; b++) {
+            ctx.beginPath();
+            ctx.moveTo(cx + b * 50, cy + 40);
+            ctx.lineTo(cx + b * 50, cy - 30);
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 1.5 + pulse;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx + b * 50, cy - 30, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#f97316';
+            ctx.fill();
+          }
+          labelPlate(ctx, 'Common-mode return current bonds', cx, cy - 55, 'center', 11);
+        } else if (currentDeepIdx === 4) {
+          // Isolation transformer
+          ctx.strokeStyle = inkColor(0.8);
+          ctx.lineWidth = 2;
+          for (var wi = 0; wi < 6; wi++) {
+            ctx.beginPath();
+            ctx.arc(cx - 55, cy - 40 + wi * 16, 8, Math.PI / 2, -Math.PI / 2, true);
+            ctx.stroke();
+          }
+          for (var wj = 0; wj < 6; wj++) {
+            ctx.beginPath();
+            ctx.arc(cx + 15, cy - 40 + wj * 16, 8, -Math.PI / 2, Math.PI / 2, true);
+            ctx.stroke();
+          }
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(cx - 20, cy - 55);
+          ctx.lineTo(cx - 20, cy + 55);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx - 10, cy - 55);
+          ctx.lineTo(cx - 10, cy + 55);
+          ctx.stroke();
+          labelPlate(ctx, 'Mains In', cx - 100, cy, 'center', 10);
+          labelPlate(ctx, 'Isolated Out → EUT', cx + 90, cy, 'center', 10);
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2 + pulse;
+          ctx.beginPath();
+          ctx.moveTo(cx + 45, cy);
+          ctx.lineTo(cx + 75, cy);
+          ctx.stroke();
+          labelPlate(ctx, 'Isolation Transformer', cx, cy + 75, 'center', 12);
+        } else {
+          // Oscilloscope + probe
+          roundedRect(ctx, cx - 90, cy - 55, 180, 110, 8);
+          ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.05)' : 'rgba(255,255,255,0.06)';
+          ctx.fill();
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          roundedRect(ctx, cx - 75, cy - 40, 150, 65, 4);
+          ctx.fillStyle = isLightTheme() ? '#e2f5ea' : '#062a17';
+          ctx.fill();
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(cx - 75, cy - 40, 150, 65);
+          ctx.clip();
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (var xx = -75; xx <= 75; xx += 2) {
+            var tt = (xx + t * 60) * 0.05;
+            var yy = -Math.exp(-Math.max(0, (tt % 8) - 0.2) * 1.2) * Math.sin(tt * 3) * 22;
+            if (xx === -75) ctx.moveTo(cx + xx, cy - 8 + yy);
+            else ctx.lineTo(cx + xx, cy - 8 + yy);
+          }
+          ctx.stroke();
+          ctx.restore();
+          labelPlate(ctx, 'V(t) & I(t) capture', cx, cy - 60, 'center', 10);
+          labelPlate(ctx, 'Monitoring Oscilloscope + Current Probe', cx, cy + 75, 'center', 12);
+        }
+        requestAnimationFrame(drawDeepDiagram);
+      }
+
+      renderDeepGrid();
+      renderDeepDetail();
+      requestAnimationFrame(drawDeepDiagram);
+      window.addEventListener('resize', function () {
+        deepCanvasStart = null;
+      });
+    </script>
+
+    <!-- Section 2: CM vs DM -->
+    <script>
+      var cmdmMode = 'cm';
+      var cmdmStart = null;
+      var CMDM_CAPTIONS = {
+        cm: 'Common-mode: the surge drives both the line and neutral conductors positively with respect to ground, and the return current flows through the ground reference plane. This is the dominant coupling mode for lightning-induced transients on long outdoor cable runs.',
+        dm: 'Differential-mode: the surge appears directly between two active conductors (e.g. line and neutral), with the current flowing out on one conductor and back on the other -- no ground path is involved. This mode is typical of switching transients generated close to the equipment.',
+      };
+
+      function drawCMDM(ts) {
+        var canvas = document.getElementById('cmdmCanvas');
+        if (!canvas) return;
+        var wrap = canvas.parentElement;
+        if (wrap.clientWidth === 0 || wrap.clientHeight === 0) {
+          requestAnimationFrame(drawCMDM);
+          return;
+        }
+        var setup = setupCanvas(canvas);
+        var ctx = setup.ctx,
+          w = setup.w,
+          h = setup.h;
+        if (cmdmStart === null) cmdmStart = ts || performance.now();
+        var t = ((ts || performance.now()) - cmdmStart) / 1000;
+        ctx.clearRect(0, 0, w, h);
+        var cx = w / 2,
+          cy = h / 2;
+        var flow = (t * 80) % 200;
+
+        // Two conductors
+        ctx.strokeStyle = inkColor(0.75);
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(cx - 160, cy - 40);
+        ctx.lineTo(cx + 160, cy - 40);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - 160, cy + 10);
+        ctx.lineTo(cx + 160, cy + 10);
+        ctx.stroke();
+        labelPlate(ctx, 'Line', cx - 175, cy - 40, 'right', 10);
+        labelPlate(ctx, 'Neutral', cx - 175, cy + 10, 'right', 10);
+
+        // ground plane
+        roundedRect(ctx, cx - 160, cy + 65, 320, 10, 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fill();
+        labelPlate(ctx, 'Ground Reference Plane', cx, cy + 70, 'center', 10);
+
+        if (cmdmMode === 'cm') {
+          // both conductors driven positive relative to ground; current returns via ground
+          for (var i = 0; i < 3; i++) {
+            var xpos = cx - 140 + ((flow + i * 66) % 280);
+            ctx.beginPath();
+            ctx.arc(xpos, cy - 40, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#f97316';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(xpos, cy + 10, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#f97316';
+            ctx.fill();
+          }
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx + 140, cy - 40);
+          ctx.lineTo(cx + 140, cy + 65);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx + 140, cy + 10);
+          ctx.lineTo(cx + 140, cy + 65);
+          ctx.stroke();
+          labelPlate(ctx, 'Return via ground', cx + 140, cy + 40, 'center', 9);
+        } else {
+          // current out on line, back on neutral
+          for (var j = 0; j < 3; j++) {
+            var xp = cx - 140 + ((flow + j * 66) % 280);
+            ctx.beginPath();
+            ctx.arc(xp, cy - 40, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#3b82f6';
+            ctx.fill();
+            var xp2 = cx + 140 - ((flow + j * 66) % 280);
+            ctx.beginPath();
+            ctx.arc(xp2, cy + 10, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#3b82f6';
+            ctx.fill();
+          }
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx + 160, cy - 40);
+          ctx.lineTo(cx + 175, cy - 15);
+          ctx.lineTo(cx + 160, cy + 10);
+          ctx.stroke();
+          labelPlate(ctx, 'Loop closes line ↔ neutral', cx + 175, cy - 55, 'center', 9);
+        }
+
+        requestAnimationFrame(drawCMDM);
+      }
+
+      document.getElementById('tabCM').addEventListener('click', function () {
+        cmdmMode = 'cm';
+        document.getElementById('tabCM').classList.add('active');
+        document.getElementById('tabDM').classList.remove('active');
+        document.getElementById('cmdmCaption').textContent = CMDM_CAPTIONS.cm;
+      });
+      document.getElementById('tabDM').addEventListener('click', function () {
+        cmdmMode = 'dm';
+        document.getElementById('tabDM').classList.add('active');
+        document.getElementById('tabCM').classList.remove('active');
+        document.getElementById('cmdmCaption').textContent = CMDM_CAPTIONS.dm;
+      });
+      document.getElementById('cmdmCaption').textContent = CMDM_CAPTIONS.cm;
+      requestAnimationFrame(drawCMDM);
+      window.addEventListener('resize', function () {
+        cmdmStart = null;
+      });
+    </script>
+
+    <!-- Section 3: Coupling configurations -->
+    <script>
+      var COUPLINGS = [
+        {
+          name: 'Line-to-Line',
+          mode: 'dm',
+          desc: 'Surge applied between two active line conductors (e.g. L1 to L2, or Line to Neutral on single-phase). This is a pure differential-mode test representing switching transients and directly-coupled line disturbances.',
+        },
+        {
+          name: 'Line-to-Ground',
+          mode: 'cm',
+          desc: 'Surge applied between a line conductor and protective earth/ground. This is a common-mode test representing lightning-induced ground potential rise and indirect strike coupling.',
+        },
+        {
+          name: 'Line-to-Neutral',
+          mode: 'dm',
+          desc: 'A specific case of line-to-line coupling on single-phase AC circuits, applied between the live/line conductor and the neutral conductor.',
+        },
+        {
+          name: 'Neutral-to-Ground',
+          mode: 'cm',
+          desc: 'Surge applied between the neutral conductor and protective earth. Often required in addition to line-to-ground since neutral is not always at the same potential as ground during a surge event.',
+        },
+      ];
+      var currentCoup = 0;
+      var coupStart = null;
+
+      function renderCoupGrid() {
+        var grid = document.getElementById('coupGrid');
+        var icons = ['↔️', '⏚', '↔️', '⏚'];
+        var html = '';
+        COUPLINGS.forEach(function (c, i) {
+          html +=
+            '<div class="cat-card' +
+            (i === currentCoup ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '"><span class="emoji">' +
+            icons[i] +
+            '</span><span class="name">' +
+            c.name +
+            '</span></div>';
+        });
+        grid.innerHTML = html;
+        grid.querySelectorAll('.cat-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            currentCoup = parseInt(card.getAttribute('data-idx'));
+            coupStart = null;
+            renderCoupGrid();
+            renderCoupDetail();
+          });
+        });
+      }
+
+      function renderCoupDetail() {
+        var c = COUPLINGS[currentCoup];
+        document.getElementById('coupDetail').innerHTML =
+          '<h3 style="margin-bottom:0.5rem">' +
+          c.name +
+          '</h3>' +
+          '<p style="font-size:0.85rem;color:var(--text-sub);line-height:1.7">' +
+          c.desc +
+          ' <strong>Mode:</strong> ' +
+          (c.mode === 'cm' ? 'Common-mode' : 'Differential-mode') +
+          '.</p>';
+      }
+
+      function drawCoupDiagram(ts) {
+        var canvas = document.getElementById('coupCanvas');
+        if (!canvas) return;
+        var wrap = canvas.parentElement;
+        if (wrap.clientWidth === 0 || wrap.clientHeight === 0) {
+          requestAnimationFrame(drawCoupDiagram);
+          return;
+        }
+        var setup = setupCanvas(canvas);
+        var ctx = setup.ctx,
+          w = setup.w,
+          h = setup.h;
+        if (coupStart === null) coupStart = ts || performance.now();
+        var t = ((ts || performance.now()) - coupStart) / 1000;
+        ctx.clearRect(0, 0, w, h);
+        var cx = w / 2,
+          cy = h / 2;
+        var pulse = (Math.sin(t * 3) + 1) / 2;
+
+        var lines = [
+          { y: cy - 60, label: 'L1' },
+          { y: cy - 20, label: 'L2 / Line' },
+          { y: cy + 20, label: 'Neutral' },
+        ];
+        ctx.strokeStyle = inkColor(0.7);
+        ctx.lineWidth = 2;
+        lines.forEach(function (l) {
+          ctx.beginPath();
+          ctx.moveTo(cx - 160, l.y);
+          ctx.lineTo(cx + 160, l.y);
+          ctx.stroke();
+          labelPlate(ctx, l.label, cx - 175, l.y, 'right', 9);
+        });
+        roundedRect(ctx, cx - 160, cy + 60, 320, 10, 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fill();
+        labelPlate(ctx, 'Ground / Earth', cx, cy + 65, 'center', 10);
+
+        var c = COUPLINGS[currentCoup];
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2 + pulse * 2;
+        ctx.setLineDash([6, 4]);
+        if (c.name === 'Line-to-Line') {
+          ctx.beginPath();
+          ctx.moveTo(cx + 40, cy - 60);
+          ctx.lineTo(cx + 40, cy - 20);
+          ctx.stroke();
+        } else if (c.name === 'Line-to-Ground') {
+          ctx.beginPath();
+          ctx.moveTo(cx + 40, cy - 20);
+          ctx.lineTo(cx + 40, cy + 60);
+          ctx.stroke();
+        } else if (c.name === 'Line-to-Neutral') {
+          ctx.beginPath();
+          ctx.moveTo(cx + 40, cy - 20);
+          ctx.lineTo(cx + 40, cy + 20);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(cx + 40, cy + 20);
+          ctx.lineTo(cx + 40, cy + 60);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.arc(cx + 40, cy - 60, 5 + pulse * 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#facc15';
+        ctx.fill();
+        labelPlate(ctx, 'Surge applied: ' + c.name, cx, cy - 95, 'center', 11);
+
+        requestAnimationFrame(drawCoupDiagram);
+      }
+
+      renderCoupGrid();
+      renderCoupDetail();
+      requestAnimationFrame(drawCoupDiagram);
+      window.addEventListener('resize', function () {
+        coupStart = null;
+      });
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What waveform does the Combination Wave Generator produce on open circuit?',
+          opts: [
+            '1.2/50 microsecond voltage waveform',
+            '8/20 microsecond voltage waveform',
+            'A continuous sine wave',
+            'A square wave',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is the purpose of the decoupling network within the CDN?',
+          opts: [
+            'To present high impedance to the surge so it is forced toward the EUT rather than back into the source',
+            'To increase the surge energy delivered to the EUT',
+            'To convert AC to DC',
+            'To measure the EUT temperature',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is a ground reference plane required in the test setup?',
+          opts: [
+            'It provides a low-impedance, repeatable return path for common-mode surge current',
+            'It powers the EUT',
+            'It replaces the need for a CDN',
+            'It is only used for ESD testing, not surge testing',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is the role of the isolation transformer in a surge test bench?',
+          opts: [
+            'Isolates the building mains supply from surge energy so it does not propagate back into the lab electrical system',
+            'Generates the surge waveform itself',
+            'Replaces the ground reference plane',
+            'Measures the surge current',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What distinguishes common-mode coupling from differential-mode coupling?',
+          opts: [
+            'Common-mode current returns through ground; differential-mode current flows out on one conductor and back on another',
+            'Common-mode only applies to DC circuits',
+            'Differential-mode always uses a higher test voltage',
+            'There is no real difference between the two',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Which coupling mode is most representative of lightning-induced ground potential rise on long outdoor cable runs?',
+          opts: [
+            'Common-mode',
+            'Differential-mode',
+            'Neither mode applies to lightning',
+            'Only relevant to ESD testing',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Which coupling mode is more typical of switching transients generated close to the equipment?',
+          opts: [
+            'Differential-mode',
+            'Common-mode',
+            'Radiated coupling only',
+            'Capacitive coupling only',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What does "Line-to-Neutral" coupling represent?',
+          opts: [
+            'A specific case of differential-mode (line-to-line) coupling on single-phase AC circuits',
+            'A common-mode coupling that always bypasses the CDN',
+            'A test applicable only to DC power ports',
+            'A configuration that does not require a CDN',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why might Neutral-to-Ground testing be required in addition to Line-to-Ground?',
+          opts: [
+            'Neutral is not always at the same potential as ground during a surge event',
+            'Neutral and ground are always electrically identical',
+            'Neutral-to-Ground testing replaces Line-to-Line testing entirely',
+            'It is only relevant for ESD, not surge, testing',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What two waveforms does the monitoring oscilloscope and current probe verify at the EUT terminals?',
+          opts: [
+            'The applied voltage waveform and the resulting current waveform',
+            'Only the ambient room temperature',
+            'Only the mains frequency',
+            'Only the EUT firmware version',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why must coupling capacitors in the CDN pass surge energy while blocking 50/60 Hz mains current?',
+          opts: [
+            'So the surge reaches the EUT while normal AC mains operation of the EUT is undisturbed during the test',
+            'So the mains supply is permanently disconnected during testing',
+            'So the EUT is isolated from the surge entirely',
+            'Coupling capacitors have no functional role in a CDN',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is a typical variant of the CWG used for testing multiple lines simultaneously?',
+          opts: [
+            'A three-phase Combination Wave Generator',
+            'A single-diode rectifier',
+            'A basic multimeter',
+            'An oscilloscope probe',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0,
+          score = 0,
+          answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#f97316';
+              dot.style.borderColor = '#f97316';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

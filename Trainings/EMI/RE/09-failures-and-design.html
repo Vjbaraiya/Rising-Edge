@@ -1,0 +1,2083 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Common RE failure root causes, PCB and cable design techniques to reduce emissions, and a structured troubleshooting methodology -- with animated before/after diagrams and interactive Plotly charts."
+    />
+    <title>
+      Failure Mechanisms, Design &amp; Troubleshooting | Radiated Emissions (RE) Testing Academy |
+      Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/RE/09-failures-and-design.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      /* Numbered step indicator for procedure lists (matches Module 08) */
+      .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: step-counter;
+      }
+      .step-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+      }
+      .step-list li:last-child {
+        border-bottom: none;
+      }
+      .step-num {
+        counter-increment: step-counter;
+        flex-shrink: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--primary-500, #3b82f6);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .step-num::before {
+        content: counter(step-counter);
+      }
+      /* Problem -> Fix row */
+      .fix-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+      .fix-row:last-child {
+        border-bottom: none;
+      }
+      .fix-problem {
+        color: var(--danger, #f87171);
+      }
+      .fix-arrow {
+        color: var(--text-muted);
+        font-weight: 700;
+      }
+      .fix-solution {
+        color: var(--success, #34d399);
+      }
+      .icon-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .icon-strip-item {
+        text-align: center;
+        padding: 14px 8px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-alt);
+      }
+      .icon-strip-item svg {
+        width: 34px;
+        height: 34px;
+        margin-bottom: 6px;
+      }
+      .icon-strip-item span {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--text-sub);
+      }
+      .toggle-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .toggle-tab {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: var(--cyan, #06b6d4);
+        color: #fff;
+        border-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Radiated Emissions (RE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Are Radiated Emissions</a
+          >
+          <a href="02-spectrum-and-importance.html" class="module-item"
+            >02. EM Spectrum &amp; Why RE Testing Matters</a
+          >
+          <a href="03-sources.html" class="module-item">03. Sources of Radiated Emissions</a>
+          <a href="04-test-types.html" class="module-item">04. Types of RE Testing</a>
+          <a href="05-frequency-and-standards.html" class="module-item"
+            >05. Frequency Ranges &amp; RE Standards</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. RE Requirements by Product Category</a
+          >
+          <a href="07-environment-and-equipment.html" class="module-item"
+            >07. Test Environment &amp; Equipment</a
+          >
+          <a href="08-setup-and-measurement.html" class="module-item"
+            >08. Test Setup, Measurement &amp; Detectors</a
+          >
+          <a href="09-failures-and-design.html" class="module-item active"
+            >09. Failure Mechanisms, Design &amp; Troubleshooting</a
+          >
+          <a href="10-case-study-and-best-practices.html" class="module-item"
+            >10. Case Study, Best Practices &amp; Summary</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies (FPGA, Power Supply &amp; More)</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Radiated Emissions (RE) Testing</a><span>/</span>
+            <span>Failure Mechanisms, Design &amp; Troubleshooting</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 9/10</span><span>90%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 90%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 09</div>
+              <h1 style="font-size: 2.2rem">Failure Mechanisms, Design &amp; Troubleshooting</h1>
+              <p class="subtitle">
+                Nearly every RE failure traces back to one of a small set of root causes on the PCB
+                or cable. This module pairs each common failure mechanism with an animated
+                before/after diagram of the design fix that addresses it, then lays out a
+                systematic, animated troubleshooting methodology for a board that has already failed
+                &mdash; backed by real-style spectrum graphs and the actual near-field debug
+                equipment used on the bench.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Section 1: Failure mechanisms overview table -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: Common Failure Mechanisms &amp; Their Design Fixes</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.25rem;
+                    "
+                  >
+                    Every entry on the left is a root cause seen repeatedly in pre-compliance RE
+                    failures; the entry on the right is the design technique that most directly
+                    addresses it. The animated diagrams further down physically show why each fix
+                    works, not just that it works.
+                  </p>
+                  <div class="fix-row">
+                    <div class="fix-problem">Poor PCB stack-up</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Ensure proper PCB layer stack-up</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Large current loops</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Minimize loop areas</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Inadequate decoupling</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">
+                      Place decoupling capacitors close to IC power pins
+                    </div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Long high-speed traces</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Maintain controlled impedance traces</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Split ground planes</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Use continuous ground planes</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Floating copper regions</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">
+                      Avoid routing high-speed signals across ground splits
+                    </div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Unshielded cables</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Shield noisy sections of the design</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">High clock edge rates</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Reduce clock edge rates where possible</div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Common-mode currents on cables</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">
+                      Filter cable interfaces with common-mode chokes or ferrites
+                    </div>
+                  </div>
+                  <div class="fix-row">
+                    <div class="fix-problem">Poor enclosure shielding</div>
+                    <div class="fix-arrow">&rarr;</div>
+                    <div class="fix-solution">Terminate high-speed interfaces correctly</div>
+                  </div>
+
+                  <div class="info-box" style="margin-top: 1rem">
+                    These pairings are not one-to-one in practice &mdash; a single failure like
+                    "unshielded cables" is often fixed by a combination of cable shielding,
+                    common-mode chokes, and improved cable grounding together. Treat the table above
+                    as the starting point for diagnosis, not an exhaustive checklist.
+                  </div>
+
+                  <!-- Plotly: dB improvement per fix -->
+                  <div class="widget-container" style="margin-top: 1.5rem">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Interactive: Typical Emission Reduction by Fix
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      Approximate real-world dB reduction seen at the offending frequency after
+                      applying each fix in isolation on a typical digital board. Actual results vary
+                      by board, but the relative ranking is consistent across designs &mdash; loop
+                      area and ground continuity fixes tend to yield the largest single gains.
+                    </p>
+                    <div id="plotlyFixImpact" style="width: 100%; height: 320px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Loop area animation -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secLoop">
+                  <span>Section 2: How Minimizing Loop Area Reduces Emissions</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secLoop">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.25rem;
+                    "
+                  >
+                    Radiated field strength from a current loop scales with the loop's enclosed
+                    area. A sprawling trace routed far from its return path (large loop) radiates
+                    far more than the same signal routed directly above a solid ground plane (small,
+                    tight loop) &mdash; even though both carry the identical current.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Bad Layout vs. Good Layout, Same Signal
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="loopFixDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Decoupling / stack-up animation -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secDecoupling">
+                  <span
+                    >Section 3: How Decoupling Capacitors &amp; PCB Stack-up Suppress Noise</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secDecoupling">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.25rem;
+                    "
+                  >
+                    Every digital IC draws current in short, sharp pulses as its internal gates
+                    switch. Without a decoupling capacitor placed right at the power pin, that pulse
+                    has to travel all the way back to the board's bulk supply and back &mdash; a
+                    large loop that radiates strongly. A capacitor placed within a few millimeters
+                    of the pin supplies that current locally instead, collapsing the loop to almost
+                    nothing. A proper 4-layer stack-up (signal / ground / power / signal) gives
+                    every trace a solid, adjacent return plane so this local decoupling actually
+                    works.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: IC Switching Current Path, With and Without Local Decoupling
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="decouplingDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                  <div class="widget-container" style="margin-top: 1.5rem">
+                    <h3 style="margin-bottom: 0.5rem">Animated: 4-Layer PCB Stack-up</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      Each signal layer sits directly adjacent to a solid reference plane, giving
+                      every trace a tightly coupled, low-impedance return path immediately beneath
+                      it.
+                    </p>
+                    <div style="position: relative; width: 100%; height: 220px">
+                      <canvas
+                        id="stackupDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: Ground plane split animation -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secGround">
+                  <span>Section 4: How a Split Ground Plane Creates an Antenna</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secGround">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.25rem;
+                    "
+                  >
+                    When a high-speed signal's return current reaches a slot or split in the ground
+                    plane beneath it, it can't continue in a straight line back to the source. It is
+                    forced to detour around the slot &mdash; creating exactly the large,
+                    uncontrolled current loop Section 2 warned about, and turning the slot edges
+                    into an unintentional slot antenna.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Return Current Detouring Around a Ground Split
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="groundSplitDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 5: Cable shielding / common-mode choke animation -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secCable">
+                  <span>Section 5: How Shielding &amp; Common-Mode Chokes Fix Cable Radiation</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secCable">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.25rem;
+                    "
+                  >
+                    An unshielded cable with even a small common-mode current riding on it can
+                    radiate more than the entire PCB it's attached to, because the cable is often
+                    physically much longer than the internal loop &mdash; approaching a resonant
+                    antenna length at the frequencies of interest. A ferrite common-mode choke adds
+                    high impedance specifically to that common-mode current (while leaving the
+                    wanted differential signal untouched), and a shield tied to chassis ground at
+                    both ends gives the common-mode current a much shorter path back than the cable
+                    itself.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Cable Radiation, Unfiltered vs. Ferrite + Shield
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="cableFixDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 6: Troubleshooting methodology -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secTrouble">
+                  <span>Section 6: The Six-Step Troubleshooting Methodology</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secTrouble">
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.75rem">Troubleshooting Methodology</h3>
+                    <ol class="step-list" id="troubleStepList">
+                      <li data-step="1">
+                        <span class="step-num"></span> Identify the failing frequency from the
+                        compliance scan.
+                      </li>
+                      <li data-step="2">
+                        <span class="step-num"></span> Correlate the frequency to potential clock
+                        sources or harmonics.
+                      </li>
+                      <li data-step="3">
+                        <span class="step-num"></span> Use near-field probes to localize the
+                        emission source on the board.
+                      </li>
+                      <li data-step="4">
+                        <span class="step-num"></span> Evaluate PCB layout, return paths, and cable
+                        routing at that location.
+                      </li>
+                      <li data-step="5">
+                        <span class="step-num"></span> Apply temporary mitigation (ferrites,
+                        shielding, filtering) to isolate the cause.
+                      </li>
+                      <li data-step="6">
+                        <span class="step-num"></span> Validate improvements through iterative
+                        pre-compliance testing.
+                      </li>
+                    </ol>
+                  </div>
+
+                  <!-- Animated near-field probe scan -->
+                  <div class="widget-container" style="margin-top: 1.5rem">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Near-Field Probe Scanning for the Hotspot
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      The probe sweeps across the board while the live reading spikes directly over
+                      the clock driver &mdash; exactly how Step 3 physically pinpoints a source once
+                      the failing frequency and likely clock harmonic are already known.
+                    </p>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="probeScanDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+
+                  <div class="tip-box" style="margin-top: 1rem">
+                    This same six-step methodology is applied to the real case study you'll see in
+                    Module 10 &mdash; a networking board failing at 300 MHz, traced back to a clock
+                    harmonic and a broken return path beneath the routing.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 7: Before/after spectrum -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secSpectrum">
+                  <span>Section 7: Real Graph &mdash; Before/After Mitigation Spectrum</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secSpectrum">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    A realistic EMI-receiver-style trace showing the same board before and after
+                    applying the Section 2&ndash;5 fixes together. Toggle between the two traces to
+                    see exactly how much margin was recovered at the failing harmonic against the
+                    CISPR Class B limit line.
+                  </p>
+                  <div class="widget-container">
+                    <div class="toggle-tabs">
+                      <button class="toggle-tab active" data-view="both" id="tabBoth">Both</button>
+                      <button class="toggle-tab" data-view="before" id="tabBefore">
+                        Before Fix
+                      </button>
+                      <button class="toggle-tab" data-view="after" id="tabAfter">After Fix</button>
+                    </div>
+                    <div id="plotlyBeforeAfter" style="width: 100%; height: 340px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 8: Troubleshooting equipment -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secEquip">
+                  <span>Section 8: Typical Troubleshooting Equipment</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secEquip">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 0.5rem;
+                    "
+                  >
+                    Bench-level debug uses a different, cheaper equipment set than the chamber
+                    itself &mdash; the goal here is localizing and iterating quickly, not producing
+                    a compliance-grade absolute measurement.
+                  </p>
+                  <div class="icon-strip">
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect
+                          x="18"
+                          y="6"
+                          width="12"
+                          height="20"
+                          rx="4"
+                          stroke="#22d3ee"
+                          stroke-width="2"
+                        />
+                        <path d="M24 26v10" stroke="#22d3ee" stroke-width="2" />
+                        <path d="M14 40h20" stroke="#22d3ee" stroke-width="2" />
+                      </svg>
+                      <span>Near-Field Probe Set</span>
+                    </div>
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect
+                          x="4"
+                          y="10"
+                          width="40"
+                          height="26"
+                          rx="2"
+                          stroke="#8b5cf6"
+                          stroke-width="2"
+                        />
+                        <path
+                          d="M6 30l4-14 6 18 6-20 6 16 6-10 6 6"
+                          stroke="#8b5cf6"
+                          stroke-width="1.5"
+                          fill="none"
+                        />
+                      </svg>
+                      <span>Spectrum Analyzer</span>
+                    </div>
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="12" stroke="#f59e0b" stroke-width="2" />
+                        <path
+                          d="M24 6v6M24 36v6M6 24h6M36 24h6"
+                          stroke="#f59e0b"
+                          stroke-width="2"
+                        />
+                      </svg>
+                      <span>Current Probe</span>
+                    </div>
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="24" cy="24" rx="9" ry="14" stroke="#4cdf8b" stroke-width="2" />
+                        <path d="M6 24h9M33 24h9" stroke="#4cdf8b" stroke-width="2" />
+                      </svg>
+                      <span>Ferrite Clamp Kit</span>
+                    </div>
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect
+                          x="4"
+                          y="8"
+                          width="40"
+                          height="24"
+                          rx="2"
+                          stroke="#06b6d4"
+                          stroke-width="2"
+                        />
+                        <path
+                          d="M8 24c3-8 5 8 8 0s5-8 8 0 5-8 8 0 5-8 8 0"
+                          stroke="#06b6d4"
+                          stroke-width="1.3"
+                          fill="none"
+                        />
+                        <path d="M12 36v6M36 36v6" stroke="#06b6d4" stroke-width="2" />
+                      </svg>
+                      <span>Oscilloscope</span>
+                    </div>
+                    <div class="icon-strip-item">
+                      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect
+                          x="8"
+                          y="12"
+                          width="32"
+                          height="24"
+                          rx="2"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                        />
+                        <path d="M16 20h16M16 26h10" stroke="#ef4444" stroke-width="2" />
+                      </svg>
+                      <span>Copper Shielding Tape</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 9 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score:
+                    <span id="quizScore" style="color: var(--cyan); font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 8.3%;
+                        background: linear-gradient(90deg, var(--cyan), #00d4aa);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="08-setup-and-measurement.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="10-case-study-and-best-practices.html"
+                  >Next Lesson &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <!-- Accordion toggle -->
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <!-- Theme-aware canvas color helpers + Plotly layout base -->
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+    </script>
+
+    <!-- Section 1: Plotly fix-impact bar chart -->
+    <script>
+      function drawPlotlyFixImpact() {
+        var el = document.getElementById('plotlyFixImpact');
+        if (!el || !window.Plotly) return;
+        var fixes = [
+          'Minimize loop area',
+          'Continuous ground plane',
+          'Local decoupling caps',
+          'Common-mode choke/ferrite',
+          'Cable shielding',
+          'Controlled-impedance traces',
+          'Reduced clock edge rate',
+          'Proper 4-layer stack-up',
+        ];
+        var dbGain = [14, 12, 9, 11, 8, 6, 7, 10];
+        var layout = Object.assign({}, getPlotlyLayoutBase(), {
+          xaxis: {
+            title: 'Typical reduction at failing frequency (dB)',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          yaxis: { automargin: true },
+          margin: { l: 190, r: 20, t: 20, b: 45 },
+        });
+        Plotly.newPlot(
+          el,
+          [
+            {
+              x: dbGain,
+              y: fixes,
+              type: 'bar',
+              orientation: 'h',
+              marker: { color: '#06b6d4' },
+            },
+          ],
+          layout,
+          { displayModeBar: false, responsive: true }
+        );
+      }
+      drawPlotlyFixImpact();
+      window.addEventListener('resize', drawPlotlyFixImpact);
+    </script>
+
+    <!-- Section 2: Loop area before/after animation -->
+    <script>
+      var loopStart = null;
+      function drawLoopFixDiagram(ts) {
+        var canvas = document.getElementById('loopFixDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawLoopFixDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (loopStart === null) loopStart = ts;
+        var elapsed = (ts - loopStart) / 1000;
+        var panelW = w / 2;
+
+        function drawBoard(x0, label) {
+          var boardY = 20;
+          var boardH = h - 70;
+          var grad = ctx.createLinearGradient(0, boardY, 0, boardY + boardH);
+          grad.addColorStop(0, '#1a4d2e');
+          grad.addColorStop(1, '#0d2818');
+          ctx.fillStyle = grad;
+          ctx.fillRect(x0 + 14, boardY, panelW - 28, boardH);
+          ctx.strokeStyle = inkColor(0.3);
+          ctx.strokeRect(x0 + 14, boardY, panelW - 28, boardH);
+          ctx.fillStyle = inkColor(0.8);
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, x0 + panelW / 2, h - 10);
+          return { x0: x0 + 14, y0: boardY, w: panelW - 28, h: boardH };
+        }
+
+        var badBoard = drawBoard(0, 'BAD: Large Loop (radiates more)');
+        var goodBoard = drawBoard(panelW, 'GOOD: Tight Loop over Ground (radiates less)');
+
+        // Bad layout: IC top-left, trace wanders down and across, return path along board edge
+        var icX = badBoard.x0 + 20,
+          icY = badBoard.y0 + 16;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(icX, icY, 26, 18);
+        var loadX = badBoard.x0 + badBoard.w - 30,
+          loadY = badBoard.y0 + badBoard.h - 26;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(loadX, loadY, 22, 16);
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(icX + 26, icY + 9);
+        ctx.lineTo(badBoard.x0 + badBoard.w - 20, icY + 9);
+        ctx.lineTo(badBoard.x0 + badBoard.w - 20, loadY + 8);
+        ctx.lineTo(loadX + 22, loadY + 8);
+        ctx.stroke();
+        // return path along opposite edge -- big loop
+        ctx.strokeStyle = inkColor(0.4);
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.moveTo(loadX, loadY + 8);
+        ctx.lineTo(badBoard.x0 + 8, badBoard.y0 + badBoard.h - 4);
+        ctx.lineTo(badBoard.x0 + 8, icY + 16);
+        ctx.lineTo(icX, icY + 16);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1;
+
+        // pulsing loop-area fill + big radiated ring
+        var pulse = 0.5 + 0.5 * Math.sin(elapsed * 2.4);
+        ctx.fillStyle = 'rgba(239,68,68,' + (0.08 + 0.08 * pulse).toFixed(2) + ')';
+        ctx.fillRect(badBoard.x0 + 8, icY + 8, badBoard.w - 28, badBoard.h - 30);
+        var badRingMax = Math.min(panelW, h) * 0.5;
+        var badRingT = (elapsed / 1.2) % 1;
+        var badRing = badRingT * badRingMax;
+        if (badRing > 0) {
+          ctx.beginPath();
+          ctx.arc(
+            badBoard.x0 + badBoard.w / 2,
+            badBoard.y0 + badBoard.h / 2,
+            badRing,
+            0,
+            Math.PI * 2
+          );
+          ctx.strokeStyle = 'rgba(239,68,68,' + ((1 - badRingT) * 0.5).toFixed(2) + ')';
+          ctx.stroke();
+        }
+
+        // Good layout: IC and load close together, tight loop, ground plane fill beneath
+        ctx.fillStyle = 'rgba(76,223,139,0.08)';
+        ctx.fillRect(goodBoard.x0 + 10, goodBoard.y0 + 10, goodBoard.w - 20, goodBoard.h - 20);
+        var icX2 = goodBoard.x0 + 20,
+          icY2 = goodBoard.y0 + 20;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(icX2, icY2, 26, 18);
+        var loadX2 = icX2 + 40,
+          loadY2 = icY2;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(loadX2, loadY2, 20, 18);
+        ctx.strokeStyle = '#4cdf8b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(icX2 + 26, icY2 + 6);
+        ctx.lineTo(loadX2, loadY2 + 6);
+        ctx.stroke();
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.moveTo(icX2 + 26, icY2 + 12);
+        ctx.lineTo(loadX2, loadY2 + 12);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1;
+        var goodRing = ((elapsed / 1.2) % 1) * 16;
+        if (goodRing > 0) {
+          ctx.beginPath();
+          ctx.arc(icX2 + 33, icY2 + 9, goodRing, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(76,223,139,' + (1 - goodRing / 16).toFixed(2) + ')';
+          ctx.stroke();
+        }
+
+        requestAnimationFrame(drawLoopFixDiagram);
+      }
+      requestAnimationFrame(drawLoopFixDiagram);
+      window.addEventListener('resize', function () {
+        loopStart = null;
+      });
+    </script>
+
+    <!-- Shared realistic-PCB + high-contrast-label helpers -->
+    <script>
+      // Realistic fiberglass PCB board (matches the style used in Module 03)
+      function drawPcbBoard(ctx, x, y, w, h) {
+        var grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#0f4a36');
+        grad.addColorStop(1, '#0a3527');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+        ctx.lineWidth = 1;
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        [
+          [x + 10, y + 10],
+          [x + w - 10, y + 10],
+          [x + 10, y + h - 10],
+          [x + w - 10, y + h - 10],
+        ].forEach(function (p) {
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // Realistic IC package (dark body, gold pins, pin-1 marker) -- always
+      // high-contrast against the green board regardless of theme.
+      function drawIcPackage(ctx, cx, cy, bodyW, bodyH, pinsPerSide) {
+        ctx.fillStyle = '#1c1c1c';
+        ctx.strokeStyle = '#5a5a5a';
+        ctx.lineWidth = 1;
+        ctx.fillRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH);
+        ctx.strokeRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH);
+        ctx.fillStyle = '#e2b84b';
+        ctx.beginPath();
+        ctx.arc(cx - bodyW / 2 + 6, cy - bodyH / 2 + 6, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#e2b84b';
+        for (var i = 0; i < pinsPerSide; i++) {
+          var py = cy - bodyH / 2 + ((i + 0.5) * bodyH) / pinsPerSide;
+          ctx.fillRect(cx - bodyW / 2 - 7, py - 1.5, 7, 3);
+          ctx.fillRect(cx + bodyW / 2, py - 1.5, 7, 3);
+        }
+        ctx.lineWidth = 1;
+      }
+
+      // Small ceramic decoupling capacitor (tan body, silver leads) -- reads
+      // clearly against dark green copper/board in both themes.
+      function drawCeramicCap(ctx, cx, cy, w2, h2) {
+        ctx.fillStyle = '#d9b26b';
+        ctx.strokeStyle = '#8a6a34';
+        ctx.lineWidth = 1;
+        ctx.fillRect(cx - w2 / 2, cy - h2 / 2, w2, h2);
+        ctx.strokeRect(cx - w2 / 2, cy - h2 / 2, w2, h2);
+        ctx.fillStyle = '#c7c9cc';
+        ctx.fillRect(cx - w2 / 2 - 5, cy - 2, 5, 4);
+        ctx.fillRect(cx + w2 / 2, cy - 2, 5, 4);
+      }
+
+      // Text label drawn on a small contrast-guaranteed backing plate, so it
+      // stays legible regardless of the board/copper color beneath it or the
+      // active light/dark theme.
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+    </script>
+
+    <!-- Section 3: Decoupling animation (shown on a realistic PCB board) -->
+    <script>
+      var decStart = null;
+      function drawDecouplingDiagram(ts) {
+        var canvas = document.getElementById('decouplingDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawDecouplingDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (decStart === null) decStart = ts;
+        var elapsed = (ts - decStart) / 1000;
+        var pulseT = elapsed % 1;
+        var pulseOn = pulseT < 0.15;
+        var panelW = w / 2;
+        var boardPad = 10;
+
+        // Left board: no decoupling -- current must travel to bulk supply far away
+        var boardX0 = boardPad,
+          boardY0 = 10,
+          boardW0 = panelW - boardPad * 2,
+          boardH0 = h - 40;
+        drawPcbBoard(ctx, boardX0, boardY0, boardW0, boardH0);
+
+        var icX = boardX0 + boardW0 * 0.55,
+          icY = boardY0 + boardH0 * 0.32;
+        drawIcPackage(ctx, icX, icY, 26, 20, 3);
+        var supplyX = boardX0 + 30,
+          supplyY = boardY0 + boardH0 * 0.78;
+        ctx.fillStyle = '#3a3f47';
+        ctx.strokeStyle = '#7a828c';
+        ctx.lineWidth = 1;
+        ctx.fillRect(supplyX - 14, supplyY - 11, 28, 22);
+        ctx.strokeRect(supplyX - 14, supplyY - 11, 28, 22);
+        labelPlate(ctx, 'Bulk supply', supplyX, supplyY + 28, 'center');
+        labelPlate(ctx, 'IC', icX, icY - 16, 'center');
+
+        ctx.strokeStyle = pulseOn ? '#ef4444' : inkColor(0.35);
+        ctx.lineWidth = pulseOn ? 2.5 : 1.5;
+        ctx.beginPath();
+        ctx.moveTo(icX - 13, icY);
+        ctx.lineTo(supplyX, icY);
+        ctx.lineTo(supplyX, supplyY - 11);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(icX - 13, icY + 9);
+        ctx.lineTo(supplyX + 7, icY + 9);
+        ctx.lineTo(supplyX + 7, supplyY + 11);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        if (pulseOn) {
+          ctx.fillStyle = 'rgba(239,68,68,0.22)';
+          ctx.beginPath();
+          ctx.ellipse((icX + supplyX) / 2, (icY + supplyY) / 2, 50, 38, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        labelPlate(
+          ctx,
+          'WITHOUT local decoupling: pulse loop reaches the bulk supply',
+          boardX0 + boardW0 / 2,
+          h - 6,
+          'center',
+          11
+        );
+
+        // Right board: with decoupling cap right at the pin
+        var boardX1 = panelW + boardPad,
+          boardY1 = 10,
+          boardW1 = panelW - boardPad * 2,
+          boardH1 = h - 40;
+        drawPcbBoard(ctx, boardX1, boardY1, boardW1, boardH1);
+
+        var icX2 = boardX1 + boardW1 * 0.42,
+          icY2 = boardY1 + boardH1 * 0.4;
+        drawIcPackage(ctx, icX2, icY2, 26, 20, 3);
+        var capX = icX2 + 46,
+          capY = icY2;
+        drawCeramicCap(ctx, capX, capY, 14, 16);
+        labelPlate(ctx, 'IC', icX2, icY2 - 16, 'center');
+        labelPlate(ctx, 'C', capX, capY + 26, 'center');
+
+        ctx.strokeStyle = pulseOn ? '#4cdf8b' : inkColor(0.35);
+        ctx.lineWidth = pulseOn ? 2.5 : 1.5;
+        ctx.beginPath();
+        ctx.moveTo(icX2 + 13, icY2 - 4);
+        ctx.lineTo(capX - 7, icY2 - 4);
+        ctx.moveTo(icX2 + 13, icY2 + 6);
+        ctx.lineTo(capX - 7, icY2 + 6);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        if (pulseOn) {
+          ctx.fillStyle = 'rgba(76,223,139,0.28)';
+          ctx.beginPath();
+          ctx.ellipse((icX2 + capX) / 2, icY2, 24, 18, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        labelPlate(
+          ctx,
+          'WITH local decoupling: tiny loop, current supplied right at the pin',
+          boardX1 + boardW1 / 2,
+          h - 6,
+          'center',
+          11
+        );
+
+        requestAnimationFrame(drawDecouplingDiagram);
+      }
+      requestAnimationFrame(drawDecouplingDiagram);
+      window.addEventListener('resize', function () {
+        decStart = null;
+      });
+    </script>
+
+    <!-- Section 3: Stack-up diagram (one-shot, redraws on resize) -->
+    <script>
+      function drawStackupDiagram() {
+        var canvas = document.getElementById('stackupDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        var layers = [
+          { label: 'Signal (top)', color: '#f59e0b' },
+          { label: 'Ground plane', color: '#22d3ee' },
+          { label: 'Power plane', color: '#ef4444' },
+          { label: 'Signal (bottom)', color: '#f59e0b' },
+        ];
+        var margin = 40;
+        var boxW = w - margin * 2;
+        var layerH = Math.min(40, (h - 20) / layers.length - 8);
+        var totalH = layers.length * (layerH + 8) - 8;
+        var startY = (h - totalH) / 2;
+
+        layers.forEach(function (l, i) {
+          var y = startY + i * (layerH + 8);
+          ctx.fillStyle = l.color + '33';
+          ctx.fillRect(margin, y, boxW, layerH);
+          ctx.strokeStyle = l.color;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(margin, y, boxW, layerH);
+          ctx.fillStyle = inkColor(0.85);
+          ctx.font = '11px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(l.label, margin + 8, y + layerH / 2 + 4);
+          if (i < layers.length - 1) {
+            ctx.strokeStyle = inkColor(0.15);
+            ctx.beginPath();
+            ctx.moveTo(margin, y + layerH + 4);
+            ctx.lineTo(margin + boxW, y + layerH + 4);
+            ctx.stroke();
+          }
+        });
+      }
+      drawStackupDiagram();
+      window.addEventListener('resize', drawStackupDiagram);
+    </script>
+
+    <!-- Section 4: Ground plane split animation -->
+    <script>
+      var gsStart = null;
+      function drawGroundSplitDiagram(ts) {
+        var canvas = document.getElementById('groundSplitDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawGroundSplitDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (gsStart === null) gsStart = ts;
+        var elapsed = (ts - gsStart) / 1000;
+
+        var boardX = 20,
+          boardY = 20,
+          boardW = w - 40,
+          boardH = h - 60;
+        var grad = ctx.createLinearGradient(0, boardY, 0, boardY + boardH);
+        grad.addColorStop(0, '#1a4d2e');
+        grad.addColorStop(1, '#0d2818');
+        ctx.fillStyle = grad;
+        ctx.fillRect(boardX, boardY, boardW, boardH);
+        ctx.strokeStyle = inkColor(0.3);
+        ctx.strokeRect(boardX, boardY, boardW, boardH);
+
+        // ground plane slot across the middle
+        var slotY = boardY + boardH * 0.5;
+        var slotH = 10;
+        ctx.fillStyle = isLightTheme() ? '#e2e8f0' : '#0a0f14';
+        ctx.fillRect(boardX + 4, slotY - slotH / 2, boardW - 8, slotH);
+        ctx.strokeStyle = '#ef4444';
+        ctx.setLineDash([3, 3]);
+        ctx.strokeRect(boardX + 4, slotY - slotH / 2, boardW - 8, slotH);
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '10px sans-serif';
+        ctx.fillText('ground plane split', boardX + 8, slotY - slotH / 2 - 6);
+
+        // trace crossing the slot
+        var traceY = boardY + boardH * 0.25;
+        var icX = boardX + 20,
+          loadX = boardX + boardW - 30;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(icX, traceY);
+        ctx.lineTo(loadX, traceY);
+        ctx.stroke();
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(icX - 12, traceY - 10, 20, 16);
+        ctx.fillRect(loadX - 8, traceY - 10, 20, 16);
+
+        // signal current dot traveling forward
+        var fwdT = (elapsed / 1.4) % 1;
+        var fx = icX + (loadX - icX) * fwdT;
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(fx, traceY, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // return current forced to detour around the slot end
+        var slotEndX = boardX + boardW - 20;
+        var retPathY0 = traceY + 6;
+        var detourY = slotY + slotH / 2 + 14;
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.moveTo(loadX, retPathY0);
+        ctx.lineTo(slotEndX, retPathY0);
+        ctx.lineTo(slotEndX, detourY);
+        ctx.lineTo(icX, detourY);
+        ctx.lineTo(icX, traceY + 4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        var retT = (elapsed / 1.4 + 0.5) % 1;
+        var retPathLen =
+          slotEndX - loadX + (detourY - retPathY0) + (slotEndX - icX) + (detourY - traceY - 4);
+        var rd = retT * retPathLen;
+        var rx, ry;
+        var seg1 = Math.abs(slotEndX - loadX);
+        var seg2 = Math.abs(detourY - retPathY0);
+        var seg3 = Math.abs(slotEndX - icX);
+        if (rd < seg1) {
+          rx = loadX + (slotEndX - loadX) * (rd / seg1);
+          ry = retPathY0;
+        } else if (rd < seg1 + seg2) {
+          rx = slotEndX;
+          ry = retPathY0 + (detourY - retPathY0) * ((rd - seg1) / seg2);
+        } else if (rd < seg1 + seg2 + seg3) {
+          rx = slotEndX - (slotEndX - icX) * ((rd - seg1 - seg2) / seg3);
+          ry = detourY;
+        } else {
+          rx = icX;
+          ry =
+            detourY -
+            (detourY - traceY - 4) *
+              ((rd - seg1 - seg2 - seg3) / Math.max(1, detourY - traceY - 4));
+        }
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(rx, ry, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // radiated field from the enlarged loop
+        var ringT = (elapsed / 1.6) % 1;
+        var ringR = ringT * boardW * 0.4;
+        if (ringR > 0) {
+          ctx.beginPath();
+          ctx.arc((icX + slotEndX) / 2, detourY, ringR, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(239,68,68,' + ((1 - ringT) * 0.4).toFixed(2) + ')';
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.8);
+        ctx.font = '11px sans-serif';
+        ctx.fillText(
+          'The forced detour enlarges the loop area and radiates like a slot antenna.',
+          boardX,
+          h - 10
+        );
+
+        requestAnimationFrame(drawGroundSplitDiagram);
+      }
+      requestAnimationFrame(drawGroundSplitDiagram);
+      window.addEventListener('resize', function () {
+        gsStart = null;
+      });
+    </script>
+
+    <!-- Section 5: Cable fix animation -->
+    <script>
+      var cableFixStart = null;
+      function drawCableFixDiagram(ts) {
+        var canvas = document.getElementById('cableFixDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawCableFixDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (cableFixStart === null) cableFixStart = ts;
+        var elapsed = (ts - cableFixStart) / 1000;
+        var panelW = w / 2;
+
+        function drawCablePanel(x0, filtered, label) {
+          var midY = h * 0.42;
+          var boardPad = 14;
+          var boardX = x0 + boardPad,
+            boardY = 14,
+            boardW = panelW * 0.42,
+            boardH = h - 60;
+          drawPcbBoard(ctx, boardX, boardY, boardW, boardH);
+
+          var icX = boardX + boardW * 0.4,
+            icY = boardY + boardH * 0.4;
+          drawIcPackage(ctx, icX, icY, 22, 16, 2);
+          labelPlate(ctx, 'PCB', boardX + boardW / 2, boardY + boardH + 16, 'center');
+
+          // connector pad at the board edge where the cable exits
+          var connX = boardX + boardW - 6;
+          ctx.fillStyle = '#c7c9cc';
+          ctx.fillRect(connX - 4, midY - 8, 10, 16);
+
+          var cableEndX = x0 + panelW - 26;
+          ctx.strokeStyle = inkColor(0.6);
+          ctx.lineWidth = filtered ? 4 : 3;
+          ctx.beginPath();
+          ctx.moveTo(connX + 6, midY);
+          ctx.lineTo(cableEndX, midY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+
+          if (filtered) {
+            // ferrite bead (grey donut clamp)
+            var ferriteX = connX + 34;
+            ctx.strokeStyle = '#8b8f96';
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.moveTo(ferriteX, midY);
+            ctx.lineTo(ferriteX + 22, midY);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            labelPlate(ctx, 'ferrite', ferriteX + 11, midY - 14, 'center');
+          }
+
+          ctx.fillStyle = '#3a3f47';
+          ctx.strokeStyle = '#7a828c';
+          ctx.fillRect(cableEndX, midY - 10, 16, 20);
+          ctx.strokeRect(cableEndX, midY - 10, 16, 20);
+
+          // common-mode current animation along cable
+          var cmT = (elapsed / 1.3) % 1;
+          var cmAmp = filtered ? 0.25 : 1;
+          for (var i = 0; i < 3; i++) {
+            var t2 = (cmT + i / 3) % 1;
+            var cx = connX + 6 + (cableEndX - connX - 6) * t2;
+            var wobble = Math.sin(t2 * Math.PI * 8) * 4 * cmAmp;
+            ctx.fillStyle = filtered ? '#a78bfa' : '#f87171';
+            ctx.beginPath();
+            ctx.arc(cx, midY + wobble, 2.7, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // radiated rings from the cable -- large if unfiltered, small if filtered
+          var ringMax = filtered ? 14 : 44;
+          var ringT2 = (elapsed / 1.5) % 1;
+          var ringR = ringT2 * ringMax;
+          if (ringR > 0) {
+            ctx.beginPath();
+            ctx.arc((connX + cableEndX) / 2, midY, ringR, 0, Math.PI * 2);
+            ctx.strokeStyle =
+              (filtered ? 'rgba(139,92,246,' : 'rgba(239,68,68,') +
+              ((1 - ringT2) * 0.5).toFixed(2) +
+              ')';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+          }
+
+          labelPlate(ctx, label, x0 + panelW / 2, h - 8, 'center', 11);
+        }
+
+        drawCablePanel(
+          0,
+          false,
+          'UNFILTERED: common-mode current radiates strongly along full cable length'
+        );
+        drawCablePanel(
+          panelW,
+          true,
+          'FERRITE + SHIELD: common-mode current choked, radiation collapses'
+        );
+
+        requestAnimationFrame(drawCableFixDiagram);
+      }
+      requestAnimationFrame(drawCableFixDiagram);
+      window.addEventListener('resize', function () {
+        cableFixStart = null;
+      });
+    </script>
+
+    <!-- Section 6: Near-field probe scan animation -->
+    <script>
+      var probeStart = null;
+      function drawProbeScanDiagram(ts) {
+        var canvas = document.getElementById('probeScanDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawProbeScanDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (probeStart === null) probeStart = ts;
+        var elapsed = (ts - probeStart) / 1000;
+
+        var boardX = 20,
+          boardY = 20,
+          boardW = w - 40,
+          boardH = h * 0.55;
+        drawPcbBoard(ctx, boardX, boardY, boardW, boardH);
+
+        // clock driver hotspot -- realistic IC package, always high-contrast
+        var hotX = boardX + boardW * 0.62,
+          hotY = boardY + boardH * 0.5;
+        drawIcPackage(ctx, hotX, hotY, 28, 20, 3);
+        labelPlate(ctx, 'Clock driver', hotX, hotY - 18, 'center');
+
+        // a few other components as decoys
+        [0.2, 0.85].forEach(function (fx) {
+          drawIcPackage(ctx, boardX + boardW * fx, boardY + boardH * 0.28, 18, 12, 2);
+        });
+
+        // probe sweeping left to right and back
+        var sweepPeriod = 4;
+        var sweepT = (elapsed % sweepPeriod) / sweepPeriod;
+        var sweepX = boardX + boardW * (0.5 - 0.5 * Math.cos(sweepT * Math.PI * 2));
+        var probeY = boardY - 30;
+
+        // probe body -- fixed bright color so it stays visible over both the
+        // dark board and either page theme
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(sweepX, probeY);
+        ctx.lineTo(sweepX, boardY + 8);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(sweepX, probeY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'Near-field probe', sweepX, probeY - 12, 'center');
+
+        // reading spikes near the hotspot
+        var dist = Math.abs(sweepX - hotX);
+        var reading = Math.max(0.05, Math.exp(-Math.pow(dist / 26, 2)));
+        var meterX = boardX,
+          meterY = boardY + boardH + 20,
+          meterW = boardW;
+        ctx.strokeStyle = inkColor(0.35);
+        ctx.strokeRect(meterX, meterY, meterW, 14);
+        ctx.fillStyle = reading > 0.6 ? '#ef4444' : reading > 0.3 ? '#f59e0b' : '#4cdf8b';
+        ctx.fillRect(meterX, meterY, meterW * reading, 14);
+        labelPlate(
+          ctx,
+          'Probe reading: ' +
+            (reading * 100).toFixed(0) +
+            '%' +
+            (reading > 0.6 ? '  <-- hotspot found' : ''),
+          meterX,
+          meterY + 32,
+          'left',
+          11
+        );
+
+        // glow on hotspot when probe is close
+        if (reading > 0.5) {
+          ctx.fillStyle = 'rgba(239,68,68,' + (reading * 0.3).toFixed(2) + ')';
+          ctx.beginPath();
+          ctx.arc(hotX, hotY, 24, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(drawProbeScanDiagram);
+      }
+      requestAnimationFrame(drawProbeScanDiagram);
+      window.addEventListener('resize', function () {
+        probeStart = null;
+      });
+    </script>
+
+    <!-- Section 7: Before/after Plotly spectrum with toggle -->
+    <script>
+      var beforeAfterView = 'both';
+      function drawPlotlyBeforeAfter() {
+        var el = document.getElementById('plotlyBeforeAfter');
+        if (!el || !window.Plotly) return;
+        var freqs = [];
+        for (var f = 30; f <= 1000; f *= 1.03) freqs.push(f);
+        function noiseFloor(f) {
+          return -12 + 6 * Math.sin(f / 130);
+        }
+        function harmonic(f, f0, amp, width) {
+          return amp * Math.exp(-Math.pow((f - f0) / width, 2));
+        }
+        var before = freqs.map(function (f) {
+          var v = noiseFloor(f);
+          v += harmonic(f, 100, 34, 6);
+          v += harmonic(f, 300, 40, 5);
+          v += harmonic(f, 500, 22, 6);
+          v += harmonic(f, 700, 14, 8);
+          return v;
+        });
+        var after = freqs.map(function (f) {
+          var v = noiseFloor(f);
+          v += harmonic(f, 100, 22, 6);
+          v += harmonic(f, 300, 18, 5);
+          v += harmonic(f, 500, 12, 6);
+          v += harmonic(f, 700, 8, 8);
+          return v;
+        });
+        var limit = freqs.map(function () {
+          return 40;
+        });
+
+        var traces = [];
+        if (beforeAfterView === 'both' || beforeAfterView === 'before') {
+          traces.push({
+            x: freqs,
+            y: before,
+            name: 'Before fix',
+            mode: 'lines',
+            line: { color: '#ef4444', width: 2 },
+          });
+        }
+        if (beforeAfterView === 'both' || beforeAfterView === 'after') {
+          traces.push({
+            x: freqs,
+            y: after,
+            name: 'After fix',
+            mode: 'lines',
+            line: { color: '#4cdf8b', width: 2 },
+          });
+        }
+        traces.push({
+          x: freqs,
+          y: limit,
+          name: 'CISPR Class B limit',
+          mode: 'lines',
+          line: { color: '#f59e0b', width: 1.5, dash: 'dash' },
+        });
+
+        var layout = {
+          paper_bgcolor: '#0a0f14',
+          plot_bgcolor: '#0a0f14',
+          font: { color: '#94a3b8', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+          xaxis: {
+            title: 'Frequency (MHz)',
+            type: 'log',
+            gridcolor: 'rgba(255,255,255,0.08)',
+            color: '#94a3b8',
+          },
+          yaxis: { title: 'dBµV/m', gridcolor: 'rgba(255,255,255,0.08)', color: '#94a3b8' },
+          legend: { orientation: 'h', y: -0.25 },
+        };
+        Plotly.newPlot(el, traces, layout, { displayModeBar: false, responsive: true });
+      }
+      drawPlotlyBeforeAfter();
+      window.addEventListener('resize', drawPlotlyBeforeAfter);
+      document.querySelectorAll('.toggle-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('.toggle-tab').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          beforeAfterView = tab.getAttribute('data-view');
+          drawPlotlyBeforeAfter();
+        });
+      });
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'Which design technique most directly fixes "large current loops" as an RE failure mechanism?',
+          opts: [
+            'Reduce clock edge rates',
+            'Minimize loop areas',
+            'Terminate high-speed interfaces correctly',
+            'Increase heatsink size',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why does a large current loop radiate more than a small one carrying the same current?',
+          opts: [
+            "Radiated field strength scales with the loop's enclosed area",
+            'Large loops always run at higher voltage',
+            'Loop size has no effect on radiation, only frequency does',
+            'Large loops only affect conducted emissions, not radiated',
+          ],
+          correct: 0,
+        },
+        {
+          q: "What is the purpose of placing a decoupling capacitor close to an IC's power pin?",
+          opts: [
+            "To supply the IC's switching current locally, collapsing the loop back to the bulk supply",
+            'To block DC power entirely',
+            "To increase the IC's clock speed",
+            'To provide mechanical support for the IC',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Which design technique most directly fixes "split ground planes"?',
+          opts: [
+            'Use continuous ground planes',
+            'Filter cable interfaces with ferrites',
+            'Shield noisy sections of the design',
+            'Reduce clock edge rates',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What happens to return current when it reaches a slot or split in the ground plane beneath its signal trace?',
+          opts: [
+            'It stops flowing entirely',
+            'It is forced to detour around the slot, enlarging the loop area and creating a slot-antenna effect',
+            'It reverses direction and flows back into the IC',
+            'It has no effect since return current always ignores ground splits',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the recommended fix for common-mode currents on cables?',
+          opts: [
+            'Increase trace width',
+            'Filter cable interfaces with common-mode chokes or ferrites',
+            'Add more decoupling capacitors',
+            'Split the ground plane',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why can an unshielded cable radiate more than the entire PCB it is attached to?',
+          opts: [
+            'Cables are always more expensive than PCBs',
+            'The cable is often physically much longer, approaching a resonant antenna length at the frequencies of interest',
+            'Cables carry more current than any PCB trace',
+            'Cables have no relationship to radiated emissions',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the FIRST step in the troubleshooting methodology?',
+          opts: [
+            'Use near-field probes to localize the source',
+            'Apply temporary mitigation',
+            'Identify the failing frequency',
+            'Validate through iterative testing',
+          ],
+          correct: 2,
+        },
+        {
+          q: 'After identifying the failing frequency and correlating it to a clock source, what is the next step?',
+          opts: [
+            'Validate improvements through iterative pre-compliance testing',
+            'Use near-field probes to localize the emission source',
+            'Apply temporary mitigation only',
+            'Ship the product',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the LAST step in the troubleshooting methodology?',
+          opts: [
+            'Identify the failing frequency',
+            'Evaluate PCB layout and cable routing',
+            'Apply temporary mitigation',
+            'Validate improvements through iterative pre-compliance testing',
+          ],
+          correct: 3,
+        },
+        {
+          q: 'What is a near-field probe used for during troubleshooting?',
+          opts: [
+            'Measuring absolute compliance-grade field strength at 3 m',
+            'Localizing which specific area of the board is emitting, by scanning close to the surface',
+            'Replacing the need for a spectrum analyzer entirely',
+            'Filtering common-mode currents on cables',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'In a proper 4-layer PCB stack-up, what should be directly adjacent to each signal layer?',
+          opts: [
+            'Another signal layer, to save cost',
+            'A solid reference (ground or power) plane, giving every trace a tightly coupled return path',
+            'Nothing — signal layers should be isolated from all planes',
+            'A layer of exposed fiberglass with no copper',
+          ],
+          correct: 1,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      /* Quiz logic - one question at a time with nav */
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 signal integrity: reflections from impedance discontinuities, crosstalk (NEXT/FEXT), inter-symbol interference and the eye diagram, and simultaneous switching noise — with an interactive Plotly eye-diagram explorer."
+    />
+    <title>
+      Signal Integrity | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/06-signal-integrity.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .sim-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item active">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Signal Integrity</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 06</span>
+              <span class="badge badge-purple">Plotly</span>
+              <span class="badge badge-cyan">Animated</span>
+              <h1>Signal Integrity for DDR Interfaces</h1>
+              <p class="subtitle">
+                At DDR4 data rates, a single unit interval is well under a nanosecond. Reflections,
+                crosstalk and inter-symbol interference all eat directly into that tiny window —
+                this module builds the intuition for why, before Modules 07–09 give you the fixes.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Budget framing -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Why the SI budget is so tight</h3></div>
+                <div class="metrics-grid">
+                  <div class="metric-card">
+                    <div class="metric-value">312 ps</div>
+                    <div class="metric-label">Unit interval at DDR4-3200</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">~100 ps</div>
+                    <div class="metric-label">Typical total setup+hold budget</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">&lt; 10%</div>
+                    <div class="metric-label">Of UI usually left for SI margin</div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-sub);
+                    line-height: 1.75;
+                    margin-top: 10px;
+                  "
+                >
+                  Every reflection, every millivolt of crosstalk, and every picosecond of jitter
+                  comes directly out of that remaining margin. Unlike a slow control signal, a DDR
+                  data or strobe line has almost nothing left to give.
+                </p>
+              </div>
+
+              <!-- Reflections -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Reflections from impedance discontinuities</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Any point where trace impedance changes — a via, a connector, an unrouted stub, a
+                  plane split underneath the trace — sends part of the signal's energy backward
+                  toward the driver instead of forward to the receiver.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 560 130"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Animated diagram of a signal traveling from driver to receiver, hitting a via stub impedance discontinuity, and partially reflecting back toward the driver"
+                  >
+                    <line
+                      x1="30"
+                      y1="65"
+                      x2="530"
+                      y2="65"
+                      stroke="var(--border)"
+                      stroke-width="3"
+                    />
+                    <rect
+                      x="10"
+                      y="45"
+                      width="60"
+                      height="40"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="40"
+                      y="69"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--text-base)"
+                    >
+                      Driver
+                    </text>
+                    <rect
+                      x="490"
+                      y="45"
+                      width="60"
+                      height="40"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="520"
+                      y="69"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--text-base)"
+                    >
+                      RX
+                    </text>
+                    <!-- via stub discontinuity -->
+                    <line
+                      x1="300"
+                      y1="65"
+                      x2="300"
+                      y2="105"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="3"
+                    />
+                    <circle cx="300" cy="65" r="4" fill="var(--danger,#f87171)" />
+                    <text
+                      x="300"
+                      y="120"
+                      text-anchor="middle"
+                      font-size="8.5"
+                      fill="var(--danger,#f87171)"
+                    >
+                      unrouted via stub
+                    </text>
+                    <!-- incident pulse -->
+                    <circle r="7" fill="var(--cyan,#22d3ee)">
+                      <animate
+                        attributeName="cx"
+                        values="70;300;300"
+                        keyTimes="0;0.5;1"
+                        dur="2.6s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="cy"
+                        values="65;65;65"
+                        dur="2.6s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="1;1;0"
+                        keyTimes="0;0.5;1"
+                        dur="2.6s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <!-- forward continuing pulse (attenuated) -->
+                    <circle r="6" fill="var(--cyan,#22d3ee)" opacity="0">
+                      <animate
+                        attributeName="cx"
+                        values="300;490"
+                        dur="1.3s"
+                        begin="1.3s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.75;0"
+                        dur="1.3s"
+                        begin="1.3s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <!-- reflected pulse traveling back -->
+                    <circle r="6" fill="var(--danger,#f87171)" opacity="0">
+                      <animate
+                        attributeName="cx"
+                        values="300;70"
+                        dur="1.3s"
+                        begin="1.3s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.85;0"
+                        dur="1.3s"
+                        begin="1.3s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  </svg>
+                  <p class="diagram-caption">
+                    Cyan: the incident edge traveling to the discontinuity. Red: the reflected
+                    energy bouncing back toward the driver, arriving late and distorting the next
+                    bit.
+                  </p>
+                </div>
+                <div class="warning-box">
+                  Back-drilling or minimizing via stub length is one of the highest-leverage layout
+                  decisions for DDR4/DDR5 — a stub resonance can land right in the middle of your
+                  data-eye frequency content.
+                </div>
+              </div>
+
+              <!-- Crosstalk -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Crosstalk between adjacent traces (NEXT / FEXT)</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Every switching trace couples a little energy into its neighbors through mutual
+                  capacitance and inductance. Coupling toward the driver is
+                  <strong>near-end crosstalk (NEXT)</strong>; coupling toward the receiver, riding
+                  along with the aggressor's own edge, is <strong>far-end crosstalk (FEXT)</strong>.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 560 140"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Animated diagram of an aggressor trace switching and inducing a small crosstalk bump on an adjacent victim trace"
+                  >
+                    <text
+                      x="20"
+                      y="35"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--warning,#fb923c)"
+                    >
+                      Aggressor (switching)
+                    </text>
+                    <line
+                      x1="20"
+                      y1="50"
+                      x2="540"
+                      y2="50"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="3"
+                    />
+                    <text x="20" y="105" font-size="9" font-weight="700" fill="var(--cyan,#22d3ee)">
+                      Victim (quiet / driven low)
+                    </text>
+                    <line
+                      x1="20"
+                      y1="90"
+                      x2="540"
+                      y2="90"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="3"
+                    />
+                    <!-- aggressor edge pulse -->
+                    <circle r="7" fill="var(--warning,#fb923c)">
+                      <animate
+                        attributeName="cx"
+                        values="20;540"
+                        dur="2s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <!-- induced bump on victim, following slightly behind, small vertical wobble -->
+                    <circle r="6" fill="var(--cyan,#22d3ee)">
+                      <animate
+                        attributeName="cx"
+                        values="20;540"
+                        dur="2s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="cy"
+                        values="90;90;78;90;90"
+                        keyTimes="0;0.38;0.46;0.54;1"
+                        dur="2s"
+                        begin="0s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  </svg>
+                  <p class="diagram-caption">
+                    As the orange aggressor edge passes, the quiet cyan victim line bumps upward
+                    momentarily — that bump can be misread as a real logic transition if it's large
+                    enough relative to VREF margin.
+                  </p>
+                </div>
+                <div class="tip-box">
+                  Rule of thumb: keep edge-to-edge spacing between DDR traces at least
+                  <strong>3× the trace width</strong> ("3W rule") to hold coupled noise to a small
+                  fraction of the voltage margin. Byte-lane groups (Module 05) are the traces this
+                  applies to most strictly.
+                </div>
+              </div>
+
+              <!-- Eye diagram interactive -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Interactive: watch reflections &amp; noise close the data eye</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  An <strong>eye diagram</strong> overlays every unit interval of a bit stream on
+                  top of each other. A clean, wide-open "eye" means the receiver has plenty of
+                  voltage and timing margin; a closed eye means bit errors. Slide the controls below
+                  to see how slower edges and added noise (standing in for reflections/crosstalk)
+                  close the eye.
+                </p>
+                <div class="sim-controls">
+                  <div>
+                    <label class="slider-label" for="riseSlider"
+                      >Rise/fall time constant: <span id="riseVal">0.15 UI</span></label
+                    >
+                    <input
+                      type="range"
+                      id="riseSlider"
+                      min="0.05"
+                      max="0.55"
+                      step="0.01"
+                      value="0.15"
+                    />
+                  </div>
+                  <div>
+                    <label class="slider-label" for="noiseSlider"
+                      >Reflection / crosstalk noise: <span id="noiseVal">0.03</span></label
+                    >
+                    <input
+                      type="range"
+                      id="noiseSlider"
+                      min="0"
+                      max="0.18"
+                      step="0.005"
+                      value="0.03"
+                    />
+                  </div>
+                </div>
+                <div class="plot-box">
+                  <div id="eyePlot" style="width: 100%; height: 320px"></div>
+                </div>
+                <div class="info-box">
+                  Try dragging the rise-time slider to its slowest setting, or the noise slider to
+                  its highest — both close the eye vertically and horizontally, which is exactly why
+                  Modules 07–09 exist: termination controls reflections, decoupling controls noise,
+                  and routing controls both.
+                </div>
+              </div>
+
+              <!-- SSN -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Simultaneous switching noise (SSN) &amp; ground bounce</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  When many DQ lines in a byte lane switch at the same instant, the combined di/dt
+                  through shared package and PCB return-path inductance induces a voltage bump on
+                  the local ground/power reference — momentarily shifting the "zero" that every
+                  other signal in that group is compared against.
+                </p>
+                <table class="iface-spec-table">
+                  <thead>
+                    <tr>
+                      <th>Contributor</th>
+                      <th>Effect</th>
+                      <th>Primary mitigation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Many DQ bits switching together</td>
+                      <td>Local ground bounce, shifts VREF-referenced levels</td>
+                      <td>Decoupling &amp; PDN design (Module 08)</td>
+                    </tr>
+                    <tr>
+                      <td>Shared package/BGA return inductance</td>
+                      <td>Amplifies bounce for byte-wide bus transitions</td>
+                      <td>Component/package selection, ball assignment (Module 02/10)</td>
+                    </tr>
+                    <tr>
+                      <td>DBI (data bus inversion)</td>
+                      <td>Reduces number of simultaneously switching lines</td>
+                      <td>Enable in controller when SSN margin is tight</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    DDR4's unit interval leaves very little SI margin — reflections, crosstalk, and
+                    jitter all subtract directly from timing/voltage budget.
+                  </li>
+                  <li>
+                    Impedance discontinuities (unrouted via stubs especially) reflect energy back
+                    toward the driver and distort the following bit.
+                  </li>
+                  <li>
+                    Crosstalk couples energy between adjacent traces; the 3W spacing rule keeps it
+                    small relative to VREF margin.
+                  </li>
+                  <li>
+                    The eye diagram is the standard way to visualize combined SI effects — a closing
+                    eye is the direct, visual signature of a marginal interface.
+                  </li>
+                  <li>
+                    Simultaneous switching noise shifts the reference level itself, which is why
+                    decoupling/PDN design (Module 08) is as much an SI topic as a power topic.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="05-signal-groups.html"
+                  >← Signal Groups &amp; Roles</a
+                >
+                <a class="btn btn-primary" href="07-termination.html"
+                  >Next: Termination Strategies →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      function baseLayout(extra) {
+        var css = getComputedStyle(document.documentElement);
+        var textColor = css.getPropertyValue('--text-sub').trim() || '#94a3b8';
+        var gridColor = 'rgba(128,140,160,0.18)';
+        var base = {
+          autosize: true,
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: textColor, size: 11 },
+          showlegend: false,
+          xaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+          yaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+        };
+        for (var k in extra) {
+          if (base[k] && typeof base[k] === 'object' && typeof extra[k] === 'object') {
+            for (var kk in extra[k]) base[k][kk] = extra[k][kk];
+          } else {
+            base[k] = extra[k];
+          }
+        }
+        return base;
+      }
+
+      var bits = [
+        0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1,
+      ];
+      var UI = 1;
+      var dt = 0.01;
+
+      function simulate(riseFrac, noiseAmp) {
+        var tau = Math.max(riseFrac, 0.02) * UI;
+        var N = bits.length;
+        var totalT = N * UI;
+        var v = bits[0];
+        var t = 0;
+        var samples = [];
+        while (t < totalT) {
+          var idx = Math.min(Math.floor(t / UI), N - 1);
+          var target = bits[idx];
+          v += (target - v) * (dt / tau);
+          var noisy = v + (Math.sin(t * 97.13) + Math.sin(t * 53.7)) * 0.5 * noiseAmp;
+          samples.push([t, noisy]);
+          t += dt;
+        }
+        return samples;
+      }
+
+      function buildEyeTraces(riseFrac, noiseAmp) {
+        var samples = simulate(riseFrac, noiseAmp);
+        var N = bits.length;
+        var traces = [];
+        for (var k = 3; k < N - 3; k++) {
+          var xs = [];
+          var ys = [];
+          for (var i = 0; i < samples.length; i++) {
+            var t = samples[i][0];
+            var local = t - k * UI;
+            if (local >= -0.5 && local <= 1.5) {
+              xs.push(local);
+              ys.push(samples[i][1]);
+            }
+          }
+          traces.push({
+            x: xs,
+            y: ys,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: 'rgba(34,211,238,0.25)', width: 1 },
+            hoverinfo: 'skip',
+          });
+        }
+        return traces;
+      }
+
+      function draw() {
+        var riseSlider = document.getElementById('riseSlider');
+        var noiseSlider = document.getElementById('noiseSlider');
+        var riseFrac = parseFloat(riseSlider.value);
+        var noiseAmp = parseFloat(noiseSlider.value);
+        document.getElementById('riseVal').textContent = riseFrac.toFixed(2) + ' UI';
+        document.getElementById('noiseVal').textContent = noiseAmp.toFixed(3);
+        var traces = buildEyeTraces(riseFrac, noiseAmp);
+        var layout = baseLayout({
+          xaxis: { title: 'Time (Unit Intervals)', range: [-0.5, 1.5] },
+          yaxis: { title: 'Voltage (normalized)', range: [-0.3, 1.3] },
+          height: 320,
+        });
+        Plotly.react('eyePlot', traces, layout, { displayModeBar: false, responsive: true });
+      }
+
+      document.getElementById('riseSlider').addEventListener('input', draw);
+      document.getElementById('noiseSlider').addEventListener('input', draw);
+
+      var themeObserver = new MutationObserver(draw);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', draw);
+      } else {
+        draw();
+      }
+    </script>
+  </body>
+</html>

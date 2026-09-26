@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Compare FPGA and GPU architectures, parallelism models, latency, power efficiency, and workload suitability across AI inference, DSP, packet processing, and more."
+    />
+    <meta property="og:title" content="FPGA vs GPU | FPGA Academy | Rising Edge" />
+    <title>FPGA vs GPU | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/05-fpga-vs-gpu.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .data-table .fpga-win {
+        color: #34d399;
+        font-weight: 700;
+      }
+      .data-table .gpu-win {
+        color: #818cf8;
+        font-weight: 700;
+      }
+      .data-table .tie {
+        color: #fb923c;
+        font-weight: 700;
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .objectives-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .objectives-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .objectives-list li:last-child {
+        border-bottom: none;
+      }
+      .objectives-list li::before {
+        content: '→';
+        color: #22d3ee;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .section-heading {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 2rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+      }
+      .widget-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .widget-container h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 12px;
+      }
+      .arch-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+      @media (max-width: 640px) {
+        .arch-split {
+          grid-template-columns: 1fr;
+        }
+      }
+      .arch-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .arch-box h4 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .arch-box.gpu-box {
+        border-top: 3px solid #818cf8;
+      }
+      .arch-box.fpga-box {
+        border-top: 3px solid #22d3ee;
+      }
+      .arch-box ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .arch-box ul li {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        gap: 8px;
+      }
+      .arch-box ul li::before {
+        content: '•';
+        color: #94a3b8;
+        flex-shrink: 0;
+      }
+      .exercise-step {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .exercise-step:last-child {
+        border-bottom: none;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .step-text {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        padding-top: 4px;
+      }
+      .latency-breakdown {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin: 16px 0;
+      }
+      .latency-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        font-size: 0.85rem;
+      }
+      .latency-item:last-child {
+        border-bottom: none;
+      }
+      .latency-item .step-name {
+        color: var(--text-sub);
+      }
+      .latency-item .step-time {
+        font-weight: 700;
+        font-family: monospace;
+      }
+      .gpu-time {
+        color: #f87171;
+      }
+      .fpga-time {
+        color: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item active" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>FPGA vs GPU</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 5/25</span><span>20%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 20%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 5 OF 25</span>
+                <span class="badge">12 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                FPGA vs GPU
+              </h1>
+              <p class="subtitle">
+                Contrast FPGA spatial computing with GPU SIMD parallelism — understand when each
+                wins for AI inference, radar DSP, streaming data, and high-frequency trading, and
+                why latency often determines the winner.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Learning Objectives -->
+              <div class="widget-container">
+                <h3>Learning Objectives</h3>
+                <ul class="objectives-list">
+                  <li>Describe GPU SIMD architecture and explain the CUDA execution model</li>
+                  <li>
+                    Contrast GPU data-parallel batching with FPGA streaming pipeline processing
+                  </li>
+                  <li>
+                    Quantify GPU latency sources (PCIe transfer, kernel launch, scheduling overhead)
+                  </li>
+                  <li>
+                    Explain why FPGA wins for streaming data and GPU wins for large batch workloads
+                  </li>
+                  <li>
+                    Analyze real-world benchmarks comparing FPGA and GPU for ML inference and DSP
+                  </li>
+                  <li>
+                    Match a given workload to the optimal platform — FPGA, GPU, or a combination
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Overview -->
+              <h2 class="section-heading">Two Kinds of Parallelism</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                GPUs and FPGAs are both parallel computing platforms — but they achieve parallelism
+                in completely different ways. Understanding this architectural distinction is the
+                key to making correct platform decisions in AI, signal processing, and data center
+                applications.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                A <strong style="color: var(--text-base)">GPU</strong> is a
+                <em>SIMD (Single Instruction, Multiple Data)</em> machine. It contains thousands of
+                simple compute cores (CUDA cores in NVIDIA's terminology) organized into Streaming
+                Multiprocessors (SMs). All cores in an SM execute the same instruction on different
+                data simultaneously. To use a GPU efficiently, you must have a large batch of
+                independent data items — the A100 GPU needs 6,912 CUDA cores all busy to reach peak
+                efficiency. If you send it 1 item, 6,911 cores sit idle. The GPU also requires data
+                to be transferred from CPU RAM to GPU VRAM over PCIe, adding 20–100 µs of overhead
+                before any computation begins.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 24px">
+                An <strong style="color: var(--text-base)">FPGA</strong> is a
+                <em>spatial computing</em> machine. Your algorithm is implemented as a custom
+                hardware pipeline that exactly matches the shape of the data flow. A packet entering
+                the FPGA immediately begins flowing through logic stages — no batch, no kernel
+                launch, no PCIe transfer, no wasted cores. The first bit of data produces the first
+                result in 10–200 nanoseconds. This is why FPGAs dominate in streaming applications
+                where data arrives continuously and must be processed immediately.
+              </p>
+
+              <!-- Architecture Comparison -->
+              <h2 class="section-heading">Architecture: SIMD vs Spatial Pipeline</h2>
+              <div class="arch-split">
+                <div class="arch-box gpu-box">
+                  <h4 style="color: #818cf8">GPU — SIMD Model</h4>
+                  <ul>
+                    <li>Thousands of simple CUDA/shader cores</li>
+                    <li>All cores execute same instruction (SIMD/SIMT)</li>
+                    <li>High memory bandwidth (HBM2e: 2–3 TB/s)</li>
+                    <li>Requires large data batches for efficiency</li>
+                    <li>PCIe interface to host CPU (+20–100 µs latency)</li>
+                    <li>GPU VRAM separate from CPU RAM</li>
+                    <li>Power: 200–700W (A100: 400W, H100: 700W)</li>
+                    <li>Programming: CUDA, OpenCL, ROCm</li>
+                    <li>Excellent for: training, batch inference, graphics</li>
+                    <li>Weak for: single-item latency, custom IO</li>
+                  </ul>
+                </div>
+                <div class="arch-box fpga-box">
+                  <h4 style="color: #22d3ee">FPGA — Spatial Pipeline Model</h4>
+                  <ul>
+                    <li>Custom logic fabric — hardware matches algorithm</li>
+                    <li>Each pipeline stage has dedicated compute resources</li>
+                    <li>Moderate bandwidth (DDR4/HBM: 64–460 GB/s)</li>
+                    <li>Processes one item at a time, every clock cycle</li>
+                    <li>Direct IO — no host transfer overhead</li>
+                    <li>On-chip BRAM + external DDR tightly integrated</li>
+                    <li>Power: 5–100W (typical: 15–75W)</li>
+                    <li>Programming: VHDL, Verilog, HLS (Vitis)</li>
+                    <li>Excellent for: streaming, custom IO, low latency</li>
+                    <li>Weak for: training large models, arbitrary code</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Architecture Diagrams -->
+              <h2 class="section-heading">Execution Model Diagrams</h2>
+              <div class="mermaid">
+                graph LR subgraph GPU_arch["GPU — SIMD (Batch) Model"] Host["CPU Host\n(System
+                RAM)"] -->|"PCIe\n+20-100µs"| GM["GPU\nGlobal Memory\n(VRAM HBM)"] GM --> SM1["SM
+                Core 1\n(CUDA)"] GM --> SM2["SM Core 2\n(CUDA)"] GM --> SM3["SM Core N\n(6912
+                cores)"] SM1 --> RES["Batched\nResult"] SM2 --> RES SM3 --> RES end subgraph
+                FPGA_arch["FPGA — Spatial Pipeline Model"] IO_in["Input Data\n(Direct
+                IO\nQSFP/PCIe)"] --> P1["Pipeline\nStage 1\n~2ns"] P1 --> P2["Pipeline\nStage
+                2\n~2ns"] P2 --> P3["Pipeline\nStage N\n~2ns"] P3 -->
+                IO_out["Output\n(nanoseconds\ntotal)"] end style GPU_arch
+                fill:#1a0f40,stroke:#818cf8 style FPGA_arch fill:#0f2d1f,stroke:#22d3ee
+              </div>
+
+              <!-- Latency Deep Dive -->
+              <h2 class="section-heading">The Latency Gap: Where It Comes From</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The latency difference between GPU and FPGA is not just about processing speed —
+                it's about the overhead stack that every GPU request must climb before any compute
+                occurs. Understanding each component helps you understand why GPUs cannot serve
+                certain markets regardless of how fast the GPU cores themselves are.
+              </p>
+
+              <div class="arch-split">
+                <div>
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: #818cf8;
+                      margin-bottom: 8px;
+                      text-transform: uppercase;
+                      letter-spacing: 0.05em;
+                    "
+                  >
+                    GPU Latency Stack (typical)
+                  </p>
+                  <div class="latency-breakdown">
+                    <div class="latency-item">
+                      <span class="step-name">Application CPU code</span
+                      ><span class="step-time gpu-time">~1 µs</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">CUDA API call overhead</span
+                      ><span class="step-time gpu-time">~5 µs</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">PCIe DMA transfer (1KB data)</span
+                      ><span class="step-time gpu-time">~10–50 µs</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">GPU kernel scheduling</span
+                      ><span class="step-time gpu-time">~5–20 µs</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Kernel execution</span
+                      ><span class="step-time gpu-time">~10–100 µs</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Result DMA back to CPU</span
+                      ><span class="step-time gpu-time">~10–50 µs</span>
+                    </div>
+                    <div class="latency-item" style="border-top: 2px solid #818cf8">
+                      <span class="step-name"><strong>Total</strong></span
+                      ><span class="step-time" style="color: #818cf8"
+                        ><strong>~40–200+ µs</strong></span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 700;
+                      color: #22d3ee;
+                      margin-bottom: 8px;
+                      text-transform: uppercase;
+                      letter-spacing: 0.05em;
+                    "
+                  >
+                    FPGA Latency Stack (direct IO)
+                  </p>
+                  <div class="latency-breakdown">
+                    <div class="latency-item">
+                      <span class="step-name">IO pin propagation</span
+                      ><span class="step-time fpga-time">~1 ns</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Input register capture</span
+                      ><span class="step-time fpga-time">~2 ns</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Pipeline stage 1</span
+                      ><span class="step-time fpga-time">~2 ns/stage</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Pipeline stages 2…N</span
+                      ><span class="step-time fpga-time">~2 ns/stage</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">Output register + IO pin</span
+                      ><span class="step-time fpga-time">~3 ns</span>
+                    </div>
+                    <div class="latency-item">
+                      <span class="step-name">(No PCIe, no OS, no DMA)</span
+                      ><span class="step-time fpga-time">0</span>
+                    </div>
+                    <div class="latency-item" style="border-top: 2px solid #22d3ee">
+                      <span class="step-name"><strong>Total</strong></span
+                      ><span class="step-time" style="color: #22d3ee"
+                        ><strong>~50–500 ns</strong></span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="callout callout-info">
+                <strong>The GPU's Core Weakness</strong>
+                The GPU's biggest architectural weakness is not raw compute — it's latency. A GPU
+                needs thousands of operations batched together to be efficient. Before it can
+                process item #1, you must: call the CUDA API, DMA data over PCIe, schedule the
+                kernel, launch warps, and wait for execution. By the time result #1 arrives, an FPGA
+                has processed thousands of items. For streaming real-time data, this overhead is
+                fatal.
+              </div>
+
+              <!-- Power Comparison -->
+              <h2 class="section-heading">Power Efficiency: A Critical Differentiator</h2>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Power is often the deciding factor at the edge — in autonomous vehicles, industrial
+                equipment, telecom radio units, and medical devices where power budgets are tight. A
+                700W H100 GPU requires a server-grade power supply and cooling infrastructure. An
+                Xilinx Alveo U50 FPGA draws 75W and fits in a standard PCIe slot with passive
+                cooling.
+              </p>
+
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                For ML inference at the network edge, the power efficiency difference is dramatic.
+                AMD Xilinx published benchmarks showing Alveo U50 achieving better latency than a
+                V100 GPU for BERT-base inference at 3x lower power. Versal AI Core series achieves
+                up to 400 TOPS while consuming under 100W — compared to A100's 312 TOPS at 400W. The
+                FPGA's ability to implement custom low-precision arithmetic (INT4, INT6, arbitrary
+                fixed-point) further multiplies this advantage, since fewer transistors switch per
+                MAC operation.
+              </p>
+
+              <!-- Multi-Chart Comparison -->
+              <h2 class="section-heading">Performance Comparison by Workload</h2>
+              <div id="chart-workload" style="width: 100%; height: 420px"></div>
+
+              <!-- Power Chart -->
+              <h2 class="section-heading">Power Consumption Comparison</h2>
+              <div id="chart-power" style="width: 100%; height: 320px"></div>
+
+              <!-- Comprehensive Table -->
+              <h2 class="section-heading">FPGA vs GPU — Full Comparison</h2>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Criteria</th>
+                    <th>GPU</th>
+                    <th>FPGA</th>
+                    <th>Winner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Parallelism Type</strong></td>
+                    <td>SIMD — same instruction, many data</td>
+                    <td>Spatial — custom pipeline, arbitrary structure</td>
+                    <td class="tie">Context-dependent</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Peak FLOPS (top model)</strong></td>
+                    <td>H100: ~2000 TFLOPS (FP8)</td>
+                    <td>Versal: ~400 TOPS (INT8)</td>
+                    <td class="gpu-win">GPU wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Streaming Latency</strong></td>
+                    <td>40–200+ µs (PCIe + kernel launch)</td>
+                    <td>50–500 ns (direct pipeline)</td>
+                    <td class="fpga-win">FPGA wins 100–1000x</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Batch ML Training</strong></td>
+                    <td>Excellent — purpose-built matrix ops</td>
+                    <td>Possible but not competitive</td>
+                    <td class="gpu-win">GPU wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Edge ML Inference</strong></td>
+                    <td>Overkill — too much power/latency</td>
+                    <td>Optimal — low power, custom bit width</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Packet Processing</strong></td>
+                    <td>Not viable — PCIe overhead kills latency</td>
+                    <td>Wire-rate with deterministic latency</td>
+                    <td class="fpga-win">FPGA wins decisively</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Radar / Sonar DSP</strong></td>
+                    <td>Too high latency, no determinism</td>
+                    <td>Real-time pipeline at ns latency</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>HFT Order Management</strong></td>
+                    <td>Not viable (&gt;50 µs latency)</td>
+                    <td>~1.2 µs order-to-send</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Video Transcoding (batch)</strong></td>
+                    <td>High throughput (NVENC hardware)</td>
+                    <td>Real-time encode with custom latency</td>
+                    <td class="tie">Tie — GPU for batch, FPGA for real-time</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Custom Interfaces</strong></td>
+                    <td>PCIe/NVLink only</td>
+                    <td>Any standard: QSFP, SMPTE, MIPI, custom</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Arbitrary Bit Widths</strong></td>
+                    <td>FP16, BF16, INT8, FP8 (limited)</td>
+                    <td>Any width: INT4, INT6, custom FP</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Power Consumption</strong></td>
+                    <td>200–700W per card</td>
+                    <td>5–100W per card</td>
+                    <td class="fpga-win">FPGA wins 5–50x efficiency</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ease of Programming</strong></td>
+                    <td>CUDA well-documented; Python frameworks</td>
+                    <td>RTL or HLS — steep learning curve</td>
+                    <td class="gpu-win">GPU wins significantly</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Monte Carlo / Simulation</strong></td>
+                    <td>Excellent — massively parallel RNG</td>
+                    <td>Possible but GPU is more practical</td>
+                    <td class="gpu-win">GPU wins</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Reconfigurability</strong></td>
+                    <td>Programmable but fixed GPU architecture</td>
+                    <td>Fully reconfigurable hardware</td>
+                    <td class="fpga-win">FPGA wins</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — Edge AI</strong>
+                For ML inference at the network edge — where power, latency, and cost all matter —
+                FPGAs increasingly beat GPUs. AMD Xilinx Alveo U50 achieves 2x better latency than
+                NVIDIA V100 for BERT-base inference at 1/5th the power. Versal AI Core with its AI
+                Engine array targets sub-millisecond inference for autonomous driving and 5G base
+                station inference workloads where a 400W GPU is simply not an option.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: Why can't a GPU handle radar signal processing with the same performance as an
+                FPGA?<br />
+                A: Radar requires processing each pulse return in microseconds with guaranteed
+                deterministic timing — every pulse, every time, with no jitter. A GPU cannot provide
+                this because: (1) PCIe data transfer takes 10–100 µs per transfer; (2) CUDA kernel
+                launch adds 5–20 µs overhead; (3) GPU scheduling is non-deterministic under load;
+                (4) there is no way to directly connect radar RF hardware to a GPU's PCIe interface.
+                An FPGA connects directly to the ADC output, processes each sample in a hardware
+                pipeline with nanosecond latency and absolute determinism.
+              </div>
+
+              <div class="callout callout-warning">
+                <strong>Common Mistake</strong>
+                Do not benchmark FPGA vs GPU for training large neural networks. GPUs were
+                purpose-built for this exact workload — terabytes of training data, massive matrix
+                multiplications, gradient updates across millions of parameters. No FPGA comes close
+                to an H100 for ResNet-50 training. The correct comparison is for <em>inference</em>,
+                <em>streaming DSP</em>, and <em>custom IO</em> workloads, where the architectural
+                trade-offs change the outcome dramatically.
+              </div>
+
+              <!-- Real-World Benchmarks -->
+              <h2 class="section-heading">Real-World Performance Data</h2>
+              <div class="widget-container">
+                <h3>Published Benchmarks</h3>
+                <table class="data-table" style="margin: 0">
+                  <thead>
+                    <tr>
+                      <th>Workload</th>
+                      <th>GPU</th>
+                      <th>FPGA</th>
+                      <th>FPGA Advantage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>BERT-base Inference Latency</strong></td>
+                      <td>V100: ~3 ms (batch=1)</td>
+                      <td>Alveo U50: ~1.2 ms</td>
+                      <td class="fpga-win">2.5x lower latency</td>
+                    </tr>
+                    <tr>
+                      <td><strong>BERT Inference Power Efficiency</strong></td>
+                      <td>V100: 300W</td>
+                      <td>Alveo U50: 75W</td>
+                      <td class="fpga-win">4x better perf/watt</td>
+                    </tr>
+                    <tr>
+                      <td><strong>HFT Order-to-Send Latency</strong></td>
+                      <td>GPU: ~50 µs (software path)</td>
+                      <td>FPGA: ~1.2 µs</td>
+                      <td class="fpga-win">40x lower latency</td>
+                    </tr>
+                    <tr>
+                      <td><strong>100 Gbps Packet Classification</strong></td>
+                      <td>Not viable (PCIe bottleneck)</td>
+                      <td>Wire-rate (&lt;100 ns/packet)</td>
+                      <td class="fpga-win">Only FPGA viable</td>
+                    </tr>
+                    <tr>
+                      <td><strong>4096-pt FFT at 1 GSPS</strong></td>
+                      <td>Not viable (latency/throughput)</td>
+                      <td>FPGA: full rate, deterministic</td>
+                      <td class="fpga-win">Only FPGA viable</td>
+                    </tr>
+                    <tr>
+                      <td><strong>ResNet-50 Training (ImageNet)</strong></td>
+                      <td>A100: ~7 min/epoch</td>
+                      <td>Not practical</td>
+                      <td class="gpu-win">GPU wins clearly</td>
+                    </tr>
+                    <tr>
+                      <td><strong>LLM Inference (Llama 70B)</strong></td>
+                      <td>H100: ~60 tokens/sec</td>
+                      <td>Not practical (memory constraints)</td>
+                      <td class="gpu-win">GPU wins for large LLMs</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Knowledge Check -->
+              <h2 class="section-heading">Knowledge Check</h2>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q1" data-answered="">
+                  1. What type of parallelism does a GPU use?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Spatial parallelism — custom hardware for each operation
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    SIMD/SIMT — same instruction executed on thousands of data items simultaneously
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Sequential pipelining — one operation at a time in a long pipeline
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    Von Neumann — fetch, decode, execute on one data item
+                  </li>
+                </ul>
+                <div id="fb1" class="quiz-fb">
+                  Correct! GPUs use SIMD (Single Instruction, Multiple Data) or NVIDIA's SIMT
+                  (Single Instruction, Multiple Threads) model. All CUDA cores in a warp execute the
+                  same instruction on different data simultaneously. This is extremely efficient for
+                  matrix operations but requires large data batches to utilize the thousands of
+                  cores.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q2" data-answered="">
+                  2. For processing a live 4K camera stream with a latency requirement of under 1
+                  millisecond, which is a better choice?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    GPU — higher TFLOPS means lower latency
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    FPGA — streaming pipeline with direct sensor IO, nanosecond latency
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    Both are equivalent — latency depends on algorithm complexity, not hardware
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    GPU with NVLink — eliminates PCIe bottleneck
+                  </li>
+                </ul>
+                <div id="fb2" class="quiz-fb">
+                  Correct! FPGA wins for low-latency streaming. A GPU must receive data over PCIe,
+                  schedule a kernel, execute, and return results — total overhead of 40–200+ µs,
+                  which already exceeds a 1 ms budget for complex models. An FPGA connects directly
+                  to the camera sensor (e.g., MIPI CSI-2 interface in the programmable IO) and
+                  processes each frame through a hardware pipeline with sub-millisecond total
+                  latency.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q3" data-answered="">
+                  3. A typical high-end GPU (H100) consumes approximately how much power?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    50–100W
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    150–250W
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    600–700W
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    1000–1500W
+                  </li>
+                </ul>
+                <div id="fb3" class="quiz-fb">
+                  Correct! The NVIDIA H100 SXM5 has a 700W TDP. The A100 is 400W. Even the
+                  inference-optimized L40S is 350W. Compare to an Xilinx Alveo U50 at 75W — a 5–9x
+                  power advantage for the FPGA at equivalent or better inference latency. For edge
+                  deployment, this difference is the difference between feasible and infeasible.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q4" data-answered="">
+                  4. For training a large language model (GPT-4 scale) with hundreds of billions of
+                  parameters, which platform wins?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    FPGA — custom bit widths give better efficiency
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    GPU — massive matrix operations, HBM bandwidth, and CUDA ecosystem are
+                    purpose-built for this
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    CPU cluster — more memory capacity available
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    ASIC — lowest power per FLOP
+                  </li>
+                </ul>
+                <div id="fb4" class="quiz-fb">
+                  Correct! GPU dominates LLM training. GPT-4 scale training required tens of
+                  thousands of A100 GPUs running for months. The reasons: (1) training requires
+                  FP16/BF16 matrix multiply which GPU Tensor Cores execute at 312 TFLOPS; (2) GPUs
+                  have HBM2e memory at 2 TB/s bandwidth; (3) NVLink/InfiniBand allows multi-GPU
+                  gradient aggregation; (4) PyTorch/JAX/DeepSpeed provide mature training
+                  frameworks. FPGAs have none of this ecosystem for LLM training.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q5" data-answered="">
+                  5. FPGAs can implement custom numeric formats like INT4 or 6-bit fixed-point
+                  arithmetic. True or False?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    True — FPGA logic can implement any arbitrary bit width arithmetic
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    False — FPGAs are limited to standard IEEE 754 floating point formats
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    True — but only for powers of 2 (INT1, INT2, INT4, INT8)
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    False — custom arithmetic requires an ASIC
+                  </li>
+                </ul>
+                <div id="fb5" class="quiz-fb">
+                  Correct — True! FPGA LUTs implement arbitrary boolean functions, so you can build
+                  multipliers and accumulators at any bit width: 4-bit, 6-bit, 9-bit, 17-bit —
+                  whatever the algorithm requires. This is a significant advantage for neural
+                  network inference, where quantization research has shown INT4 weights work well
+                  for many models. Fewer bits per multiply means more MACs fit in the same FPGA
+                  resources, multiplying effective throughput.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h2 class="section-heading">Practical Exercise — Workload Routing</h2>
+              <div class="widget-container">
+                <h3>Platform Selection: GPU or FPGA?</h3>
+                <p
+                  style="
+                    font-size: 0.875rem;
+                    color: var(--text-sub);
+                    line-height: 1.7;
+                    margin-bottom: 16px;
+                  "
+                >
+                  For each workload below, choose GPU or FPGA. Write a 2–3 sentence justification
+                  addressing: batch size, latency requirement, power budget, and any custom IO
+                  needs.
+                </p>
+                <div class="exercise-step">
+                  <div class="step-num">A</div>
+                  <div class="step-text">
+                    <strong>Training ResNet-50</strong> on the full ImageNet dataset (1.2 million
+                    images). Target: complete each training epoch in under 10 minutes. Budget:
+                    unlimited datacenter power and servers.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">B</div>
+                  <div class="step-text">
+                    <strong>Edge AI in a factory camera</strong>: detect assembly defects in
+                    real-time at 60fps, 4K resolution. Latency requirement: &lt;5ms from frame
+                    capture to alert. Power budget: 25W total (embedded system, no active cooling).
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">C</div>
+                  <div class="step-text">
+                    <strong>100 Gbps network intrusion detection</strong>: classify every TCP/UDP
+                    packet on a 100G backbone link. Latency budget: &lt;500 ns per packet. Hardware
+                    connects to a QSFP28 optical module.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">D</div>
+                  <div class="step-text">
+                    <strong>4096-point FFT for an S-band radar</strong>: sample rate 1 GSPS, process
+                    each FFT in real-time (one new FFT output per 4096 ADC samples = every 4 µs).
+                    Connect directly to a 12-bit ADC at 1 GSPS. No batching possible.
+                  </div>
+                </div>
+                <div class="exercise-step">
+                  <div class="step-num">E</div>
+                  <div class="step-text">
+                    <strong>Monte Carlo simulation</strong> for option pricing: run 1 billion random
+                    paths, each path is independent, final answer needed in under 30 seconds. Runs
+                    in a datacenter with abundant power. No latency constraint — throughput only.
+                  </div>
+                </div>
+                <div class="callout callout-tip" style="margin-top: 12px">
+                  <strong>Hint</strong>
+                  Apply the three questions: (1) Is data arriving in a continuous stream requiring
+                  immediate per-item response? → FPGA. (2) Is the workload a large batch where all
+                  items can be processed together? → GPU. (3) Is there a custom electrical interface
+                  (ADC, QSFP, camera sensor)? → FPGA.
+                </div>
+              </div>
+
+              <!-- Summary -->
+              <h2 class="section-heading">Lesson Summary</h2>
+              <div class="widget-container">
+                <h3>Key Takeaways</h3>
+                <ul class="objectives-list">
+                  <li>
+                    GPU uses SIMD/SIMT parallelism — same instruction on thousands of data items;
+                    requires large batches for efficiency
+                  </li>
+                  <li>
+                    FPGA uses spatial pipeline parallelism — custom hardware matches algorithm
+                    structure; processes streaming data item-by-item with nanosecond latency
+                  </li>
+                  <li>
+                    GPU latency stack: PCIe transfer + kernel launch + execution = 40–200+ µs. FPGA
+                    latency: 50–500 ns (no overhead)
+                  </li>
+                  <li>
+                    GPU wins: batch ML training, Monte Carlo simulation, large language model
+                    inference, ray tracing
+                  </li>
+                  <li>
+                    FPGA wins: streaming data processing, edge ML inference, radar/DSP, packet
+                    processing, HFT, custom electrical interfaces
+                  </li>
+                  <li>
+                    Power: GPU = 200–700W. FPGA = 5–100W. FPGA provides 5–50x better power
+                    efficiency for matching workloads
+                  </li>
+                  <li>
+                    FPGAs support arbitrary bit widths (INT4, INT6, custom fixed-point) — enabling
+                    more MACs per watt for quantized neural networks
+                  </li>
+                  <li>
+                    The optimal system often uses both: GPU for batch training and large-scale
+                    inference; FPGA for edge inference, IO, and streaming
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a href="04-fpga-vs-asic.html">← FPGA vs ASIC</a>
+                <a href="06-fpga-families.html">AMD Xilinx FPGA Families →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-05';
+      const TOTAL = 25;
+
+      // Workload comparison grouped bar chart
+      var workloads = [
+        'Batch ML\nTraining',
+        'Edge ML\nInference',
+        'Packet\nProcessing',
+        'Radar\nFFT DSP',
+        'Monte Carlo\nSimulation',
+      ];
+      Plotly.newPlot(
+        'chart-workload',
+        [
+          {
+            name: 'GPU Score',
+            x: workloads,
+            y: [10, 4, 1, 1, 9],
+            type: 'bar',
+            marker: { color: '#818cf8', opacity: 0.85 },
+            text: ['GPU Wins', 'FPGA Better', 'Not Viable', 'Not Viable', 'GPU Wins'],
+            textposition: 'outside',
+            textfont: { size: 9, color: '#94a3b8' },
+          },
+          {
+            name: 'FPGA Score',
+            x: workloads,
+            y: [1, 9, 10, 10, 4],
+            type: 'bar',
+            marker: { color: '#22d3ee', opacity: 0.85 },
+            text: ['Not Optimal', 'FPGA Wins', 'FPGA Wins', 'FPGA Wins', 'Feasible'],
+            textposition: 'outside',
+            textfont: { size: 9, color: '#94a3b8' },
+          },
+        ],
+        {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#94a3b8', family: 'Inter' },
+          title: {
+            text: 'FPGA vs GPU Platform Suitability by Workload (1=poor, 10=excellent)',
+            font: { size: 12, color: '#e2e8f0' },
+          },
+          xaxis: { gridcolor: 'rgba(148,163,184,0.1)', tickfont: { size: 10 } },
+          yaxis: { gridcolor: 'rgba(148,163,184,0.1)', title: 'Suitability Score', range: [0, 12] },
+          barmode: 'group',
+          legend: { x: 0.75, y: 0.98 },
+          margin: { t: 60, b: 60, l: 70, r: 20 },
+          bargap: 0.2,
+          bargroupgap: 0.05,
+        },
+        { responsive: true, displayModeBar: false }
+      );
+
+      // Power comparison
+      Plotly.newPlot(
+        'chart-power',
+        [
+          {
+            x: ['FPGA\n(Alveo U50)', 'FPGA\n(Versal AI Core)', 'GPU\n(A100)', 'GPU\n(H100 SXM)'],
+            y: [75, 65, 400, 700],
+            type: 'bar',
+            marker: { color: ['#22d3ee', '#22d3ee', '#818cf8', '#f87171'], opacity: 0.85 },
+            text: ['75W', '65W', '400W', '700W'],
+            textposition: 'outside',
+            textfont: { size: 11, color: '#94a3b8' },
+            hovertemplate: '<b>%{x}</b><br>TDP: %{y}W<extra></extra>',
+          },
+        ],
+        {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#94a3b8', family: 'Inter' },
+          title: {
+            text: 'Thermal Design Power (TDP) — FPGA vs GPU',
+            font: { size: 13, color: '#e2e8f0' },
+          },
+          xaxis: { gridcolor: 'rgba(148,163,184,0.1)' },
+          yaxis: { gridcolor: 'rgba(148,163,184,0.1)', title: 'Power (Watts)' },
+          margin: { t: 50, b: 60, l: 70, r: 20 },
+          bargap: 0.35,
+        },
+        { responsive: true, displayModeBar: false }
+      );
+
+      async function loadProgress() {
+        try {
+          const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const token = session.accessToken || session.token || '';
+          if (!token) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          const data = await r.json();
+          let done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          const sbp = document.getElementById('sb-pct');
+          const sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress. Please check your connection.');
+        }
+      }
+
+      function markAsCompleteUI() {
+        const btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="#34d399" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="#34d399" stroke-width="2.5" fill="none"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          if (isCorrect) fb.classList.add('correct');
+          else fb.classList.add('incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

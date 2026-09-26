@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <title>Verifying Purchase | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Trainings/verify-purchase.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .verify-wrap {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .verify-card {
+        text-align: center;
+        max-width: 420px;
+        padding: var(--sp-10) var(--sp-8);
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+      }
+      .verify-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--sp-5);
+      }
+      .verify-icon.success {
+        background: rgba(16, 185, 129, 0.15);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+      }
+      .verify-icon.failure {
+        background: rgba(239, 68, 68, 0.15);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+      }
+      .verify-icon.pending {
+        background: rgba(99, 102, 241, 0.15);
+        border: 2px solid rgba(99, 102, 241, 0.3);
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto var(--sp-5);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <h1 class="sr-only">Verifying Purchase | Rising Edge Technologies</h1>
+    <div class="verify-wrap">
+      <div class="verify-card">
+        <div id="verify-spinner" class="spinner"></div>
+        <div id="verify-content" style="display: none">
+          <div id="verify-icon" class="verify-icon"></div>
+          <h2 id="verify-heading" style="margin-bottom: var(--sp-2)"></h2>
+          <p
+            id="verify-msg"
+            style="color: var(--text-sub); font-size: 0.9rem; margin-bottom: var(--sp-6)"
+          ></p>
+          <a id="verify-cta" href="trainings.html" class="btn btn-primary">Go to Courses</a>
+        </div>
+      </div>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      /* Skip requireAuth() here — the verify endpoint is intentionally public.
+         The access token may have expired during a long UPI / 3D-Secure flow,
+         and redirecting the user away would prevent them seeing the confirmation. */
+    </script>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var orderId = params.get('order_id');
+        var MAX_POLLS = 12; // 12 × 5 s = 60 s max polling window
+        var pollCount = 0;
+
+        function showResult(type, heading, msg, ctaHref, ctaLabel) {
+          document.getElementById('verify-spinner').style.display = 'none';
+          var icon = document.getElementById('verify-icon');
+          icon.className = 'verify-icon ' + type;
+          if (type === 'success') {
+            icon.innerHTML =
+              '<svg width="28" height="28" fill="none" stroke="#10b981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+          } else if (type === 'failure') {
+            icon.innerHTML =
+              '<svg width="28" height="28" fill="none" stroke="#ef4444" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+          } else {
+            icon.innerHTML =
+              '<svg width="28" height="28" fill="none" stroke="#6366f1" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+          }
+          document.getElementById('verify-heading').textContent = heading;
+          document.getElementById('verify-msg').textContent = msg;
+          var cta = document.getElementById('verify-cta');
+          cta.href = ctaHref || 'trainings.html';
+          cta.textContent = ctaLabel || 'Go to Courses';
+          document.getElementById('verify-content').style.display = 'block';
+        }
+
+        function updateSpinnerLabel(text) {
+          var el = document.getElementById('verify-spinner-label');
+          if (!el) {
+            el = document.createElement('p');
+            el.id = 'verify-spinner-label';
+            el.style.cssText =
+              'color:var(--text-muted);font-size:0.82rem;margin-top:var(--sp-3);text-align:center';
+            document.getElementById('verify-spinner').insertAdjacentElement('afterend', el);
+          }
+          el.textContent = text;
+        }
+
+        if (!orderId) {
+          showResult(
+            'failure',
+            'Invalid Link',
+            'No order ID found. Please contact support.',
+            'trainings.html',
+            'Browse Courses'
+          );
+          return;
+        }
+
+        function verify() {
+          pollCount++;
+          fetch('/api/cashfree/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: orderId }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (json) {
+              if (json.status === 'paid') {
+                showResult(
+                  'success',
+                  'Payment Successful!',
+                  'Your course purchase is confirmed. You can now start learning.',
+                  'trainings.html',
+                  'Start Learning'
+                );
+              } else if (
+                json.status === 'pending' ||
+                json.status === 'active' ||
+                json.status === 'created'
+              ) {
+                if (pollCount >= MAX_POLLS) {
+                  showResult(
+                    'pending',
+                    'Still Processing',
+                    'Your payment is taking longer than expected. Check back in a few minutes or contact support with order ID: ' +
+                      orderId,
+                    'trainings.html',
+                    'Go to Courses'
+                  );
+                } else {
+                  updateSpinnerLabel(
+                    'Payment processing… checking again in 5 s (' +
+                      pollCount +
+                      '/' +
+                      MAX_POLLS +
+                      ')'
+                  );
+                  setTimeout(verify, 5000);
+                }
+              } else {
+                showResult(
+                  'failure',
+                  'Payment Failed',
+                  (json.error || 'Your payment could not be completed.') + ' Please try again.',
+                  'trainings.html',
+                  'Try Again'
+                );
+              }
+            })
+            .catch(function () {
+              if (pollCount < MAX_POLLS) {
+                updateSpinnerLabel('Network issue — retrying…');
+                setTimeout(verify, 5000);
+              } else {
+                showResult(
+                  'failure',
+                  'Verification Error',
+                  'We could not verify your payment. Please contact support with order ID: ' +
+                    orderId,
+                  'trainings.html',
+                  'Go to Courses'
+                );
+              }
+            });
+        }
+
+        verify();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="A comprehensive map of FPGA internal architecture — CLBs, BRAM, DSP slices, routing, clock networks, IO, and transceivers — with resource counts and estimation guidance."
+    />
+    <title>FPGA Internal Architecture Overview | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/08-internal-architecture.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .resource-block {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        min-width: 110px;
+        text-align: center;
+      }
+      .resource-block .rb-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+      .resource-block .rb-val {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--text-base);
+      }
+      .resource-block .rb-sub {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item active" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>FPGA Internal Architecture Overview</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 8/25</span><span>32%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 32%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 8 OF 25</span>
+                <span class="badge">20 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                FPGA Internal Architecture Overview
+              </h1>
+              <p class="subtitle">
+                Build a complete mental map of every major building block inside an FPGA — CLBs,
+                BRAM, DSPs, clock networks, IO, routing, and transceivers — before diving into each
+                in depth.
+              </p>
+            </div>
+          </section>
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                The Architecture Map
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 20px">
+                An FPGA is not a single monolithic circuit — it is an array of specialized,
+                interconnected building blocks. Understanding the role of each block and how they
+                connect is essential before you can efficiently use the device or interpret tool
+                output. This lesson gives you the "30,000-foot view" we will systematically zoom
+                into over the next 17 lessons.
+              </p>
+
+              <!-- Key resource callout for XC7A200T -->
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Our reference device for this course is the <strong>Artix-7 XC7A200T</strong> — a
+                widely used, mid-size 7-series FPGA. Its resource counts give us concrete numbers to
+                anchor our understanding:
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px">
+                <div class="resource-block">
+                  <div class="rb-label">CLBs</div>
+                  <div class="rb-val" style="color: #818cf8">33,650</div>
+                  <div class="rb-sub">= 67,300 Slices</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">LUTs</div>
+                  <div class="rb-val" style="color: #6366f1">134,600</div>
+                  <div class="rb-sub">LUT6 primitives</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">Flip-Flops</div>
+                  <div class="rb-val" style="color: #a78bfa">269,200</div>
+                  <div class="rb-sub">D-type FFs</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">BRAM</div>
+                  <div class="rb-val" style="color: #34d399">365</div>
+                  <div class="rb-sub">× 36Kb = 13,140 Kb</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">DSP48</div>
+                  <div class="rb-val" style="color: #fb923c">740</div>
+                  <div class="rb-sub">25×18 MAC units</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">IO Pins</div>
+                  <div class="rb-val" style="color: #22d3ee">500</div>
+                  <div class="rb-sub">max user IO</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">GTX</div>
+                  <div class="rb-val" style="color: #f472b6">16</div>
+                  <div class="rb-sub">transceivers</div>
+                </div>
+                <div class="resource-block">
+                  <div class="rb-label">MMCM</div>
+                  <div class="rb-val" style="color: #60a5fa">10</div>
+                  <div class="rb-sub">+ 10 PLLs</div>
+                </div>
+              </div>
+
+              <!-- Architecture Mermaid -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Full Architecture Diagram
+              </h3>
+              <div class="mermaid">
+                graph TD subgraph FPGA_FABRIC["FPGA Internal Architecture (7-Series)"] CLB_ARRAY[CLB
+                Array\nSlices + LUTs + FFs + Carry] BRAM_COL[BRAM Columns\n36Kb Dual-Port RAM]
+                DSP_COL[DSP48 Columns\n25×18 MAC] CLOCK_NET[Clock Network\nMMCM + BUFG + BUFH +
+                BUFR] IO_BANKS[IO Banks\nHP/HR, IOB buffers] GTX_XCVR[GTX Transceivers\nHigh-Speed
+                Serial up to 12.5 Gbps] XADC[XADC\n12-bit Dual-Channel ADC] CFG[Config Logic\nJTAG +
+                SPI + SelectMAP + ICAP] ROUTING[Routing Network\nSwitch Matrix + Interconnect]
+                PCIE[PCIe Hard Block\nGen2 x4/x8 optional] end CLB_ARRAY <--> ROUTING BRAM_COL <-->
+                ROUTING DSP_COL <--> ROUTING CLOCK_NET --> CLB_ARRAY CLOCK_NET --> BRAM_COL
+                CLOCK_NET --> DSP_COL IO_BANKS <--> ROUTING GTX_XCVR --> IO_BANKS CFG --> CLB_ARRAY
+                PCIE <--> ROUTING XADC <--> ROUTING
+              </div>
+
+              <!-- Building Blocks Sections -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 16px;
+                "
+              >
+                Building Blocks — Detailed Overview
+              </h3>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                1. CLB — Configurable Logic Block
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                The fundamental repeating cell. In 7-series, each CLB contains
+                <strong>2 Slices</strong>. Slices come in two flavors: Slice L (logic-only) and
+                Slice M (logic + distributed RAM/SRL). CLBs tile the majority of the die area. The
+                synthesis tool maps your RTL into CLBs; the placer assigns CLBs to physical
+                locations on the die.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                2. Slice — The Smallest Independently Routable Unit
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each 7-series Slice contains: <strong>4 LUT6s</strong> (6-input look-up tables),
+                <strong>8 storage elements</strong> (configurable as D flip-flop or latch),
+                <strong>1 CARRY4</strong> (fast arithmetic carry chain), and wide MUXes (F7MUX,
+                F8MUX) for creating 7- and 8-input functions.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                3. LUT6 — 6-Input Look-Up Table
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                A 64×1-bit memory (2⁶ = 64 entries) that implements any Boolean function of 6
+                inputs. The configuration bitstream programs the 64 bits. A LUT6 can also be split
+                into two independent LUT5s. In Slice M, LUTs double as 64×1-bit distributed SRAM or
+                32-bit shift registers.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                4. Flip-Flop
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each LUT output feeds a dedicated D flip-flop. Features: configurable clock edge
+                (rising/falling), clock enable (CE), synchronous or asynchronous set/reset (SR). FFs
+                can be bypassed to take the LUT output directly. The 2:1 ratio of FFs to LUTs (8 FFs
+                / 4 LUTs per Slice) allows pipelined designs with ample registers.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                5. CARRY4 — Fast Carry Chain
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Dedicated carry propagation hardware independent of the routing network. One CARRY4
+                per Slice, cascading vertically between adjacent Slices. Used for adders,
+                subtracters, counters, comparators. Allows arithmetic to run at near-maximum clock
+                frequency without routing delays limiting performance.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                6. BRAM — Block RAM (36Kb)
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Dedicated synchronous dual-port RAM primitives. Each 36Kb block can split into two
+                18Kb blocks. Configurable width/depth: 32K×1, 16K×2, 8K×4, 4K×9, 2K×18, 1K×36. True
+                dual-port operation — both ports can read and write simultaneously to different
+                addresses. Essential for FIFOs, packet buffers, coefficient tables, small lookup
+                memories. BRAM is often the limiting resource in memory-heavy designs.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                7. DSP48E1 — Digital Signal Processing Slice (7-Series)
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                A hardened arithmetic unit containing: 25×18-bit two's complement multiplier, 48-bit
+                accumulator, pre-adder (for symmetric filters), and cascade ports for chaining. One
+                DSP48E1 can implement multiply-accumulate (MAC) in a single clock cycle. FIR
+                filters, complex multipliers, FFTs, and PID controllers map efficiently to DSP48E1
+                chains.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                8. Clock Network — MMCM, BUFG, BUFH
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                7-series provides 32 global clock networks (BUFG). Each drives a low-skew,
+                high-fanout H-tree across the entire device. MMCM (Mixed-Mode Clock Manager)
+                synthesizes frequencies, adjusts phase, and deskews clocks. BUFH distributes clocks
+                within a single clock region. BUFR supports regional clock division. Correct clock
+                domain design is critical for reliable timing closure.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                9. IO Blocks (IOB)
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each user IO pin is backed by a fully configurable IO buffer. Features: programmable
+                drive strength (2mA–24mA), slew rate (SLOW/FAST), pull-up/pull-down, keeper, input
+                delay (IDELAY), differential pair support (LVDS, TMDS), and DDR registers
+                (IDDR/ODDR). HP banks add support for DCI (Digitally Controlled Impedance) for clean
+                DDR termination.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                10. GTX Transceivers (7-Series)
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                High-speed serial transceivers up to 12.5 Gbps per channel. Each GTX has dedicated
+                PMA (Physical Medium Attachment) with SerDes, CDR (Clock Data Recovery), and
+                equalization. Supports standard protocols: PCIe, 10GbE, SATA, Aurora, CPRI,
+                JESD204B. Not available on Spartan-7; available on larger Artix-7 and all
+                Kintex-7/Virtex-7 devices.
+              </p>
+
+              <h4
+                style="
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-base);
+                  margin: 20px 0 8px;
+                "
+              >
+                11. Routing Network
+              </h4>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                The programmable interconnect fabric that connects all resources. Consists of wire
+                segments of varying lengths: local (within a CLB column), hex (6-CLB span), double
+                (2-CLB span), and long lines (full device width/height). Switch boxes at wire
+                intersections are configured by the bitstream to create signal paths. Routing
+                consumes a large fraction of the total die area and has the most impact on timing
+                after logic mapping.
+              </p>
+
+              <!-- Resource Count Table -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                7-Series Resource Count Reference
+              </h3>
+              <div style="overflow-x: auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Device</th>
+                      <th>LUTs</th>
+                      <th>FFs</th>
+                      <th>BRAM (Kb)</th>
+                      <th>DSP</th>
+                      <th>IO</th>
+                      <th>GTX</th>
+                      <th>Clock Regions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>XC7A35T</strong></td>
+                      <td>20,800</td>
+                      <td>41,600</td>
+                      <td>1,800</td>
+                      <td>90</td>
+                      <td>250</td>
+                      <td>—</td>
+                      <td>6</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XC7A200T</strong></td>
+                      <td>134,600</td>
+                      <td>269,200</td>
+                      <td>13,140</td>
+                      <td>740</td>
+                      <td>500</td>
+                      <td>16</td>
+                      <td>10</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XC7K325T</strong></td>
+                      <td>203,800</td>
+                      <td>407,600</td>
+                      <td>25,700</td>
+                      <td>840</td>
+                      <td>500</td>
+                      <td>16</td>
+                      <td>12</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XC7K480T</strong></td>
+                      <td>301,440</td>
+                      <td>602,880</td>
+                      <td>34,380</td>
+                      <td>1,920</td>
+                      <td>520</td>
+                      <td>32</td>
+                      <td>16</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XC7V585T</strong></td>
+                      <td>364,800</td>
+                      <td>729,600</td>
+                      <td>50,760</td>
+                      <td>1,260</td>
+                      <td>850</td>
+                      <td>36</td>
+                      <td>18</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Plotly Resource Distribution Chart -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Resource Distribution Across Families
+              </h3>
+              <div id="resource-chart" style="width: 100%; height: 400px"></div>
+
+              <!-- UltraScale Architecture Change callout -->
+              <div class="callout callout-info">
+                <strong>UltraScale / UltraScale+ Architecture Changes</strong>
+                In UltraScale and UltraScale+, Xilinx revised the CLB structure. Each CLB now
+                contains only <strong>1 Slice</strong> (down from 2 in 7-series), but each Slice has
+                <strong>8 LUTs</strong> (up from 4) and <strong>16 FFs</strong> (up from 8). The
+                carry chain becomes CARRY8 (8 bits per slice vs 4). The net result is higher
+                density, better FF-to-LUT ratio, and reduced routing congestion. The hierarchical
+                level "CLB" essentially becomes synonymous with "Slice" in UltraScale terminology.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip: Three-Resource Utilization Check</strong>
+                When estimating FPGA size requirements: (1) LUT usage drives CLB count, (2) memory
+                needs drive BRAM count, (3) multiply-heavy code drives DSP count. The device must
+                accommodate ALL THREE — pick the smallest device where all three resources are
+                approximately 50% utilized. This gives headroom for timing closure and future
+                modifications.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question: CLB vs Slice vs LUT Hierarchy</strong>
+                Q: What is the difference between a CLB, a Slice, and a LUT?<br />
+                A: These are nested architectural levels. CLB (Configurable Logic Block) is the
+                top-level grouping — in 7-series, each CLB contains 2 Slices. A Slice is the
+                smallest independently routable unit — each 7-series Slice contains 4 LUT6s, 8 FFs,
+                and 1 CARRY4. A LUT (Look-Up Table) is the 64-bit memory that implements any 6-input
+                Boolean function. So: 1 CLB = 2 Slices = 8 LUTs = 16 FFs in 7-series.
+              </div>
+
+              <div class="callout callout-danger">
+                <strong>Common Mistake: Checking Only LUT Utilization</strong>
+                Engineers often report "I'm at 60% LUT utilization, there's room." But a design with
+                60% LUT usage and 95% BRAM usage will fail to fit — BRAM is a hard constraint.
+                Similarly, DSP-heavy designs can exhaust DSPs while LUTs are lightly used. Always
+                check all three resource types in the implementation report, not just LUTs.
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <p class="quiz-q">1. In Xilinx 7-series, how many Slices does one CLB contain?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>A</span> 1
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>B</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>C</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>D</span> 8
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb1">
+                  Correct! In 7-series, each CLB = 2 Slices. In UltraScale/UltraScale+, each CLB = 1
+                  Slice (but each Slice has 8 LUTs instead of 4).
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <p class="quiz-q">2. What is the capacity of one BRAM in Xilinx 7-series?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>A</span> 18Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>B</span> 36Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>C</span> 72Kb
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>D</span> 4Kb
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb2">
+                  Correct! Each BRAM tile is 36Kb and can be used as a single 36Kb block or split
+                  into two independent 18Kb blocks. The Artix-7 XC7A200T has 365 × 36Kb = 13,140 Kb
+                  total.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <p class="quiz-q">
+                  3. What is the multiplier size in a DSP48E1 slice (Xilinx 7-series)?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>A</span> 18×18-bit
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>B</span> 25×18-bit
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>C</span> 32×32-bit
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>D</span> 27×18-bit
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb3">
+                  Correct! DSP48E1 has a 25×18-bit multiplier (two's complement) with a 48-bit
+                  accumulator. DSP58E2 in UltraScale increases this to 27×18-bit.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <p class="quiz-q">
+                  4. How many global clock buffers (BUFG) does a 7-series FPGA provide?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>A</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>B</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>C</span> 32
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>D</span> 64
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb4">
+                  Correct! 7-series FPGAs provide 32 BUFG (Global Clock Buffer) primitives, allowing
+                  up to 32 simultaneously active global clock domains.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <p class="quiz-q">5. How many flip-flops are in a single 7-series Slice?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>A</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>B</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>C</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>D</span> 2
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb5">
+                  Correct! Each 7-series Slice has 8 flip-flops (2 per LUT output). UltraScale+
+                  Slices have 16 FFs (8 LUTs × 2 FFs each).
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q6">
+                <p class="quiz-q">6. How many CARRY4 primitives are in one 7-series Slice?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>A</span> 1
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>B</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>C</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>D</span> 0 — carry logic is in LUTs
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb6">
+                  Correct! One CARRY4 per Slice in 7-series. It handles 4-bit carry propagation,
+                  cascading vertically between adjacent Slices for wide arithmetic. UltraScale uses
+                  CARRY8 (8-bit) per Slice.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-info">
+                <strong>Resource Estimation: 16-Tap FIR Filter</strong>
+                You are designing a 16-tap FIR filter with 16-bit input data and 32-bit fixed-point
+                coefficients, targeting an Artix-7 device.
+                <ul style="margin: 8px 0 0; padding-left: 18px; line-height: 2">
+                  <li>
+                    (a) How many DSP48E1 slices are needed? (Each tap requires 1 multiplier +
+                    accumulation)
+                  </li>
+                  <li>
+                    (b) How many 18Kb BRAMs are needed to store the 16 coefficients (32-bit each)?
+                  </li>
+                  <li>
+                    (c) At 50% utilization headroom, which XC7A device from the table above would
+                    you choose?
+                  </li>
+                </ul>
+                Check your estimates by creating a simple FIR filter in Vivado and examining the
+                synthesis resource report.
+              </div>
+              <div class="lesson-nav">
+                <a href="07-inside-fpga-chip.html">← Inside an FPGA Chip</a>
+                <a href="09-clb.html">Configurable Logic Blocks →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-08';
+      const TOTAL = 25;
+
+      (function () {
+        var devices = [
+          'XC7A35T\n(Artix-7)',
+          'XC7A200T\n(Artix-7)',
+          'XC7K325T\n(Kintex-7)',
+          'XC7K480T\n(Kintex-7)',
+          'XC7V585T\n(Virtex-7)',
+        ];
+        var luts = [20800, 134600, 203800, 301440, 364800];
+        var bram_kb = [1800, 13140, 25700, 34380, 50760];
+        var dsp = [90, 740, 840, 1920, 1260];
+        var isDark = document.documentElement.dataset.theme === 'dark';
+        var bg = isDark ? '#0f172a' : '#ffffff';
+        var paper = isDark ? '#1e293b' : '#f8fafc';
+        var txt = isDark ? '#94a3b8' : '#475569';
+        Plotly.newPlot(
+          'resource-chart',
+          [
+            {
+              name: 'LUTs (÷100)',
+              x: devices,
+              y: luts.map(function (v) {
+                return Math.round(v / 100);
+              }),
+              type: 'bar',
+              marker: { color: '#818cf8' },
+              hovertemplate: 'LUTs: %{customdata:,}<extra></extra>',
+              customdata: luts,
+            },
+            {
+              name: 'BRAM Kb (÷10)',
+              x: devices,
+              y: bram_kb.map(function (v) {
+                return Math.round(v / 10);
+              }),
+              type: 'bar',
+              marker: { color: '#34d399' },
+              hovertemplate: 'BRAM: %{customdata:,} Kb<extra></extra>',
+              customdata: bram_kb,
+            },
+            {
+              name: 'DSP Slices',
+              x: devices,
+              y: dsp,
+              type: 'bar',
+              marker: { color: '#fb923c' },
+              hovertemplate: 'DSP: %{y}<extra></extra>',
+            },
+          ],
+          {
+            barmode: 'group',
+            paper_bgcolor: paper,
+            plot_bgcolor: bg,
+            font: { family: 'Inter', color: txt },
+            legend: { bgcolor: 'transparent' },
+            xaxis: { tickangle: -20, gridcolor: isDark ? '#1e293b' : '#e2e8f0' },
+            yaxis: {
+              title: 'Resource Count (scaled)',
+              gridcolor: isDark ? '#1e293b' : '#e2e8f0',
+              zeroline: false,
+            },
+            margin: { t: 20, b: 90, l: 60, r: 20 },
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      })();
+
+      async function loadProgress() {
+        try {
+          var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          var token = session.accessToken || session.token || '';
+          if (!token) return;
+          var r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          var data = await r.json();
+          var done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              var link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          var pct = Math.round((done / TOTAL) * 100);
+          var sbp = document.getElementById('sb-pct');
+          var sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        var token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          var r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        var btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        var fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

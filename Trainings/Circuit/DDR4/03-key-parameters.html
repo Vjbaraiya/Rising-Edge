@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 electrical and timing parameter glossary: tCK, CL, tRCD, tRP, tRAS, tRC, tRFC, tFAW, tWTR, tRRD, tCCD, ODT, drive strength, SSTL/POD I/O standards, and VREF — with an interactive Plotly timing chart."
+    />
+    <title>
+      Key Electrical &amp; Timing Parameters | DDR4 Memory Interface Design Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/03-key-parameters.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 8px;
+        margin: 14px 0;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item active"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Key Electrical &amp; Timing Parameters</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 03</span>
+              <span class="badge badge-purple">Plotly</span>
+              <h1>Key Electrical &amp; Timing Parameters</h1>
+              <p class="subtitle">
+                Every DDR4 datasheet is dominated by a dense timing table and an electrical
+                characteristics section. This module turns that alphabet soup — tCK, CL, tRCD, tRP,
+                tRAS, tRFC and friends — into a mental model you can actually reason with.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Command cycle diagram -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The command cycle these parameters describe</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Almost every timing parameter measures a gap between two commands on the same
+                  bank: <strong>ACTIVATE</strong> opens a row, <strong>READ/WRITE</strong> accesses
+                  it, <strong>PRECHARGE</strong> closes it before a different row can open.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 640 160"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Timeline showing ACTIVATE, READ and PRECHARGE commands with tRCD, tRAS and tRP intervals highlighted in sequence"
+                  >
+                    <line
+                      x1="20"
+                      y1="80"
+                      x2="620"
+                      y2="80"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <!-- ACT -->
+                    <circle cx="60" cy="80" r="6" fill="var(--cyan,#22d3ee)">
+                      <animate attributeName="r" values="6;9;6" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                    <text
+                      x="60"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="11"
+                      font-weight="700"
+                      fill="var(--text-base)"
+                    >
+                      ACT
+                    </text>
+                    <text
+                      x="60"
+                      y="105"
+                      text-anchor="middle"
+                      font-size="9"
+                      fill="var(--text-muted)"
+                    >
+                      open row
+                    </text>
+                    <!-- RD -->
+                    <circle cx="260" cy="80" r="6" fill="var(--warning,#fb923c)">
+                      <animate
+                        attributeName="r"
+                        values="6;9;6"
+                        dur="3s"
+                        begin="1s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <text
+                      x="260"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="11"
+                      font-weight="700"
+                      fill="var(--text-base)"
+                    >
+                      READ
+                    </text>
+                    <text
+                      x="260"
+                      y="105"
+                      text-anchor="middle"
+                      font-size="9"
+                      fill="var(--text-muted)"
+                    >
+                      access row
+                    </text>
+                    <!-- PRE -->
+                    <circle cx="460" cy="80" r="6" fill="#818cf8">
+                      <animate
+                        attributeName="r"
+                        values="6;9;6"
+                        dur="3s"
+                        begin="2s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <text
+                      x="460"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="11"
+                      font-weight="700"
+                      fill="var(--text-base)"
+                    >
+                      PRE
+                    </text>
+                    <text
+                      x="460"
+                      y="105"
+                      text-anchor="middle"
+                      font-size="9"
+                      fill="var(--text-muted)"
+                    >
+                      close row
+                    </text>
+                    <!-- next ACT -->
+                    <circle cx="590" cy="80" r="6" fill="var(--cyan,#22d3ee)" opacity="0.5" />
+                    <text
+                      x="590"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="11"
+                      font-weight="700"
+                      fill="var(--text-muted)"
+                    >
+                      ACT
+                    </text>
+                    <text
+                      x="590"
+                      y="105"
+                      text-anchor="middle"
+                      font-size="9"
+                      fill="var(--text-muted)"
+                    >
+                      new row
+                    </text>
+                    <!-- intervals -->
+                    <g font-size="10" font-weight="700">
+                      <line
+                        x1="60"
+                        y1="130"
+                        x2="260"
+                        y2="130"
+                        stroke="var(--cyan,#22d3ee)"
+                        stroke-width="1.5"
+                      />
+                      <text x="160" y="124" text-anchor="middle" fill="var(--cyan,#22d3ee)">
+                        tRCD
+                      </text>
+                      <line
+                        x1="60"
+                        y1="145"
+                        x2="460"
+                        y2="145"
+                        stroke="var(--warning,#fb923c)"
+                        stroke-width="1.5"
+                      />
+                      <text x="260" y="139" text-anchor="middle" fill="var(--warning,#fb923c)">
+                        tRAS (min row-open time)
+                      </text>
+                      <line
+                        x1="460"
+                        y1="130"
+                        x2="590"
+                        y2="130"
+                        stroke="#818cf8"
+                        stroke-width="1.5"
+                      />
+                      <text x="525" y="124" text-anchor="middle" fill="#818cf8">tRP</text>
+                    </g>
+                  </svg>
+                  <p class="diagram-caption">
+                    tRCD (ACT→READ/WRITE), tRAS (ACT→PRE minimum) and tRP (PRE→next ACT) chained
+                    together give tRC — the minimum time between two ACTIVATEs on the same bank.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Glossary table -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>JEDEC timing parameter glossary</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Parameter</th>
+                        <th>Meaning</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>tCK</strong></td>
+                        <td>
+                          Clock period — the base unit almost every other parameter is expressed in
+                          cycles of.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>CL</strong> (CAS latency)</td>
+                        <td>
+                          Cycles from READ command to first data out. The number printed in
+                          "DDR4-3200 CL22" style names.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRCD</strong></td>
+                        <td>
+                          ACTIVATE → READ/WRITE minimum delay (row must be open before accessing
+                          it).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRP</strong></td>
+                        <td>
+                          PRECHARGE → next ACTIVATE minimum delay (row must fully close before
+                          reopening).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRAS</strong></td>
+                        <td>Minimum time a row must stay open (ACTIVATE → PRECHARGE).</td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRC</strong></td>
+                        <td>Minimum ACTIVATE-to-ACTIVATE time on the same bank = tRAS + tRP.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRFC</strong></td>
+                        <td>
+                          Refresh cycle time — how long a REFRESH command blocks the bank; grows
+                          with density.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>tFAW</strong></td>
+                        <td>
+                          Four-Activate Window — limits how many ACTIVATEs can happen in a rolling
+                          window (controls peak current).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>tWTR</strong></td>
+                        <td>Write-to-read turnaround — bus direction change penalty.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>tRRD</strong></td>
+                        <td>Minimum time between ACTIVATEs on <em>different</em> banks.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>tCCD</strong></td>
+                        <td>
+                          Minimum time between two column commands (back-to-back READs/WRITEs).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>ODT</strong></td>
+                        <td>
+                          On-die termination setting — which internal resistance the DQ/DQS receiver
+                          presents (Module 07).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>RON</strong> (drive strength)</td>
+                        <td>
+                          Output driver impedance setting — pairs with ODT to set the effective line
+                          impedance.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Slew rate</strong></td>
+                        <td>
+                          How fast the output transitions — faster edges mean tighter SI budgets
+                          (Module 06).
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  Datasheets usually give timing parameters in
+                  <strong>both nanoseconds and clock cycles</strong>. The ns value is what
+                  physically matters; the cycle count is what the controller actually programs.
+                  Module 03's chart below shows why both views matter.
+                </div>
+              </div>
+
+              <!-- Plotly: ns vs cycles across speed grades -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Interactive: the same latency, three speed grades</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.7">
+                  tRCD stays roughly <strong>13–14 ns</strong> across DDR4 speed grades — but
+                  because the clock period shrinks as data rate rises, that same real-world delay
+                  costs more and more <em>clock cycles</em>. This is why doubling the data rate
+                  doesn't double your effective bandwidth for latency-sensitive access patterns.
+                </p>
+                <div class="plot-box">
+                  <div id="tcdPlot" style="width: 100%; height: 340px"></div>
+                  <p class="diagram-caption">
+                    tRCD expressed in nanoseconds (flat, left axis) vs. clock cycles (rising, right
+                    axis) across three DDR4 speed grades.
+                  </p>
+                </div>
+              </div>
+
+              <!-- I/O standards + VREF -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>I/O standards &amp; VREF</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Generation</th>
+                        <th>I/O standard</th>
+                        <th>Nominal swing</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>DDR3</td>
+                        <td>SSTL-15</td>
+                        <td>1.5 V, VREF ≈ VDDQ/2</td>
+                      </tr>
+                      <tr>
+                        <td>DDR4</td>
+                        <td>SSTL-135 / POD12</td>
+                        <td>1.2 V, VREF ≈ VDDQ/2</td>
+                      </tr>
+                      <tr>
+                        <td>DDR5</td>
+                        <td>POD (decision-feedback assisted)</td>
+                        <td>1.1 V, per-pin DFE</td>
+                      </tr>
+                      <tr>
+                        <td>LPDDR4/5</td>
+                        <td>Low-swing single-ended</td>
+                        <td>1.1 V / 0.5 V</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  <strong>VREF</strong> is the receiver's decision threshold — every DQ/CA input
+                  compares the incoming signal against it to decide 0 vs. 1. Because VREF sits at
+                  roughly the midpoint of the signal swing,
+                  <em>any noise on VREF directly eats into your read/write margins</em> exactly like
+                  noise on the signal itself — which is why Module 08 treats VREF decoupling as
+                  seriously as the main power rails.
+                </p>
+              </div>
+
+              <!-- Leveling teaser -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>A preview: why leveling exists</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  At DDR4 speeds, the propagation delay difference between the first and last DRAM
+                  on a fly-by bus (Module 04) is a meaningful fraction of a bit period. Rather than
+                  fight this purely with layout, the controller runs a
+                  <strong>read/write leveling</strong> calibration at power-up: it measures the
+                  actual delay to each device and adjusts its own timing per byte lane to
+                  compensate. Your layout's job (Modules 04, 09) is to keep that delay
+                  <em>within the range leveling can correct</em> — not to eliminate it entirely.
+                </p>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Most timing parameters measure gaps around ACTIVATE/READ-WRITE/PRECHARGE on a
+                    bank; tRC = tRAS + tRP ties them together.
+                  </li>
+                  <li>
+                    Parameters are fixed in nanoseconds by the silicon but cost more clock cycles as
+                    speed grade rises.
+                  </li>
+                  <li>
+                    SSTL/POD I/O standards center around a VREF threshold — VREF noise is just as
+                    damaging as signal noise.
+                  </li>
+                  <li>
+                    Read/write leveling exists specifically to correct fly-by propagation delay
+                    differences your layout can't fully eliminate.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="02-component-selection-datasheets.html"
+                  >← Component Selection &amp; Datasheets</a
+                >
+                <a class="btn btn-primary" href="04-topologies.html">Next: Memory Topologies →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+
+        function baseLayout(extra) {
+          var cs = getComputedStyle(document.documentElement);
+          var text = (cs.getPropertyValue('--text-sub') || '#94a3b8').trim();
+          var grid = 'rgba(128,140,160,0.18)';
+          var layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: text, family: 'Inter, sans-serif', size: 11 },
+            margin: { l: 55, r: 55, t: 10, b: 45 },
+            xaxis: { gridcolor: grid, zerolinecolor: grid },
+            yaxis: { gridcolor: grid, zerolinecolor: grid },
+            legend: { orientation: 'h', y: -0.22 },
+          };
+          for (var k in extra) layout[k] = Object.assign({}, layout[k] || {}, extra[k]);
+          return layout;
+        }
+
+        function draw() {
+          var grades = ['DDR4-1600\n(CL11)', 'DDR4-2400\n(CL17)', 'DDR4-3200\n(CL22)'];
+          var tckNs = [1.25, 0.833, 0.625]; // ns per cycle at each data rate (DDR: cycle = 2/rate)
+          var trcdNs = [13.75, 13.32, 13.75]; // ~fixed physical delay across grades
+          var trcdCycles = trcdNs.map(function (ns, i) {
+            return ns / tckNs[i];
+          });
+
+          var traces = [
+            {
+              x: grades,
+              y: trcdNs,
+              name: 'tRCD (ns)',
+              type: 'bar',
+              marker: { color: '#22d3ee' },
+              yaxis: 'y1',
+            },
+            {
+              x: grades,
+              y: trcdCycles,
+              name: 'tRCD (clock cycles)',
+              type: 'scatter',
+              mode: 'lines+markers',
+              marker: { color: '#fb923c', size: 9 },
+              line: { color: '#fb923c', width: 2 },
+              yaxis: 'y2',
+            },
+          ];
+          var layout = baseLayout({
+            yaxis: { title: { text: 'tRCD (ns)' }, range: [0, 16] },
+            yaxis2: {
+              title: { text: 'tRCD (clock cycles)' },
+              overlaying: 'y',
+              side: 'right',
+              range: [0, 24],
+              gridcolor: 'rgba(0,0,0,0)',
+            },
+          });
+          Plotly.react('tcdPlot', traces, layout, { displayModeBar: false, responsive: true });
+        }
+
+        var themeObserver = new MutationObserver(draw);
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme'],
+        });
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', draw);
+        } else {
+          draw();
+        }
+      })();
+    </script>
+  </body>
+</html>

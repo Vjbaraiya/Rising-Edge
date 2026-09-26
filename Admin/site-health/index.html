@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Site Health — Rising Edge Admin" />
+    <title>Site Health | Rising Edge Admin</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Admin/site-health/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../assets/css/admin.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      /* ── health-specific overrides ─────────────────────────────────────── */
+      .sh-score-ring svg {
+        display: block;
+      }
+      .sh-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--sp-4);
+        margin-bottom: var(--sp-6);
+      }
+      .sh-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: var(--sp-4);
+        margin-bottom: var(--sp-6);
+      }
+      .sh-stat-card {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--sp-5) var(--sp-5);
+      }
+      .sh-stat-val {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: var(--sp-1);
+      }
+      .sh-stat-lbl {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+      .sh-tab-bar {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: var(--sp-6);
+      }
+      .sh-tab {
+        padding: 10px 18px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-faint);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .sh-tab:hover {
+        color: var(--text-base);
+      }
+      .sh-tab.active {
+        color: var(--primary-400);
+        border-bottom-color: var(--primary-400);
+      }
+      .sh-panel {
+        display: none;
+      }
+      .sh-panel.active {
+        display: block;
+      }
+      .sh-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .sh-table th {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        background: var(--bg-muted);
+      }
+      .sh-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+        vertical-align: top;
+      }
+      .sh-table tr:last-child td {
+        border-bottom: none;
+      }
+      .sh-table tr:hover td {
+        background: var(--bg-hover);
+      }
+      .file-mono {
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 0.8rem;
+        color: var(--text-base);
+        font-weight: 600;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 20px;
+        white-space: nowrap;
+      }
+      .badge-ok {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--success);
+      }
+      .badge-warn {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--warning);
+      }
+      .badge-err {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--danger);
+      }
+      .badge-miss {
+        background: rgba(100, 116, 139, 0.12);
+        color: var(--text-muted);
+      }
+      .badge-leg {
+        background: rgba(168, 85, 247, 0.12);
+        color: #a78bfa;
+      }
+      .issue-li {
+        font-size: 0.8rem;
+        color: var(--text-sub);
+        padding: 3px 0 3px 16px;
+        position: relative;
+      }
+      .issue-li::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 9px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--danger);
+      }
+      .warn-li::before {
+        background: var(--warning);
+      }
+      .filter-row {
+        display: flex;
+        gap: var(--sp-2);
+        flex-wrap: wrap;
+        margin-bottom: var(--sp-5);
+      }
+      .filter-chip {
+        padding: 5px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-muted);
+        color: var(--text-sub);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .filter-chip:hover,
+      .filter-chip.on {
+        background: var(--primary-dim);
+        border-color: var(--primary-400);
+        color: var(--primary-400);
+      }
+      .rec-row {
+        display: flex;
+        gap: var(--sp-4);
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--sp-4) var(--sp-5);
+        margin-bottom: var(--sp-3);
+      }
+      .rec-icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+      }
+      .rec-body {
+        flex: 1;
+      }
+      .rec-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 3px;
+      }
+      .rec-desc {
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+      }
+      /* run audit panel */
+      .run-bar {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--sp-4) var(--sp-5);
+        display: flex;
+        align-items: center;
+        gap: var(--sp-4);
+        flex-wrap: wrap;
+        margin-bottom: var(--sp-6);
+      }
+      .progress-track {
+        flex: 1;
+        min-width: 160px;
+        height: 8px;
+        background: var(--bg-hover);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary-400), var(--cyan-400));
+        width: 0%;
+        transition: width 0.3s;
+      }
+      #audit-status {
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        min-width: 160px;
+      }
+      /* score ring */
+      .score-wrap {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-5);
+        margin-bottom: var(--sp-6);
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--sp-5) var(--sp-6);
+      }
+      .score-stats {
+        display: flex;
+        gap: var(--sp-6);
+        flex-wrap: wrap;
+      }
+      .score-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .score-stat-val {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .score-stat-lbl {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+      .c-green {
+        color: var(--success);
+      }
+      .c-warn {
+        color: var(--warning);
+      }
+      .c-red {
+        color: var(--danger);
+      }
+      .c-blue {
+        color: var(--primary-400);
+      }
+      .c-cyan {
+        color: var(--cyan-400);
+      }
+      .c-purple {
+        color: #a78bfa;
+      }
+      .asset-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 5px 11px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 0.75rem;
+        color: var(--text-sub);
+        margin: 3px;
+      }
+      .dot-ok {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--success);
+        flex-shrink: 0;
+      }
+      .dot-miss {
+        background: var(--danger);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="admin-layout">
+      <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="admin-badge">
+            <svg
+              width="10"
+              height="10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Admin
+          </div>
+          <div class="sidebar-brand-name">Rising Edge</div>
+          <div class="sidebar-brand-sub">Platform Control Panel</div>
+        </div>
+        <nav class="admin-nav">
+          <div class="admin-section-label">Overview</div>
+          <a href="../index.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            Dashboard</a
+          >
+          <a href="../users.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Users</a
+          >
+          <a href="../analytics.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            Analytics</a
+          >
+          <div class="admin-section-label">Content</div>
+          <a href="../training-admin.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            Courses</a
+          >
+          <a href="../resources-admin.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Resources</a
+          >
+          <a href="../certificates.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="8" r="6" />
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+            </svg>
+            Certificates</a
+          >
+          <div class="admin-section-label">Monetization</div>
+          <a href="../coupons.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+            Coupons</a
+          >
+          <div class="admin-section-label">System</div>
+          <a href="../audit.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Audit Log</a
+          >
+          <a href="../settings.html" class="admin-nav-item"
+            ><svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Settings</a
+          >
+          <!-- SUPER ADMIN ONLY — injected by JS -->
+          <div id="superadmin-nav-section" style="display: none">
+            <div class="admin-section-label" style="color: rgba(239, 68, 68, 0.7)">Super Admin</div>
+            <a
+              href="index.html"
+              class="admin-nav-item active"
+              style="
+                color: var(--danger);
+                background: rgba(239, 68, 68, 0.06);
+                border-left: 2px solid var(--danger);
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Site Health
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="admin-avatar" id="admin-av">AD</div>
+          <div>
+            <div class="sidebar-foot-name" id="admin-foot-name">Admin</div>
+            <div class="sidebar-foot-role" id="admin-foot-role">SUPER_ADMIN</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ── Main ───────────────────────────────────────────────────────── -->
+      <main class="admin-main">
+        <!-- Access denied -->
+        <div id="access-denied" style="display: none; text-align: center; padding: 80px 20px">
+          <div style="font-size: 3rem; margin-bottom: 16px">🔒</div>
+          <h2 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 8px">
+            Super Admin Access Required
+          </h2>
+          <p style="color: var(--text-sub); margin-bottom: 24px">
+            The Site Health dashboard is restricted to Super Administrators.
+          </p>
+          <a href="../index.html" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+
+        <!-- Main content (shown only to SUPER_ADMIN) -->
+        <div id="sh-content" style="display: none">
+          <!-- Header row -->
+          <div class="sh-hdr">
+            <div>
+              <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px">
+                <span
+                  style="
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 8px;
+                    background: rgba(239, 68, 68, 0.1);
+                  "
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="var(--danger)"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
+                </span>
+                Site Health
+              </h1>
+              <p class="admin-page-sub">
+                Live audit of all HTML pages, assets, and internal links.
+              </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--sp-3)">
+              <span id="last-run-time" style="font-size: 0.8rem; color: var(--text-muted)"
+                >Not yet run</span
+              >
+              <button class="btn btn-primary btn-sm" id="run-btn" onclick="startAudit()">
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+                Run Audit
+              </button>
+              <a href="site-health.html" class="btn btn-outline btn-sm" target="_blank"
+                >Static Report ↗</a
+              >
+            </div>
+          </div>
+
+          <!-- Run progress bar -->
+          <div class="run-bar" id="run-bar" style="display: none">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="var(--primary-400)"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            <span id="audit-status">Initialising…</span>
+            <button
+              class="btn btn-outline btn-sm"
+              id="cancel-btn"
+              onclick="cancelAudit()"
+              style="display: none"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <!-- Score summary -->
+          <div class="score-wrap" id="score-wrap">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="rgba(255,255,255,.06)"
+                stroke-width="8"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                id="score-arc"
+                stroke="#10b981"
+                stroke-width="8"
+                stroke-dasharray="251"
+                stroke-dashoffset="38"
+                stroke-linecap="round"
+                transform="rotate(-90 50 50)"
+              />
+              <text
+                x="50"
+                y="47"
+                text-anchor="middle"
+                dominant-baseline="central"
+                style="font-size: 1.5rem; font-weight: 900; fill: var(--text-base)"
+                id="score-num"
+              >
+                85
+              </text>
+              <text
+                x="50"
+                y="61"
+                text-anchor="middle"
+                dominant-baseline="central"
+                style="
+                  font-size: 0.45rem;
+                  font-weight: 700;
+                  fill: var(--text-faint);
+                  letter-spacing: 0.08em;
+                  text-transform: uppercase;
+                "
+              >
+                / 100
+              </text>
+            </svg>
+            <div class="score-stats">
+              <div class="score-stat">
+                <span class="score-stat-val c-green" id="cnt-healthy">33</span
+                ><span class="score-stat-lbl">Healthy</span>
+              </div>
+              <div class="score-stat">
+                <span class="score-stat-val c-warn" id="cnt-warn">1</span
+                ><span class="score-stat-lbl">Warnings</span>
+              </div>
+              <div class="score-stat">
+                <span class="score-stat-val c-red" id="cnt-err">1</span
+                ><span class="score-stat-lbl">Errors</span>
+              </div>
+              <div class="score-stat">
+                <span class="score-stat-val c-purple" id="cnt-miss">2</span
+                ><span class="score-stat-lbl">Missing</span>
+              </div>
+              <div class="score-stat">
+                <span class="score-stat-val c-blue" id="cnt-total">39</span
+                ><span class="score-stat-lbl">Total</span>
+              </div>
+              <div class="score-stat">
+                <span class="score-stat-val c-cyan" id="cnt-pass">94%</span
+                ><span class="score-stat-lbl">Pass Rate</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="sh-tab-bar">
+            <button class="sh-tab active" onclick="shTab('all', this)">All Pages</button>
+            <button class="sh-tab" onclick="shTab('issues', this)">Issues &amp; Warnings</button>
+            <button class="sh-tab" onclick="shTab('recs', this)">Recommendations</button>
+          </div>
+
+          <!-- ALL PAGES panel -->
+          <div class="sh-panel active" id="sh-panel-all">
+            <div class="filter-row">
+              <button class="filter-chip on" onclick="setFilter('all', this)">All</button>
+              <button class="filter-chip" onclick="setFilter('healthy', this)">Healthy</button>
+              <button class="filter-chip" onclick="setFilter('warning', this)">Warnings</button>
+              <button class="filter-chip" onclick="setFilter('error', this)">Errors</button>
+              <button class="filter-chip" onclick="setFilter('missing', this)">Missing</button>
+              <button class="filter-chip" onclick="setFilter('legacy', this)">Legacy</button>
+            </div>
+            <div class="card" style="padding: 0; overflow: hidden">
+              <div style="overflow-x: auto">
+                <table class="sh-table">
+                  <thead>
+                    <tr>
+                      <th>File</th>
+                      <th>Status</th>
+                      <th>Lines</th>
+                      <th>Size</th>
+                      <th>Issues</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pages-tbody">
+                    <tr>
+                      <td
+                        colspan="5"
+                        style="text-align: center; color: var(--text-faint); padding: 32px"
+                      >
+                        Click <strong>Run Audit</strong> to fetch live results, or viewing last
+                        cached data below.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ISSUES panel -->
+          <div class="sh-panel" id="sh-panel-issues">
+            <div id="issues-list">
+              <div style="color: var(--text-faint); padding: 20px 0">
+                Run the audit to populate this panel.
+              </div>
+            </div>
+          </div>
+
+          <!-- RECOMMENDATIONS panel -->
+          <div class="sh-panel" id="sh-panel-recs">
+            <div id="recs-list"></div>
+          </div>
+        </div>
+        <!-- /#sh-content -->
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../assets/js/core.js"></script>
+    <script src="audit.js"></script>
+    <script>
+      /* ── Auth guard — SUPER_ADMIN only ──────────────────────────────── */
+      (function () {
+        var u = (function () {
+          try {
+            return JSON.parse(localStorage.getItem('re_user') || '{}');
+          } catch (e) {
+            return {};
+          }
+        })();
+        var n = u.fullName || u.email || 'Administrator';
+        var av =
+          n
+            .split(' ')
+            .map(function (w) {
+              return w[0] || '';
+            })
+            .join('')
+            .toUpperCase()
+            .slice(0, 2) || 'AD';
+        document.getElementById('admin-av').textContent = av;
+        document.getElementById('admin-foot-name').textContent = n;
+        document.getElementById('admin-foot-role').textContent = u.role || 'ADMIN';
+
+        if (u.role === 'SUPER_ADMIN') {
+          document.getElementById('sh-content').style.display = 'block';
+          document.getElementById('superadmin-nav-section').style.display = 'block';
+        } else {
+          document.getElementById('access-denied').style.display = 'block';
+        }
+      })();
+
+      /* ── Tab switching ───────────────────────────────────────────────── */
+      var _activeTab = 'all';
+      function shTab(id, btn) {
+        _activeTab = id;
+        document.querySelectorAll('.sh-tab').forEach(function (b) {
+          b.classList.remove('active');
+        });
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.sh-panel').forEach(function (p) {
+          p.classList.remove('active');
+        });
+        document.getElementById('sh-panel-' + id).classList.add('active');
+      }
+
+      /* ── Page filter ─────────────────────────────────────────────────── */
+      var _filter = 'all';
+      function setFilter(f, el) {
+        _filter = f;
+        document.querySelectorAll('.filter-chip').forEach(function (c) {
+          c.classList.remove('on');
+        });
+        el.classList.add('on');
+        renderTable(_lastResults);
+      }
+
+      /* ── Audit state ─────────────────────────────────────────────────── */
+      var _lastResults = [];
+      var _running = false;
+
+      function startAudit() {
+        if (_running) return;
+        if (location.protocol === 'file:') {
+          document.getElementById('audit-status').textContent =
+            'Cannot run audit on file:// — open via http:// (e.g. python -m http.server)';
+          document.getElementById('run-bar').style.display = 'flex';
+          return;
+        }
+        _running = true;
+        _lastResults = [];
+        document.getElementById('run-bar').style.display = 'flex';
+        document.getElementById('run-btn').disabled = true;
+        document.getElementById('run-btn').textContent = 'Running…';
+        document.getElementById('cancel-btn').style.display = 'inline-flex';
+        document.getElementById('pages-tbody').innerHTML =
+          '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:32px"><span class="spinner"></span> Scanning pages…</td></tr>';
+        document.getElementById('issues-list').innerHTML =
+          '<div style="color:var(--text-faint);padding:12px 0">Scanning…</div>';
+
+        SiteAudit.onProgress(function (done, total) {
+          var pct = Math.round((done / total) * 100);
+          document.getElementById('progress-fill').style.width = pct + '%';
+          document.getElementById('audit-status').textContent =
+            'Checking ' + done + ' / ' + total + ' files (pages + assets)…';
+        });
+
+        SiteAudit.onResult(function (r) {
+          // The engine now auto-discovers and checks pages, CSS, JS, and
+          // images in one pass; this table only renders pages, so ignore
+          // asset results here (they still count toward the progress bar).
+          if (r.kind !== 'page') return;
+          _lastResults.push(r);
+          renderTable(_lastResults);
+        });
+
+        SiteAudit.onComplete(function (results) {
+          // results = { pages, css, js, images } — everything auto-discovered
+          // via /api/site-health/scan and checked. This table is page-focused.
+          _lastResults = results.pages;
+          _running = false;
+          document.getElementById('run-btn').disabled = false;
+          document.getElementById('run-btn').innerHTML =
+            '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Run Audit';
+          document.getElementById('cancel-btn').style.display = 'none';
+          var assetTotal = results.css.length + results.js.length + results.images.length;
+          document.getElementById('audit-status').textContent =
+            'Complete — ' + results.pages.length + ' pages + ' + assetTotal + ' assets scanned';
+          document.getElementById('last-run-time').textContent =
+            'Last run: ' + new Date().toLocaleTimeString();
+          renderTable(results.pages);
+          renderScore(results.pages);
+          renderIssues(results.pages);
+        });
+
+        SiteAudit.run();
+      }
+
+      function cancelAudit() {
+        _running = false;
+        document.getElementById('run-btn').disabled = false;
+        document.getElementById('run-btn').innerHTML =
+          '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Run Audit';
+        document.getElementById('cancel-btn').style.display = 'none';
+        document.getElementById('audit-status').textContent =
+          'Cancelled after ' + _lastResults.length + ' pages.';
+      }
+
+      /* ── Render helpers ──────────────────────────────────────────────── */
+      function statusBadge(s) {
+        var map = {
+          healthy: '<span class="badge badge-ok">✓ Healthy</span>',
+          warning: '<span class="badge badge-warn">⚠ Warning</span>',
+          error: '<span class="badge badge-err">✕ Error</span>',
+          missing: '<span class="badge badge-miss">— Missing</span>',
+          legacy: '<span class="badge badge-leg">⚑ Legacy</span>',
+        };
+        return map[s] || '<span class="badge badge-miss">?</span>';
+      }
+
+      function renderTable(results) {
+        var filt = _filter;
+        var rows = results.filter(function (r) {
+          if (filt === 'all') return true;
+          return r.assessment.status === filt;
+        });
+        if (!rows.length) {
+          document.getElementById('pages-tbody').innerHTML =
+            '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:24px">No pages match this filter.</td></tr>';
+          return;
+        }
+        document.getElementById('pages-tbody').innerHTML = rows
+          .map(function (r) {
+            var a = r.assessment;
+            var issueHtml = '';
+            a.issues.forEach(function (i) {
+              issueHtml += '<div class="issue-li">' + escH(i) + '</div>';
+            });
+            a.warnings.forEach(function (w) {
+              issueHtml +=
+                '<div class="issue-li warn-li" style="color:var(--warning)">' + escH(w) + '</div>';
+            });
+            return (
+              '<tr>' +
+              '<td><span class="file-mono">' +
+              escH(r.path) +
+              '</span></td>' +
+              '<td>' +
+              statusBadge(a.status) +
+              '</td>' +
+              '<td style="color:var(--text-sub)">' +
+              (a.lines || '—') +
+              '</td>' +
+              '<td style="color:var(--text-sub)">' +
+              (a.sizeKb ? a.sizeKb + 'kb' : '—') +
+              '</td>' +
+              '<td>' +
+              (issueHtml || '<span style="color:var(--success);font-size:.8rem">None</span>') +
+              '</td>' +
+              '</tr>'
+            );
+          })
+          .join('');
+      }
+
+      function renderScore(results) {
+        var healthy = 0,
+          warn = 0,
+          err = 0,
+          miss = 0;
+        results.forEach(function (r) {
+          var s = r.assessment.status;
+          if (s === 'healthy') healthy++;
+          else if (s === 'warning') warn++;
+          else if (s === 'error') err++;
+          else if (s === 'missing') miss++;
+        });
+        var total = results.length;
+        var passable = healthy + warn;
+        var score = total ? Math.round((passable / total) * 85 + (healthy / total) * 15) : 0;
+        var passRate = total ? Math.round((passable / total) * 100) : 0;
+        document.getElementById('cnt-healthy').textContent = healthy;
+        document.getElementById('cnt-warn').textContent = warn;
+        document.getElementById('cnt-err').textContent = err;
+        document.getElementById('cnt-miss').textContent = miss;
+        document.getElementById('cnt-total').textContent = total;
+        document.getElementById('cnt-pass').textContent = passRate + '%';
+        document.getElementById('score-num').textContent = score;
+        // Arc: circumference = 2*PI*40 = 251; offset to leave blank = 251 * (1 - score/100)
+        var offset = Math.round(251 * (1 - score / 100));
+        document.getElementById('score-arc').setAttribute('stroke-dashoffset', offset);
+        var color = score >= 85 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+        document.getElementById('score-arc').setAttribute('stroke', color);
+      }
+
+      function renderIssues(results) {
+        var problematic = results.filter(function (r) {
+          return r.assessment.status !== 'healthy';
+        });
+        if (!problematic.length) {
+          document.getElementById('issues-list').innerHTML =
+            '<div class="card" style="text-align:center;padding:40px;color:var(--success)">✓ No issues found — all pages healthy!</div>';
+          return;
+        }
+        document.getElementById('issues-list').innerHTML = problematic
+          .map(function (r) {
+            var a = r.assessment;
+            var allIssues = a.issues.concat(
+              a.warnings.map(function (w) {
+                return '⚠ ' + w;
+              })
+            );
+            return (
+              '<div class="rec-row">' +
+              '<div class="rec-icon-box" style="background:' +
+              (a.status === 'error'
+                ? 'rgba(239,68,68,.1)'
+                : a.status === 'warning'
+                  ? 'rgba(245,158,11,.1)'
+                  : 'rgba(100,116,139,.1)') +
+              ';">' +
+              (a.status === 'error' ? '✕' : a.status === 'warning' ? '⚠' : '—') +
+              '</div>' +
+              '<div class="rec-body">' +
+              '<div class="rec-title">' +
+              escH(r.path) +
+              '</div>' +
+              '<div class="rec-desc">' +
+              allIssues
+                .map(function (i) {
+                  return '<span style="display:block">' + escH(i) + '</span>';
+                })
+                .join('') +
+              '</div></div>' +
+              statusBadge(a.status) +
+              '</div>'
+            );
+          })
+          .join('');
+      }
+
+      /* render static recommendations */
+      (function renderRecs() {
+        var recs = [
+          {
+            p: 'Critical',
+            color: 'rgba(239,68,68,.1)',
+            icon: '⚠',
+            title: 'Build 6 missing SI module pages',
+            desc: 'content.html links to 04-reflections.html, 05-crosstalk.html, 07-differential-signaling.html, 08-eye-diagrams.html, 09-jitter.html, 10-via-modeling.html — none exist.',
+          },
+          {
+            p: 'Medium',
+            color: 'rgba(59,130,246,.1)',
+            icon: '🏷',
+            title: 'Add meta descriptions to all public pages',
+            desc: 'Most pages lack <meta name="description"> — hurts SEO and social previews. Add 150–160 char descriptions to at least the 10 primary public pages.',
+          },
+          {
+            p: 'Medium',
+            color: 'rgba(59,130,246,.1)',
+            icon: '🖼',
+            title: 'Add favicon.ico',
+            desc: 'No favicon in site root. Browsers show blank tab icon. Add a 32×32 .ico or SVG favicon.',
+          },
+          {
+            p: 'Medium',
+            color: 'rgba(6,182,212,.1)',
+            icon: '🔀',
+            title: 'Redirect deprecated root-level user pages',
+            desc: 'dashboard.html, profile.html, my-learning.html at root level still exist from old routing. Add meta-refresh or JS redirect to /User/ counterparts.',
+          },
+          {
+            p: 'Low',
+            color: 'rgba(16,185,129,.1)',
+            icon: '🗑',
+            title: 'Delete stub files',
+            desc: 'hello.html and pages/test.html serve no purpose in production. Remove them.',
+          },
+          {
+            p: 'Low',
+            color: 'rgba(168,85,247,.1)',
+            icon: '📝',
+            title: 'Add Open Graph tags',
+            desc: 'No og:title, og:description, og:image tags. Affects link previews on social platforms.',
+          },
+          {
+            p: 'Low',
+            color: 'rgba(100,116,139,.1)',
+            icon: '⚡',
+            title: 'Consider a build pipeline',
+            desc: 'As the site grows, hand-editing HTML is error-prone. Even a simple bundler or SSG would eliminate truncation risk and enable asset hashing for cache busting.',
+          },
+        ];
+        var priorityColor = {
+          Critical: 'var(--danger)',
+          High: 'var(--warning)',
+          Medium: 'var(--primary-400)',
+          Low: 'var(--text-faint)',
+        };
+        document.getElementById('recs-list').innerHTML = recs
+          .map(function (r) {
+            return (
+              '<div class="rec-row">' +
+              '<div class="rec-icon-box" style="background:' +
+              r.color +
+              ';font-size:1.1rem">' +
+              r.icon +
+              '</div>' +
+              '<div class="rec-body">' +
+              '<div class="rec-title">' +
+              r.title +
+              '<span style="font-size:.6875rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;background:' +
+              r.color +
+              ';color:' +
+              priorityColor[r.p] +
+              '">' +
+              r.p +
+              '</span>' +
+              '</div>' +
+              '<div class="rec-desc">' +
+              r.desc +
+              '</div>' +
+              '</div></div>'
+            );
+          })
+          .join('');
+      })();
+
+      function escH(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1801 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Weekly Hardware Design Challenge admin — author, schedule and manage challenges."
+    />
+    <title>Challenge Admin | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Admin/challenge-admin.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../assets/css/admin.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .ca-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--sp-4);
+      }
+      .ca-field label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+      }
+      .ca-field input,
+      .ca-field select,
+      .ca-field textarea {
+        width: 100%;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-base);
+        padding: 9px 11px;
+        font-size: 0.86rem;
+        font-family: inherit;
+      }
+      .ca-field textarea {
+        min-height: 72px;
+        resize: vertical;
+      }
+      .ca-hint {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      .ca-toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 100;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #10b981);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        color: var(--text-base);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 340px;
+        display: none;
+      }
+      .ca-toast.err {
+        border-left-color: var(--danger, #ef4444);
+      }
+      .ca-toast.show {
+        display: block;
+      }
+      .ca-status {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+      .ca-status.draft {
+        background: rgba(148, 163, 184, 0.18);
+        color: #94a3b8;
+      }
+      .ca-status.scheduled {
+        background: rgba(59, 130, 246, 0.16);
+        color: #60a5fa;
+      }
+      .ca-status.live {
+        background: rgba(16, 185, 129, 0.16);
+        color: #10b981;
+      }
+      .ca-status.closed {
+        background: rgba(245, 158, 11, 0.16);
+        color: #f59e0b;
+      }
+      .ca-status.archived {
+        background: rgba(148, 163, 184, 0.12);
+        color: #64748b;
+      }
+      .ca-hide {
+        display: none !important;
+      }
+      /* Email notification toggles */
+      .email-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--sp-3) var(--sp-4);
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: var(--sp-2);
+      }
+      .email-toggle-label {
+        font-weight: 500;
+        font-size: 0.88rem;
+      }
+      .email-toggle-desc {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      /* Toggle switch */
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--border);
+        border-radius: 24px;
+        transition: 0.22s;
+      }
+      .toggle-slider:before {
+        position: absolute;
+        content: '';
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.22s;
+      }
+      .toggle-switch input:checked + .toggle-slider {
+        background: var(--primary-400, #22d3ee);
+      }
+      .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="admin-badge">
+            <svg
+              width="10"
+              height="10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Admin
+          </div>
+          <div class="sidebar-brand-name">Rising Edge</div>
+          <div class="sidebar-brand-sub">Platform Control Panel</div>
+        </div>
+        <nav class="admin-nav">
+          <div class="admin-section-label">Overview</div>
+          <a href="index.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            Dashboard
+          </a>
+          <a href="users.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+            </svg>
+            Users
+          </a>
+          <div class="admin-section-label">Content</div>
+          <a href="training-admin.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            Training
+          </a>
+          <a href="challenge-admin.html" class="admin-nav-item active">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+              <path d="M4 22h16" />
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+            </svg>
+            Weekly Challenge
+          </a>
+          <a href="resources-admin.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+            </svg>
+            Resources
+          </a>
+          <a href="certificates.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="8" r="6" />
+              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+            </svg>
+            Certificates
+          </a>
+          <div class="admin-section-label">System</div>
+          <a href="audit.html" class="admin-nav-item">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Audit Log
+          </a>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="admin-avatar" id="admin-av">AD</div>
+          <div>
+            <div class="sidebar-foot-name" id="admin-foot-name">Admin</div>
+            <div class="sidebar-foot-role" id="admin-foot-role">ADMIN</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--sp-6);
+          "
+        >
+          <div>
+            <h1 style="font-size: var(--text-xl)">Weekly Hardware Design Challenge</h1>
+            <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 4px">
+              Author, schedule, publish and grade the weekly challenge.
+            </p>
+          </div>
+          <a href="../Challenge/index.html" target="_blank" class="btn btn-secondary btn-sm"
+            >View public hub ↗</a
+          >
+        </div>
+
+        <!-- stats -->
+        <div class="dashboard-grid" style="margin-bottom: var(--sp-6)">
+          <div class="card stat-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Challenges</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value text-success" id="stat-live">0</div>
+            <div class="stat-label">Live</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value" style="color: var(--primary-400)" id="stat-scheduled">0</div>
+            <div class="stat-label">Scheduled</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value" style="color: var(--warning)" id="stat-draft">0</div>
+            <div class="stat-label">Draft</div>
+          </div>
+        </div>
+
+        <!-- create / edit challenge -->
+        <div class="card" style="margin-bottom: var(--sp-6); padding: var(--sp-5)">
+          <h2 id="ca-form-title" style="font-size: var(--text-lg); margin-bottom: var(--sp-4)">
+            Create a challenge
+          </h2>
+          <div class="ca-form-grid">
+            <div class="ca-field">
+              <label>Week number</label><input type="number" id="f-week" placeholder="35" />
+            </div>
+            <div class="ca-field" style="grid-column: span 2">
+              <label>Title</label
+              ><input type="text" id="f-title" placeholder="Buck Converter Layout & PDN" />
+            </div>
+            <div class="ca-field">
+              <label>Slug</label><input type="text" id="f-slug" placeholder="auto from title" />
+            </div>
+            <div class="ca-field">
+              <label>Topic</label><input type="text" id="f-topic" placeholder="Power Integrity" />
+            </div>
+            <div class="ca-field">
+              <label>Track</label>
+              <select id="f-category">
+                <option value="BASIC_HW">Basic Hardware Design</option>
+                <option value="ADVANCED_HW">Advanced Hardware Design</option>
+                <option value="PCB_DESIGN">PCB Design</option>
+              </select>
+            </div>
+            <div class="ca-field">
+              <label>Difficulty</label>
+              <select id="f-diff">
+                <option>Beginner</option>
+                <option selected>Intermediate</option>
+                <option>Advanced</option>
+                <option>Mixed</option>
+              </select>
+            </div>
+            <div class="ca-field">
+              <label>Total points</label><input type="number" id="f-points" value="100" />
+            </div>
+            <div class="ca-field">
+              <label>Opens at</label><input type="datetime-local" id="f-opens" />
+            </div>
+            <div class="ca-field">
+              <label>Closes at</label><input type="datetime-local" id="f-closes" />
+            </div>
+            <div class="ca-field">
+              <label id="f-status-label">Initial status</label>
+              <select id="f-status">
+                <option value="draft" selected>Draft</option>
+                <option value="scheduled">Scheduled (auto-opens)</option>
+                <option value="live">Live now</option>
+                <option value="closed">Closed</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="ca-field" style="grid-column: 1 / -1">
+              <label>Description</label
+              ><textarea id="f-desc" placeholder="Short summary shown on the hub"></textarea>
+            </div>
+          </div>
+          <div style="margin-top: var(--sp-4)">
+            <button class="btn btn-primary btn-sm" id="btn-create">Create challenge</button>
+            <button class="btn btn-secondary btn-sm ca-hide" id="btn-cancel-edit">
+              Cancel edit
+            </button>
+            <span class="ca-hint"
+              >Scheduled challenges open/close automatically via the weekly scheduler.</span
+            >
+          </div>
+        </div>
+
+        <!-- challenges table -->
+        <div class="card" style="margin-bottom: var(--sp-6)">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Wk</th>
+                  <th>Title</th>
+                  <th>Track</th>
+                  <th>Difficulty</th>
+                  <th>Qs</th>
+                  <th>Status</th>
+                  <th>Opens</th>
+                  <th>Closes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ch-body">
+                <tr>
+                  <td colspan="9" style="color: var(--text-muted); padding: 18px">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- question builder -->
+        <div class="card" style="padding: var(--sp-5)">
+          <h2 style="font-size: var(--text-lg); margin-bottom: var(--sp-2)">Add a question</h2>
+          <div class="ca-field" style="max-width: 420px; margin-bottom: var(--sp-4)">
+            <label>Challenge</label>
+            <select id="q-challenge">
+              <option value="">Select a challenge…</option>
+            </select>
+          </div>
+          <div class="ca-form-grid">
+            <div class="ca-field">
+              <label>Type</label>
+              <select id="q-type">
+                <option value="mcq">Single choice (MCQ)</option>
+                <option value="multi">Multiple select</option>
+                <option value="truefalse">True / False</option>
+                <option value="numeric">Numeric answer</option>
+              </select>
+            </div>
+            <div class="ca-field">
+              <label>Points</label><input type="number" id="q-points" value="10" />
+            </div>
+            <div class="ca-field">
+              <label>Topic tag</label
+              ><input type="text" id="q-topic" placeholder="Reference-Plane Integrity" />
+            </div>
+            <div class="ca-field" style="grid-column: 1 / -1">
+              <label>Prompt</label
+              ><textarea
+                id="q-prompt"
+                placeholder="Question text (may include MathJax \\( … \\))"
+              ></textarea>
+            </div>
+            <div class="ca-field" style="grid-column: 1 / -1">
+              <label>Image (optional)</label>
+              <input type="text" id="q-image" placeholder="Paste an image URL…" />
+              <input type="file" id="q-image-file" accept="image/*" style="margin-top: 6px" />
+              <div class="ca-hint" id="q-image-hint">
+                Shown above the question. Paste a URL, or choose a file (stored inline as a data
+                URL). Keep uploads small (&lt; ~200 KB).
+              </div>
+            </div>
+            <div class="ca-field ca-ans-num ca-hide">
+              <label>Unit (optional)</label><input type="text" id="q-unit" placeholder="ps" />
+            </div>
+            <div class="ca-field ca-opts" style="grid-column: 1 / -1">
+              <label>Options — one per line</label>
+              <textarea
+                id="q-options"
+                placeholder="Option A&#10;Option B&#10;Option C&#10;Option D"
+              ></textarea>
+              <div class="ca-hint">
+                For MCQ/Multiple-select. True/False and Numeric ignore this.
+              </div>
+            </div>
+            <div class="ca-field ca-ans-choice">
+              <label>Correct option # (1-based)</label
+              ><input type="number" id="q-correct" placeholder="2" />
+            </div>
+            <div class="ca-field ca-ans-multi ca-hide" style="grid-column: 1 / -1">
+              <label>Correct options (comma, 1-based)</label
+              ><input type="text" id="q-correct-multi" placeholder="1, 3" />
+            </div>
+            <div class="ca-field ca-ans-tf ca-hide">
+              <label>Correct answer</label
+              ><select id="q-tf">
+                <option value="1">True</option>
+                <option value="0">False</option>
+              </select>
+            </div>
+            <div class="ca-field ca-ans-num ca-hide">
+              <label>Correct value</label
+              ><input type="number" id="q-num" placeholder="312.5" step="any" />
+            </div>
+            <div class="ca-field ca-ans-num ca-hide">
+              <label>Tolerance ±</label><input type="number" id="q-tol" value="0" step="any" />
+            </div>
+            <div class="ca-field" style="grid-column: 1 / -1">
+              <label>Explanation</label
+              ><textarea id="q-exp" placeholder="Shown after submission"></textarea>
+            </div>
+          </div>
+          <div style="margin-top: var(--sp-4)">
+            <button class="btn btn-primary btn-sm" id="btn-add-q">Add question</button>
+            <span class="ca-hint" id="q-count-hint"></span>
+          </div>
+        </div>
+
+        <!-- bulk upload from .md -->
+        <div class="card" style="padding: var(--sp-5); margin-top: var(--sp-6)">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              flex-wrap: wrap;
+            "
+          >
+            <h2 style="font-size: var(--text-lg)">Bulk upload questions (.md)</h2>
+            <button class="btn btn-secondary btn-sm" id="btn-template">⬇ Download template</button>
+          </div>
+          <p style="color: var(--text-sub); font-size: 0.85rem; margin: 6px 0 var(--sp-4)">
+            Upload a Markdown file to add many questions at once. Separate each question with a line
+            containing only <code>---</code>. Mark correct options with a leading <code>*</code>.
+            Add an image with <code>image:</code> (URL) or a Markdown image
+            <code>![alt](url)</code> in the prompt.
+          </p>
+          <div class="ca-form-grid">
+            <div class="ca-field">
+              <label>Challenge</label>
+              <select id="bulk-challenge">
+                <option value="">Select a challenge…</option>
+              </select>
+            </div>
+            <div class="ca-field">
+              <label>Markdown file</label>
+              <input type="file" id="bulk-file" accept=".md,text/markdown,text/plain" />
+            </div>
+          </div>
+          <div style="margin-top: var(--sp-4); display: flex; gap: 8px; flex-wrap: wrap">
+            <button class="btn btn-secondary btn-sm" id="btn-bulk-parse">
+              Parse &amp; preview
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-bulk-upload" style="display: none">
+              Upload <span id="bulk-count">0</span> question(s)
+            </button>
+          </div>
+          <div id="bulk-preview" style="margin-top: var(--sp-4)"></div>
+        </div>
+
+        <!-- Email Notifications -->
+        <div class="card" style="padding: var(--sp-5); margin-top: var(--sp-6)">
+          <h2 style="font-size: var(--text-lg); margin-bottom: var(--sp-1)">Email Notifications</h2>
+          <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: var(--sp-4)">
+            Enable or disable each automated email broadcast.
+          </p>
+          <div id="email-toggles">
+            <div style="color: var(--text-muted); font-size: 0.85rem">Loading…</div>
+          </div>
+          <div style="margin-top: var(--sp-4)">
+            <button class="btn btn-primary btn-sm" id="btn-save-email-flags">
+              Save email settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Email Template Editor -->
+        <div class="card" style="padding: var(--sp-5); margin-top: var(--sp-6)">
+          <h2 style="font-size: var(--text-lg); margin-bottom: var(--sp-4)">
+            Email Template Editor
+          </h2>
+          <div class="ca-field" style="max-width: 360px; margin-bottom: var(--sp-3)">
+            <label>Template</label>
+            <select id="tpl-select">
+              <option value="announcement">Announcement — new challenge goes live</option>
+              <option value="challenge-reminder">Reminder — challenge still live</option>
+              <option value="results-published">Results — challenge closed</option>
+              <option value="certificate-issued">Certificate — top-3 finishers</option>
+            </select>
+          </div>
+          <div id="tpl-placeholders" style="margin-bottom: var(--sp-3)"></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4)">
+            <div class="ca-field">
+              <label>Template source (.md)</label>
+              <textarea
+                id="tpl-editor"
+                style="
+                  min-height: 320px;
+                  font-family: 'Courier New', monospace;
+                  font-size: 0.82rem;
+                  resize: vertical;
+                  white-space: pre;
+                  overflow-x: auto;
+                "
+              ></textarea>
+              <div class="ca-hint">
+                First line must be <code>Subject: …</code>. Use
+                <code>&#123;&#123;placeholder&#125;&#125;</code> tokens, <strong>**bold**</strong>,
+                <em>*italic*</em>, and <code>[link](url)</code>.
+              </div>
+            </div>
+            <div>
+              <div
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 0.04em;
+                  color: var(--text-muted);
+                  margin-bottom: 5px;
+                "
+              >
+                Preview
+              </div>
+              <div
+                id="tpl-preview"
+                style="
+                  background: var(--bg-alt);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  min-height: 320px;
+                  font-size: 0.86rem;
+                  line-height: 1.65;
+                  overflow-y: auto;
+                "
+              ></div>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: var(--sp-4);
+              display: flex;
+              gap: 8px;
+              flex-wrap: wrap;
+              align-items: center;
+            "
+          >
+            <button class="btn btn-primary btn-sm" id="btn-save-tpl">Save template</button>
+            <span class="ca-hint" id="tpl-status" style="margin-left: 4px"></span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="ca-toast" id="toast"></div>
+
+    <script src="../assets/js/core.js"></script>
+    <script>
+      /* Sidebar identity */
+      (function () {
+        var u = (function () {
+          try {
+            return JSON.parse(localStorage.getItem('re_user') || '{}');
+          } catch (e) {
+            return {};
+          }
+        })();
+        var n = u.fullName || u.email || 'Administrator';
+        var av =
+          n
+            .split(' ')
+            .map(function (w) {
+              return w[0] || '';
+            })
+            .join('')
+            .toUpperCase()
+            .slice(0, 2) || 'AD';
+        document.getElementById('admin-av').textContent = av;
+        document.getElementById('admin-foot-name').textContent = n;
+        document.getElementById('admin-foot-role').textContent = u.role || 'ADMIN';
+      })();
+
+      function toast(msg, isErr) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'ca-toast show' + (isErr ? ' err' : '');
+        setTimeout(function () {
+          t.className = 'ca-toast';
+        }, 3200);
+      }
+      function slugify(s) {
+        return s
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+      function toIso(v) {
+        return v ? new Date(v).toISOString() : null;
+      }
+      // Inverse of toIso — formats a stored timestamp for a <input type="datetime-local">,
+      // using local time (the input has no timezone concept of its own).
+      function toLocalInput(v) {
+        if (!v) return '';
+        var d = new Date(v);
+        var pad = function (n) {
+          return n < 10 ? '0' + n : '' + n;
+        };
+        return (
+          d.getFullYear() +
+          '-' +
+          pad(d.getMonth() + 1) +
+          '-' +
+          pad(d.getDate()) +
+          'T' +
+          pad(d.getHours()) +
+          ':' +
+          pad(d.getMinutes())
+        );
+      }
+      var CATEGORIES = [
+        { id: 'BASIC_HW', label: 'Basic Hardware Design' },
+        { id: 'ADVANCED_HW', label: 'Advanced Hardware Design' },
+        { id: 'PCB_DESIGN', label: 'PCB Design' },
+      ];
+      function categoryLabel(id) {
+        var c = CATEGORIES.find(function (x) {
+          return x.id === id;
+        });
+        return c ? c.label : '—';
+      }
+      function fmtDate(d) {
+        if (!d) return '—';
+        var x = new Date(d);
+        return (
+          x.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+          ' ' +
+          x.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+        );
+      }
+
+      var CHALLENGES = [];
+
+      function loadChallenges() {
+        return reApiFetch('/api/admin/challenges')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed to load');
+            CHALLENGES = d.data || [];
+            renderTable();
+            renderChallengeSelect();
+          })
+          .catch(function (e) {
+            document.getElementById('ch-body').innerHTML =
+              '<tr><td colspan="9" style="color:var(--danger,#ef4444);padding:18px">' +
+              (e.message || 'Could not load challenges. Are you signed in as an admin?') +
+              '</td></tr>';
+          });
+      }
+
+      function renderTable() {
+        var live = 0,
+          sched = 0,
+          draft = 0;
+        CHALLENGES.forEach(function (c) {
+          if (c.status === 'live') live++;
+          else if (c.status === 'scheduled') sched++;
+          else if (c.status === 'draft') draft++;
+        });
+        document.getElementById('stat-total').textContent = CHALLENGES.length;
+        document.getElementById('stat-live').textContent = live;
+        document.getElementById('stat-scheduled').textContent = sched;
+        document.getElementById('stat-draft').textContent = draft;
+
+        if (!CHALLENGES.length) {
+          document.getElementById('ch-body').innerHTML =
+            '<tr><td colspan="9" style="color:var(--text-muted);padding:18px">No challenges yet — create one above.</td></tr>';
+          return;
+        }
+        document.getElementById('ch-body').innerHTML = CHALLENGES.map(function (c) {
+          var actions = [];
+          if (c.status === 'draft' || c.status === 'scheduled')
+            actions.push(
+              '<button class="btn btn-primary btn-sm" data-act="publish" data-id="' +
+                c.id +
+                '">Publish live</button>'
+            );
+          if (c.status === 'draft')
+            actions.push(
+              '<button class="btn btn-secondary btn-sm" data-act="schedule" data-id="' +
+                c.id +
+                '">Schedule</button>'
+            );
+          if (c.status === 'live')
+            actions.push(
+              '<button class="btn btn-secondary btn-sm" data-act="close" data-id="' +
+                c.id +
+                '">Close now</button>'
+            );
+          actions.push(
+            '<button class="btn btn-outline btn-sm" data-act="edit" data-id="' +
+              c.id +
+              '">Edit</button>'
+          );
+          actions.push(
+            '<button class="btn btn-outline btn-sm" data-act="delete" data-id="' +
+              c.id +
+              '" style="color:var(--danger,#ef4444);border-color:var(--danger,#ef4444)">Delete</button>'
+          );
+          return (
+            '<tr>' +
+            '<td>' +
+            (c.week_number || '—') +
+            '</td>' +
+            '<td style="color:var(--text-base);font-weight:600">' +
+            c.title +
+            '</td>' +
+            '<td>' +
+            '<select class="ca-track-select" data-id="' +
+            c.id +
+            '" style="font-size:0.78rem;padding:5px 7px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;color:var(--text-base)">' +
+            '<option value=""' +
+            (!c.category_id ? ' selected' : '') +
+            '>— Uncategorized —</option>' +
+            CATEGORIES.map(function (cat) {
+              return (
+                '<option value="' +
+                cat.id +
+                '"' +
+                (c.category_id === cat.id ? ' selected' : '') +
+                '>' +
+                cat.label +
+                '</option>'
+              );
+            }).join('') +
+            '</select>' +
+            '</td>' +
+            '<td>' +
+            (c.difficulty || '') +
+            '</td>' +
+            '<td>' +
+            (c.question_count || 0) +
+            '</td>' +
+            '<td><span class="ca-status ' +
+            c.status +
+            '">' +
+            c.status +
+            '</span></td>' +
+            '<td style="font-size:0.78rem">' +
+            fmtDate(c.opens_at) +
+            '</td>' +
+            '<td style="font-size:0.78rem">' +
+            fmtDate(c.closes_at) +
+            '</td>' +
+            '<td><div style="display:flex;gap:6px;flex-wrap:wrap">' +
+            actions.join('') +
+            '</div></td>' +
+            '</tr>'
+          );
+        }).join('');
+
+        document.querySelectorAll('#ch-body [data-act]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var id = b.getAttribute('data-id');
+            var act = b.getAttribute('data-act');
+            if (act === 'close') doClose(id);
+            else if (act === 'edit') startEditChallenge(id);
+            else if (act === 'delete') doDeleteChallenge(id);
+            else doPublish(id, act === 'schedule' ? 'scheduled' : 'live');
+          });
+        });
+        document.querySelectorAll('.ca-track-select').forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            doSetCategory(sel.getAttribute('data-id'), sel.value || null);
+          });
+        });
+      }
+
+      function doSetCategory(id, categoryId) {
+        reApiFetch('/api/admin/challenges/' + id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category_id: categoryId }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed to update track');
+            toast(
+              'Track set to ' + (categoryId ? categoryLabel(categoryId) : 'Uncategorized') + '.'
+            );
+            loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          });
+      }
+
+      function renderChallengeSelect() {
+        var opts =
+          '<option value="">Select a challenge…</option>' +
+          CHALLENGES.map(function (c) {
+            return (
+              '<option value="' +
+              c.id +
+              '">' +
+              (c.category_id ? '[' + categoryLabel(c.category_id) + '] ' : '') +
+              (c.week_number ? 'W' + c.week_number + ' · ' : '') +
+              c.title +
+              ' (' +
+              (c.question_count || 0) +
+              ' Qs)</option>'
+            );
+          }).join('');
+        ['q-challenge', 'bulk-challenge'].forEach(function (id) {
+          var sel = document.getElementById(id);
+          if (!sel) return;
+          var cur = sel.value;
+          sel.innerHTML = opts;
+          sel.value = cur;
+        });
+      }
+
+      /* Create challenge */
+      document.getElementById('f-title').addEventListener('blur', function () {
+        var s = document.getElementById('f-slug');
+        if (!s.value && this.value) s.value = slugify(this.value);
+      });
+      /* ── Create / Edit challenge (shared form) ────────────────────── */
+      var editingId = null;
+
+      function resetChallengeForm() {
+        editingId = null;
+        document.getElementById('ca-form-title').textContent = 'Create a challenge';
+        document.getElementById('f-status-label').textContent = 'Initial status';
+        document.getElementById('btn-create').textContent = 'Create challenge';
+        document.getElementById('btn-cancel-edit').classList.add('ca-hide');
+        ['f-week', 'f-title', 'f-slug', 'f-topic', 'f-desc', 'f-opens', 'f-closes'].forEach(
+          function (id) {
+            document.getElementById(id).value = '';
+          }
+        );
+        document.getElementById('f-category').value = 'BASIC_HW';
+        document.getElementById('f-diff').value = 'Intermediate';
+        document.getElementById('f-points').value = '100';
+        document.getElementById('f-status').value = 'draft';
+      }
+
+      function startEditChallenge(id) {
+        var c = CHALLENGES.find(function (x) {
+          return x.id === id;
+        });
+        if (!c) return toast('Challenge not found.', true);
+        editingId = id;
+        document.getElementById('ca-form-title').textContent = 'Edit challenge — ' + c.title;
+        document.getElementById('f-status-label').textContent = 'Status';
+        document.getElementById('btn-create').textContent = 'Save changes';
+        document.getElementById('btn-cancel-edit').classList.remove('ca-hide');
+        document.getElementById('f-week').value = c.week_number || '';
+        document.getElementById('f-title').value = c.title || '';
+        document.getElementById('f-slug').value = c.slug || '';
+        document.getElementById('f-topic').value = c.topic || '';
+        document.getElementById('f-category').value = c.category_id || 'BASIC_HW';
+        document.getElementById('f-diff').value = c.difficulty || 'Intermediate';
+        document.getElementById('f-desc').value = c.description || '';
+        document.getElementById('f-points').value = c.total_points || 100;
+        document.getElementById('f-opens').value = toLocalInput(c.opens_at);
+        document.getElementById('f-closes').value = toLocalInput(c.closes_at);
+        document.getElementById('f-status').value = c.status || 'draft';
+        document.getElementById('f-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      document.getElementById('btn-cancel-edit').addEventListener('click', resetChallengeForm);
+
+      document.getElementById('btn-create').addEventListener('click', function () {
+        var title = document.getElementById('f-title').value.trim();
+        if (!title) return toast('Title is required.', true);
+        var body = {
+          week_number: parseInt(document.getElementById('f-week').value) || null,
+          title: title,
+          slug: document.getElementById('f-slug').value.trim() || slugify(title),
+          topic: document.getElementById('f-topic').value.trim() || null,
+          category_id: document.getElementById('f-category').value || null,
+          difficulty: document.getElementById('f-diff').value,
+          description: document.getElementById('f-desc').value.trim() || null,
+          total_points: parseInt(document.getElementById('f-points').value) || 100,
+          opens_at: toIso(document.getElementById('f-opens').value),
+          closes_at: toIso(document.getElementById('f-closes').value),
+          status: document.getElementById('f-status').value,
+        };
+        var isEdit = !!editingId;
+        var btn = this;
+        btn.disabled = true;
+        reApiFetch(isEdit ? '/api/admin/challenges/' + editingId : '/api/admin/challenges', {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success)
+              throw new Error(d.error || (isEdit ? 'Update failed' : 'Create failed'));
+            toast(
+              isEdit ? 'Challenge updated: ' + d.data.title : 'Challenge created: ' + d.data.title
+            );
+            resetChallengeForm();
+            return loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
+
+      function doDeleteChallenge(id) {
+        var c = CHALLENGES.find(function (x) {
+          return x.id === id;
+        });
+        var label = c ? c.title : 'this challenge';
+        var attemptWarning =
+          c && (c.status === 'live' || c.status === 'closed' || c.status === 'archived')
+            ? ' This challenge has been live, so this will also permanently delete all of its attempts, answers, and results.'
+            : '';
+        if (
+          !confirm(
+            'Delete "' +
+              label +
+              '"? This also deletes its questions.' +
+              attemptWarning +
+              ' This cannot be undone.'
+          )
+        )
+          return;
+        reApiFetch('/api/admin/challenges/' + id, { method: 'DELETE' })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Delete failed');
+            toast('Challenge deleted.');
+            if (editingId === id) resetChallengeForm();
+            loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          });
+      }
+
+      function doPublish(id, status) {
+        reApiFetch('/api/admin/challenges/' + id + '/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: status }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed');
+            toast('Status → ' + status);
+            loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          });
+      }
+      function doClose(id) {
+        if (!confirm('Close this challenge now? Ranks will be frozen and results published.'))
+          return;
+        reApiFetch('/api/admin/challenges/' + id + '/close', { method: 'POST' })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed');
+            toast('Challenge closed and ranked.');
+            loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          });
+      }
+
+      /* Question type field toggling */
+      function syncQType() {
+        var t = document.getElementById('q-type').value;
+        document
+          .querySelector('.ca-opts')
+          .classList.toggle('ca-hide', t === 'numeric' || t === 'truefalse');
+        document.querySelector('.ca-ans-choice').classList.toggle('ca-hide', t !== 'mcq');
+        document.querySelector('.ca-ans-multi').classList.toggle('ca-hide', t !== 'multi');
+        document.querySelector('.ca-ans-tf').classList.toggle('ca-hide', t !== 'truefalse');
+        document.querySelectorAll('.ca-ans-num').forEach(function (el) {
+          el.classList.toggle('ca-hide', t !== 'numeric');
+        });
+      }
+      document.getElementById('q-type').addEventListener('change', syncQType);
+      syncQType();
+
+      /* Image file → inline data URL for single-add */
+      var singleImageDataUrl = '';
+      document.getElementById('q-image-file').addEventListener('change', function () {
+        var f = this.files && this.files[0];
+        if (!f) {
+          singleImageDataUrl = '';
+          return;
+        }
+        if (f.size > 400 * 1024) {
+          toast(
+            'Image is large (' + Math.round(f.size / 1024) + ' KB). Prefer a URL for big images.',
+            true
+          );
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          singleImageDataUrl = reader.result;
+          document.getElementById('q-image-hint').textContent =
+            'Using uploaded file (' +
+            Math.round(f.size / 1024) +
+            ' KB). Clear the file input to use a URL instead.';
+        };
+        reader.readAsDataURL(f);
+      });
+
+      /* Add question */
+      document.getElementById('btn-add-q').addEventListener('click', function () {
+        var chId = document.getElementById('q-challenge').value;
+        if (!chId) return toast('Pick a challenge first.', true);
+        var type = document.getElementById('q-type').value;
+        var prompt = document.getElementById('q-prompt').value.trim();
+        if (!prompt) return toast('Prompt is required.', true);
+
+        var options = null;
+        var answer_key = {};
+        var tol = null;
+        if (type === 'mcq') {
+          options = document
+            .getElementById('q-options')
+            .value.split('\n')
+            .map(function (s) {
+              return s.trim();
+            })
+            .filter(Boolean);
+          if (options.length < 2) return toast('Add at least 2 options.', true);
+          var c = parseInt(document.getElementById('q-correct').value);
+          if (!(c >= 1 && c <= options.length))
+            return toast('Correct option # out of range.', true);
+          answer_key = { correct: c - 1 };
+        } else if (type === 'multi') {
+          options = document
+            .getElementById('q-options')
+            .value.split('\n')
+            .map(function (s) {
+              return s.trim();
+            })
+            .filter(Boolean);
+          if (options.length < 2) return toast('Add at least 2 options.', true);
+          var arr = document
+            .getElementById('q-correct-multi')
+            .value.split(',')
+            .map(function (s) {
+              return parseInt(s.trim()) - 1;
+            })
+            .filter(function (n) {
+              return n >= 0;
+            });
+          if (!arr.length) return toast('Enter the correct option numbers.', true);
+          answer_key = { correct: arr };
+        } else if (type === 'truefalse') {
+          options = ['True', 'False'];
+          answer_key = { correct: parseInt(document.getElementById('q-tf').value) === 1 ? 0 : 1 };
+        } else if (type === 'numeric') {
+          var val = parseFloat(document.getElementById('q-num').value);
+          if (isNaN(val)) return toast('Enter the correct value.', true);
+          answer_key = { value: val };
+          tol = parseFloat(document.getElementById('q-tol').value) || 0;
+        }
+
+        var assets = {};
+        var imgUrl = document.getElementById('q-image').value.trim() || singleImageDataUrl;
+        if (imgUrl) assets.image = imgUrl;
+        var unit = (document.getElementById('q-unit').value || '').trim();
+        if (type === 'numeric' && unit) assets.unit = unit;
+
+        var body = {
+          type: type,
+          prompt: prompt,
+          options: options,
+          answer_key: answer_key,
+          points: parseInt(document.getElementById('q-points').value) || 10,
+          numeric_tolerance: tol,
+          topic_tag: document.getElementById('q-topic').value.trim() || null,
+          explanation: document.getElementById('q-exp').value.trim() || null,
+          partial_credit: type === 'multi',
+          assets: Object.keys(assets).length ? assets : null,
+        };
+        var btn = this;
+        btn.disabled = true;
+        reApiFetch('/api/admin/challenges/' + chId + '/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed to add question');
+            toast('Question added.');
+            document.getElementById('q-prompt').value = '';
+            document.getElementById('q-options').value = '';
+            document.getElementById('q-exp').value = '';
+            document.getElementById('q-correct').value = '';
+            document.getElementById('q-correct-multi').value = '';
+            document.getElementById('q-num').value = '';
+            document.getElementById('q-image').value = '';
+            document.getElementById('q-image-file').value = '';
+            singleImageDataUrl = '';
+            return loadChallenges();
+          })
+          .catch(function (e) {
+            toast(e.message, true);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
+
+      /* ── Bulk upload from .md ─────────────────────────────────────────── */
+      var BULK_TEMPLATE =
+        '<!-- Rising Edge — Weekly Challenge bulk question template -->\n' +
+        '<!-- Separate each question with a line containing only: --- -->\n' +
+        '<!-- Mark correct option(s) with a leading * . Lines are "key: value". -->\n' +
+        '<!-- type = mcq | multi | truefalse | numeric -->\n' +
+        '\n' +
+        'type: mcq\n' +
+        'topic: Reference-Plane Integrity\n' +
+        'difficulty: Advanced\n' +
+        'points: 10\n' +
+        'image: \n' +
+        'prompt: What is the primary SI risk of routing a DQ byte lane across a plane split?\n' +
+        'options:\n' +
+        '- Increased DC resistance only\n' +
+        '- *A return-current discontinuity that raises impedance, crosstalk, and EMI\n' +
+        '- The trace becomes an antenna only below 1 MHz\n' +
+        '- Nothing — DQ lines are single-ended so the plane is irrelevant\n' +
+        'explanation: The return current cannot follow across a plane split.\n' +
+        '\n' +
+        '---\n' +
+        '\n' +
+        'type: multi\n' +
+        'topic: Power Integrity\n' +
+        'points: 10\n' +
+        'prompt: Which measures reduce simultaneous switching noise (SSN)? (select all)\n' +
+        'options:\n' +
+        '- *Adequate decoupling close to the power pins\n' +
+        '- *Low-inductance power/ground plane pairs\n' +
+        '- Removing all series resistors from DQ lines\n' +
+        '- *Balanced, tightly-coupled return paths\n' +
+        'explanation: Decoupling, low-inductance planes and tight returns reduce SSN.\n' +
+        '\n' +
+        '---\n' +
+        '\n' +
+        'type: numeric\n' +
+        'topic: Timing\n' +
+        'points: 10\n' +
+        'prompt: A DDR4 interface runs at 3200 MT/s. What is the unit interval in ps?\n' +
+        'answer: 312.5\n' +
+        'tolerance: 5\n' +
+        'unit: ps\n' +
+        'explanation: 1 / 3.2 GT/s = 312.5 ps.\n' +
+        '\n' +
+        '---\n' +
+        '\n' +
+        'type: truefalse\n' +
+        'topic: Termination\n' +
+        'points: 10\n' +
+        'image: https://example.com/flyby-bus.png\n' +
+        'prompt: VTT termination sits at the far end of the fly-by command/address bus.\n' +
+        'answer: true\n' +
+        'explanation: End termination absorbs the wavefront and prevents reflections.\n';
+
+      document.getElementById('btn-template').addEventListener('click', function () {
+        var blob = new Blob([BULK_TEMPLATE], { type: 'text/markdown' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'whdc-question-template.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      });
+
+      // Parse a markdown file into question bodies (same shape as the single-add API body).
+      function parseBulkMarkdown(text) {
+        var errors = [];
+        var questions = [];
+        var blocks = text.split(/\r?\n-{3,}\s*\r?\n/); // split on a line of ---
+        blocks.forEach(function (raw, bi) {
+          var block = raw.trim();
+          if (!block) return;
+          var lines = block.split(/\r?\n/);
+          var kv = {};
+          var options = [];
+          var correct = [];
+          lines.forEach(function (line) {
+            var l = line.trim();
+            if (!l || l.indexOf('<!--') === 0 || l === 'options:') return;
+            var optMatch = l.match(/^[-]\s+(.*)$/);
+            if (optMatch) {
+              var t = optMatch[1].trim();
+              var isCorrect = false;
+              if (/^\*\s?/.test(t)) {
+                isCorrect = true;
+                t = t.replace(/^\*\s?/, '');
+              } else if (/^\[[xX]\]\s?/.test(t)) {
+                isCorrect = true;
+                t = t.replace(/^\[[xX]\]\s?/, '');
+              }
+              if (t) {
+                options.push(t);
+                if (isCorrect) correct.push(options.length - 1);
+              }
+              return;
+            }
+            var idx = l.indexOf(':');
+            if (idx > 0) {
+              var key = l.slice(0, idx).trim().toLowerCase();
+              var val = l.slice(idx + 1).trim();
+              kv[key] = val;
+            }
+          });
+
+          var qnum = 'Question ' + (bi + 1);
+          var type = (kv.type || '').toLowerCase();
+          if (!type) {
+            errors.push(qnum + ': missing "type:".');
+            return;
+          }
+          var prompt = kv.prompt || '';
+          // pull a markdown image out of the prompt if present
+          var assets = {};
+          var imgInPrompt = prompt.match(/!\[[^\]]*\]\(([^)]+)\)/);
+          if (imgInPrompt) {
+            assets.image = imgInPrompt[1].trim();
+            prompt = prompt.replace(imgInPrompt[0], '').trim();
+          }
+          if (kv.image) assets.image = kv.image;
+          if (kv.unit && type === 'numeric') assets.unit = kv.unit;
+          if (!prompt) {
+            errors.push(qnum + ': missing "prompt:".');
+            return;
+          }
+
+          var body = {
+            type: type,
+            prompt: prompt,
+            points: parseInt(kv.points) || 10,
+            topic_tag: kv.topic || null,
+            difficulty_tag: kv.difficulty || null,
+            explanation: kv.explanation || null,
+            options: null,
+            answer_key: {},
+            numeric_tolerance: null,
+            partial_credit: type === 'multi',
+            assets: Object.keys(assets).length ? assets : null,
+          };
+
+          if (type === 'mcq') {
+            if (options.length < 2) return errors.push(qnum + ': needs at least 2 options.');
+            if (correct.length !== 1)
+              return errors.push(qnum + ': mark exactly one correct option with *.');
+            body.options = options;
+            body.answer_key = { correct: correct[0] };
+          } else if (type === 'multi') {
+            if (options.length < 2) return errors.push(qnum + ': needs at least 2 options.');
+            if (!correct.length) return errors.push(qnum + ': mark correct options with *.');
+            body.options = options;
+            body.answer_key = { correct: correct };
+          } else if (type === 'truefalse') {
+            var a = (kv.answer || '').toLowerCase();
+            if (a !== 'true' && a !== 'false')
+              return errors.push(qnum + ': truefalse needs "answer: true" or "answer: false".');
+            body.options = ['True', 'False'];
+            body.answer_key = { correct: a === 'true' ? 0 : 1 };
+          } else if (type === 'numeric') {
+            var v = parseFloat(kv.answer);
+            if (isNaN(v)) return errors.push(qnum + ': numeric needs "answer: <number>".');
+            body.answer_key = { value: v };
+            body.numeric_tolerance = kv.tolerance != null ? parseFloat(kv.tolerance) || 0 : 0;
+          } else {
+            return errors.push(qnum + ': unknown type "' + type + '".');
+          }
+          questions.push(body);
+        });
+        return { questions: questions, errors: errors };
+      }
+
+      var bulkParsed = [];
+      document.getElementById('btn-bulk-parse').addEventListener('click', function () {
+        var fileEl = document.getElementById('bulk-file');
+        var f = fileEl.files && fileEl.files[0];
+        if (!f) return toast('Choose a .md file first.', true);
+        var reader = new FileReader();
+        reader.onload = function () {
+          var res = parseBulkMarkdown(String(reader.result || ''));
+          bulkParsed = res.questions;
+          var html = '';
+          if (res.errors.length) {
+            html +=
+              '<div class="ca-hint" style="color:var(--danger,#ef4444);margin-bottom:8px">' +
+              res.errors.length +
+              ' problem(s): ' +
+              res.errors.join(' · ') +
+              '</div>';
+          }
+          if (res.questions.length) {
+            html +=
+              '<div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Type</th><th>Prompt</th><th>Options</th><th>Img</th></tr></thead><tbody>' +
+              res.questions
+                .map(function (q, i) {
+                  var correctTxt =
+                    q.type === 'numeric'
+                      ? q.answer_key.value + (q.assets && q.assets.unit ? ' ' + q.assets.unit : '')
+                      : Array.isArray(q.answer_key.correct)
+                        ? q.answer_key.correct.length + ' correct'
+                        : '1 correct';
+                  return (
+                    '<tr><td>' +
+                    (i + 1) +
+                    '</td><td>' +
+                    q.type +
+                    '</td><td style="color:var(--text-base)">' +
+                    (q.prompt.length > 70 ? q.prompt.slice(0, 70) + '…' : q.prompt) +
+                    '</td><td>' +
+                    (q.options ? q.options.length + ' opts · ' + correctTxt : correctTxt) +
+                    '</td><td>' +
+                    (q.assets && q.assets.image ? '🖼' : '—') +
+                    '</td></tr>'
+                  );
+                })
+                .join('') +
+              '</tbody></table></div>';
+          } else {
+            html += '<div class="ca-hint">No valid questions found.</div>';
+          }
+          document.getElementById('bulk-preview').innerHTML = html;
+          document.getElementById('bulk-count').textContent = res.questions.length;
+          document.getElementById('btn-bulk-upload').style.display = res.questions.length
+            ? 'inline-flex'
+            : 'none';
+        };
+        reader.readAsText(f);
+      });
+
+      document.getElementById('btn-bulk-upload').addEventListener('click', function () {
+        var chId = document.getElementById('bulk-challenge').value;
+        if (!chId) return toast('Pick a challenge for the bulk upload.', true);
+        if (!bulkParsed.length) return toast('Nothing parsed to upload.', true);
+        var btn = this;
+        btn.disabled = true;
+        var ok = 0;
+        var fail = 0;
+        var queue = bulkParsed.slice();
+        function next() {
+          if (!queue.length) {
+            toast(
+              'Uploaded ' + ok + ' question(s)' + (fail ? ', ' + fail + ' failed' : '') + '.',
+              fail > 0
+            );
+            btn.disabled = false;
+            bulkParsed = [];
+            document.getElementById('bulk-preview').innerHTML = '';
+            document.getElementById('btn-bulk-upload').style.display = 'none';
+            document.getElementById('bulk-file').value = '';
+            loadChallenges();
+            return;
+          }
+          var q = queue.shift();
+          reApiFetch('/api/admin/challenges/' + chId + '/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(q),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              if (d && d.success) ok++;
+              else fail++;
+            })
+            .catch(function () {
+              fail++;
+            })
+            .finally(next);
+        }
+        next();
+      });
+
+      // ── Email Notifications ──────────────────────────────────────────────────
+      var EMAIL_LABELS = {
+        'whdc.email.announce': {
+          label: 'Announcement email',
+          desc: 'Sent when a new challenge goes live',
+        },
+        'whdc.email.reminder': {
+          label: 'Reminder emails',
+          desc: 'Sent every 2 days while a challenge is active',
+        },
+        'whdc.email.results': {
+          label: 'Results email',
+          desc: 'Sent when a challenge closes and results are published',
+        },
+        'whdc.email.certificate': {
+          label: 'Certificate email',
+          desc: 'Sent to top-3 finishers when a certificate is issued',
+        },
+      };
+      var EMAIL_FLAGS = {};
+
+      function loadEmailSettings() {
+        reApiFetch('/api/admin/whdc/email-settings')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Failed to load email settings');
+            EMAIL_FLAGS = d.settings || {};
+            renderEmailToggles();
+          })
+          .catch(function (e) {
+            document.getElementById('email-toggles').innerHTML =
+              '<span style="color:var(--danger,#ef4444)">' +
+              (e.message || 'Could not load email settings.') +
+              '</span>';
+          });
+      }
+
+      function renderEmailToggles() {
+        var keys = Object.keys(EMAIL_LABELS);
+        document.getElementById('email-toggles').innerHTML = keys
+          .map(function (key) {
+            var meta = EMAIL_LABELS[key];
+            // Server returns { enabled, label } objects; fall back to true if absent
+            var flag = EMAIL_FLAGS[key];
+            var checked = flag ? flag.enabled !== false : true;
+            return (
+              '<div class="email-toggle-row">' +
+              '<div><div class="email-toggle-label">' +
+              meta.label +
+              '</div><div class="email-toggle-desc">' +
+              meta.desc +
+              '</div></div>' +
+              '<label class="toggle-switch">' +
+              '<input type="checkbox" data-key="' +
+              key +
+              '"' +
+              (checked ? ' checked' : '') +
+              '><span class="toggle-slider"></span>' +
+              '</label>' +
+              '</div>'
+            );
+          })
+          .join('');
+      }
+
+      document.getElementById('btn-save-email-flags').addEventListener('click', function () {
+        var checkboxes = document.querySelectorAll('#email-toggles input[data-key]');
+        var body = {};
+        checkboxes.forEach(function (cb) {
+          body[cb.getAttribute('data-key')] = cb.checked;
+        });
+        var btn = this;
+        btn.disabled = true;
+        reApiFetch('/api/admin/whdc/email-settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Save failed');
+            toast('Email settings saved.');
+            EMAIL_FLAGS = body;
+          })
+          .catch(function (e) {
+            toast(e.message || 'Save failed.', true);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
+
+      // ── Template editor ───────────────────────────────────────────────────
+      var TPL_PLACEHOLDERS = {
+        announcement: ['{{name}}', '{{challengeTitle}}', '{{challengeLink}}'],
+        'challenge-reminder': [
+          '{{name}}',
+          '{{challengeTitle}}',
+          '{{challengeLink}}',
+          '{{daysLeft}}',
+        ],
+        'results-published': [
+          '{{name}}',
+          '{{challengeTitle}}',
+          '{{rank}}',
+          '{{score}}',
+          '{{leaderboardLink}}',
+        ],
+        'certificate-issued': ['{{name}}', '{{challengeTitle}}', '{{certificateLink}}'],
+      };
+
+      function inlineMd(s) {
+        s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        s = s.replace(
+          /\[([^\]]+)\]\(([^)]+)\)/g,
+          '<a href="$2" style="color:var(--primary-400,#22d3ee)">$1</a>'
+        );
+        s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        s = s.replace(
+          /`([^`]+)`/g,
+          '<code style="background:var(--bg-card);padding:1px 5px;border-radius:4px;font-size:0.85em">$1</code>'
+        );
+        s = s.replace(
+          /\{\{([^}]+)\}\}/g,
+          '<code style="background:rgba(34,211,238,0.13);color:var(--primary-400,#22d3ee);padding:1px 5px;border-radius:4px">{{$1}}</code>'
+        );
+        return s;
+      }
+
+      function mdToHtml(md) {
+        if (!md) return '';
+        var lines = md.split('\n');
+        var out = [];
+        lines.forEach(function (line) {
+          if (/^Subject:\s*/i.test(line)) {
+            out.push(
+              '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:3px">Subject</div>' +
+                '<div style="font-size:1rem;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">' +
+                inlineMd(line.replace(/^Subject:\s*/i, '')) +
+                '</div>'
+            );
+          } else if (!line.trim()) {
+            out.push('<div style="height:8px"></div>');
+          } else if (/^##\s/.test(line)) {
+            out.push(
+              '<h3 style="margin:12px 0 5px;font-size:0.95rem">' + inlineMd(line.slice(3)) + '</h3>'
+            );
+          } else if (/^#\s/.test(line)) {
+            out.push(
+              '<h2 style="margin:12px 0 6px;font-size:1.05rem">' + inlineMd(line.slice(2)) + '</h2>'
+            );
+          } else {
+            out.push('<p style="margin:0 0 6px">' + inlineMd(line) + '</p>');
+          }
+        });
+        return out.join('');
+      }
+
+      function updateTplPreview() {
+        document.getElementById('tpl-preview').innerHTML = mdToHtml(
+          document.getElementById('tpl-editor').value
+        );
+      }
+
+      function updateTplPlaceholders(name) {
+        var ph = TPL_PLACEHOLDERS[name] || [];
+        var el = document.getElementById('tpl-placeholders');
+        if (!ph.length) {
+          el.innerHTML = '';
+          return;
+        }
+        el.innerHTML =
+          '<div style="padding:9px 14px;background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.2);border-radius:8px;font-size:0.8rem;margin-bottom:var(--sp-3)">' +
+          '<span style="font-weight:600;color:var(--text-muted);margin-right:6px">Placeholders:</span>' +
+          ph
+            .map(function (p) {
+              return (
+                '<code style="background:rgba(34,211,238,0.13);color:var(--primary-400,#22d3ee);padding:1px 7px;border-radius:4px;margin:0 3px">' +
+                p +
+                '</code>'
+              );
+            })
+            .join('') +
+          '</div>';
+      }
+
+      function loadTemplate(name) {
+        document.getElementById('tpl-editor').value = '';
+        document.getElementById('tpl-preview').innerHTML =
+          '<span style="color:var(--text-muted)">Loading…</span>';
+        document.getElementById('tpl-status').textContent = '';
+        updateTplPlaceholders(name);
+        reApiFetch('/api/admin/whdc/email-template/' + name)
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Load failed');
+            document.getElementById('tpl-editor').value = d.content || '';
+            updateTplPreview();
+          })
+          .catch(function (e) {
+            document.getElementById('tpl-preview').innerHTML =
+              '<span style="color:var(--danger,#ef4444)">' +
+              (e.message || 'Could not load template.') +
+              '</span>';
+          });
+      }
+
+      document.getElementById('tpl-select').addEventListener('change', function () {
+        loadTemplate(this.value);
+      });
+      document.getElementById('tpl-editor').addEventListener('input', updateTplPreview);
+
+      document.getElementById('btn-save-tpl').addEventListener('click', function () {
+        var name = document.getElementById('tpl-select').value;
+        var content = document.getElementById('tpl-editor').value;
+        var btn = this;
+        var statusEl = document.getElementById('tpl-status');
+        btn.disabled = true;
+        statusEl.textContent = 'Saving…';
+        reApiFetch('/api/admin/whdc/email-template/' + name, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: content }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (!d.success) throw new Error(d.error || 'Save failed');
+            statusEl.textContent = 'Saved ✓';
+            toast('Template saved.');
+            setTimeout(function () {
+              statusEl.textContent = '';
+            }, 3000);
+          })
+          .catch(function (e) {
+            statusEl.textContent = 'Error: ' + (e.message || 'save failed');
+            toast(e.message || 'Save failed.', true);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
+
+      loadEmailSettings();
+      loadTemplate('announcement');
+      loadChallenges();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="I2C vs SMBus vs PMBus differences, an I3C preview, a printable 15-point I2C design checklist, and frequently asked I2C hardware design questions."
+    />
+    <title>
+      Standards, Variants &amp; Checklist | I2C Hardware Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/08-standards-checklist.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .check-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-alt);
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+      }
+      .check-item input[type='checkbox'] {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+        flex-shrink: 0;
+      }
+      .check-item.done {
+        opacity: 0.55;
+        text-decoration: line-through;
+      }
+      details.faq {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-alt);
+        margin-bottom: 8px;
+        padding: 0 14px;
+      }
+      details.faq summary {
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-base);
+        padding: 12px 0;
+      }
+      details.faq p {
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        padding-bottom: 12px;
+        margin: 0;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        .lesson-nav,
+        .breadcrumb {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item active"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>Standards &amp; Checklist</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 08</span>
+              <span class="badge badge-green">Printable</span>
+              <h1>Standards, Variants &amp; the Design Checklist</h1>
+              <p class="subtitle">
+                The cousins you'll meet in datasheets — SMBus, PMBus, I3C — and the 15-point
+                checklist that catches 95 % of I2C design escapes before layout review ends.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- SMBus -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>SMBus vs I2C — close, but not the same</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>I2C</th>
+                        <th>SMBus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Clock range</td>
+                        <td>0 (DC) – 3.4 MHz</td>
+                        <td><strong>10 kHz – 100 kHz</strong> (min speed exists!)</td>
+                      </tr>
+                      <tr>
+                        <td>Timeout</td>
+                        <td>None — can stretch forever</td>
+                        <td><strong>35 ms</strong> — bus self-heals</td>
+                      </tr>
+                      <tr>
+                        <td>Logic levels</td>
+                        <td>Ratiometric (30 %/70 % of V<sub>CC</sub>)</td>
+                        <td>Fixed thresholds (0.8 V / 2.1 V)</td>
+                      </tr>
+                      <tr>
+                        <td>Extra signal</td>
+                        <td>—</td>
+                        <td>SMBALERT# open-drain interrupt line</td>
+                      </tr>
+                      <tr>
+                        <td>Protocol layer</td>
+                        <td>None mandated</td>
+                        <td>Defined commands, PEC (CRC-8) option</td>
+                      </tr>
+                      <tr>
+                        <td>Typical home</td>
+                        <td>Embedded peripherals</td>
+                        <td>PC/server management, batteries, VRMs</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  Mixing them usually works — until it doesn't: an SMBus target may time out and
+                  drop a byte mid-transfer if a slow I2C controller stretches beyond 35 ms, and a
+                  1.8 V I2C bus can't guarantee SMBus's fixed 2.1 V V<sub>IH</sub>. Check both
+                  columns when a "battery gauge" or "hot-swap controller" lands on your bus.
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  <strong>PMBus</strong> is SMBus plus a standardized command set for power
+                  converters (VOUT_COMMAND, READ_TEMPERATURE, fault logs). Electrically follow SMBus
+                  rules; the value is the interoperable command vocabulary.
+                </p>
+              </div>
+
+              <!-- I3C -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>I3C in one paragraph</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  MIPI <strong>I3C</strong> keeps two wires and backward compatibility with I2C
+                  targets, but switches to push-pull signaling at up to 12.5 MHz SDR, adds
+                  <em>in-band interrupts</em> (no more INT pins),
+                  <em>dynamic address assignment</em> (no more A0 straps), and hot-join. The catch:
+                  controller and target support is still concentrated in sensors/mobile, and the
+                  electrical design rules are completely different — your pull-up math from Module
+                  03 does not carry over. If your platform offers it for a dense sensor cluster,
+                  evaluate it; otherwise I2C remains the default for years yet.
+                </p>
+              </div>
+
+              <!-- Checklist -->
+              <div class="widget-container" id="checklist">
+                <div class="widget-header">
+                  <h3>The 15-point I2C design review checklist</h3>
+                  <button class="btn btn-outline btn-sm" onclick="window.print()">🖨 Print</button>
+                </div>
+                <div id="ckList">
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>1.</strong> C<sub>bus</sub> estimated (pins + traces + cable) and
+                      documented; &lt; 400 pF, or bus is buffered/segmented.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>2.</strong> R<sub>p</sub> calculated from the actual C<sub>bus</sub>
+                      and speed — not copied from the last project.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>3.</strong> Exactly <em>one</em> pull-up pair per bus segment; every
+                      module schematic audited for strays.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>4.</strong> Address map table in the schematic; zero conflicts; A0–A2
+                      straps shown explicitly.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>5.</strong> 7-bit vs 8-bit address convention verified for every part
+                      from its datasheet.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>6.</strong> All devices' V<sub>IH</sub>/V<sub>IL</sub> compatible
+                      with the bus rail; level shifters on every domain crossing (both lines).</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>7.</strong> Clock-stretching support confirmed in the controller
+                      peripheral; stretch timeout in firmware plan.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>8.</strong> Multi-master (if used): arbitration + target-mode
+                      verified in silicon <em>and</em> driver.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>9.</strong> Daisy-chain routing, stubs &lt; 1 cm, no plane-split
+                      crossings, SDA/SCL spaced ≥ 3W.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>10.</strong> TVS (low-C) on every externally accessible SDA/SCL;
+                      series R footprints fitted.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>11.</strong> Hot-plug segments isolated behind an idle-detect buffer;
+                      connector pin lengths sequence power first.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>12.</strong> SDA/SCL on GPIO-capable pins; 9-clock bus recovery in
+                      boot code.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>13.</strong> Test points (or resistor pads) on SDA and SCL, reachable
+                      with a scope probe ground nearby.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>14.</strong> SMBus devices identified; 35 ms timeout and fixed
+                      thresholds accounted for.</span
+                    ></label
+                  >
+                  <label class="check-item"
+                    ><input type="checkbox" />
+                    <span
+                      ><strong>15.</strong> Bring-up plan: idle levels, measured t<sub>r</sub> and
+                      V<sub>OL</sub> at the farthest node, ACK screenshot archived.</span
+                    ></label
+                  >
+                </div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px">
+                  Tick items as you review — ticks are just visual (nothing is saved). Use the Print
+                  button for a hard copy for design reviews.
+                </p>
+              </div>
+
+              <!-- FAQ -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>FAQ</h3></div>
+                <details class="faq">
+                  <summary>What pull-up resistor should I use for I2C?</summary>
+                  <p>
+                    Calculate it: R<sub>min</sub> = (V<sub>CC</sub> − 0.4 V)/3 mA, R<sub>max</sub> =
+                    t<sub>r</sub>/(0.8473·C<sub>bus</sub>), pick an E24 value between them. For a
+                    typical 3.3 V, 400 kHz bus around 150 pF, 2.2 kΩ is the classic answer — but use
+                    the <a href="03-pullup-resistors.html#calc">calculator</a> with your real
+                    capacitance.
+                  </p>
+                </details>
+                <details class="faq">
+                  <summary>How many devices can share one I2C bus?</summary>
+                  <p>
+                    The protocol allows 112 addresses, but the electrical limit arrives first: 400
+                    pF of total bus capacitance — typically 10–20 devices with realistic routing.
+                    Buffers/muxes extend this indefinitely by segmenting.
+                  </p>
+                </details>
+                <details class="faq">
+                  <summary>Can I2C have two masters?</summary>
+                  <p>
+                    Yes — clock synchronization and lossless arbitration are built into the spec
+                    (Module 05). In practice verify both controllers' silicon and drivers handle
+                    arbitration loss; many designs are better restructured with a single bus owner.
+                  </p>
+                </details>
+                <details class="faq">
+                  <summary>Why does my I2C bus hang?</summary>
+                  <p>
+                    Usually a target left mid-byte holding SDA low after a controller reset. Recover
+                    by bit-banging up to 9 SCL pulses then a STOP (Module 07). Prevent it with
+                    boot-time recovery and transaction timeouts.
+                  </p>
+                </details>
+                <details class="faq">
+                  <summary>Do SDA and SCL need the same pull-up value?</summary>
+                  <p>
+                    Use matched values. SCL only needs to meet rise time from the controller's
+                    perspective, but keeping both identical avoids skewed timing margins and
+                    simplifies BOM — there's no benefit to mixing.
+                  </p>
+                </details>
+                <details class="faq">
+                  <summary>Can I run I2C through a cable between boards?</summary>
+                  <p>
+                    Short cables (tens of cm) with a ground between the lines work if you count the
+                    capacitance. Beyond that, put a buffer at the connector, or use a differential
+                    extender (PCA9615) for meters (Module 06).
+                  </p>
+                </details>
+              </div>
+
+              <!-- done -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>You made it 🎉</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  You can now size pull-ups from first principles, architect single- and
+                  multi-master buses, and debug the classic failures from a scope shot. Keep going:
+                  the <a href="../../SI/index.html">Signal Integrity Academy</a> turns the rise-time
+                  intuition you built here into full transmission-line design, and the
+                  <a href="../../EMI/ESD/index.html">ESD training</a> hardens your connectors
+                  properly.
+                </p>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="07-robustness-debug.html"
+                  >← Robustness &amp; Debug</a
+                >
+                <a class="btn btn-primary" href="index.html">Course Home ↺</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      /* strike-through ticked checklist items (visual only) */
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          cb.closest('.check-item').classList.toggle('done', cb.checked);
+        });
+      });
+    </script>
+  </body>
+</html>

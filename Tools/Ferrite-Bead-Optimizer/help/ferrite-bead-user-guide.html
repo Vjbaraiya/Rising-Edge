@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Complete user manual for the Ferrite Bead Optimizer — Rising Edge Technologies."
+    />
+    <title>Ferrite Bead Optimizer — User Guide | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/Ferrite-Bead-Optimizer/help/ferrite-bead-user-guide.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <main class="manual-page">
+      <!-- ── COVER ── -->
+      <div class="manual-cover card">
+        <div
+          class="fb-kicker"
+          style="
+            display: inline-block;
+            font: 700 0.75rem/1 system-ui;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--primary-400, #60a5fa);
+            margin-bottom: 12px;
+          "
+        >
+          Rising Edge Technologies · Tools
+        </div>
+        <h1>Ferrite Bead Optimizer</h1>
+        <p>
+          Complete user manual — impedance modelling, insertion loss calculation, filter topology
+          selection, DC bias derating, resonance analysis, and PCB layout guidelines.
+        </p>
+        <div class="manual-meta">
+          <span class="badge badge-blue">v1.0</span>
+          <span class="badge badge-gray">Updated July 2026</span>
+          <span class="badge badge-green">Intermediate</span>
+        </div>
+        <div class="manual-actions">
+          <a class="btn btn-primary" href="../ferrite-bead-optimizer.html">Open Tool</a>
+          <button class="btn btn-outline" onclick="window.print()">Print manual</button>
+        </div>
+      </div>
+
+      <!-- ── TABLE OF CONTENTS ── -->
+      <nav class="manual-toc card" aria-label="Table of contents">
+        <h2>Table of Contents</h2>
+        <ol>
+          <li><a href="#overview">Tool Overview</a></li>
+          <li><a href="#quickstart">Quick Start Workflow</a></li>
+          <li><a href="#app-params">Application Parameters</a></li>
+          <li><a href="#bead-selection">Ferrite Bead Selection</a></li>
+          <li><a href="#filter-topology">Filter Topology</a></li>
+          <li><a href="#impedance-model">Impedance Model</a></li>
+          <li><a href="#insertion-loss">Insertion Loss Calculation</a></li>
+          <li><a href="#dc-derating">DC Bias Derating</a></li>
+          <li><a href="#resonance">Resonance Analysis</a></li>
+          <li><a href="#pdn">PDN Noise Model</a></li>
+          <li><a href="#charts">Chart Reference</a></li>
+          <li><a href="#results">Interpreting Results</a></li>
+          <li><a href="#layout">PCB Layout Guidelines</a></li>
+          <li><a href="#export">Reports &amp; Export</a></li>
+          <li><a href="#glossary">Glossary</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ol>
+      </nav>
+
+      <!-- ── SECTION 1: OVERVIEW ── -->
+      <section class="manual-section card" id="overview">
+        <h2>1. Tool Overview</h2>
+        <p>
+          The Ferrite Bead Optimizer is an interactive engineering tool that models the real-world
+          behaviour of ferrite bead EMI filters on power and signal lines. Unlike datasheets — which
+          specify impedance at 100 MHz with zero DC bias and in a 50 Ω system — this tool
+          calculates:
+        </p>
+        <ul>
+          <li>
+            Impedance across 1 MHz–3 GHz with DC bias derating applied at your operating current
+          </li>
+          <li>Insertion loss in your actual circuit impedance environment (not 50 Ω)</li>
+          <li>Filter resonance frequency and risk of noise amplification</li>
+          <li>PDN impedance profile including bead + decoupling capacitor</li>
+          <li>Voltage drop under DC load</li>
+          <li>Temperature derating of ferrite permeability</li>
+        </ul>
+        <p>
+          The tool includes a database of 15 representative ferrite beads from Murata, TDK, Wurth,
+          Laird, and Samsung, and supports custom bead parameter entry for any part not in the
+          database.
+        </p>
+        <div class="manual-callout">
+          <strong
+            >This tool is a modelling aid, not a replacement for SPICE simulation or prototype
+            testing.</strong
+          >
+          The impedance model uses empirical curve-fitting to manufacturer data. Always verify
+          critical filter designs with SPICE (using S-parameter data from the manufacturer) and with
+          prototype measurements before committing to a PCB layout.
+        </div>
+      </section>
+
+      <!-- ── SECTION 2: QUICK START ── -->
+      <section class="manual-section card" id="quickstart">
+        <h2>2. Quick Start Workflow</h2>
+        <div class="manual-flow">
+          <span>Set parameters</span><span>→</span><span>Select bead</span><span>→</span>
+          <span>Choose topology</span><span>→</span><span>Run optimizer</span><span>→</span>
+          <span>Review charts</span><span>→</span><span>Export report</span>
+        </div>
+        <h3>Step-by-step</h3>
+        <ol>
+          <li>
+            <strong>Set Application Parameters:</strong> Enter your target noise frequency (e.g.,
+            100 MHz for a switching regulator), supply current, supply voltage, maximum allowable
+            voltage drop, and required attenuation.
+          </li>
+          <li>
+            <strong>Select a Ferrite Bead:</strong> Either choose from the dropdown (auto-fills all
+            parameters) or click <strong>Auto-select</strong> to let the optimizer pick the best
+            candidate. Alternatively, enter manual specifications from your chosen part's datasheet.
+          </li>
+          <li>
+            <strong>Choose Filter Topology:</strong> Select L-filter (bead + output cap), π-filter
+            (input cap + bead + output cap), or T-filter (two beads + shunt cap). The π-filter
+            provides highest attenuation; the L-filter is simplest.
+          </li>
+          <li>
+            <strong>Run Optimizer:</strong> Click <strong>Run Optimizer</strong> (or press
+            Ctrl+Enter). The tool calculates all metrics and renders 10 interactive charts.
+          </li>
+          <li>
+            <strong>Review Results:</strong> Check the Summary stats, impedance chart, insertion
+            loss curve, derating chart, and resonance analysis. Green = PASS, amber = MARGINAL, red
+            = FAIL.
+          </li>
+          <li>
+            <strong>Export:</strong> Download results as CSV (for spreadsheets), JSON (for full
+            data), or print a formatted report for design review.
+          </li>
+        </ol>
+        <div class="manual-callout">
+          <strong>Keyboard shortcuts:</strong> Ctrl+Enter = Run, Ctrl+S = Save config, F1 = Open
+          Help, Ctrl+P = Print.
+        </div>
+      </section>
+
+      <!-- ── SECTION 3: APPLICATION PARAMETERS ── -->
+      <section class="manual-section card" id="app-params">
+        <h2>3. Application Parameters</h2>
+
+        <h3>Application type</h3>
+        <p>
+          Selects the layout guideline profile shown after optimization. Does not affect the
+          electrical calculations.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Typical use case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Power rail EMI filter</td>
+              <td>VDD, VCORE, VIO — switching regulator output or LDO supply</td>
+            </tr>
+            <tr>
+              <td>Signal line filter</td>
+              <td>I2C, SPI, GPIO, CAN, RS-485 — moderate-speed signal lines</td>
+            </tr>
+            <tr>
+              <td>RF / antenna isolation</td>
+              <td>VDD supply to PA, LNA, transceiver</td>
+            </tr>
+            <tr>
+              <td>Audio / sensitive analog</td>
+              <td>AVDD, PVDD, DAC/ADC supply rails</td>
+            </tr>
+            <tr>
+              <td>USB power filtering</td>
+              <td>VBUS isolation, USB OTG power switching</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Target noise frequency</h3>
+        <p>
+          The primary frequency of the noise you want to suppress. This is the frequency at which
+          the bead impedance and insertion loss are evaluated for the pass/fail criteria.
+        </p>
+        <p>Common target frequencies:</p>
+        <ul>
+          <li>
+            <strong>100 MHz:</strong> Switching regulator (1–3 MHz switching freq, harmonics
+            dominate 100 MHz region)
+          </li>
+          <li><strong>433 / 868 / 915 MHz:</strong> Wireless communication bands</li>
+          <li><strong>2400 MHz:</strong> Wi-Fi / Bluetooth band</li>
+          <li><strong>480 MHz:</strong> USB 2.0 High-Speed</li>
+        </ul>
+        <p>
+          If you have multiple noise frequencies to suppress, run the optimizer separately for each
+          and choose a bead that meets all requirements.
+        </p>
+
+        <h3>Supply current</h3>
+        <p>
+          The maximum DC current that flows through the ferrite bead in normal operation. This is
+          the single most important input for power rail applications because it determines:
+        </p>
+        <ul>
+          <li>DC voltage drop (V_drop = I × R_DC)</li>
+          <li>DC bias derating of the ferrite bead impedance</li>
+          <li>Whether the bead's rated current is exceeded</li>
+          <li>I²R power dissipation and thermal requirements</li>
+        </ul>
+        <p>
+          Always use the maximum expected current, including startup surges and load transients. For
+          a microcontroller drawing 150 mA typical but up to 350 mA with all peripherals active,
+          enter 350 mA.
+        </p>
+
+        <h3>Maximum voltage drop</h3>
+        <p>
+          The maximum DC voltage drop across the bead's RDC that the downstream circuit can
+          tolerate. Calculate this as:
+        </p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          V_drop_max = V_supply_min − V_load_min
+        </p>
+        <p>
+          For example: a 3.3V rail with ±5% tolerance supplying a device requiring 3.0V minimum
+          allows 0.135V drop maximum. Set 135 mV.
+        </p>
+
+        <h3>Target attenuation</h3>
+        <p>
+          Required insertion loss at the target noise frequency. This comes from your EMC
+          pre-compliance testing or conducted emission limit analysis. Typical requirements:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>Typical target attenuation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CISPR 25 Class 5 (automotive)</td>
+              <td>40–60 dB</td>
+            </tr>
+            <tr>
+              <td>FCC/CE consumer electronics</td>
+              <td>20–40 dB</td>
+            </tr>
+            <tr>
+              <td>Industrial (IEC 61000)</td>
+              <td>30–50 dB</td>
+            </tr>
+            <tr>
+              <td>Simple noise reduction / layout cleanup</td>
+              <td>10–20 dB</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="manual-callout warning">
+          <strong>Remember:</strong> The tool calculates attenuation in the real circuit impedance
+          environment, which is much less favourable than the 50 Ω datasheet S21 measurement. Set
+          your target attenuation realistically — a bead rated 600 Ω in a 50 Ω system provides ~20
+          dB S21 attenuation at 100 MHz, but only 5–15 dB in a typical low-impedance power circuit.
+        </div>
+      </section>
+
+      <!-- ── SECTION 4: BEAD SELECTION ── -->
+      <section class="manual-section card" id="bead-selection">
+        <h2>4. Ferrite Bead Selection</h2>
+
+        <h3>Component database</h3>
+        <p>
+          The built-in database contains 15 representative ferrite beads. Each entry includes the
+          complete set of parameters needed for the impedance and insertion loss models.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Symbol</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Impedance at 100 MHz</td>
+              <td>Z₁₀₀</td>
+              <td>
+                Datasheet impedance at 100 MHz, 0 A bias. Primary figure of merit for ferrite beads.
+              </td>
+            </tr>
+            <tr>
+              <td>Rated DC current</td>
+              <td>I_rated</td>
+              <td>
+                DC current at which impedance is significantly reduced (typically 30–50% of Z₁₀₀).
+                Do not confuse with the maximum safe current.
+              </td>
+            </tr>
+            <tr>
+              <td>DC resistance</td>
+              <td>R_DC</td>
+              <td>
+                Ohmic resistance of the winding at DC. Determines voltage drop and I²R heating.
+              </td>
+            </tr>
+            <tr>
+              <td>Self-resonant frequency</td>
+              <td>SRF</td>
+              <td>
+                Frequency at which the bead impedance peaks. Choose SRF near or above the target
+                noise frequency for best attenuation.
+              </td>
+            </tr>
+            <tr>
+              <td>Derating percentage</td>
+              <td>—</td>
+              <td>
+                Percentage of Z₁₀₀ retained at I_rated. 30% = impedance drops to 30% of Z₁₀₀ at
+                rated current.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Selecting from the dropdown</h3>
+        <p>
+          Choose a part from the dropdown menu. All parameters are automatically populated from the
+          database. You can then modify individual parameters if your chosen variant differs from
+          the database entry.
+        </p>
+
+        <h3>Auto-select</h3>
+        <p>
+          Click <strong>Auto-select</strong> to run a quick optimization across all database entries
+          and select the highest-scoring candidate for your requirements. This is the fastest way to
+          get a starting point.
+        </p>
+
+        <h3>Manual parameter entry</h3>
+        <p>
+          Enter your own specifications for a bead not in the database. All values come directly
+          from the manufacturer datasheet:
+        </p>
+        <ul>
+          <li>
+            <strong>Z₁₀₀:</strong> Impedance vs. frequency graph, read at 100 MHz and 0 A bias
+          </li>
+          <li><strong>I_rated:</strong> "Rated current" in the electrical characteristics table</li>
+          <li>
+            <strong>R_DC:</strong> DC resistance in the electrical characteristics table (units: mΩ)
+          </li>
+          <li>
+            <strong>SRF:</strong> Self-resonant frequency — the peak of the impedance vs. frequency
+            curve
+          </li>
+          <li>
+            <strong>C_out:</strong> Your design's output-side decoupling capacitance (not from the
+            datasheet — this is your circuit parameter)
+          </li>
+        </ul>
+
+        <h3>Package selection</h3>
+        <p>Package affects current handling capacity, RDC, and peak impedance:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Typical I_max</th>
+              <th>Typical R_DC range</th>
+              <th>Best for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0402</td>
+              <td>100–300 mA</td>
+              <td>300–2000 mΩ</td>
+              <td>Signal lines, low-current rails</td>
+            </tr>
+            <tr>
+              <td>0603</td>
+              <td>300 mA – 1.5A</td>
+              <td>100–600 mΩ</td>
+              <td>General power and signal</td>
+            </tr>
+            <tr>
+              <td>0805</td>
+              <td>1–5A</td>
+              <td>30–200 mΩ</td>
+              <td>Main power rails</td>
+            </tr>
+            <tr>
+              <td>1206</td>
+              <td>3–10A</td>
+              <td>10–100 mΩ</td>
+              <td>High-current power domains</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── SECTION 5: FILTER TOPOLOGY ── -->
+      <section class="manual-section card" id="filter-topology">
+        <h2>5. Filter Topology</h2>
+
+        <h3>L-filter</h3>
+        <p>
+          <strong>Configuration:</strong> Ferrite bead in series → capacitor to ground at output.
+        </p>
+        <p><strong>Transfer function:</strong> H(s) = (1/sCout) / (Z_bead(s) + 1/sCout)</p>
+        <p>
+          The simplest topology and the most common in power rail applications. The output
+          decoupling capacitor required for power integrity also serves as the filter capacitor. No
+          additional components are needed.
+        </p>
+        <p>
+          <strong>Attenuation:</strong> Moderate (&lt; 30–40 dB typical at the target frequency).
+        </p>
+        <p>
+          <strong>Resonance risk:</strong> Medium — one LC tank between the bead inductance and
+          Cout.
+        </p>
+        <p><strong>Best for:</strong> MCU power rails, LDO outputs, low-cost designs.</p>
+
+        <h3>π-filter</h3>
+        <p>
+          <strong>Configuration:</strong> Capacitor to ground → ferrite bead in series → capacitor
+          to ground at output.
+        </p>
+        <p>
+          The π-filter provides significantly more attenuation than the L-filter because both
+          capacitors contribute. The input capacitor (Cin) bypasses high-frequency noise before it
+          reaches the bead, and the output capacitor (Cout) provides local charge storage and
+          further filtering.
+        </p>
+        <p><strong>Attenuation:</strong> High (&gt; 40 dB possible).</p>
+        <p>
+          <strong>Resonance risk:</strong> High — two LC tanks, sharper resonance. Requires careful
+          damping.
+        </p>
+        <p>
+          <strong>Best for:</strong> Sensitive analog supplies, RF VDD isolation, DC-DC output
+          filtering, USB VBUS.
+        </p>
+
+        <h3>T-filter</h3>
+        <p>
+          <strong>Configuration:</strong> Ferrite bead → capacitor to ground → ferrite bead in
+          series.
+        </p>
+        <p>
+          Two beads in series with a shunt capacitor between them. Well-suited to high source
+          impedance environments (long cables, weak regulators) because the first bead attenuates
+          energy from the source, the capacitor diverts it to ground, and the second bead prevents
+          it from coupling to the load.
+        </p>
+        <p><strong>Attenuation:</strong> High with good high-frequency characteristics.</p>
+        <p>
+          <strong>Resonance risk:</strong> Medium — the shunt capacitor between two beads provides
+          inherent damping.
+        </p>
+        <p>
+          <strong>Best for:</strong> Long cable EMI problems, high source impedance, ultra-sensitive
+          loads.
+        </p>
+
+        <div class="manual-callout warning">
+          <strong>Resonance damping for all topologies:</strong> All LC filters create a resonance.
+          If the resonant frequency falls near the target noise frequency or a critical signal
+          frequency, the filter will amplify noise there instead of attenuating it. Always check the
+          Resonance Analysis chart and add damping as needed (electrolytic cap in parallel with
+          MLCC, or small series resistor with MLCC on output side).
+        </div>
+      </section>
+
+      <!-- ── SECTION 6: IMPEDANCE MODEL ── -->
+      <section class="manual-section card" id="impedance-model">
+        <h2>6. Impedance Model</h2>
+        <p>
+          The ferrite bead impedance model uses a modified Lorentzian function to represent the
+          resistive component R(f) and a lumped-element LC model for the reactive component X(f).
+        </p>
+
+        <h3>Resistive component R(f)</h3>
+        <p>The resistive component — responsible for energy dissipation — is modelled as:</p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          R(f) = Z_peak × (f/SRF) / (1 + ((f/SRF − SRF/f) × Q)²)
+        </p>
+        <p>
+          where Z_peak ≈ 1.6 × Z₁₀₀ and Q ≈ 0.8 (characteristic of lossy ferrite). This produces a
+          broad peak at SRF that matches the typical shape of manufacturer impedance curves.
+        </p>
+
+        <h3>Reactive component X(f)</h3>
+        <p>The effective inductance L is estimated from Z₁₀₀ and 100 MHz:</p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          L = Z₁₀₀ / (2π × 100 MHz)
+        </p>
+        <p>The parasitic parallel capacitance Cp is derived from the SRF:</p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          Cp = 1 / ((2π × SRF)² × L)
+        </p>
+
+        <h3>DC bias derating model</h3>
+        <p>The impedance derating with DC current uses an empirical sigmoid:</p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          factor(I) = 1 − (1 − Z_min/Z₁₀₀) × (I / I_rated)^0.7
+        </p>
+        <p>
+          This produces the characteristic concave-down shape seen in manufacturer derating curves.
+          The model is validated against published derating curves from Murata, TDK, and Wurth.
+        </p>
+
+        <div class="manual-callout">
+          <strong>Model accuracy:</strong> The tool's impedance model is accurate to within ±20% for
+          most NiZn ferrite beads in the 50 MHz–500 MHz range. For more accurate results, use the
+          manufacturer's S-parameter data (S2P file) with a SPICE simulator or vector network
+          analyser measurement. The model is less accurate below 10 MHz and above 1 GHz.
+        </div>
+      </section>
+
+      <!-- ── SECTION 7: INSERTION LOSS ── -->
+      <section class="manual-section card" id="insertion-loss">
+        <h2>7. Insertion Loss Calculation</h2>
+        <p>
+          The tool calculates insertion loss as the voltage divider ratio between the load impedance
+          and the total series impedance:
+        </p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          H(jω) = Z_load / (Z_load + Z_bead)<br />
+          IL (dB) = −20 × log₁₀(|H(jω)|)
+        </p>
+        <p>where Z_load = 1/(jωCout) for the output capacitor.</p>
+
+        <h3>Why this differs from datasheet insertion loss</h3>
+        <p>
+          Datasheet S21 insertion loss is measured in a 50 Ω system (50 Ω source impedance, 50 Ω
+          load impedance). This is unrealistic for power circuits:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Environment</th>
+              <th>Source impedance</th>
+              <th>Load impedance</th>
+              <th>Expected IL at 100 MHz</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Datasheet (S21)</td>
+              <td>50 Ω</td>
+              <td>50 Ω</td>
+              <td>~20 dB (600 Ω bead)</td>
+            </tr>
+            <tr>
+              <td>Real power circuit</td>
+              <td>&lt; 0.5 Ω (regulator)</td>
+              <td>~0.1 Ω (10 µF cap)</td>
+              <td>~5–12 dB</td>
+            </tr>
+            <tr>
+              <td>Real signal circuit</td>
+              <td>10–100 Ω (MCU output)</td>
+              <td>5–50 pF (input cap)</td>
+              <td>~8–18 dB</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          This is why designing to the datasheet insertion loss leads to EMI test failures — the
+          real circuit always provides less attenuation. The tool's calculation uses the actual
+          circuit impedances for a realistic prediction.
+        </p>
+      </section>
+
+      <!-- ── SECTION 8: DC DERATING ── -->
+      <section class="manual-section card" id="dc-derating">
+        <h2>8. DC Bias Derating</h2>
+        <p>
+          Ferrite permeability decreases as the magnetic field strength (H = NI/l) increases. Since
+          the DC current through the bead creates a DC magnetic field that biases the ferrite core,
+          higher current reduces permeability and therefore impedance.
+        </p>
+        <p>
+          Typical derating at rated current: 30–60% of nominal impedance retained. This means a bead
+          rated 600 Ω at 100 MHz (0 A) may provide only 180–360 Ω at its rated current.
+        </p>
+
+        <h3>Practical guidelines</h3>
+        <ul>
+          <li>For maximum filter effectiveness: operate at ≤ 30% of rated current</li>
+          <li>For standard power rail applications: ≤ 50% is acceptable</li>
+          <li>For non-critical applications: up to 80% of rated current is common</li>
+          <li>Never exceed rated current — saturation causes rapid impedance collapse</li>
+        </ul>
+        <p>
+          The DC Bias Derating chart shows the impedance at your target frequency vs. DC current.
+          The red dot marks your operating point. If the operating point is on the steep portion of
+          the curve, consider a higher-rated bead or a larger package.
+        </p>
+      </section>
+
+      <!-- ── SECTION 9: RESONANCE ── -->
+      <section class="manual-section card" id="resonance">
+        <h2>9. Resonance Analysis</h2>
+        <p>
+          Any ferrite bead filter creates an LC resonance between the bead's effective inductance (L
+          = Z₁₀₀ / (2π × 100 MHz)) and the filter capacitance.
+        </p>
+
+        <h3>Resonant frequency</h3>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          f_res = 1 / (2π × √(L × C_out))
+        </p>
+        <p>
+          For a 600 Ω bead (L ≈ 955 nH) with 10 µF output cap: f_res ≈ 163 kHz. This is well below a
+          typical 100 MHz target — but if you use a small HF decoupling cap (100 nF), f_res ≈ 1.6
+          MHz, which may be in the range of switching regulator harmonics.
+        </p>
+
+        <h3>Resonance risk levels</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Risk</th>
+              <th>Condition</th>
+              <th>Action required</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Low</td>
+              <td>f_res is far below or above the target noise frequency</td>
+              <td>No action needed</td>
+            </tr>
+            <tr>
+              <td>Medium</td>
+              <td>f_res is 3–10× away from target frequency</td>
+              <td>Monitor; add damping if noise is present at f_res</td>
+            </tr>
+            <tr>
+              <td>High</td>
+              <td>f_res is within 3× of the target frequency</td>
+              <td>
+                Add damping: polymer/electrolytic cap in parallel with MLCC, or series resistor with
+                MLCC
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Damping techniques</h3>
+        <p>
+          <strong>Electrolytic/polymer in parallel:</strong> Place a 10–47 µF electrolytic or
+          polymer capacitor in parallel with the MLCC output capacitor. The higher ESR (0.1–1 Ω)
+          damps the LC resonance without significantly affecting the HF filtering provided by the
+          MLCC.
+        </p>
+        <p>
+          <strong>Series resistor with MLCC:</strong> Place a 1–10 Ω resistor in series with the
+          output MLCC. This increases the effective ESR and damps the resonance, but reduces the
+          capacitor's filtering effectiveness at HF. Best used when board space prevents a large
+          electrolytic.
+        </p>
+      </section>
+
+      <!-- ── SECTION 10: PDN ── -->
+      <section class="manual-section card" id="pdn">
+        <h2>10. PDN Noise Model</h2>
+        <p>
+          When a ferrite bead is inserted in a power distribution network, it becomes part of the
+          PDN impedance. The PDN noise model charts the impedance seen from the load side of the
+          bead across the full frequency range.
+        </p>
+        <p>The target PDN impedance is estimated as:</p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          Z_target = V_supply × ripple_budget / I_max
+        </p>
+        <p>
+          where ripple_budget is typically 5% of VDD. The PDN impedance must stay below this target
+          across the frequency range of switching transients.
+        </p>
+        <h3>Implications for design</h3>
+        <p>
+          The ferrite bead adds series impedance to the PDN. During fast load transients (rising
+          edge of current demand), the bead limits the current slew rate and causes a voltage droop
+          on the load side. The load-side bulk capacitance must provide charge during this interval:
+        </p>
+        <p
+          style="
+            font-family: monospace;
+            padding: 10px;
+            background: var(--bg-alt);
+            border-radius: 6px;
+            display: inline-block;
+          "
+        >
+          C_bulk ≥ ΔI × t_response / ΔV_max
+        </p>
+        <p>
+          where t_response is the time for the upstream supply to respond through the bead
+          (typically 10–100 µs for a well-designed regulator).
+        </p>
+      </section>
+
+      <!-- ── SECTION 11: CHARTS ── -->
+      <section class="manual-section card" id="charts">
+        <h2>11. Chart Reference</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Chart</th>
+              <th>X-axis</th>
+              <th>Y-axis</th>
+              <th>Key information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Impedance vs Frequency</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Impedance (Ω, log)</td>
+              <td>|Z|, R, |X| components. Amber line = target freq. Red line = SRF.</td>
+            </tr>
+            <tr>
+              <td>Insertion Loss</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Insertion loss (dB)</td>
+              <td>Actual circuit attenuation. Amber line = target attenuation.</td>
+            </tr>
+            <tr>
+              <td>DC Bias Derating</td>
+              <td>DC current (mA)</td>
+              <td>Impedance (Ω)</td>
+              <td>Impedance at target freq vs current. Red dot = operating point.</td>
+            </tr>
+            <tr>
+              <td>Resonance Analysis</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Filter impedance (Ω, log)</td>
+              <td>LC tank response. Red line = resonant frequency.</td>
+            </tr>
+            <tr>
+              <td>PDN Noise Model</td>
+              <td>Frequency (MHz, log)</td>
+              <td>PDN impedance (Ω, log)</td>
+              <td>Total PDN Z seen from load. Amber = target impedance.</td>
+            </tr>
+            <tr>
+              <td>Bode Plot</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Magnitude (dB) + Phase (°)</td>
+              <td>Transfer function. Phase uses right y-axis.</td>
+            </tr>
+            <tr>
+              <td>Topology Comparison</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Insertion loss (dB)</td>
+              <td>L, π, T topologies on one chart. Red = target attenuation.</td>
+            </tr>
+            <tr>
+              <td>Z vs Temperature</td>
+              <td>Temperature (°C)</td>
+              <td>Impedance (Ω)</td>
+              <td>Simplified temperature derating model (NiZn ferrite typical).</td>
+            </tr>
+            <tr>
+              <td>Candidate Z Comparison</td>
+              <td>Candidate name</td>
+              <td>Z @ target freq (Ω)</td>
+              <td>Bar chart, colour-coded pass/marginal/fail.</td>
+            </tr>
+            <tr>
+              <td>Top Candidates IL</td>
+              <td>Frequency (MHz, log)</td>
+              <td>Insertion loss (dB)</td>
+              <td>Top 3 candidates compared on one chart.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── SECTION 12: RESULTS ── -->
+      <section class="manual-section card" id="results">
+        <h2>12. Interpreting Results</h2>
+
+        <h3>Status codes</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Criteria</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PASS</td>
+              <td>
+                All of: V_drop ≤ budget, I_supply ≤ I_rated, IL ≥ target, resonance risk low or
+                medium
+              </td>
+              <td>Proceed with this bead. Verify with simulation.</td>
+            </tr>
+            <tr>
+              <td>MARGINAL</td>
+              <td>
+                One or more criteria borderline: IL slightly below target, moderate resonance risk,
+                derating &gt; 60%
+              </td>
+              <td>Acceptable with engineering justification. Document rationale.</td>
+            </tr>
+            <tr>
+              <td>FAIL</td>
+              <td>
+                Any of: I_supply &gt; I_rated, V_drop &gt; budget, IL significantly below target
+              </td>
+              <td>Select a different bead. Increase package size or use π/T topology.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Candidate ranking</h3>
+        <p>Candidates are scored using a weighted function that prioritises:</p>
+        <ol>
+          <li>Pass/fail status (highest weight)</li>
+          <li>Insertion loss relative to target</li>
+          <li>DC bias derating factor</li>
+          <li>Voltage drop relative to budget</li>
+          <li>Resonance risk penalty</li>
+        </ol>
+        <p>
+          The highest-scoring candidate is shown first in both the recommendation cards and the
+          comparison table.
+        </p>
+      </section>
+
+      <!-- ── SECTION 13: LAYOUT ── -->
+      <section class="manual-section card" id="layout">
+        <h2>13. PCB Layout Guidelines</h2>
+        <p>
+          After running the optimizer, application-specific layout guidelines are generated in the
+          Layout Guidelines section. The general guidelines below apply to all applications.
+        </p>
+
+        <h3>Placement rules</h3>
+        <ul>
+          <li>Place the bead within 5–10 mm of the source (regulator output, connector pin)</li>
+          <li>Place output decoupling capacitor immediately after the bead — within 2–3 mm</li>
+          <li>Route: Source → bead → output cap → load. Never branch before the bead.</li>
+          <li>Keep the bead and its bypass cap on the same copper layer when possible</li>
+        </ul>
+
+        <h3>Trace and via sizing</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Current</th>
+              <th>Minimum trace width (1 oz)</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>100 mA</td>
+              <td>0.15 mm</td>
+              <td>0402 bead thermal limit at this width — use wider pad</td>
+            </tr>
+            <tr>
+              <td>500 mA</td>
+              <td>0.5 mm</td>
+              <td>Standard 0603 application</td>
+            </tr>
+            <tr>
+              <td>1 A</td>
+              <td>0.8 mm</td>
+              <td>Large 0603 or 0805 bead</td>
+            </tr>
+            <tr>
+              <td>3 A</td>
+              <td>2.0 mm</td>
+              <td>0805 or 1206 bead required</td>
+            </tr>
+            <tr>
+              <td>5 A</td>
+              <td>3.5 mm or copper pour</td>
+              <td>1206 bead, multiple vias to ground</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Ground plane requirements</h3>
+        <ul>
+          <li>Never split the ground plane under a ferrite bead filter</li>
+          <li>Ground vias for bypass capacitors: minimum 2 vias each, ≤ 0.5 mm from pad edge</li>
+          <li>Do not route signal traces through the return current path under the bead</li>
+          <li>For high-current beads: use 3–4 vias per bypass capacitor ground connection</li>
+        </ul>
+      </section>
+
+      <!-- ── SECTION 14: EXPORT ── -->
+      <section class="manual-section card" id="export">
+        <h2>14. Reports &amp; Export</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Function</th>
+              <th>Output</th>
+              <th>Contents</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Export CSV</td>
+              <td>.csv file</td>
+              <td>
+                All candidates: part, parameters, Z@target, IL, Vdrop, derating, resonance, status
+              </td>
+            </tr>
+            <tr>
+              <td>Export JSON</td>
+              <td>.json file</td>
+              <td>
+                Full report including generation timestamp, all input parameters, summary
+                statistics, candidate list with warnings
+              </td>
+            </tr>
+            <tr>
+              <td>Save config</td>
+              <td>.json file</td>
+              <td>
+                Input parameters only — reload with Load config to restore a previous analysis setup
+              </td>
+            </tr>
+            <tr>
+              <td>Load config</td>
+              <td>—</td>
+              <td>Restores all input parameters from a saved config file. Does not auto-run.</td>
+            </tr>
+            <tr>
+              <td>Print report</td>
+              <td>Browser print</td>
+              <td>
+                Optimised print layout: navigation hidden, charts included, table at readable font
+                size
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── SECTION 15: GLOSSARY ── -->
+      <section class="manual-section card" id="glossary">
+        <h2>15. Glossary</h2>
+        <dl>
+          <dt>C_out (Output capacitance)</dt>
+          <dd>
+            Capacitance on the load side of the ferrite bead. Forms the filter with the bead.
+            Typically 1–100 µF for power rails, 1–100 nF for signal lines.
+          </dd>
+          <dt>DC Bias Derating</dt>
+          <dd>
+            Reduction in ferrite bead impedance due to DC magnetic saturation. Expressed as %
+            reduction from the zero-bias value. Higher derating = less filtering effectiveness at
+            the operating current.
+          </dd>
+          <dt>EMI (Electromagnetic Interference)</dt>
+          <dd>
+            Unwanted electromagnetic energy conducted or radiated by a circuit. Conducted EMI
+            travels on power and signal wires; radiated EMI travels through free space. Ferrite
+            beads suppress conducted EMI.
+          </dd>
+          <dt>Insertion Loss (IL)</dt>
+          <dd>
+            Reduction in signal power (in dB) provided by the filter at a given frequency. IL = −20
+            log₁₀(|V_out / V_in|). Positive dB = attenuation.
+          </dd>
+          <dt>L (Effective inductance)</dt>
+          <dd>
+            The equivalent inductance of the ferrite bead at low frequency (below SRF). L ≈ Z₁₀₀ /
+            (2π × 100 MHz).
+          </dd>
+          <dt>PDN (Power Distribution Network)</dt>
+          <dd>
+            The complete network from the power supply to the IC VDD pin, including regulators,
+            ferrite beads, bulk capacitors, and decoupling capacitors. PDN design determines voltage
+            stability under load transients.
+          </dd>
+          <dt>R_DC (DC Resistance)</dt>
+          <dd>
+            Ohmic resistance of the bead winding. Causes DC voltage drop (V = I × R_DC) and power
+            dissipation (P = I² × R_DC). Specified in mΩ.
+          </dd>
+          <dt>SRF (Self-Resonant Frequency)</dt>
+          <dd>
+            Frequency at which the bead's inductive and capacitive reactances cancel. Impedance is
+            maximum (purely resistive) at SRF. Above SRF, the bead becomes capacitive. Choose SRF ≥
+            target noise frequency.
+          </dd>
+          <dt>V_drop (Voltage drop)</dt>
+          <dd>
+            DC voltage drop across the bead = I_supply × R_DC. Reduces the supply voltage available
+            to the load. Must be within the load's input voltage range.
+          </dd>
+          <dt>Z₁₀₀ (Impedance at 100 MHz)</dt>
+          <dd>
+            Primary datasheet specification for ferrite beads. Measured at 100 MHz, 0 A DC bias, at
+            25°C. The tool uses this as the scaling factor for the impedance model.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ── SECTION 16: FAQ ── -->
+      <section class="manual-section card" id="faq">
+        <h2>16. Frequently Asked Questions</h2>
+
+        <h3>Why does the tool show less attenuation than the datasheet?</h3>
+        <p>
+          The datasheet S21 value is measured in a 50 Ω system. Real power circuits have source
+          impedance &lt; 1 Ω and load impedance determined by the filter capacitor — not 50 Ω. The
+          tool calculates the real-circuit transfer function, which is always less favourable than
+          the 50 Ω datasheet value. This is correct and expected behaviour.
+        </p>
+
+        <h3>The resonance frequency is in the audio band — is that a problem?</h3>
+        <p>
+          Not for most digital circuits, but it can be a problem for audio and sensitive analog
+          designs. A resonance at 100 Hz–20 kHz can amplify power supply noise in the audio band.
+          For audio VDD filtering, use a larger capacitor (to lower the resonant frequency further)
+          or an LC filter with an RC damping network.
+        </p>
+
+        <h3>Can I use two beads in parallel?</h3>
+        <p>
+          Yes. Two identical beads in parallel halve the DC resistance (halving V_drop) and double
+          the current rating, but also halve the impedance. The net effect is lower attenuation but
+          improved current handling. This is useful when you need higher current capacity but cannot
+          switch to a larger package.
+        </p>
+
+        <h3>My bead is not in the database — how accurate will the model be?</h3>
+        <p>
+          Enter the parameters from the datasheet (Z₁₀₀, I_rated, R_DC, SRF). The model will be
+          representative. For the best accuracy, compare the modelled impedance curve with the
+          datasheet graph and adjust if there is a significant discrepancy. The derating percentage
+          (how much impedance is retained at rated current) is the most uncertain parameter — use
+          the manufacturer's bias-current vs. impedance chart if available.
+        </p>
+
+        <h3>What is the accuracy of the impedance model?</h3>
+        <p>
+          The model is accurate to within ±20% for the peak impedance value and the overall shape of
+          the impedance curve for NiZn ferrite beads in the 50 MHz–500 MHz range. It is less
+          accurate below 10 MHz and above 1 GHz. For critical designs, always obtain S-parameter
+          data (S2P file) from the manufacturer and use SPICE simulation.
+        </p>
+      </section>
+    </main>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

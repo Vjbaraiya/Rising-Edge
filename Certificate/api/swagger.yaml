@@ -1,0 +1,528 @@
+openapi: 3.0.3
+info:
+  title: Rising Edge Technologies — Certificate Management API
+  description: |
+    REST API for issuing, managing, and verifying professional course completion
+    certificates. All endpoints require JWT authentication unless marked public.
+    
+    ## Certificate Number Format
+    `RET-{YEAR}-{COURSECODE6}-{SEQ6}`  
+    Example: `RET-2026-SIA201-000451`
+    
+    ## Offline / Demo Mode
+    When the API is unreachable (or the page is served via `file://`), the
+    front-end falls back to localStorage (`re_certificates`). The data shape
+    is identical to the API response, so UI code is portable.
+  version: 1.0.0
+  contact:
+    name: Rising Edge Technologies
+    url: https://risingedgetechnologies.com
+    email: support@risingedgetechnologies.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.risingedgetechnologies.com/v1
+    description: Production
+  - url: https://staging-api.risingedgetechnologies.com/v1
+    description: Staging
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Certificates
+    description: Certificate lifecycle management
+  - name: Verification
+    description: Public verification endpoints (no auth required)
+  - name: Email
+    description: Email dispatch and resend operations
+
+paths:
+  # ── LIST ──────────────────────────────────────────────────────────
+  /certificates:
+    get:
+      tags: [Certificates]
+      summary: List all certificates
+      description: Returns a paginated list of certificates. Admins see all; users see their own.
+      operationId: listCertificates
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, revoked, expired, pending]
+          description: Filter by status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by candidate name, email, or certificate number
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated certificate list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    # ── GENERATE ──────────────────────────────────────────────────
+    post:
+      tags: [Certificates]
+      summary: Generate (issue) a new certificate
+      operationId: generateCertificate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCertificateRequest'
+            example:
+              candidateName: "Arjun Sharma"
+              email: "arjun@example.com"
+              courseName: "Signal Integrity Academy"
+              courseCode: "SIA201"
+              completionDate: "2026-06-15"
+              duration: "24 Hours"
+              instructor: "Dr. Rahul Mehta"
+              grade: "A+"
+              enrollmentId: "RE-2026-00142"
+              batch: "Batch 2026-A"
+      responses:
+        '201':
+          description: Certificate generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── SINGLE CERT ───────────────────────────────────────────────────
+  /certificates/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Certificate number (e.g. RET-2026-SIA201-000451) or internal UUID
+
+    get:
+      tags: [Certificates]
+      summary: Get certificate by ID
+      operationId: getCertificate
+      responses:
+        '200':
+          description: Certificate details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Certificates]
+      summary: Revoke a certificate
+      operationId: revokeCertificate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for revocation
+      responses:
+        '200':
+          description: Certificate revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── PDF ───────────────────────────────────────────────────────────
+  /certificates/{id}/pdf:
+    get:
+      tags: [Certificates]
+      summary: Download certificate as PDF
+      operationId: downloadCertificatePDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF file stream
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── AUDIT LOG ─────────────────────────────────────────────────────
+  /certificates/{id}/audit:
+    get:
+      tags: [Certificates]
+      summary: Get audit log for a certificate
+      operationId: getCertificateAudit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of audit events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditEvent'
+
+  # ── VERIFY (PUBLIC) ───────────────────────────────────────────────
+  /certificates/verify/{certNumber}:
+    get:
+      tags: [Verification]
+      summary: Verify a certificate (public, no auth)
+      operationId: verifyCertificate
+      security: []
+      parameters:
+        - name: certNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Certificate number in RET-YEAR-CODE-SEQ format
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── EMAIL ─────────────────────────────────────────────────────────
+  /certificates/{id}/email/resend:
+    post:
+      tags: [Email]
+      summary: Resend certificate email
+      operationId: resendCertificateEmail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email queued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  queued_at:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── STATS ─────────────────────────────────────────────────────────
+  /certificates/stats:
+    get:
+      tags: [Certificates]
+      summary: Certificate statistics summary
+      operationId: getCertificateStats
+      responses:
+        '200':
+          description: Stats breakdown
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateStats'
+
+# ── COMPONENTS ────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Certificate:
+      type: object
+      required: [id, certificateNumber, candidateName, email, courseName, status, issueDate]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        certificateNumber:
+          type: string
+          example: "RET-2026-SIA201-000451"
+        candidateName:
+          type: string
+          example: "Arjun Sharma"
+        email:
+          type: string
+          format: email
+          example: "arjun@example.com"
+        enrollmentId:
+          type: string
+          example: "RE-2026-00142"
+        batch:
+          type: string
+          example: "Batch 2026-A"
+        courseName:
+          type: string
+          example: "Signal Integrity Academy"
+        courseCode:
+          type: string
+          example: "SIA201"
+        instructor:
+          type: string
+          example: "Dr. Rahul Mehta"
+        duration:
+          type: string
+          example: "24 Hours"
+        grade:
+          type: string
+          example: "A+"
+        completionDate:
+          type: string
+          format: date
+          example: "2026-06-15"
+        issueDate:
+          type: string
+          format: date
+          example: "2026-06-16"
+        status:
+          type: string
+          enum: [active, revoked, expired, pending]
+          example: "active"
+        verificationUrl:
+          type: string
+          format: uri
+          example: "https://risingedgetechnologies.com/Certificate/verify.html?id=RET-2026-SIA201-000451"
+        certificateUrl:
+          type: string
+          format: uri
+          example: "https://cdn.risingedgetechnologies.com/certs/RET-2026-SIA201-000451.pdf"
+        qrCodeUrl:
+          type: string
+          format: uri
+        issuedBy:
+          type: string
+          example: "admin@risingedgetechnologies.com"
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedReason:
+          type: string
+          nullable: true
+        downloadCount:
+          type: integer
+          example: 2
+        verifyCount:
+          type: integer
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    GenerateCertificateRequest:
+      type: object
+      required: [candidateName, email, courseName, completionDate]
+      properties:
+        candidateName:
+          type: string
+        email:
+          type: string
+          format: email
+        enrollmentId:
+          type: string
+        batch:
+          type: string
+        courseName:
+          type: string
+        courseCode:
+          type: string
+          maxLength: 12
+        instructor:
+          type: string
+        duration:
+          type: string
+        grade:
+          type: string
+          enum: ["A+", "A", "B+", "B", "Pass", ""]
+        completionDate:
+          type: string
+          format: date
+        sendEmail:
+          type: boolean
+          default: true
+          description: Whether to dispatch the certificate email on generation
+
+    CertificateListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certificate'
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            page:
+              type: integer
+            per_page:
+              type: integer
+            total_pages:
+              type: integer
+
+    VerificationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        status:
+          type: string
+          enum: [active, revoked, expired, not_found]
+        certificate:
+          $ref: '#/components/schemas/Certificate'
+        verifiedAt:
+          type: string
+          format: date-time
+        message:
+          type: string
+
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        certificateId:
+          type: string
+        event:
+          type: string
+          enum: [generated, email_sent, email_failed, downloaded, verified, revoked, resent, viewed]
+        actor:
+          type: string
+          description: Email or "system" or "public"
+        ip:
+          type: string
+          description: Source IP (admin view only)
+        userAgent:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CertificateStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        active:
+          type: integer
+        revoked:
+          type: integer
+        expired:
+          type: integer
+        pending:
+          type: integer
+        issued_this_month:
+          type: integer
+        downloads_this_month:
+          type: integer
+
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid JWT
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Insufficient role (requires ADMIN or SUPER_ADMIN)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Certificate not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -1,0 +1,1645 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Learn and calculate PCB transmission-line characteristic impedance — microstrip, embedded microstrip, stripline, asymmetric stripline, differential pairs, and CPWG — with live simulations, Plotly charts, a decision tree, and a scored quiz."
+    />
+    <title>Transmission Line Calculator | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/Transmission-Line-Calculator/transmission-line-calculator.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/transmission-line-calculator.css" />
+    <link rel="stylesheet" href="css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <main class="tlc-page">
+      <!-- ══════════════════════════ HERO ══════════════════════════ -->
+      <header class="tlc-hero" id="tlc-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../../home.html">Home</a><span>/</span><a href="../tools.html">Tools</a
+          ><span>/</span><span>Transmission Line Calculator</span>
+        </nav>
+        <div class="tlc-hero-grid">
+          <div>
+            <div class="tlc-kicker">Signal Integrity &middot; Interactive Learning Tool</div>
+            <h1>Transmission Line Calculator</h1>
+            <p>
+              Learn why a PCB trace becomes a distributed transmission line above a certain edge
+              rate, then calculate characteristic impedance Z<sub>0</sub> for microstrip, embedded
+              microstrip, stripline, asymmetric stripline, differential pairs, and coplanar
+              waveguide with a live calculator, a slider-driven simulation, and an interactive
+              decision tree.
+            </p>
+            <div class="tlc-tags">
+              <span class="badge badge-blue">Intermediate</span>
+              <span class="badge badge-green">30&ndash;40 min</span>
+              <span class="badge badge-purple">v1.0</span>
+              <span class="badge badge-gray">Updated Jul 2026</span>
+            </div>
+          </div>
+          <div class="tlc-hero-actions">
+            <a class="btn btn-primary" href="#tlc-concepts">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7" />
+              </svg>
+              Start Learning
+            </a>
+            <button class="btn btn-outline" id="tlc-play-lesson" type="button">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" />
+              </svg>
+              Play Lesson
+            </button>
+            <a class="btn btn-ghost" href="#tlc-learn">Engineering Notes</a>
+            <a class="btn btn-ghost" href="#tour-quiz">Take Quiz</a>
+            <button class="btn btn-outline" id="tlc-bookmark-btn" type="button">
+              &#9734; Bookmark
+            </button>
+            <button class="btn btn-outline" data-help-open aria-haspopup="dialog">? Help</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ══════════════════════════ INTRO ══════════════════════════ -->
+      <section class="tlc-intro card" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">A trace isn't just a wire once the edge gets fast enough</h2>
+          <p>
+            At DC and low frequency, a copper trace behaves like a simple wire — voltage appears
+            everywhere along it at once. Once the signal's rise time becomes comparable to the
+            trace's propagation delay (a common rule of thumb: t<sub>PD</sub> &gt;
+            t<sub>rise</sub>/6), the trace must be treated as a distributed transmission line with a
+            characteristic impedance Z<sub>0</sub> = &radic;(L&prime;/C&prime;) set entirely by its
+            geometry and surrounding dielectric — not by wire gauge or copper purity. Get that
+            geometry wrong relative to your target impedance, and every discontinuity along the way
+            reflects part of the signal back toward the driver.
+          </p>
+        </div>
+        <div class="alert alert-info">
+          <strong>Common mistake:</strong> Treating "50 &Omega;" as a universal constant instead of
+          a target that depends on your driver, standard, and topology. Differential USB/PCIe-class
+          pairs commonly target ~90 &Omega;, HDMI-class pairs ~100 &Omega;, and DDR single-ended
+          nets often land in the 40&ndash;60 &Omega; range depending on ODT — the geometry
+          calculation is only useful once you know the real target.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ LEARNING OBJECTIVES ══════════════════════════ -->
+      <section class="tlc-objectives" aria-labelledby="obj-title">
+        <h2 id="obj-title">What you'll be able to do</h2>
+        <div class="tlc-objective-grid">
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">01</div>
+            <h3>Explain Z0 from first principles</h3>
+            <p>
+              Derive characteristic impedance from per-unit-length inductance and capacitance, and
+              explain why geometry — not wire gauge — sets it.
+            </p>
+          </div>
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">02</div>
+            <h3>Calculate microstrip &amp; stripline Z0</h3>
+            <p>
+              Apply the Hammerstad-Jensen and IPC-2141 closed-form formulas to size trace width for
+              a target impedance.
+            </p>
+          </div>
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">03</div>
+            <h3>Size differential pairs</h3>
+            <p>
+              Compute Zdiff from single-ended Z0 and pair spacing, and reason about tight vs. loose
+              coupling tradeoffs.
+            </p>
+          </div>
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">04</div>
+            <h3>Choose the right geometry fast</h3>
+            <p>
+              Use signal type, EMI sensitivity, RF-vs-digital, and layer budget to pick a geometry
+              with the decision tree.
+            </p>
+          </div>
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">05</div>
+            <h3>Reason about εeff and delay</h3>
+            <p>
+              Distinguish effective dielectric constant from bulk εr and calculate propagation delay
+              and velocity factor.
+            </p>
+          </div>
+          <div class="tlc-objective-card">
+            <div class="tlc-objective-num">06</div>
+            <h3>Avoid the classic mistakes</h3>
+            <p>
+              Spot etch-factor errors, soldermask effects, wrong reference-plane assumptions, and
+              myths that cause respins.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ CONCEPT EXPLORER (TABS) ══════════════════════════ -->
+      <section class="tlc-concepts" id="tlc-concepts" aria-labelledby="concepts-title">
+        <h2 id="concepts-title">Concept explorer</h2>
+        <p class="tlc-section-lead">
+          Seven PCB transmission-line geometries, one shared goal: control the field distribution
+          around the trace so Z<sub>0</sub> lands where your driver and standard expect it.
+        </p>
+        <div
+          class="tabs tlc-tabs"
+          id="tlc-tabs"
+          role="tablist"
+          aria-label="Transmission line geometries"
+        >
+          <button class="tab-item active" data-tab="microstrip" role="tab" aria-selected="true">
+            Microstrip
+          </button>
+          <button class="tab-item" data-tab="embedded-microstrip" role="tab" aria-selected="false">
+            Embedded Microstrip
+          </button>
+          <button class="tab-item" data-tab="stripline" role="tab" aria-selected="false">
+            Stripline
+          </button>
+          <button class="tab-item" data-tab="asymmetric-stripline" role="tab" aria-selected="false">
+            Asymmetric Stripline
+          </button>
+          <button class="tab-item" data-tab="diff-microstrip" role="tab" aria-selected="false">
+            Differential Microstrip
+          </button>
+          <button class="tab-item" data-tab="diff-stripline" role="tab" aria-selected="false">
+            Differential Stripline
+          </button>
+          <button class="tab-item" data-tab="cpwg" role="tab" aria-selected="false">CPWG</button>
+        </div>
+
+        <div class="tlc-tab-panels">
+          <div class="tlc-tab-panel active" data-panel="microstrip" role="tabpanel">
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Microstrip</h3>
+                <p>
+                  A trace on an outer layer, running over a single reference plane a height H below,
+                  with air (or soldermask) above. The field is split between air and dielectric,
+                  which is why microstrip's effective dielectric constant εeff sits below the bulk
+                  εr. Z<sub>0</sub> is set by W, T, H, and εr via the Hammerstad-Jensen effective-εr
+                  formula combined with the IPC-2141 closed-form Z0 approximation.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>
+                    Simplest to route, probe, and rework — the default for most single-ended I/O.
+                  </li>
+                  <li>Only needs one continuous reference plane directly beneath the trace.</li>
+                  <li>
+                    Field partly exposed to air makes it the fastest (lowest εeff) common geometry.
+                  </li>
+                  <li>
+                    More exposed field than stripline means comparatively higher radiated EMI.
+                  </li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="microstrip"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="embedded-microstrip" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Embedded (buried) microstrip</h3>
+                <p>
+                  Physically the same as microstrip, but the trace is fully covered by dielectric —
+                  soldermask on an outer layer, or genuinely buried under prepreg on an inner layer.
+                  Removing the air contribution raises εeff toward the bulk εr, which lowers Z<sub
+                    >0</sub
+                  >
+                  for the same physical width compared to an uncoated surface microstrip.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>
+                    Every outer-layer trace with soldermask is technically an embedded microstrip.
+                  </li>
+                  <li>The Z0 drop from soldermask alone is usually a few percent, not dramatic.</li>
+                  <li>
+                    Genuinely buried traces (thick cover dielectric) see a larger Z0 reduction.
+                  </li>
+                  <li>
+                    Widen the trace slightly versus a bare-microstrip calculation to compensate.
+                  </li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="embedded-microstrip"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="stripline" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Symmetric stripline</h3>
+                <p>
+                  An inner-layer trace centered exactly between two reference planes, spaced total
+                  distance B apart. The field is fully enclosed in one homogeneous dielectric, so
+                  εeff = εr exactly — no air-blend term. The IPC-2141 closed form uses B, W, T, and
+                  εr directly.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>
+                    Fully shielded field gives the best EMI performance of the seven geometries.
+                  </li>
+                  <li>
+                    Requires a thicker stack-up — two planes plus the routing layer between them.
+                  </li>
+                  <li>
+                    Higher εeff than microstrip means slower propagation for the same base εr.
+                  </li>
+                  <li>Harder to probe and rework since the trace is buried inside the board.</li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="stripline"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="asymmetric-stripline" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Asymmetric (offset) stripline</h3>
+                <p>
+                  The same enclosed structure as symmetric stripline, but the trace sits closer to
+                  one plane (H1) than the other (H2). This is common in real stack-ups where layer
+                  spacing isn't perfectly symmetric — this tool approximates it with a harmonic-mean
+                  effective spacing that reduces exactly to the symmetric formula when H1 = H2.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>Very common in practice — few real stack-ups are perfectly symmetric.</li>
+                  <li>
+                    Z0 trends toward the value set by whichever plane is closer as offset grows.
+                  </li>
+                  <li>Field asymmetry couples slightly more current to the nearer plane.</li>
+                  <li>Field-solver verification matters more here than for the symmetric case.</li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="asymmetric-stripline"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="diff-microstrip" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Differential microstrip</h3>
+                <p>
+                  Two microstrip traces routed as a coupled pair. Zdiff is approximately 2 &times;
+                  the single-ended Z<sub>0</sub>, reduced by a coupling factor that depends on
+                  spacing S relative to dielectric height H. Tight spacing increases coupling
+                  (lowering Zdiff below 2&times;Z0); wide spacing approaches the fully uncoupled
+                  2&times;Z0 limit.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>Standard choice for USB, PCIe, and HDMI-class differential I/O.</li>
+                  <li>Tighter coupling improves common-mode rejection and packing density.</li>
+                  <li>Loose coupling is easier to route but yields Zdiff closer to 2&times;Z0.</li>
+                  <li>
+                    Length-matching the two legs still matters even though impedance is coupled.
+                  </li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="diff-microstrip"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="diff-stripline" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Differential stripline</h3>
+                <p>
+                  The stripline equivalent of a differential pair — two traces centered between two
+                  planes. Coupling falls off faster with spacing in stripline than in microstrip
+                  because both planes further confine the fringing field, so the same physical
+                  spacing produces stronger coupling here than it would on a microstrip pair.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>Chosen when a differential pair also needs stripline-level EMI shielding.</li>
+                  <li>
+                    Coupling decay constant differs from differential microstrip — don't reuse the
+                    formula.
+                  </li>
+                  <li>Same stack-up-depth cost as single-ended stripline.</li>
+                  <li>Common on backplanes and dense high-speed connector breakouts.</li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="diff-stripline"></div>
+            </div>
+          </div>
+
+          <div class="tlc-tab-panel" data-panel="cpwg" role="tabpanel" hidden>
+            <div class="tlc-panel-grid">
+              <div>
+                <h3>Grounded coplanar waveguide (CPWG)</h3>
+                <p>
+                  A trace with coplanar ground pours on either side (separated by gap G) in addition
+                  to a bottom reference plane at height H. The field couples both sideways to the
+                  coplanar grounds and downward to the bottom plane, letting designers hit a
+                  controlled impedance without a deep multi-layer stack-up.
+                </p>
+                <ul class="tlc-fact-list">
+                  <li>
+                    Standard for RF front-ends, antenna feeds, and SMA/connector breakout regions.
+                  </li>
+                  <li>Achieves controlled impedance on thin or even 2-layer boards.</li>
+                  <li>Gap G is an independent tuning knob alongside trace width W.</li>
+                  <li>
+                    Ground stitching vias near the gaps keep the coplanar grounds at a common
+                    potential at high frequency.
+                  </li>
+                </ul>
+              </div>
+              <div class="tlc-panel-figure" data-svg-slot="cpwg"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ ANIMATED SVGs ══════════════════════════ -->
+      <section class="tlc-anim-section" id="tour-animations" aria-labelledby="anim-title">
+        <h2 id="anim-title">Watch the field distribution change</h2>
+        <p class="tlc-section-lead">
+          Step-by-step animated cross-sections — replay any time, hover elements for details.
+        </p>
+        <div class="tlc-anim-grid">
+          <div class="card tlc-anim-card">
+            <div class="tlc-anim-card-head">
+              <h3>Microstrip vs. stripline field distribution</h3>
+              <button class="btn btn-outline btn-sm" data-replay="tlc-svg-stackup">
+                &#8635; Replay
+              </button>
+            </div>
+            <div class="tlc-svg-wrap" id="tlc-svg-stackup"></div>
+            <p class="tlc-anim-caption">
+              Microstrip's field splits between air above and dielectric below the trace — one
+              reference plane, partial shielding. Stripline's field is fully enclosed between two
+              planes — no air term, full shielding, but a thicker stack-up.
+            </p>
+          </div>
+          <div class="card tlc-anim-card">
+            <div class="tlc-anim-card-head">
+              <h3>Differential pair coupling vs. spacing</h3>
+              <button class="btn btn-outline btn-sm" data-replay="tlc-svg-diffpair">
+                &#8635; Replay
+              </button>
+            </div>
+            <div class="tlc-svg-wrap" id="tlc-svg-diffpair"></div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap">
+              <button class="btn btn-ghost btn-sm" data-diffpair-state="tight">
+                Tight spacing
+              </button>
+              <button class="btn btn-ghost btn-sm active" data-diffpair-state="medium">
+                Medium spacing
+              </button>
+              <button class="btn btn-ghost btn-sm" data-diffpair-state="loose">
+                Loose spacing
+              </button>
+            </div>
+            <p class="tlc-anim-caption">
+              Click a spacing state to see the coupling field change. Tighter spacing concentrates
+              the differential field between the two traces (lower Zdiff); loose spacing lets each
+              trace behave more like an independent single-ended line.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ GIF PLACEHOLDERS ══════════════════════════ -->
+      <section class="tlc-gif-section" aria-labelledby="gif-title">
+        <h2 id="gif-title">Reference animations (production assets)</h2>
+        <p class="tlc-section-lead">
+          Placeholders for captured field-solver / simulation GIFs to be dropped into
+          <code>assets/gifs/</code> during content production.
+        </p>
+        <div class="tlc-gif-grid">
+          <div class="tlc-gif-card">
+            <div class="tlc-gif-placeholder" aria-hidden="true">
+              <svg
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <circle cx="8.5" cy="10.5" r="1.5" />
+                <path d="M21 15l-5-5L5 19" />
+              </svg>
+            </div>
+            <h4>Field distribution as trace width changes</h4>
+            <p class="tlc-gif-meta">Suggested file: <code>field-distribution-vs-width.gif</code></p>
+            <p>
+              Objective: show a field-solver E-field plot for a microstrip cross-section as trace
+              width sweeps from narrow to wide, illustrating how the field concentration (and Z0)
+              responds.
+            </p>
+          </div>
+          <div class="tlc-gif-card">
+            <div class="tlc-gif-placeholder" aria-hidden="true">
+              <svg
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <circle cx="8.5" cy="10.5" r="1.5" />
+                <path d="M21 15l-5-5L5 19" />
+              </svg>
+            </div>
+            <h4>Microstrip vs. stripline E-field comparison</h4>
+            <p class="tlc-gif-meta">
+              Suggested file: <code>microstrip-vs-stripline-efield.gif</code>
+            </p>
+            <p>
+              Objective: side-by-side field-solver E-field magnitude plots for the same trace width
+              on microstrip versus symmetric stripline, showing the shielding difference visually.
+            </p>
+          </div>
+          <div class="tlc-gif-card">
+            <div class="tlc-gif-placeholder" aria-hidden="true">
+              <svg
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <circle cx="8.5" cy="10.5" r="1.5" />
+                <path d="M21 15l-5-5L5 19" />
+              </svg>
+            </div>
+            <h4>Differential pair coupling vs. spacing</h4>
+            <p class="tlc-gif-meta">
+              Suggested file: <code>diff-pair-coupling-vs-spacing.gif</code>
+            </p>
+            <p>
+              Objective: field-solver animation sweeping pair spacing S from tight to loose, showing
+              the differential coupling field strengthen and weaken and Zdiff move on an overlaid
+              readout.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ CALCULATOR WORKSPACE ══════════════════════════ -->
+      <section class="tlc-workspace" id="tour-calculator" aria-label="Z0 / Zdiff calculator">
+        <div class="tlc-inputs">
+          <div class="card tlc-card" id="tour-calc-inputs">
+            <div class="tlc-card-head">
+              <div>
+                <span class="tlc-step">01</span>
+                <h2>
+                  Geometry &amp; Stack-up
+                  <button
+                    class="help-tip"
+                    data-help-topic="calculator"
+                    aria-label="Help for calculator inputs"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span class="tlc-hint">Recalculates live as you type</span>
+            </div>
+            <div class="tlc-form-grid" id="tlc-calc-form">
+              <label class="tlc-full">
+                Geometry
+                <select class="select" id="tlcGeometry">
+                  <option value="microstrip" selected>Microstrip (single-ended)</option>
+                  <option value="embedded-microstrip">Embedded microstrip (single-ended)</option>
+                  <option value="stripline">Symmetric stripline (single-ended)</option>
+                  <option value="asymmetric-stripline">Asymmetric stripline (single-ended)</option>
+                  <option value="diff-microstrip">Differential microstrip</option>
+                  <option value="diff-stripline">Differential stripline</option>
+                  <option value="cpwg">Grounded coplanar waveguide (CPWG)</option>
+                </select>
+              </label>
+              <label data-field="W">
+                Trace width W <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcW"
+                  type="number"
+                  min="0.05"
+                  max="10"
+                  step="0.01"
+                  value="3.0"
+                />
+              </label>
+              <label data-field="T">
+                Trace thickness T <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcT"
+                  type="number"
+                  min="0.009"
+                  max="0.2"
+                  step="0.001"
+                  value="0.035"
+                />
+              </label>
+              <label data-field="H">
+                Dielectric height H <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcH"
+                  type="number"
+                  min="0.05"
+                  max="5"
+                  step="0.01"
+                  value="1.6"
+                />
+              </label>
+              <label data-field="H1">
+                <span id="tlc-h1-label-text">Cover dielectric H1 (mm)</span>
+                <input
+                  class="input"
+                  id="tlcH1"
+                  type="number"
+                  min="0.01"
+                  max="5"
+                  step="0.01"
+                  value="0.15"
+                />
+              </label>
+              <label data-field="H2">
+                Spacing to plane 2, H2 <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcH2"
+                  type="number"
+                  min="0.05"
+                  max="5"
+                  step="0.01"
+                  value="0.9"
+                />
+              </label>
+              <label data-field="B">
+                Total plane spacing B <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcB"
+                  type="number"
+                  min="0.1"
+                  max="6"
+                  step="0.01"
+                  value="1.6"
+                />
+              </label>
+              <label data-field="S">
+                Pair spacing S <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcS"
+                  type="number"
+                  min="0.05"
+                  max="5"
+                  step="0.01"
+                  value="0.2"
+                />
+              </label>
+              <label data-field="G">
+                Gap to coplanar ground, G <span>mm</span>
+                <input
+                  class="input"
+                  id="tlcG"
+                  type="number"
+                  min="0.05"
+                  max="5"
+                  step="0.01"
+                  value="0.4"
+                />
+              </label>
+              <label data-field="er">
+                Dielectric constant εr
+                <input
+                  class="input"
+                  id="tlcEr"
+                  type="number"
+                  min="1.5"
+                  max="12"
+                  step="0.05"
+                  value="4.3"
+                />
+              </label>
+            </div>
+            <div
+              class="tlc-crosssection"
+              id="tlc-crosssection"
+              aria-label="Cross-section diagram, proportional to current inputs"
+            ></div>
+          </div>
+        </div>
+
+        <div class="tlc-results">
+          <div class="card tlc-card tlc-summary-card" id="tour-calc-results">
+            <div class="tlc-card-head">
+              <div>
+                <span class="tlc-step">02</span>
+                <h2>
+                  Calculated Impedance
+                  <button
+                    class="help-tip"
+                    data-help-topic="results"
+                    aria-label="Help interpreting results"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span class="badge badge-blue" id="tlc-result-label">Z0</span>
+            </div>
+            <div class="tlc-stats">
+              <div>
+                <span id="tlc-result-label-2">Z0 / Zdiff</span
+                ><strong id="tlc-stat-z0">&mdash;</strong>
+              </div>
+              <div><span>Effective εeff</span><strong id="tlc-stat-eeff">&mdash;</strong></div>
+              <div><span>Prop. delay</span><strong id="tlc-stat-delay-mm">&mdash;</strong></div>
+              <div><span>Prop. delay</span><strong id="tlc-stat-delay-in">&mdash;</strong></div>
+              <div><span>Velocity factor</span><strong id="tlc-stat-vf">&mdash;</strong></div>
+              <div><span>Fab tolerance (±W)</span><strong id="tlc-stat-tol">&mdash;</strong></div>
+            </div>
+            <div class="tlc-formula-box" id="tlc-formula-box">
+              <h4>Formula &amp; worked example</h4>
+              <div id="tlc-formula-content"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ CHARTS ══════════════════════════ -->
+      <section class="tlc-charts-section" id="tour-charts" aria-labelledby="charts-title">
+        <h2 id="charts-title">Interactive charts</h2>
+        <p class="tlc-section-lead">
+          Zoom, pan, hover, and export to PNG — charts re-theme automatically with dark/light mode.
+        </p>
+        <div class="tlc-chart-grid">
+          <div class="card tlc-card">
+            <div class="tlc-card-head"><h2>Z0 vs. trace width (microstrip)</h2></div>
+            <div
+              id="tlc-chart-width"
+              class="tlc-chart"
+              role="img"
+              aria-label="Characteristic impedance versus trace width chart"
+            >
+              <div class="tlc-empty">Loading chart&hellip;</div>
+            </div>
+          </div>
+          <div class="card tlc-card">
+            <div class="tlc-card-head"><h2>Z0 vs. dielectric height (microstrip)</h2></div>
+            <div
+              id="tlc-chart-height"
+              class="tlc-chart"
+              role="img"
+              aria-label="Characteristic impedance versus dielectric height chart"
+            >
+              <div class="tlc-empty">Loading chart&hellip;</div>
+            </div>
+          </div>
+          <div class="card tlc-card">
+            <div class="tlc-card-head">
+              <h2>Zdiff vs. pair spacing (differential microstrip)</h2>
+            </div>
+            <div
+              id="tlc-chart-spacing"
+              class="tlc-chart"
+              role="img"
+              aria-label="Differential impedance versus pair spacing chart"
+            >
+              <div class="tlc-empty">Loading chart&hellip;</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ LIVE SIMULATION ══════════════════════════ -->
+      <section class="tlc-sim-section" id="tour-simulation" aria-labelledby="sim-title">
+        <div class="tlc-section-head">
+          <div>
+            <h2 id="sim-title">Live geometry simulation</h2>
+            <p>
+              Drag the sliders — the impedance curve and the cross-section diagram update instantly.
+              Uses the microstrip formula for clarity; use the full calculator above for the other
+              six geometries.
+            </p>
+          </div>
+        </div>
+        <div class="tlc-sim-grid">
+          <div class="card tlc-card tlc-sim-controls">
+            <div class="tlc-card-head"><h2>Controls</h2></div>
+            <label
+              >Trace width W: <output id="tlcSimWOut">3.00</output> mm
+              <input
+                class="tlc-slider"
+                id="tlcSimW"
+                type="range"
+                min="0.1"
+                max="3.5"
+                step="0.02"
+                value="3.0"
+              />
+            </label>
+            <label
+              >Dielectric height H: <output id="tlcSimHOut">1.60</output> mm
+              <input
+                class="tlc-slider"
+                id="tlcSimH"
+                type="range"
+                min="0.1"
+                max="2.4"
+                step="0.02"
+                value="1.6"
+              />
+            </label>
+            <label
+              >Dielectric constant εr: <output id="tlcSimErOut">4.3</output>
+              <input
+                class="tlc-slider"
+                id="tlcSimEr"
+                type="range"
+                min="2.2"
+                max="11"
+                step="0.1"
+                value="4.3"
+              />
+            </label>
+            <div class="tlc-sim-readout" id="tlcSimReadout"></div>
+          </div>
+          <div class="card tlc-card tlc-sim-chart-card">
+            <div class="tlc-card-head"><h2>Z0 vs. width, current point marked</h2></div>
+            <div
+              id="tlc-sim-chart"
+              class="tlc-chart"
+              role="img"
+              aria-label="Live impedance simulation chart"
+            ></div>
+          </div>
+        </div>
+        <div class="card tlc-card tlc-sim-visual-card" style="margin-top: 20px">
+          <div class="tlc-card-head"><h2>Cross-section (resizes with your sliders)</h2></div>
+          <div
+            class="tlc-crosssection"
+            id="tlc-sim-crosssection"
+            aria-label="Live-resizing microstrip cross-section"
+          ></div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ REAL EXAMPLES ══════════════════════════ -->
+      <section class="tlc-examples-section" id="tour-examples" aria-labelledby="examples-title">
+        <h2 id="examples-title">Real engineering examples</h2>
+        <p class="tlc-section-lead">The same geometry math, seven different industries.</p>
+        <div class="tlc-examples-grid">
+          <div class="tlc-example-card">
+            <span class="badge badge-blue">Consumer</span>
+            <h3>USB / HDMI differential pairs</h3>
+            <p>
+              USB and PCIe-class differential pairs commonly target ~90 &Omega; differential
+              microstrip or stripline; HDMI-class pairs commonly target ~100 &Omega;. Spacing S is
+              tuned against dielectric height H to hit the target while staying routable through
+              connector fan-out.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-purple">Industrial / Memory</span>
+            <h3>DDR single-ended address/data</h3>
+            <p>
+              DDR3/4/5 single-ended nets typically target 40&ndash;60 &Omega; depending on the
+              selected on-die termination (ODT) value — the trace geometry is chosen to match
+              whatever impedance the memory controller and DRAM are calibrated for.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-green">RF / Networking</span>
+            <h3>Antenna feed / RF front-end</h3>
+            <p>
+              RF and antenna-feed traces commonly use 50 &Omega; CPWG so a controlled impedance can
+              be hit on a shallow, low-layer-count stack-up without needing a deep stripline
+              structure just for one or two RF nets.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-orange">Networking</span>
+            <h3>Ethernet magnetics side traces</h3>
+            <p>
+              Traces between the PHY and the isolation transformer are typically routed as 100
+              &Omega; differential microstrip pairs, matched in length and spacing to control
+              return-loss and common-mode noise into the magnetics.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-blue">High-speed PCB / FPGA</span>
+            <h3>PCIe / SerDes differential links</h3>
+            <p>
+              PCIe-class SerDes lanes commonly target ~85 &Omega; differential, often routed as
+              stripline on dense FPGA/ASIC boards where EMI shielding and layer budget both favor
+              burying the high-speed layers.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-purple">General digital I/O</span>
+            <h3>GPIO / general single-ended logic</h3>
+            <p>
+              General single-ended digital I/O defaults to 50 &Omega; microstrip or stripline unless
+              a specific interface standard dictates otherwise — the most common "just use 50
+              &Omega;" case, but still worth verifying against the actual driver/receiver spec.
+            </p>
+          </div>
+          <div class="tlc-example-card">
+            <span class="badge badge-green">Medical / Automotive</span>
+            <h3>Mixed-signal boards with tight EMI budgets</h3>
+            <p>
+              Medical and automotive boards with strict EMI/EMC certification requirements often
+              push otherwise-microstrip nets to stripline specifically for the shielding benefit,
+              accepting the added stack-up cost to pass radiated-emissions testing.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ DESIGN REVIEW COMPARISON ══════════════════════════ -->
+      <section class="tlc-review-section" aria-labelledby="review-title">
+        <h2 id="review-title">Design review: correct vs. incorrect geometry</h2>
+        <p class="tlc-section-lead">The same target impedance, two very different outcomes.</p>
+        <div class="tlc-review-grid">
+          <div class="card tlc-review-card tlc-review-good">
+            <div class="tlc-review-head">
+              <span class="badge badge-green">Correct</span>
+              <h3>Width matched to the actual stack-up</h3>
+            </div>
+            <div class="tlc-svg-wrap" id="tlc-svg-review-good"></div>
+            <ul>
+              <li>Trace width calculated from the real H, T, and εr for this specific stack-up.</li>
+              <li>Continuous reference plane directly beneath the trace, no gaps.</li>
+              <li>Result: Z0 lands within tolerance of the target impedance.</li>
+            </ul>
+          </div>
+          <div class="card tlc-review-card tlc-review-bad">
+            <div class="tlc-review-head">
+              <span class="badge badge-red">Incorrect</span>
+              <h3>Width copied from another board, plane gap under trace</h3>
+            </div>
+            <div class="tlc-svg-wrap" id="tlc-svg-review-bad"></div>
+            <ul>
+              <li>Trace width reused from a previous design with a different H/εr stack-up.</li>
+              <li>A routing gap in the reference plane sits directly under the signal.</li>
+              <li>
+                Result: Z0 misses the target, and the plane gap adds a return-path discontinuity.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ COMMON MISTAKES ══════════════════════════ -->
+      <section class="tlc-mistakes-section" aria-labelledby="mistakes-title">
+        <h2 id="mistakes-title">Common mistakes</h2>
+        <div class="tlc-mistakes-grid">
+          <div class="tlc-mistake-card">
+            <h3>Using εr instead of εeff for delay</h3>
+            <p>
+              <strong>Root cause:</strong> Confusing the bulk laminate dielectric constant with the
+              effective dielectric constant the wave actually experiences.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Calculated propagation delay is noticeably longer than
+              measured delay on microstrip layers.
+            </p>
+            <p>
+              <strong>Impact:</strong> Timing budgets built on the wrong delay number, especially
+              for length-matched buses.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> Always use εeff (which is lower than εr for
+              microstrip-family geometries) for delay; εr alone is only correct for fully-enclosed
+              stripline.
+            </p>
+          </div>
+          <div class="tlc-mistake-card">
+            <h3>Ignoring trace thickness / etch factor</h3>
+            <p>
+              <strong>Root cause:</strong> Treating the trace as a perfect rectangle instead of the
+              trapezoidal cross-section etching actually produces.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Fabricated Z0 consistently differs from the hand-calculated
+              value in one direction.
+            </p>
+            <p>
+              <strong>Impact:</strong> Systematic Z0 offset across an entire fabrication lot, not
+              just random variation.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> Include copper thickness T in the formula (as this
+              tool does) and account for etch factor in tightly-toleranced designs via your fab
+              house's field solver.
+            </p>
+          </div>
+          <div class="tlc-mistake-card">
+            <h3>Ignoring soldermask effect on microstrip</h3>
+            <p>
+              <strong>Root cause:</strong> Calculating a bare-surface microstrip Z0 and forgetting
+              every outer-layer trace ships with soldermask on top.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Fabricated Z0 reads a few ohms lower than the
+              bare-microstrip calculation predicted.
+            </p>
+            <p>
+              <strong>Impact:</strong> Small but real Z0 tolerance error, more noticeable on
+              tightly-toleranced RF nets.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> Use the embedded-microstrip geometry (with a
+              realistic soldermask thickness for H1) instead of the bare surface-microstrip formula
+              for outer-layer traces.
+            </p>
+          </div>
+          <div class="tlc-mistake-card">
+            <h3>Wrong reference plane assumed</h3>
+            <p>
+              <strong>Root cause:</strong> Assuming the nearest solid copper layer is the return
+              path without checking the actual stack-up or net assignment.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Measured Z0 and EMI behavior don't match the calculation at
+              all.
+            </p>
+            <p>
+              <strong>Impact:</strong> Return current forced onto a distant or split plane, adding
+              loop inductance and a real EMI/SI problem, not just a calculation error.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> Confirm the actual nearest continuous reference
+              plane for each routing layer before calculating H or B.
+            </p>
+          </div>
+          <div class="tlc-mistake-card">
+            <h3>Not accounting for adjacent trace coupling</h3>
+            <p>
+              <strong>Root cause:</strong> Calculating an isolated single-ended Z0 for a trace that
+              is actually routed tightly alongside neighboring traces.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Effective impedance seen by the signal shifts depending on
+              what's routed nearby, inconsistent with the isolated calculation.
+            </p>
+            <p>
+              <strong>Impact:</strong> Crosstalk-induced impedance shift on dense buses, especially
+              address/data groups routed at minimum spacing.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> For densely packed single-ended buses, maintain
+              adequate spacing (commonly &ge;2&times; trace width) or treat closely-coupled groups
+              with a coupled-line field solver.
+            </p>
+          </div>
+          <div class="tlc-mistake-card">
+            <h3>Forgetting manufacturing tolerance</h3>
+            <p>
+              <strong>Root cause:</strong> Treating the calculated Z0 as an exact, guaranteed number
+              rather than a nominal center value.
+            </p>
+            <p>
+              <strong>Symptoms:</strong> Boards from different fabrication lots (or panels) show
+              slightly different measured Z0.
+            </p>
+            <p>
+              <strong>Impact:</strong> Marginal designs that only work with an unusually
+              tight-tolerance fabrication run.
+            </p>
+            <p>
+              <strong>Correct approach:</strong> Design with margin against the commonly quoted ±10%
+              Z0 fabrication tolerance, and use an impedance-control service for tighter
+              requirements.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ MYTHS ══════════════════════════ -->
+      <section class="tlc-myths-section" aria-labelledby="myths-title">
+        <h2 id="myths-title">Engineering myths</h2>
+        <div class="tlc-myths-grid">
+          <div class="tlc-myth-card">
+            <h3>Myth: "50 Ω is always the target."</h3>
+            <p>
+              <strong>Why it exists:</strong> 50 &Omega; is such a common single-ended RF/digital
+              default that it gets generalized to every net on every board.
+            </p>
+            <p>
+              <strong>Where it fails:</strong> Differential standards commonly target 90&ndash;100
+              &Omega;, and DDR single-ended nets often target 40&ndash;60 &Omega; depending on ODT —
+              a fixed "always 50 &Omega;" assumption is simply wrong for those nets.
+            </p>
+            <p>
+              <strong>Correct practice:</strong> Pull the actual target impedance from the interface
+              standard or driver datasheet before calculating geometry, not from habit.
+            </p>
+          </div>
+          <div class="tlc-myth-card">
+            <h3>Myth: "Stripline is always better than microstrip."</h3>
+            <p>
+              <strong>Why it exists:</strong> Stripline's full shielding sounds strictly superior,
+              so it gets treated as the "premium" choice for everything.
+            </p>
+            <p>
+              <strong>Where it fails:</strong> Stripline costs stack-up depth, is harder to
+              probe/rework, and is slower (higher εeff) than microstrip for the same base εr — real
+              designs balance EMI needs against those costs rather than defaulting to stripline
+              everywhere.
+            </p>
+            <p>
+              <strong>Correct practice:</strong> Reserve stripline for nets that actually need the
+              shielding or layer-budget benefit; use microstrip where routing simplicity and speed
+              matter more.
+            </p>
+          </div>
+          <div class="tlc-myth-card">
+            <h3>Myth: "Impedance only depends on trace width."</h3>
+            <p>
+              <strong>Why it exists:</strong> Trace width is the one parameter routing tools let you
+              adjust interactively, so it's easy to think it's the only variable.
+            </p>
+            <p>
+              <strong>Where it fails:</strong> Dielectric height, dielectric constant, copper
+              thickness, and (for differential/CPWG) spacing or gap all shift Z0 just as strongly as
+              width — changing the stack-up without re-checking width invalidates a
+              previously-correct calculation.
+            </p>
+            <p>
+              <strong>Correct practice:</strong> Treat Z0 as a function of the whole geometry (W, T,
+              H, εr, and any spacing/gap terms), and recalculate whenever any of them change, not
+              just width.
+            </p>
+          </div>
+          <div class="tlc-myth-card">
+            <h3>Myth: "A closed-form calculator is exact — no need for a field solver."</h3>
+            <p>
+              <strong>Why it exists:</strong> Closed-form formulas like the ones in this tool give a
+              clean, immediate number that feels authoritative.
+            </p>
+            <p>
+              <strong>Where it fails:</strong> They are first-order approximations (accurate to a
+              few percent under typical conditions) — they don't capture every real-world effect
+              (trapezoidal etch, exact soldermask properties, adjacent-trace coupling) that a full
+              2D/3D field solver does.
+            </p>
+            <p>
+              <strong>Correct practice:</strong> Use closed-form calculators for early stack-up
+              planning and sanity checks, then confirm final trace geometry with a field solver or
+              your fab house's impedance-control service before release.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ DECISION TREE ══════════════════════════ -->
+      <section class="tlc-tree-section" id="tour-decision-tree" aria-labelledby="tree-title">
+        <div class="tlc-section-head">
+          <div>
+            <h2 id="tree-title">Interactive decision tree</h2>
+            <p>
+              Answer a few questions about your signal and get a recommended geometry with
+              rationale.
+            </p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="tlc-tree-restart">&#8635; Restart</button>
+        </div>
+        <div class="card tlc-tree-card">
+          <div id="tlc-tree-breadcrumb" class="tlc-tree-breadcrumb"></div>
+          <div id="tlc-tree-content"></div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+      <section class="tlc-quiz-section" id="tour-quiz" aria-labelledby="quiz-title">
+        <h2 id="quiz-title">Test your understanding</h2>
+        <p class="tlc-section-lead">
+          Thirteen scored questions covering the physics, the formulas, and the decision-making.
+        </p>
+        <div class="card tlc-quiz-card">
+          <div id="tlc-quiz-progress" class="tlc-quiz-progress"></div>
+          <div id="tlc-quiz-body"></div>
+          <div class="tlc-quiz-actions">
+            <button class="btn btn-outline" id="tlc-quiz-prev" type="button">Previous</button>
+            <button class="btn btn-primary" id="tlc-quiz-next" type="button">Next</button>
+            <button class="btn btn-primary" id="tlc-quiz-restart" type="button" hidden>
+              Restart Quiz
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ EXPORT ══════════════════════════ -->
+      <section class="tlc-export-section" id="tour-export" aria-labelledby="export-title">
+        <div class="card tlc-card">
+          <div class="tlc-card-head">
+            <h2 id="export-title">
+              Reports &amp; Export
+              <button class="help-tip" data-help-topic="reports" aria-label="Help for reports">
+                ?
+              </button>
+            </h2>
+          </div>
+          <div class="tlc-export-grid">
+            <button class="btn btn-outline" id="tlc-export-notes">Export Notes (TXT)</button>
+            <button class="btn btn-outline" id="tlc-save-config">Save config</button>
+            <label class="btn btn-outline tlc-file-label"
+              >Load config<input id="tlc-load-config" type="file" accept="application/json"
+            /></label>
+            <button class="btn btn-outline" id="tlc-print-lesson">Print lesson</button>
+            <button class="btn btn-outline" id="tlc-share-btn">Share link</button>
+            <button class="btn btn-primary" id="tlc-bookmark-btn-2">
+              &#9734; Bookmark this tool
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════ ENGINEERING NOTES ══════════════════════════ -->
+      <section id="tlc-learn" class="tlc-learn">
+        <h2>Transmission line engineering notes</h2>
+        <p class="tlc-section-lead">
+          Fundamentals, theory, equations, applications, best practices, failure modes, standards,
+          design rules and troubleshooting — the reference layer behind every calculator output
+          above.
+        </p>
+        <div class="tlc-accordion" id="tlc-accordion">
+          <details open>
+            <summary>What makes a PCB trace a "transmission line"?</summary>
+            <p>
+              A trace behaves as a lumped node when its electrical length is short compared to the
+              signal's rise time — the whole trace charges together and no meaningful reflection can
+              build up. Once the trace's one-way propagation delay exceeds roughly 1/6 of the rise
+              time, it must be treated as a distributed transmission line with a characteristic
+              impedance Z0, and any mismatch at either end starts to matter. A 1 ns rise time
+              corresponds to only a few centimetres of "safe" untreated trace length in typical
+              FR-4.
+            </p>
+          </details>
+          <details>
+            <summary>Characteristic impedance Z0 — the physical definition</summary>
+            <p>
+              Z0 = &radic;(L&prime;/C&prime;), the ratio of per-unit-length inductance to
+              per-unit-length capacitance. It is a property of the trace's cross-sectional geometry
+              and the surrounding dielectric — not the copper's resistivity, not the wire gauge. Two
+              traces of very different width can have the same Z0 if the dielectric height and
+              constant are scaled to compensate, which is why "just make it wider" is not a
+              universal answer.
+            </p>
+          </details>
+          <details>
+            <summary>Microstrip: the Hammerstad-Jensen / IPC-2141 formula</summary>
+            <p>
+              This tool computes microstrip εeff with the Hammerstad approximation, εeff = (εr+1)/2
+              + (εr&minus;1)/2 &times; 1/&radic;(1+12H/W), and Z0 with the IPC-2141 closed form, Z0
+              = (87/&radic;(εr+1.41)) &times; ln(5.98H/(0.8W+T)). Both are first-order
+              approximations valid for typical PCB proportions (0.1 &le; W/H &le; 2.0) — verified in
+              this tool against the well-known reference point of ~3 mm trace width on 1.6 mm FR-4
+              (εr&asymp;4.3) giving Z0 &asymp; 50 &Omega;.
+            </p>
+          </details>
+          <details>
+            <summary>Effective dielectric constant εeff vs. bulk εr</summary>
+            <p>
+              For microstrip, the electric field is partly in air above the trace and partly in the
+              dielectric below it, so the wave experiences a blended εeff that is always less than
+              the bulk εr. For a fully enclosed geometry like symmetric stripline, εeff = εr
+              exactly, because there is no air path at all. Confusing the two is one of the most
+              common hand-calculation errors, especially for propagation delay.
+            </p>
+          </details>
+          <details>
+            <summary>Embedded (buried) microstrip and the soldermask effect</summary>
+            <p>
+              Covering a microstrip trace with dielectric (soldermask on an outer layer, or a
+              genuinely buried inner-layer trace) removes the air contribution and pushes εeff
+              upward toward the bulk εr, which lowers Z0 for the same physical geometry. The effect
+              scales with how much dielectric now sits above the trace relative to how much remains
+              below it to the reference plane — a thin soldermask coat shifts Z0 by only a few
+              percent, while a thick, fully-buried cover approaches the fully-embedded limit.
+            </p>
+          </details>
+          <details>
+            <summary>Symmetric stripline: geometry and formula</summary>
+            <p>
+              A stripline trace sits centered between two reference planes separated by total
+              distance B. IPC-2141 gives Z0 = (60/&radic;εr) &times; ln(1.9B/(0.8W+T)). Because the
+              field never touches air, εeff = εr exactly, which is also why stripline propagates
+              more slowly than microstrip built on the same base laminate.
+            </p>
+          </details>
+          <details>
+            <summary>Why stripline is lower-EMI and more shielded</summary>
+            <p>
+              With reference planes on both sides, a stripline trace's field has no direct path to
+              radiate outward the way an exposed microstrip surface field does — the return current
+              on the two planes largely cancels any external field. This is why stripline is often
+              chosen for EMI-sensitive nets even though it costs extra stack-up depth.
+            </p>
+          </details>
+          <details>
+            <summary>Asymmetric (offset) stripline</summary>
+            <p>
+              Real stack-ups rarely place a routing layer perfectly centered between two planes —
+              when the spacings H1 and H2 to the two planes differ, the structure is an asymmetric
+              or offset stripline. This tool approximates it by combining H1 and H2 through a
+              harmonic mean into an effective spacing before applying the symmetric-stripline
+              formula, which correctly reduces to the symmetric case when H1 = H2 and trends toward
+              the closer plane's influence as the offset grows.
+            </p>
+          </details>
+          <details>
+            <summary>Differential pairs: odd-mode impedance and coupling</summary>
+            <p>
+              A differential pair's Zdiff is approximately 2 &times; the odd-mode impedance of one
+              trace in the presence of the other. Coupling between the two traces (driven by spacing
+              relative to dielectric height) lowers the odd-mode impedance below the isolated
+              single-ended value, so Zdiff is always somewhat less than 2 &times; Z0 for a
+              realistically-spaced pair, converging to exactly 2 &times; Z0 only as spacing becomes
+              very large (uncoupled).
+            </p>
+          </details>
+          <details>
+            <summary>Tight vs. loose coupling tradeoffs</summary>
+            <p>
+              Tight spacing increases coupling, lowering Zdiff and improving common-mode noise
+              rejection and routing density, but tightens manufacturing tolerance sensitivity and
+              via/connector escape difficulty. Loose spacing is easier to route and less sensitive
+              to small spacing errors, but yields weaker common-mode rejection and Zdiff closer to
+              the fully uncoupled 2 &times; Z0 limit — real designs pick a spacing that balances
+              both.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Differential stripline coupling behaves differently than differential microstrip
+            </summary>
+            <p>
+              Because both reference planes further confine the fringing field in stripline, the
+              same physical spacing produces stronger coupling (and a faster fall-off with
+              increasing spacing) in differential stripline than in differential microstrip — the
+              two geometries need different coupling-decay coefficients in their respective closed
+              forms, not a shared formula.
+            </p>
+          </details>
+          <details>
+            <summary>Coplanar waveguide with ground (CPWG): when to use it</summary>
+            <p>
+              CPWG adds coplanar ground pours beside the signal trace (separated by gap G) on top of
+              a conventional bottom reference plane. This gives designers an extra tuning parameter
+              (the gap) to hit a target impedance without needing a deep stack-up — valuable for RF
+              front-ends, antenna feeds, and connector breakout regions where board real estate or
+              layer count is constrained.
+            </p>
+          </details>
+          <details>
+            <summary>CPWG impedance: conformal mapping and the elliptic integral ratio</summary>
+            <p>
+              The rigorous CPW/CPWG solution comes from conformal mapping and involves the ratio of
+              complete elliptic integrals of the first kind, K(k)/K′(k), which this tool
+              approximates with the closed-form Hilberg approximation (accurate to a few percent
+              across the practical k range) rather than a numerical elliptic-integral routine. The
+              grounded (CPWG) case adds the bottom-plane contribution as a second parallel
+              capacitive path alongside the coplanar side-ground path.
+            </p>
+          </details>
+          <details>
+            <summary>Propagation delay and velocity of propagation</summary>
+            <p>
+              tPD = &radic;εeff / c, where c is the speed of light. The "velocity factor" (fraction
+              of the speed of light the signal actually travels at) is 1/&radic;εeff. Because
+              microstrip's εeff is always lower than stripline's εeff = εr for the same base
+              laminate, microstrip signals travel measurably faster per unit length than stripline
+              signals do.
+            </p>
+          </details>
+          <details>
+            <summary>Why stripline is slower than microstrip at the same base εr</summary>
+            <p>
+              Microstrip's field is partly in air (εr=1 contribution) and partly in dielectric,
+              giving an εeff below the bulk εr. Stripline's field never touches air, so εeff = εr
+              exactly — always higher than microstrip's blended value for the same laminate. Since
+              velocity &prop; 1/&radic;εeff, the higher εeff of stripline directly means a slower
+              propagation velocity and longer per-inch delay.
+            </p>
+          </details>
+          <details>
+            <summary>Trace width/spacing manufacturing tolerance and its effect on Z0</summary>
+            <p>
+              Etch variation on trace width (commonly around ±0.03&ndash;0.05 mm on outer layers)
+              and dielectric thickness variation both feed directly into the Z0 formulas, which is
+              why fabricated impedance typically carries a commonly-quoted tolerance around ±10%
+              from the nominal calculated value. This tool's calculator reports an estimated
+              tolerance band from a representative width perturbation so the sensitivity is visible
+              alongside the nominal number.
+            </p>
+          </details>
+          <details>
+            <summary>Etch factor and the trapezoidal trace cross-section</summary>
+            <p>
+              Real etched copper traces are trapezoidal, not rectangular — the top surface (which
+              was protected longer during etching) is narrower than the base bonded to the
+              dielectric. "Etch factor" quantifies this taper. Simple hand formulas that assume a
+              perfect rectangle introduce a small but systematic Z0 error that becomes more
+              significant on very fine-pitch, thin-copper traces.
+            </p>
+          </details>
+          <details>
+            <summary>Skin effect and conductor loss at high frequency</summary>
+            <p>
+              Above roughly tens of MHz, current crowds toward the conductor surface as frequency
+              increases, shrinking the effective cross-section and raising the trace's AC resistance
+              roughly proportional to &radic;f. This conductor loss adds to signal attenuation over
+              distance but does not itself change Z0 for a lossless-line approximation — it is a
+              separate loss-budget consideration this tool does not model in depth.
+            </p>
+          </details>
+          <details>
+            <summary>Dielectric loss and loss tangent (tan δ)</summary>
+            <p>
+              The dielectric itself dissipates energy at high frequency, characterized by its loss
+              tangent tan δ (commonly ~0.02 for standard FR-4, much lower for RF-grade laminates).
+              Dielectric loss grows roughly linearly with frequency and, at multi-GHz rates,
+              typically overtakes conductor loss as the dominant attenuation mechanism — a key
+              reason RF/high-speed designs often move to low-loss-tangent laminates.
+            </p>
+          </details>
+          <details>
+            <summary>Common mistake: using εr instead of εeff</summary>
+            <p>
+              Using the bulk εr directly for a microstrip delay calculation overstates the effective
+              dielectric loading (since it ignores the air contribution) and predicts a slower,
+              longer delay than the trace actually exhibits. Always use εeff — not εr — for
+              microstrip-family propagation delay.
+            </p>
+          </details>
+          <details>
+            <summary>Common mistake: ignoring soldermask on outer-layer traces</summary>
+            <p>
+              Every outer-layer trace ships with soldermask on top in production, yet many hand
+              calculations model a bare-surface microstrip. The result is a small, systematic Z0
+              overestimate versus what actually ships — model outer-layer traces as embedded
+              microstrip with a realistic soldermask thickness instead.
+            </p>
+          </details>
+          <details>
+            <summary>Common mistake: assuming the wrong reference plane</summary>
+            <p>
+              If the assumed reference plane isn't actually the nearest continuous copper layer (or
+              if that plane has a routing gap under the trace), both the Z0 calculation and the real
+              return-current path are wrong — this is a signal-integrity problem, not just a
+              calculation error, and can dominate over any formula-precision concern.
+            </p>
+          </details>
+          <details>
+            <summary>Real example: USB / HDMI differential pairs</summary>
+            <p>
+              USB SuperSpeed and PCIe-class pairs commonly target ~90 &Omega; differential;
+              HDMI-class pairs commonly target ~100 &Omega;. Both are typically routed as
+              differential microstrip on outer layers for routing simplicity, with spacing tuned
+              against dielectric height to hit the target while remaining routable through connector
+              fan-out geometry.
+            </p>
+          </details>
+          <details>
+            <summary>Real example: DDR single-ended impedance and ODT</summary>
+            <p>
+              DDR memory interfaces don't use one fixed single-ended target — the DRAM and memory
+              controller negotiate an on-die termination (ODT) value (commonly in the 40&ndash;240
+              &Omega; range depending on generation and topology), and the PCB trace geometry is
+              chosen to match whatever nominal line impedance the calibrated ODT expects, typically
+              landing in the 40&ndash;60 &Omega; range.
+            </p>
+          </details>
+          <details>
+            <summary>Real example: RF/antenna feed CPWG</summary>
+            <p>
+              A 50 &Omega; CPWG feedline from an RF front-end IC to an antenna or connector lets a
+              designer hit controlled impedance on a thin, often low-layer-count board without a
+              dedicated stripline structure — the coplanar ground pours also help isolate the RF
+              trace from nearby digital switching noise.
+            </p>
+          </details>
+          <details>
+            <summary>Standards touchpoint: IPC-2141 / IPC-2141A</summary>
+            <p>
+              IPC-2141 (and its successor IPC-2141A) is the source of the closed-form microstrip and
+              stripline impedance formulas implemented in this calculator — the industry-standard
+              hand-calculation reference reproduced in most PCB fabricator "impedance calculator"
+              tools.
+            </p>
+          </details>
+          <details>
+            <summary>Standards touchpoint: IPC-6012 fabrication tolerance classes</summary>
+            <p>
+              IPC-6012 defines qualification and performance requirements for rigid PCBs, including
+              the fabrication tolerance classes that ultimately determine how tightly a fab house
+              can hold your specified Z0 in production — relevant context when deciding how much
+              margin to design against the commonly quoted ±10% impedance tolerance.
+            </p>
+          </details>
+          <details>
+            <summary>Verification: Time-Domain Reflectometry (TDR)</summary>
+            <p>
+              A TDR launches a fast step into the trace and measures the reflected voltage over
+              time; the local reflection at each point along the trace reveals the local impedance,
+              letting engineers directly confirm the fabricated Z0 matches the calculated/specified
+              value and locate any discontinuities (vias, connectors, plane gaps) along the way.
+            </p>
+          </details>
+          <details>
+            <summary>Working with a fab house's stack-up / impedance-control service</summary>
+            <p>
+              Most PCB fabricators offer an impedance-control service: you specify the target Z0 and
+              layer, and they return the exact trace width for their specific laminate and process
+              (often using a full 2D field solver rather than closed-form formulas). Use this tool's
+              output as a starting point for early stack-up planning, then always confirm final
+              width against your actual fab house's numbers before release.
+            </p>
+          </details>
+          <details>
+            <summary>Design rule: choosing a geometry by application</summary>
+            <p>
+              Default to microstrip for general single-ended I/O; move to stripline when EMI
+              shielding or a specific standard demands it and layer budget allows; use differential
+              microstrip or stripline for coupled pairs following the same shielding logic; reserve
+              CPWG for RF/antenna/connector-breakout regions needing controlled impedance on a
+              shallow stack-up.
+            </p>
+          </details>
+          <details>
+            <summary>Troubleshooting: measured Z0 doesn't match the calculated value</summary>
+            <p>
+              Check the assumed reference plane is actually correct and continuous, confirm the real
+              (not nominal) dielectric height and εr for your laminate at your operating frequency,
+              verify whether the trace is genuinely bare or covered with soldermask, and account for
+              etch/trapezoidal cross-section effects — any of these alone can explain a several-ohm
+              discrepancy between hand calculation and TDR measurement.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <!-- ══════════════════════════ NARRATOR WIDGET ══════════════════════════ -->
+    <aside class="tlc-narrator" id="tlc-narrator" aria-label="Lesson narrator" hidden>
+      <div class="tlc-narrator-head">
+        <span class="tlc-kicker" style="margin: 0">Lesson Narrator</span>
+        <button class="help-close" id="tlc-narrator-close" aria-label="Close narrator">
+          &times;
+        </button>
+      </div>
+      <p class="tlc-narrator-current" id="tlc-narrator-text">Ready to play the lesson.</p>
+      <div class="tlc-narrator-controls">
+        <button class="icon-btn" id="tlc-narrator-play" aria-label="Play">&#9654;</button>
+        <button class="icon-btn" id="tlc-narrator-pause" aria-label="Pause">
+          &#10074;&#10074;
+        </button>
+        <button class="icon-btn" id="tlc-narrator-stop" aria-label="Stop">&#9632;</button>
+        <button class="icon-btn" id="tlc-narrator-replay" aria-label="Replay">&#8635;</button>
+        <select class="select" id="tlc-narrator-speed" aria-label="Narration speed">
+          <option value="0.75">0.75&times;</option>
+          <option value="1" selected>1&times;</option>
+          <option value="1.25">1.25&times;</option>
+          <option value="1.5">1.5&times;</option>
+        </select>
+        <select class="select" id="tlc-narrator-voice" aria-label="Narration voice"></select>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════════ HELP DIALOG ══════════════════════════ -->
+    <div class="help-backdrop" id="help-dialog" hidden>
+      <section class="help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <header class="help-header">
+          <div>
+            <span class="tlc-kicker">Built-in Help Center</span>
+            <h2 id="help-title">Transmission Line Calculator Guide</h2>
+            <p>Version 1.0 &middot; Updated July 2026</p>
+          </div>
+          <button class="help-close" data-help-close aria-label="Close help">&times;</button>
+        </header>
+        <div class="help-search-wrap">
+          <label for="help-search">Search help topics</label>
+          <input
+            class="input"
+            id="help-search"
+            type="search"
+            placeholder="Try microstrip, stripline, CPWG, decision tree, quiz&hellip;"
+            autocomplete="off"
+          />
+          <span id="help-search-status" aria-live="polite"></span>
+        </div>
+        <div class="help-layout">
+          <nav class="help-nav" id="help-nav" aria-label="Help topics"></nav>
+          <article class="help-content" id="help-content" tabindex="0"></article>
+        </div>
+        <footer class="help-footer">
+          <button class="btn btn-outline" id="help-start-tour">Start feature tour</button>
+          <a class="btn btn-primary" href="help/user-guide.html" target="_blank" rel="noopener"
+            >Open full user manual</a
+          >
+        </footer>
+      </section>
+    </div>
+
+    <!-- ══════════════════════════ TOUR ══════════════════════════ -->
+    <div class="tour-backdrop" id="tour-backdrop" hidden></div>
+    <aside
+      class="tour-popover"
+      id="tour-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-title"
+      hidden
+    >
+      <span id="tour-progress"></span>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-actions">
+        <button class="btn btn-ghost btn-sm" id="tour-skip">Skip</button>
+        <button class="btn btn-outline btn-sm" id="tour-prev">Previous</button>
+        <button class="btn btn-primary btn-sm" id="tour-next">Next</button>
+      </div>
+    </aside>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="../../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script src="js/calculations.js"></script>
+    <script src="js/simulations.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/help.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="I2C PCB layout and signal integrity guidelines: routing rules, series damping resistors, crosstalk between SCL and SDA, return paths, and running I2C over cables with bus extenders."
+    />
+    <title>PCB Layout &amp; SI | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/06-layout-guidelines.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item active">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>PCB Layout &amp; SI</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 06</span>
+              <h1>PCB Layout &amp; Signal Integrity</h1>
+              <p class="subtitle">
+                I2C is slow, but its edges aren't. A 3 ns falling edge doesn't care that your bus
+                runs at 100 kHz — it couples, rings, and radiates like any fast signal. A few layout
+                habits keep it civilized.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <div class="widget-container">
+                <div class="widget-header"><h3>Routing rules</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Daisy-chain</strong> device to device; keep taps/stubs under ~1 cm. No
+                    star topologies.
+                  </li>
+                  <li>
+                    Route SDA and SCL <strong>together but not coupled</strong> — same path, ≥ 2–3×
+                    trace-width spacing (or a ground trace between them at Fm+).
+                  </li>
+                  <li>
+                    Keep a <strong>continuous ground reference</strong> under both lines; never
+                    cross a plane split. The return current at the edge rate flows directly beneath
+                    the trace.
+                  </li>
+                  <li>
+                    Budget length against capacitance: ~1 pF/cm means 50 cm of routing is already 50
+                    pF before any device pins.
+                  </li>
+                  <li>Minimize vias (~0.5 pF each) — they add up on a 20-device chain.</li>
+                  <li>
+                    Keep the pair away from noisy aggressors (switching nodes, motor phases, RF
+                    antennas) — I2C inputs have no differential rejection.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Crosstalk: SCL is SDA's worst enemy</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  The most common I2C SI failure is <strong>SCL coupling into SDA</strong>: a fast
+                  SCL falling edge induces a glitch on a tightly coupled SDA that a receiver can
+                  read as a START or a data-bit error. It shows up as "occasional NACKs" that vanish
+                  when you slow the bus down.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 640 150"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Cross-section showing SDA and SCL traces properly spaced over a continuous ground plane, versus tightly coupled traces inducing a glitch."
+                  >
+                    <g>
+                      <text
+                        x="150"
+                        y="18"
+                        text-anchor="middle"
+                        fill="var(--success,#34d399)"
+                        font-size="11"
+                        font-weight="700"
+                      >
+                        ✓ spaced ≥ 3W, solid plane
+                      </text>
+                      <rect
+                        x="60"
+                        y="40"
+                        width="40"
+                        height="12"
+                        rx="2"
+                        fill="var(--warning,#fb923c)"
+                      />
+                      <text
+                        x="80"
+                        y="34"
+                        text-anchor="middle"
+                        fill="var(--warning,#fb923c)"
+                        font-size="9"
+                      >
+                        SCL
+                      </text>
+                      <rect
+                        x="200"
+                        y="40"
+                        width="40"
+                        height="12"
+                        rx="2"
+                        fill="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="220"
+                        y="34"
+                        text-anchor="middle"
+                        fill="var(--cyan,#22d3ee)"
+                        font-size="9"
+                      >
+                        SDA
+                      </text>
+                      <rect
+                        x="30"
+                        y="80"
+                        width="250"
+                        height="10"
+                        fill="var(--text-muted)"
+                        opacity="0.6"
+                      />
+                      <text
+                        x="155"
+                        y="110"
+                        text-anchor="middle"
+                        fill="var(--text-muted)"
+                        font-size="9"
+                      >
+                        continuous GND plane
+                      </text>
+                      <path
+                        d="M80 52 q0 22 -20 26"
+                        stroke="var(--success,#34d399)"
+                        fill="none"
+                        stroke-dasharray="3 3"
+                      />
+                      <path
+                        d="M220 52 q0 22 20 26"
+                        stroke="var(--success,#34d399)"
+                        fill="none"
+                        stroke-dasharray="3 3"
+                      />
+                    </g>
+                    <g>
+                      <text
+                        x="490"
+                        y="18"
+                        text-anchor="middle"
+                        fill="var(--danger,#f87171)"
+                        font-size="11"
+                        font-weight="700"
+                      >
+                        ✗ coupled pair, split plane
+                      </text>
+                      <rect
+                        x="430"
+                        y="40"
+                        width="40"
+                        height="12"
+                        rx="2"
+                        fill="var(--warning,#fb923c)"
+                      />
+                      <rect
+                        x="480"
+                        y="40"
+                        width="40"
+                        height="12"
+                        rx="2"
+                        fill="var(--cyan,#22d3ee)"
+                      />
+                      <path
+                        d="M470 46 q5 -14 10 0"
+                        stroke="var(--danger,#f87171)"
+                        fill="none"
+                        stroke-width="1.5"
+                      >
+                        <animate
+                          attributeName="opacity"
+                          values="0.2;1;0.2"
+                          dur="1.2s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
+                      <rect
+                        x="400"
+                        y="80"
+                        width="105"
+                        height="10"
+                        fill="var(--text-muted)"
+                        opacity="0.6"
+                      />
+                      <rect
+                        x="525"
+                        y="80"
+                        width="105"
+                        height="10"
+                        fill="var(--text-muted)"
+                        opacity="0.6"
+                      />
+                      <text
+                        x="516"
+                        y="104"
+                        text-anchor="middle"
+                        fill="var(--danger,#f87171)"
+                        font-size="9"
+                      >
+                        split!
+                      </text>
+                      <text
+                        x="490"
+                        y="130"
+                        text-anchor="middle"
+                        fill="var(--text-muted)"
+                        font-size="9"
+                      >
+                        coupling + broken return path = glitches
+                      </text>
+                    </g>
+                  </svg>
+                  <p class="diagram-caption">
+                    Left: healthy spacing and return path. Right: the classic failure — tight
+                    coupling with a return path detour amplifying the glitch.
+                  </p>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Series damping resistors</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  22–100 Ω in series at each driver pin slows the <em>falling</em> edge and damps
+                  ringing on longer runs. They also add protection against latch-up from hot-plugged
+                  lines. Two cautions: they add to V<sub>OL</sub> (the far device's low is lifted by
+                  I·R), and at Fm+ speeds they can eat too much of the timing budget. Rule: start
+                  with 0 Ω fitted, add 33 Ω if you see ringing overshoot beyond ±0.5 V on a scope.
+                </p>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Off-board I2C: cables and extenders</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Distance</th>
+                        <th>Approach</th>
+                        <th>Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>&lt; 30 cm</td>
+                        <td>Direct, ribbon/FFC ok</td>
+                        <td>Put GND between SDA and SCL conductors; count cable pF</td>
+                      </tr>
+                      <tr>
+                        <td>0.3 – 2 m</td>
+                        <td>Buffer at the connector (PCA9517)</td>
+                        <td>Isolates cable capacitance from the main bus; drop to 100 kHz</td>
+                      </tr>
+                      <tr>
+                        <td>2 – 50 m</td>
+                        <td>Differential extender pair (P82B715 / PCA9615)</td>
+                        <td>Converts to robust differential signaling over twisted pair</td>
+                      </tr>
+                      <tr>
+                        <td>&gt; 50 m</td>
+                        <td>Don't — use RS-485/CAN and a bridge</td>
+                        <td>I2C was never meant to leave the enclosure</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="info-box">
+                  Deep dive on rise-time budgets, reflections and terminations? That's the
+                  <a href="../../SI/index.html">Signal Integrity Academy</a> — the concepts map
+                  directly.
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>Treat edges (ns), not bit rate (kHz), as the SI-relevant speed.</li>
+                  <li>Daisy-chain, short stubs, solid return plane, SDA/SCL spaced apart.</li>
+                  <li>SCL→SDA crosstalk is the classic intermittent-failure mechanism.</li>
+                  <li>Leaving the board? Buffer it. Leaving the enclosure? Go differential.</li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="05-multi-master.html">← Multi-Master Buses</a>
+                <a class="btn btn-primary" href="07-robustness-debug.html"
+                  >Next: Robustness &amp; Debug →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

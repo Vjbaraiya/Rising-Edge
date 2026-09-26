@@ -1,0 +1,3195 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Calculate return path impedance, loop inductance, and EMI risk for high-speed PCB traces. Visualize return current flow and get actionable design recommendations."
+    />
+    <meta
+      name="keywords"
+      content="return path calculator, PCB signal integrity, loop inductance, EMI, return current, ground plane, stitching vias, PCB design"
+    />
+    <title>Return Path Calculator | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/Return-path-calculator/return-path-calculator.html"
+    />
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Return Path Calculator",
+        "applicationCategory": "EngineeringApplication",
+        "description": "Calculate return path impedance, loop inductance and EMI risk for high-speed PCB signals.",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/rpc.css" />
+    <link rel="stylesheet" href="css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <main class="rpc-page">
+      <!-- ── Hero ─────────────────────────────────────────────────────── -->
+      <header class="rpc-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../../home.html">Home</a><span>/</span> <a href="../tools.html">Tools</a
+          ><span>/</span>
+          <span>Return Path Calculator</span>
+        </nav>
+        <div class="rpc-kicker">Signal Integrity &amp; EMC Engineering Tool</div>
+        <h1>Return Path Calculator</h1>
+        <p>
+          Understand how high-speed return currents flow, identify plane discontinuities, estimate
+          loop inductance, and eliminate EMI problems before you manufacture.
+        </p>
+        <div class="rpc-tags">
+          <span class="badge badge-blue">Intermediate</span>
+          <span class="badge badge-green">5–10 min</span>
+          <span class="badge badge-purple">v1.0</span>
+          <span class="badge badge-gray">SI / EMC</span>
+        </div>
+        <div class="rpc-hero-actions">
+          <button class="btn btn-primary" id="rpcCalcBtn">Calculate</button>
+          <button class="btn btn-outline" id="rpcPresetBtn">Load example</button>
+          <button class="btn btn-outline" id="rpcResetBtn">Reset</button>
+          <button class="btn btn-outline" data-help-open aria-haspopup="dialog">? Help</button>
+          <a class="btn btn-ghost" href="#rpc-learn">Learn the theory</a>
+        </div>
+
+        <!-- Audio explainer -->
+        <div class="rpc-audio-bar" id="rpcAudioBar" role="region" aria-label="Audio explanation">
+          <button
+            class="rpc-audio-btn"
+            id="rpcAudioBtn"
+            aria-label="Play audio explanation"
+            title="Listen to a quick explanation of this tool"
+          >
+            <svg
+              class="rpc-audio-icon"
+              id="rpcAudioIcon"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <!-- Play icon (default) -->
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+              <polygon id="iconPlay" points="10,8 16,12 10,16" fill="currentColor" />
+              <!-- Pause icon (hidden when not playing) -->
+              <g id="iconPause" style="display: none">
+                <rect x="9" y="8" width="2" height="8" rx="1" fill="currentColor" />
+                <rect x="13" y="8" width="2" height="8" rx="1" fill="currentColor" />
+              </g>
+            </svg>
+            <span id="rpcAudioLabel">Listen to explanation</span>
+          </button>
+          <div class="rpc-audio-progress-wrap" id="rpcAudioProgressWrap" aria-hidden="true">
+            <div class="rpc-audio-waveform" id="rpcAudioWave">
+              <span></span><span></span><span></span><span></span><span></span> <span></span
+              ><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="rpc-audio-progress-bar">
+              <div class="rpc-audio-progress-fill" id="rpcAudioFill"></div>
+            </div>
+          </div>
+          <span class="rpc-audio-time" id="rpcAudioTime" aria-live="polite"></span>
+        </div>
+      </header>
+
+      <!-- Alert banner -->
+      <div class="rpc-alert" id="rpcAlert" role="alert" aria-live="polite"></div>
+
+      <!-- ── Workspace ──────────────────────────────────────────────── -->
+      <div class="rpc-workspace">
+        <!-- ── LEFT: Inputs ───────────────────────────────────────── -->
+        <aside class="rpc-inputs" aria-label="Calculator inputs">
+          <!-- 01 Signal -->
+          <div class="card rpc-card">
+            <div class="rpc-card-head">
+              <h2>
+                <span class="rpc-step">01</span> Signal
+                <button
+                  class="help-tip"
+                  data-help-topic="signal"
+                  aria-label="Help for signal parameters"
+                >
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="rpc-form-grid">
+              <label
+                >Signal type<span></span>
+                <select class="input" id="signalType">
+                  <option value="single">Single-Ended</option>
+                  <option value="diff">Differential Pair</option>
+                  <option value="clock" selected>Clock</option>
+                  <option value="power">Power Trace</option>
+                </select>
+              </label>
+              <label
+                >Layer type<span></span>
+                <select class="input" id="layerType">
+                  <option value="microstrip" selected>Microstrip</option>
+                  <option value="stripline">Stripline</option>
+                  <option value="cpw">Coplanar Waveguide</option>
+                </select>
+              </label>
+              <label
+                >Rise time<span></span>
+                <div class="rpc-input-unit">
+                  <input
+                    class="input"
+                    id="riseTime"
+                    type="number"
+                    min="0.001"
+                    step="0.1"
+                    value="1.0"
+                    aria-label="Rise time value"
+                  />
+                  <span class="unit" id="riseTimeUnit">ns</span>
+                </div>
+              </label>
+              <label
+                >Unit<span></span>
+                <select class="input" id="riseTimeUnitSel">
+                  <option value="1e-9" selected>ns</option>
+                  <option value="1e-12">ps</option>
+                  <option value="1e-6">µs</option>
+                </select>
+              </label>
+              <label
+                >Switching freq<span></span>
+                <div class="rpc-input-unit">
+                  <input
+                    class="input"
+                    id="switchFreq"
+                    type="number"
+                    min="0.001"
+                    step="1"
+                    value="100"
+                  />
+                  <span class="unit" id="switchFreqUnit">MHz</span>
+                </div>
+              </label>
+              <label
+                >Unit<span></span>
+                <select class="input" id="switchFreqUnitSel">
+                  <option value="1">Hz</option>
+                  <option value="1e3">kHz</option>
+                  <option value="1e6" selected>MHz</option>
+                  <option value="1e9">GHz</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- 02 Trace Geometry -->
+          <div class="card rpc-card">
+            <div class="rpc-card-head">
+              <h2>
+                <span class="rpc-step">02</span> Trace Geometry
+                <button
+                  class="help-tip"
+                  data-help-topic="geometry"
+                  aria-label="Help for trace geometry"
+                >
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="rpc-form-grid">
+              <label
+                >Trace width<span>mil</span>
+                <input class="input" id="traceWidth" type="number" min="0.1" step="0.5" value="5" />
+              </label>
+              <label
+                >Trace length<span>mm</span>
+                <input class="input" id="traceLength" type="number" min="1" step="5" value="100" />
+              </label>
+              <label
+                >Height above plane<span>mil</span>
+                <input
+                  class="input"
+                  id="heightAbove"
+                  type="number"
+                  min="0.1"
+                  step="0.5"
+                  value="4"
+                />
+              </label>
+              <label
+                >Copper thickness<span></span>
+                <select class="input" id="copperThick">
+                  <option value="0.017">0.5 oz (17 µm)</option>
+                  <option value="0.035" selected>1 oz (35 µm)</option>
+                  <option value="0.070">2 oz (70 µm)</option>
+                  <option value="0.105">3 oz (105 µm)</option>
+                </select>
+              </label>
+              <label
+                >Dielectric (εr)<span></span>
+                <input
+                  class="input"
+                  id="epsilonR"
+                  type="number"
+                  min="1"
+                  max="20"
+                  step="0.1"
+                  value="4.2"
+                />
+              </label>
+              <label
+                >PCB layers<span></span>
+                <select class="input" id="layerCount">
+                  <option value="2">2 Layer</option>
+                  <option value="4" selected>4 Layer</option>
+                  <option value="6">6 Layer</option>
+                  <option value="8">8 Layer</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- 03 Reference Plane -->
+          <div class="card rpc-card">
+            <div class="rpc-card-head">
+              <h2>
+                <span class="rpc-step">03</span> Reference Plane
+                <button
+                  class="help-tip"
+                  data-help-topic="plane"
+                  aria-label="Help for reference plane"
+                >
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="rpc-form-full">
+              <label
+                >Plane type<span></span>
+                <select class="input" id="planeType">
+                  <option value="solid" selected>Solid Ground Plane</option>
+                  <option value="split">Split Ground Plane</option>
+                  <option value="power">Power Plane</option>
+                  <option value="float">Floating / No Plane</option>
+                </select>
+              </label>
+              <label
+                >Plane transition<span></span>
+                <select class="input" id="planeTransition">
+                  <option value="none" selected>None</option>
+                  <option value="via">Via Layer Transition</option>
+                  <option value="connector">Connector</option>
+                  <option value="cable">Cable</option>
+                  <option value="slot">Slot Crossing</option>
+                </select>
+              </label>
+            </div>
+            <div class="rpc-divider"></div>
+            <div class="rpc-form-grid">
+              <label
+                >Stitching vias<span>count</span>
+                <input class="input" id="stitchVias" type="number" min="0" step="1" value="2" />
+              </label>
+              <label
+                >Via spacing<span>mm</span>
+                <input class="input" id="viaSpacing" type="number" min="0.1" step="0.5" value="5" />
+              </label>
+              <label
+                >Via diameter<span>mil</span>
+                <input class="input" id="viaDia" type="number" min="4" step="1" value="10" />
+              </label>
+              <label
+                >Gap width<span>mm</span>
+                <input
+                  class="input"
+                  id="gapWidth"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value="0"
+                  placeholder="0 = no gap"
+                />
+              </label>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary rpc-calc-btn"
+            id="rpcCalcBtn2"
+            aria-label="Run calculation"
+          >
+            ⚡ Calculate Return Path
+          </button>
+        </aside>
+
+        <!-- ── RIGHT: Results ─────────────────────────────────────── -->
+        <section class="rpc-results" aria-label="Calculation results" aria-live="polite">
+          <!-- KPI Row -->
+          <div class="rpc-kpi-row" id="rpcKpiRow">
+            <div class="rpc-kpi" id="kpiBW">
+              <div class="rpc-kpi-label">Bandwidth</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">MHz</div>
+            </div>
+            <div class="rpc-kpi" id="kpiL">
+              <div class="rpc-kpi-label">Loop Inductance</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">nH</div>
+            </div>
+            <div class="rpc-kpi" id="kpiLoopArea">
+              <div class="rpc-kpi-label">Loop Area</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">mm²</div>
+            </div>
+            <div class="rpc-kpi" id="kpiZ">
+              <div class="rpc-kpi-label">Return Impedance</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">@ BW</div>
+            </div>
+            <div class="rpc-kpi" id="kpiEff">
+              <div class="rpc-kpi-label">Path Efficiency</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">%</div>
+            </div>
+            <div class="rpc-kpi" id="kpiViaL">
+              <div class="rpc-kpi-label">Via Inductance</div>
+              <div class="rpc-kpi-value">—</div>
+              <div class="rpc-kpi-unit">pH</div>
+            </div>
+          </div>
+
+          <!-- PCB Visualization -->
+          <div class="card rpc-viz-card">
+            <h3>
+              PCB Cross-Section — Return Current Flow
+              <div class="rpc-viz-legend">
+                <span><i class="trace"></i> Signal</span>
+                <span><i class="plane"></i> Plane</span>
+                <span><i class="good"></i> Good path</span>
+                <span><i class="warn"></i> Moderate</span>
+                <span><i class="bad"></i> Poor</span>
+              </div>
+            </h3>
+            <canvas
+              id="rpcCanvas"
+              height="240"
+              aria-label="PCB cross-section visualization showing return current path"
+            ></canvas>
+          </div>
+
+          <!-- Top-view thermal heatmap -->
+          <div class="card rpc-viz-card">
+            <h3>
+              PCB Top View — Return Current Density (Thermal)
+              <div class="rpc-viz-legend">
+                <span
+                  ><i
+                    style="
+                      background: #1e3a5f;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 2px;
+                      display: inline-block;
+                    "
+                  ></i>
+                  Zero</span
+                >
+                <span
+                  ><i
+                    style="
+                      background: #0ea5e9;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 2px;
+                      display: inline-block;
+                    "
+                  ></i>
+                  Low</span
+                >
+                <span
+                  ><i
+                    style="
+                      background: #22d3ee;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 2px;
+                      display: inline-block;
+                    "
+                  ></i>
+                  Medium</span
+                >
+                <span
+                  ><i
+                    style="
+                      background: #fbbf24;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 2px;
+                      display: inline-block;
+                    "
+                  ></i>
+                  High</span
+                >
+                <span
+                  ><i
+                    style="
+                      background: #f87171;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 2px;
+                      display: inline-block;
+                    "
+                  ></i>
+                  Peak</span
+                >
+              </div>
+            </h3>
+            <canvas
+              id="rpcTopCanvas"
+              height="180"
+              aria-label="PCB top view showing return current density heatmap"
+            ></canvas>
+          </div>
+
+          <!-- Charts row -->
+          <div class="rpc-charts-row">
+            <div class="card rpc-chart-card">
+              <h4>Return Path Impedance vs Frequency</h4>
+              <div class="rpc-chart-wrap">
+                <canvas id="rpcImpChart" aria-label="Impedance vs frequency chart"></canvas>
+              </div>
+            </div>
+            <div class="card rpc-chart-card">
+              <h4>Loop Inductance vs Plane Height</h4>
+              <div class="rpc-chart-wrap">
+                <canvas id="rpcIndChart" aria-label="Inductance vs height chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMI Gauge + Return current distribution -->
+          <div class="rpc-charts-row">
+            <div class="card rpc-emi-card">
+              <h4>EMI Risk Score</h4>
+              <div class="rpc-gauge-wrap">
+                <canvas id="rpcGaugeCanvas" aria-label="EMI risk gauge"></canvas>
+              </div>
+              <div class="rpc-gauge-label">
+                <div class="rpc-gauge-score" id="gaugeScore">—</div>
+                <div class="rpc-gauge-text" id="gaugeText">Run calculation</div>
+              </div>
+            </div>
+            <div class="card rpc-chart-card">
+              <h4>Return Current Distribution</h4>
+              <div class="rpc-chart-wrap">
+                <canvas id="rpcDistChart" aria-label="Return current distribution chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="card rpc-viz-card">
+            <h3 style="margin-bottom: var(--sp-4)">
+              Engineering Recommendations
+              <button
+                class="help-tip"
+                data-help-topic="results"
+                aria-label="Help interpreting results"
+              >
+                ?
+              </button>
+            </h3>
+            <div class="rpc-recs" id="rpcRecs">
+              <div class="rpc-rec info">
+                <span class="rpc-rec-icon">ℹ️</span>
+                <div>
+                  <strong>Enter parameters and click Calculate</strong>Set your trace geometry,
+                  reference plane type, and signal parameters above to get actionable
+                  recommendations.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scenario Comparison -->
+          <div class="card rpc-viz-card" id="rpc-compare">
+            <h3 style="margin-bottom: var(--sp-4)">Scenario Comparison</h3>
+            <div class="rpc-scenario-tabs">
+              <button class="rpc-tab active" id="tabA">Scenario A (current)</button>
+              <button class="rpc-tab" id="tabB">Scenario B (reference)</button>
+            </div>
+            <div class="rpc-compare-grid">
+              <div class="rpc-scenario-card active" id="scenarioA">
+                <div class="rpc-scenario-label">Scenario A</div>
+                <div class="rpc-scenario-name" id="scAName">Current Design</div>
+                <div class="rpc-scenario-metrics" id="scAMetrics">
+                  <div class="rpc-scenario-metric">
+                    <span>Loop Inductance</span><span id="scA-L">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>Loop Area</span><span id="scA-area">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>EMI Risk</span><span id="scA-emi">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>Impedance @ BW</span><span id="scA-z">—</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpc-scenario-card" id="scenarioB">
+                <div class="rpc-scenario-label">Scenario B</div>
+                <div class="rpc-scenario-name">Solid Ground Plane</div>
+                <div class="rpc-scenario-metrics">
+                  <div class="rpc-scenario-metric">
+                    <span>Loop Inductance</span><span id="scB-L">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>Loop Area</span><span id="scB-area">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>EMI Risk</span><span id="scB-emi">—</span>
+                  </div>
+                  <div class="rpc-scenario-metric">
+                    <span>Impedance @ BW</span><span id="scB-z">—</span>
+                  </div>
+                </div>
+                <div class="rpc-improve-badge" id="improveBadge" hidden>
+                  ▼ <span id="improveText">—</span> improvement
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Export -->
+          <div class="card rpc-viz-card">
+            <h3 style="margin-bottom: var(--sp-4)">Export Results</h3>
+            <div class="rpc-export-row">
+              <button class="btn btn-outline" id="exportPNG">📷 Save PNG</button>
+              <button class="btn btn-outline" id="exportCSV">📊 Export CSV</button>
+              <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+            </div>
+          </div>
+        </section>
+      </div>
+      <!-- /workspace -->
+
+      <!-- ── Educational Section ────────────────────────────────────── -->
+      <section class="rpc-section" id="rpc-learn" aria-labelledby="learnHead">
+        <h2 class="rpc-section-head" id="learnHead">Understanding Return Paths</h2>
+        <p class="rpc-section-sub">
+          Return current is as important as the signal itself. How it flows determines signal
+          integrity, EMI, and crosstalk in your PCB design.
+        </p>
+
+        <div class="rpc-concept-grid">
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">⚡</div>
+            <h3>What is Return Current?</h3>
+            <p>
+              Every signal current must return to its source. At low frequencies the return path
+              follows the shortest DC path. At high frequencies (&gt;1 MHz) return current flows
+              directly beneath the signal trace on the nearest reference plane — following the path
+              of minimum inductance, not minimum resistance.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">📐</div>
+            <h3>Path of Least Impedance</h3>
+            <p>
+              Impedance = R + jωL. At high frequencies, ωL dominates. Current concentrates where L
+              is lowest — directly beneath the trace. The magnetic fields of signal and return
+              currents cancel, minimising loop inductance and radiated EMI.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">🔁</div>
+            <h3>Loop Area &amp; EMI</h3>
+            <p>
+              Radiated EMI is proportional to loop area × current × frequency². Reducing the height
+              between trace and reference plane cuts loop area and dramatically reduces EMI. A 2×
+              reduction in height halves the loop area.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">✂️</div>
+            <h3>Plane Discontinuities</h3>
+            <p>
+              Slots, splits, and gaps in the reference plane force return current to detour around
+              the discontinuity. The detour increases loop area, injects inductance into the return
+              path, and can cause crosstalk with adjacent traces.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">🔩</div>
+            <h3>Stitching Vias</h3>
+            <p>
+              When a signal transitions between layers via a via, the return current must also
+              change reference planes. Stitching vias placed close to the signal via provide a
+              low-inductance return path for the reference plane current.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">⚡</div>
+            <h3>Ground Bounce</h3>
+            <p>
+              When multiple outputs switch simultaneously, the shared inductance of the return path
+              causes the ground potential to momentarily rise. This "ground bounce" can corrupt
+              logic levels and increase jitter on high-speed signals.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">🌊</div>
+            <h3>Power Planes as References</h3>
+            <p>
+              Power planes can serve as AC return paths at high frequencies if they are
+              well-decoupled. Place decoupling capacitors near the trace-to-power-plane transition
+              to provide a low-impedance return path.
+            </p>
+          </div>
+          <div class="rpc-concept">
+            <div class="rpc-concept-icon">📡</div>
+            <h3>Image Currents</h3>
+            <p>
+              In transmission line theory, the reference plane carries an "image" of the signal
+              current — equal in magnitude, opposite in direction. This image current is what
+              controls the impedance of the trace and confines the electromagnetic field.
+            </p>
+          </div>
+        </div>
+
+        <!-- PCB Design Rules -->
+        <h3
+          style="
+            margin-top: var(--sp-10);
+            margin-bottom: var(--sp-4);
+            font-size: 1.125rem;
+            font-weight: 800;
+          "
+        >
+          PCB Return Path Design Rules
+        </h3>
+        <div class="rpc-rules">
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R1</span>
+            <div>
+              <strong>Never route across a split plane.</strong> A split plane forces return current
+              to detour, increasing loop area and EMI by 10–40 dB.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R2</span>
+            <div>
+              <strong>Always provide a continuous reference plane.</strong> Every high-speed signal
+              needs an unbroken ground or power plane within 4–8 mil directly beneath or above it.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R3</span>
+            <div>
+              <strong>Add stitching vias at every layer transition.</strong> Place at least one
+              stitching via within 2 mm of the signal via, on the same net as the reference plane.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R4</span>
+            <div>
+              <strong>Minimise the loop area.</strong> Reduce the height between trace and plane.
+              Keep the trace short. Use stripline for sensitive signals.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R5</span>
+            <div>
+              <strong>Maintain a continuous return path.</strong> Avoid connectors, cables, and vias
+              that break the return current without providing an alternative low-impedance path.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R6</span>
+            <div>
+              <strong>Avoid floating copper.</strong> Copper pours not connected to ground can act
+              as antennas. Tie all copper pours to ground with vias every 1/20 wavelength.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R7</span>
+            <div>
+              <strong>Use decoupling capacitors near power-plane references.</strong> When a signal
+              references a power plane, place a 100 nF decoupling capacitor within 5 mm of the trace
+              via to provide the return path.
+            </div>
+          </div>
+          <div class="rpc-rule">
+            <span class="rpc-rule-num">R8</span>
+            <div>
+              <strong>Minimise reference plane transitions.</strong> Each time a signal changes
+              reference planes (e.g., GND → PWR), add a stitching capacitor between the planes at
+              that location.
+            </div>
+          </div>
+        </div>
+
+        <!-- Standards -->
+        <h3
+          style="
+            margin-top: var(--sp-10);
+            margin-bottom: var(--sp-4);
+            font-size: 1.125rem;
+            font-weight: 800;
+          "
+        >
+          Standards &amp; References
+        </h3>
+        <div class="card" style="overflow-x: auto">
+          <table class="rpc-std-table" aria-label="Standards and references">
+            <thead>
+              <tr>
+                <th>Standard / Reference</th>
+                <th>Topic</th>
+                <th>Key Guidance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>IPC-2221B</td>
+                <td>PCB Design Standard</td>
+                <td>
+                  Conductor spacing, layer stackup, and reference plane requirements for signal
+                  integrity.
+                </td>
+              </tr>
+              <tr>
+                <td>IPC-2152</td>
+                <td>Current Carrying Capacity</td>
+                <td>
+                  Trace width vs current tables; relevant for power traces and return current
+                  sizing.
+                </td>
+              </tr>
+              <tr>
+                <td>IEC 61000-4-x</td>
+                <td>EMC Immunity</td>
+                <td>
+                  Defines immunity test levels; good return path practice directly improves immunity
+                  margins.
+                </td>
+              </tr>
+              <tr>
+                <td>IEEE Std 1076.1</td>
+                <td>VHDL-AMS</td>
+                <td>
+                  Referenced in simulation models for SI analysis including return path effects.
+                </td>
+              </tr>
+              <tr>
+                <td>Howard Johnson — <em>High Speed Signal Propagation</em></td>
+                <td>SI Theory</td>
+                <td>
+                  Definitive treatment of return currents, loop inductance, and reference planes
+                  (Ch. 11).
+                </td>
+              </tr>
+              <tr>
+                <td>Eric Bogatin — <em>Signal and Power Integrity Simplified</em></td>
+                <td>SI Fundamentals</td>
+                <td>
+                  Accessible coverage of return paths, plane discontinuities, and stitching vias.
+                </td>
+              </tr>
+              <tr>
+                <td>Henry Ott — <em>Electromagnetic Compatibility Engineering</em></td>
+                <td>EMC</td>
+                <td>
+                  Ground planes, loop area reduction, and differential mode EMI from return path
+                  discontinuities.
+                </td>
+              </tr>
+              <tr>
+                <td>Lee Ritchey — PCB Insights</td>
+                <td>PCB Design Rules</td>
+                <td>
+                  Practical rules for reference planes, layer transitions, and via inductance in
+                  production designs.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── FAQ ───────────────────────────────────────────────────── -->
+      <section class="rpc-section" id="rpc-faq" aria-labelledby="faqHead">
+        <h2 class="rpc-section-head" id="faqHead">Frequently Asked Questions</h2>
+        <p class="rpc-section-sub">
+          Common questions about return paths, ground planes, and EMC design.
+        </p>
+        <div class="rpc-faq" itemscope itemtype="https://schema.org/FAQPage">
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">Why does return current not follow the shortest path?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                At DC and low frequencies, current follows the path of least resistance (shortest
+                path). Above about 1 MHz, inductive impedance (Z = jωL) dominates over resistance.
+                Current redistributes to minimise total loop inductance — which means flowing
+                directly beneath the signal trace on the reference plane, even if this is a longer
+                physical path. The current "self-organises" because the magnetic fields of the
+                signal and return cancel when they are closest together, reducing stored energy.
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">How many stitching vias should I use?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                At a minimum, place one stitching via within 2 mm of the signal via. For frequencies
+                above 500 MHz, use two vias — one on each side of the signal via. For GHz-range
+                signals, place stitching vias along the trace perimeter at intervals no greater than
+                λ/20 (wavelength in the PCB material at the highest significant frequency). In
+                practice, a via every 5–8 mm is a common rule of thumb for most high-speed digital
+                designs up to 5 GHz.
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">Can power planes be used as return paths?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                Yes, at high frequencies a power plane behaves similarly to a ground plane as a
+                reference — provided the plane is well-decoupled. The return current flows through
+                the decoupling capacitors between the power and ground planes. Place a 100 nF (or
+                smaller) capacitor within 5 mm of any signal via that transitions from a GND
+                reference to a PWR reference. Without decoupling, the return impedance is high at
+                the resonant frequency of the plane cavity, which can cause signal integrity and EMI
+                problems.
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">Why do plane splits create EMI?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                A slot or split in the reference plane forces the return current to flow around the
+                discontinuity. This greatly increases the loop area of the signal-return current
+                pair. Radiated EMI is proportional to loop area × current × frequency². A slot that
+                forces the return current to detour by 10 mm at 100 MHz can increase radiated
+                emissions by 20–40 dB. This is why crossing a split plane is one of the most common
+                causes of EMC test failures.
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">How does rise time affect return current?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                Faster rise times mean higher bandwidth (BW ≈ 0.35/tr). Higher frequency content
+                means more energy at frequencies where inductive effects dominate. This tightens the
+                return current distribution: at 1 GHz the return current is concentrated in a strip
+                roughly 3× the height above the plane (95% of energy), compared to a much wider
+                spread at 10 MHz. Faster edges also increase the voltage induced across any
+                inductance in the return path (V = L × dI/dt), making good return path practice more
+                critical for fast logic families (LVDS, PCIe, DDR4/5, etc.).
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name">What is the 3H rule for return path width?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                At high frequencies, 95% of the return current flows within a strip ±3H wide centred
+                beneath the signal trace, where H is the height of the trace above the reference
+                plane. For a trace 4 mil above the plane, 95% of return current flows within ±12
+                mil. This rule helps you ensure the reference plane is wide enough and that no
+                discontinuities exist within that 6H strip beneath the trace.
+              </div>
+            </div>
+          </div>
+          <div
+            class="rpc-faq-item"
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <button class="rpc-faq-q" aria-expanded="false">
+              <span itemprop="name"
+                >What is the difference between common mode and differential mode return
+                currents?</span
+              ><span class="rpc-faq-chevron">▾</span>
+            </button>
+            <div
+              class="rpc-faq-a"
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">
+                Differential mode current flows in opposite directions through the two conductors of
+                a pair — signal and return. These fields cancel and produce little radiation. Common
+                mode current flows in the same direction through both conductors and returns via
+                parasitic paths (chassis, cables). Common mode is the primary source of radiated EMI
+                and is typically caused by imperfect return paths — ground bounce, plane
+                discontinuities, and asymmetries in differential pairs that convert differential
+                energy to common mode.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- /rpc-page -->
+
+    <div id="global-footer"></div>
+
+    <!-- ── HELP DIALOG ── -->
+    <div class="help-backdrop" id="rpc-help-dialog" hidden>
+      <section class="help-panel" role="dialog" aria-modal="true" aria-labelledby="rpc-help-title">
+        <header class="help-header">
+          <div>
+            <span class="rpc-kicker" style="display: block; margin-bottom: 4px"
+              >Built-in Help Center</span
+            >
+            <h2 id="rpc-help-title">Return Path Calculator Guide</h2>
+            <p>Version 1.0 · Updated July 2026</p>
+          </div>
+          <button class="help-close" data-help-close aria-label="Close help">×</button>
+        </header>
+        <div class="help-search-wrap">
+          <label for="rpc-help-search">Search help topics</label>
+          <input
+            class="input"
+            id="rpc-help-search"
+            type="search"
+            placeholder="Try loop inductance, EMI, stitching via, split plane…"
+            autocomplete="off"
+          />
+          <span id="rpc-help-search-status" aria-live="polite"></span>
+        </div>
+        <div class="help-layout">
+          <nav class="help-nav" id="rpc-help-nav" aria-label="Help topics"></nav>
+          <article class="help-content" id="rpc-help-content" tabindex="0"></article>
+        </div>
+        <footer class="help-footer">
+          <button class="btn btn-outline" id="rpc-help-start-tour">Start feature tour</button>
+        </footer>
+      </section>
+    </div>
+
+    <!-- ── TOUR ── -->
+    <div class="tour-backdrop" id="rpc-tour-backdrop" hidden></div>
+    <aside
+      class="tour-popover"
+      id="rpc-tour-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rpc-tour-title"
+      hidden
+    >
+      <span id="rpc-tour-progress"></span>
+      <h3 id="rpc-tour-title"></h3>
+      <p id="rpc-tour-text"></p>
+      <div class="tour-actions">
+        <button class="btn btn-ghost btn-sm" id="rpc-tour-skip">Skip</button>
+        <button class="btn btn-outline btn-sm" id="rpc-tour-prev">Previous</button>
+        <button class="btn btn-primary btn-sm" id="rpc-tour-next">Next</button>
+      </div>
+    </aside>
+
+    <script src="../../assets/js/core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      /* ─────────────────────────────────────────────────────────────────────
+       Return Path Calculator — Main Script
+       All calculations use SI base units internally; display in convenient units.
+    ───────────────────────────────────────────────────────────────────── */
+      (function () {
+        'use strict';
+
+        /* ── Constants ─────────────────────────────────────────────────── */
+        var MU0 = 4 * Math.PI * 1e-7; // H/m
+        var EPS0 = 8.854e-12; // F/m
+        var MIL = 25.4e-6; // 1 mil in metres
+        var MM = 1e-3; // 1 mm in metres
+
+        /* ── State ─────────────────────────────────────────────────────── */
+        var lastResult = null;
+        var impChart = null,
+          indChart = null,
+          distChart = null,
+          gaugeChart = null;
+        var savedScenarioB = null;
+
+        /* ── DOM helpers ───────────────────────────────────────────────── */
+        function $(id) {
+          return document.getElementById(id);
+        }
+        function num(id, fallback) {
+          var v = parseFloat($(id).value);
+          return isNaN(v) ? fallback || 0 : v;
+        }
+        function sel(id) {
+          return $(id).value;
+        }
+
+        /* ── Unit sync labels ──────────────────────────────────────────── */
+        $('riseTimeUnitSel').addEventListener('change', function () {
+          $('riseTimeUnit').textContent = this.options[this.selectedIndex].text;
+        });
+        $('switchFreqUnitSel').addEventListener('change', function () {
+          $('switchFreqUnit').textContent = this.options[this.selectedIndex].text;
+        });
+
+        /* ── FAQ accordion ─────────────────────────────────────────────── */
+        document.querySelectorAll('.rpc-faq-q').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var item = this.closest('.rpc-faq-item');
+            var open = item.classList.toggle('open');
+            this.setAttribute('aria-expanded', open);
+          });
+        });
+
+        /* ── Preset ────────────────────────────────────────────────────── */
+        $('rpcPresetBtn').addEventListener('click', function () {
+          $('signalType').value = 'clock';
+          $('layerType').value = 'microstrip';
+          $('riseTime').value = '1.0';
+          $('riseTimeUnitSel').value = '1e-9';
+          $('riseTimeUnit').textContent = 'ns';
+          $('switchFreq').value = '100';
+          $('switchFreqUnitSel').value = '1e6';
+          $('switchFreqUnit').textContent = 'MHz';
+          $('traceWidth').value = '5';
+          $('traceLength').value = '100';
+          $('heightAbove').value = '4';
+          $('copperThick').value = '0.035';
+          $('epsilonR').value = '4.2';
+          $('layerCount').value = '4';
+          $('planeType').value = 'solid';
+          $('planeTransition').value = 'none';
+          $('stitchVias').value = '2';
+          $('viaSpacing').value = '5';
+          $('viaDia').value = '10';
+          $('gapWidth').value = '0';
+          calculate();
+        });
+
+        /* ── Reset ─────────────────────────────────────────────────────── */
+        $('rpcResetBtn').addEventListener('click', function () {
+          document.querySelectorAll('.rpc-inputs input, .rpc-inputs select').forEach(function (el) {
+            el.value = el.defaultValue;
+          });
+          lastResult = null;
+          $('rpcAlert').className = 'rpc-alert';
+          clearKPIs();
+        });
+
+        /* ── Calculate buttons ─────────────────────────────────────────── */
+        $('rpcCalcBtn').addEventListener('click', calculate);
+        $('rpcCalcBtn2').addEventListener('click', calculate);
+
+        /* ── Scenario tabs ─────────────────────────────────────────────── */
+        $('tabB').addEventListener('click', function () {
+          if (lastResult) {
+            savedScenarioB = lastResult;
+            updateScenarioB(lastResult);
+            showAlert('Scenario B saved. Adjust inputs and recalculate for Scenario A.', 'info');
+          }
+        });
+
+        /* ── Export PNG ────────────────────────────────────────────────── */
+        $('exportPNG').addEventListener('click', function () {
+          var canvas = $('rpcCanvas');
+          var link = document.createElement('a');
+          link.download = 'return-path-' + Date.now() + '.png';
+          link.href = canvas.toDataURL();
+          link.click();
+        });
+
+        /* ── Export CSV ────────────────────────────────────────────────── */
+        $('exportCSV').addEventListener('click', function () {
+          if (!lastResult) {
+            showAlert('Run a calculation first.', 'warn');
+            return;
+          }
+          var r = lastResult;
+          var rows = [
+            ['Parameter', 'Value', 'Unit'],
+            ['Bandwidth', r.bw.toFixed(2), 'MHz'],
+            ['Loop Inductance', r.L_nH.toFixed(3), 'nH'],
+            ['Loop Area', r.loopArea_mm2.toFixed(2), 'mm²'],
+            ['Return Path Impedance @ BW', r.Z_at_bw.toFixed(4), 'Ω'],
+            ['Via Inductance', r.viaL_pH.toFixed(1), 'pH'],
+            ['Path Efficiency', r.efficiency.toFixed(1), '%'],
+            ['EMI Risk Score', r.emiScore.toFixed(0), '/100'],
+            ['Rise Time', r.tr_s * 1e9, 'ns'],
+            ['Switching Frequency', r.fSwitch / 1e6, 'MHz'],
+            ['Trace Width', r.w_m / MIL, 'mil'],
+            ['Trace Length', r.len_m / MM, 'mm'],
+            ['Height Above Plane', r.h_m / MIL, 'mil'],
+          ];
+          var csv = rows
+            .map(function (r) {
+              return r.join(',');
+            })
+            .join('\n');
+          var blob = new Blob([csv], { type: 'text/csv' });
+          var link = document.createElement('a');
+          link.download = 'return-path-' + Date.now() + '.csv';
+          link.href = URL.createObjectURL(blob);
+          link.click();
+        });
+
+        /* ════════════════════════════════════════════════════════════════
+         CALCULATIONS
+      ════════════════════════════════════════════════════════════════ */
+        function calculate() {
+          /* ── Gather inputs ─────────────────────────────────────────── */
+          var tr_s = num('riseTime') * parseFloat(sel('riseTimeUnitSel')); // rise time [s]
+          var fSwitch = num('switchFreq') * parseFloat(sel('switchFreqUnitSel')); // [Hz]
+          var w_m = num('traceWidth', 5) * MIL; // trace width [m]
+          var len_m = num('traceLength', 100) * MM; // trace length [m]
+          var h_m = num('heightAbove', 4) * MIL; // height above plane [m]
+          var t_m = num('copperThick', 0.035) * 1e-3; // copper thickness [m]
+          var er = num('epsilonR', 4.2);
+          var nVias = num('stitchVias', 0);
+          var viaSpac = num('viaSpacing', 5) * MM; // [m]
+          var viaDiam = num('viaDia', 10) * MIL; // [m]
+          var gapW = num('gapWidth', 0) * MM; // [m]
+          var planeT = sel('planeType');
+          var planeTr = sel('planeTransition');
+          var sigType = sel('signalType');
+          var layerT = sel('layerType');
+
+          /* ── Validate ──────────────────────────────────────────────── */
+          if (tr_s <= 0 || isNaN(tr_s)) {
+            showAlert('Rise time must be > 0.', 'err');
+            return;
+          }
+          if (w_m <= 0) {
+            showAlert('Trace width must be > 0.', 'err');
+            return;
+          }
+          if (len_m <= 0) {
+            showAlert('Trace length must be > 0.', 'err');
+            return;
+          }
+          if (h_m <= 0) {
+            showAlert('Height above plane must be > 0.', 'err');
+            return;
+          }
+          hideAlert();
+
+          /* ── 1. Bandwidth ──────────────────────────────────────────── */
+          var bw_Hz = 0.35 / tr_s; // [Hz]  Bogatin / IPC rule
+          var bw_MHz = bw_Hz / 1e6;
+
+          /* ── 2. Loop area ──────────────────────────────────────────── */
+          // Effective height: for stripline use average of top+bottom plane distance
+          var h_eff = layerT === 'stripline' ? h_m / 2 : h_m;
+          var loopArea_m2 = len_m * h_eff;
+          var loopArea_mm2 = loopArea_m2 * 1e6;
+
+          /* ── 3. Loop inductance (rectangular loop approximation) ─────
+           L ≈ (μ₀ / π) × len × ln(2h/w + 0.5) for w < h
+           Use Grover formula for wide traces:
+           L ≈ μ₀ × len × (2h/w) for w >> h
+           General: L_partial = μ₀ × len × [ ln(2len/(w+h)) + 0.5 + (w+h)/(3len) ]
+        ── */
+          var aspectRatio = (2 * h_eff) / w_m;
+          var L_m;
+          if (w_m >= h_eff) {
+            // Wide trace (microstrip dominant)
+            L_m = (MU0 * loopArea_m2) / w_m;
+          } else {
+            // Narrow trace
+            L_m = (MU0 / Math.PI) * len_m * Math.log(aspectRatio + 0.5);
+          }
+          // Plane type modifier
+          var planeModifier = { solid: 1.0, split: 3.5, power: 1.2, float: 8.0 }[planeT] || 1.0;
+          // Transition modifier
+          var transMod =
+            { none: 1.0, via: 1.3, connector: 2.0, cable: 5.0, slot: 4.0 }[planeTr] || 1.0;
+          L_m *= planeModifier * transMod;
+          var L_nH = L_m * 1e9;
+
+          /* ── 4. DC resistance of trace ─────────────────────────────── */
+          var rho = 1.72e-8; // copper resistivity Ω·m
+          var R_dc = (rho * len_m) / (w_m * t_m); // [Ω]
+
+          /* ── 5. Return path impedance vs frequency ─────────────────── */
+          // Z(f) = √(R² + (2πfL)²)
+          var omega_bw = 2 * Math.PI * bw_Hz;
+          var Z_at_bw = Math.sqrt(R_dc * R_dc + Math.pow(omega_bw * L_m, 2));
+
+          /* ── 6. Via inductance ─────────────────────────────────────── */
+          // L_via ≈ 5.08 × h_via × [ln(4×h_via/d) + 1] pH/mm × h_via_mm
+          // Simplified: L_via ≈ 20 × h_mil × ln(4h/d) pH  (Johnson formula)
+          var viaL_pH = 0;
+          if (planeTr !== 'none') {
+            var h_via_mm = ((h_m / MM) * parseFloat(sel('layerCount'))) / 2; // rough estimate
+            var d_mm = viaDiam / MM;
+            viaL_pH = 5.08 * h_via_mm * (Math.log((4 * h_via_mm) / d_mm) + 1);
+            if (viaL_pH < 0) viaL_pH = 0;
+          }
+
+          /* ── 7. Gap inductance (slot crossing) ─────────────────────── */
+          var gapL_nH = 0;
+          if (gapW > 0) {
+            // Each mm of gap ≈ 0.5 nH additional inductance (rule of thumb)
+            gapL_nH = (gapW / MM) * 0.5;
+          }
+
+          /* ── 8. EMI risk score (0–100) ─────────────────────────────── */
+          // Factors: loop area, frequency, plane type, transitions
+          var emiLoop = Math.min(loopArea_mm2 / 500, 1); // normalised to 500 mm² ref
+          var emiFreq = Math.min(bw_Hz / 1e9, 1); // normalised to 1 GHz ref
+          var emiPlane = { solid: 0, split: 0.7, power: 0.2, float: 1.0 }[planeT] || 0;
+          var emiTrans = { none: 0, via: 0.1, connector: 0.3, cable: 0.5, slot: 0.6 }[planeTr] || 0;
+          var emiVia = nVias > 0 ? Math.max(0, 0.2 - nVias * 0.05) : 0.2;
+          var emiScore = Math.min(
+            100,
+            Math.round(emiLoop * 40 + emiFreq * 20 + emiPlane * 25 + emiTrans * 10 + emiVia * 5)
+          );
+
+          /* ── 9. Path efficiency ─────────────────────────────────────── */
+          var maxLoopIdeal = loopArea_mm2 / planeModifier / transMod;
+          var efficiency = Math.max(
+            0,
+            Math.min(
+              100,
+              100 * (1 - (loopArea_mm2 - maxLoopIdeal) / Math.max(maxLoopIdeal, 1) / planeModifier)
+            )
+          );
+          // Simpler approach: inversely related to modifier product
+          efficiency = Math.max(5, Math.min(100, 100 / (planeModifier * transMod)));
+
+          /* ── 10. Skin depth at BW ───────────────────────────────────── */
+          var skinDepth_m = Math.sqrt(rho / (Math.PI * bw_Hz * MU0));
+
+          /* ── 11. Return path width (3H rule) ───────────────────────── */
+          var returnWidth_m = 6 * h_eff; // 95% of current within ±3H
+
+          /* ── Store result ───────────────────────────────────────────── */
+          lastResult = {
+            bw: bw_MHz,
+            bw_Hz: bw_Hz,
+            L_nH: L_nH,
+            L_m: L_m,
+            loopArea_mm2: loopArea_mm2,
+            loopArea_m2: loopArea_m2,
+            Z_at_bw: Z_at_bw,
+            R_dc: R_dc,
+            viaL_pH: viaL_pH,
+            gapL_nH: gapL_nH,
+            emiScore: emiScore,
+            efficiency: efficiency,
+            skinDepth_um: skinDepth_m * 1e6,
+            returnWidth_mm: returnWidth_m * 1e3,
+            tr_s: tr_s,
+            fSwitch: fSwitch,
+            w_m: w_m,
+            len_m: len_m,
+            h_m: h_eff,
+            planeT: planeT,
+            planeTr: planeTr,
+            nVias: nVias,
+            sigType: sigType,
+            gapW: gapW,
+            viaSpac: viaSpac,
+            viaDiam: viaDiam,
+          };
+
+          /* ── Render all outputs ─────────────────────────────────────── */
+          renderKPIs(lastResult);
+          renderPCBCanvas(lastResult);
+          renderTopCanvas(lastResult);
+          renderImpChart(lastResult);
+          renderIndChart(lastResult);
+          renderDistChart(lastResult);
+          renderGauge(lastResult);
+          renderRecommendations(lastResult);
+          renderScenarioA(lastResult);
+          if (savedScenarioB) {
+            showImprovement(lastResult, savedScenarioB);
+          }
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+         RENDER KPIs
+      ════════════════════════════════════════════════════════════════ */
+        function renderKPIs(r) {
+          function setKPI(id, value, unit, level) {
+            var el = $(id);
+            el.querySelector('.rpc-kpi-value').textContent = value;
+            el.querySelector('.rpc-kpi-unit').textContent = unit;
+            el.className = 'rpc-kpi' + (level ? ' ' + level : '');
+          }
+          var emiLevel = r.emiScore < 30 ? 'good' : r.emiScore < 60 ? 'warn' : 'bad';
+          var lLevel = r.L_nH < 5 ? 'good' : r.L_nH < 20 ? 'warn' : 'bad';
+          var effLevel = r.efficiency > 80 ? 'good' : r.efficiency > 50 ? 'warn' : 'bad';
+          var zLevel = r.Z_at_bw < 1 ? 'good' : r.Z_at_bw < 10 ? 'warn' : 'bad';
+
+          setKPI(
+            'kpiBW',
+            r.bw < 1000 ? r.bw.toFixed(1) : (r.bw / 1000).toFixed(2),
+            r.bw < 1000 ? 'MHz' : 'GHz',
+            ''
+          );
+          setKPI('kpiL', r.L_nH.toFixed(3), 'nH', lLevel);
+          setKPI(
+            'kpiLoopArea',
+            r.loopArea_mm2.toFixed(1),
+            'mm²',
+            r.loopArea_mm2 < 50 ? 'good' : r.loopArea_mm2 < 200 ? 'warn' : 'bad'
+          );
+          setKPI(
+            'kpiZ',
+            r.Z_at_bw < 1 ? (r.Z_at_bw * 1000).toFixed(1) + ' mΩ' : r.Z_at_bw.toFixed(3) + ' Ω',
+            '@ BW',
+            zLevel
+          );
+          setKPI('kpiEff', r.efficiency.toFixed(1), '%', effLevel);
+          setKPI(
+            'kpiViaL',
+            r.viaL_pH.toFixed(1),
+            'pH',
+            r.viaL_pH < 100 ? 'good' : r.viaL_pH < 500 ? 'warn' : 'bad'
+          );
+        }
+
+        function clearKPIs() {
+          document.querySelectorAll('.rpc-kpi-value').forEach(function (el) {
+            el.textContent = '—';
+          });
+          document.querySelectorAll('.rpc-kpi-unit').forEach(function (el) {
+            el.textContent = '';
+          });
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+         PCB CANVAS VISUALIZATION
+      ════════════════════════════════════════════════════════════════ */
+        function renderPCBCanvas(r) {
+          var canvas = $('rpcCanvas');
+          var W = canvas.offsetWidth || 600;
+          canvas.width = W * (window.devicePixelRatio || 1);
+          canvas.height = 240 * (window.devicePixelRatio || 1);
+          var ctx = canvas.getContext('2d');
+          var dpr = window.devicePixelRatio || 1;
+          ctx.scale(dpr, dpr);
+          var cw = W,
+            ch = 240;
+          ctx.clearRect(0, 0, cw, ch);
+
+          /* ── Colours ────────────────────────────────────────────────── */
+          var isDark = document.documentElement.dataset.theme !== 'light';
+          var bgColor = isDark ? '#0a0e1a' : '#f8fafc';
+          var dielectricC = isDark ? '#1a2540' : '#dbeafe';
+          var traceColor = '#d97706';
+          var planeColor = '#94a3b8';
+          var textColor = isDark ? '#94a3b8' : '#475569';
+          var dimColor = isDark ? '#334155' : '#cbd5e1';
+
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, cw, ch);
+
+          /* ── Path quality from plane + transition ───────────────────── */
+          var pathQuality =
+            r.planeT === 'float'
+              ? 'bad'
+              : r.planeT === 'split' || r.planeTr === 'slot'
+                ? 'bad'
+                : r.planeTr === 'cable' || r.planeTr === 'connector'
+                  ? 'warn'
+                  : r.planeT === 'power'
+                    ? 'warn'
+                    : 'good';
+          var arrowColors = { good: '#34d399', warn: '#fbbf24', bad: '#f87171' };
+          var arrowColor = arrowColors[pathQuality];
+
+          /* ── Scale height → pixels ──────────────────────────────────────
+             Map real geometry to the canvas.
+             Min displayable gap = 28 px, max = 110 px.
+             Trace width: scale w_m relative to h_m, clamp 4–28 px.
+          ─────────────────────────────────────────────────────────────── */
+          var h_mil = r.h_m / MIL;
+          var w_mil = r.w_m / MIL;
+
+          // Height: 1 mil = 3px, clamped [28, 110]
+          var heightPx = Math.min(Math.max(h_mil * 3, 28), 110);
+          // Trace width pixel — wider traces fill more of the canvas
+          var traceMaxW = W - 80; // usable width
+          var traceH_px = Math.min(Math.max(Math.round(h_mil * 0.4 + 2), 4), 20);
+
+          /* Fixed layout anchors */
+          var padH = 40;
+          var pcbX = padH;
+          var pcbW = cw - padH * 2;
+          var planeY = ch - 40; // reference plane Y (bottom, fixed)
+          var planeH = 8;
+          var traceY = planeY - heightPx; // signal trace Y (moves with height)
+
+          /* ── PCB substrate (dielectric between trace and plane) ──────── */
+          ctx.fillStyle = dielectricC;
+          roundRect(ctx, pcbX, traceY, pcbW, planeY - traceY + planeH, 6);
+          ctx.fill();
+
+          /* ── Stripline: draw second plane above trace ────────────────── */
+          if (
+            r.sigType !== 'power' &&
+            document.getElementById('layerType') &&
+            document.getElementById('layerType').value === 'stripline'
+          ) {
+            var topPlaneY = traceY - 10;
+            ctx.fillStyle = planeColor;
+            roundRect(ctx, pcbX, topPlaneY, pcbW, 6, 3);
+            ctx.fill();
+            ctx.fillStyle = textColor;
+            ctx.font = '8px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('Top plane (stripline)', pcbX + 4, topPlaneY - 3);
+          }
+
+          /* ── Reference plane (bottom) ────────────────────────────────── */
+          var planePoor = r.planeT === 'float';
+          if (!planePoor) {
+            var gapFrac = r.gapW > 0 ? Math.min(r.gapW / (r.len_m || 0.1), 0.35) : 0;
+            var splitX = pcbX + pcbW * 0.5;
+            var gapPx = gapFrac > 0 ? Math.max(pcbW * gapFrac, 14) : 0;
+
+            ctx.fillStyle = r.planeT === 'power' ? '#818cf8' : planeColor;
+
+            if (gapPx > 0) {
+              roundRect(ctx, pcbX, planeY, splitX - pcbX - gapPx / 2, planeH, 3);
+              ctx.fill();
+              ctx.fillStyle = r.planeT === 'power' ? '#818cf8' : planeColor;
+              roundRect(
+                ctx,
+                splitX + gapPx / 2,
+                planeY,
+                pcbX + pcbW - splitX - gapPx / 2,
+                planeH,
+                3
+              );
+              ctx.fill();
+              // Gap hatching
+              ctx.strokeStyle = '#f87171';
+              ctx.lineWidth = 1.5;
+              ctx.setLineDash([3, 3]);
+              ctx.beginPath();
+              ctx.moveTo(splitX - gapPx / 2, planeY - 5);
+              ctx.lineTo(splitX - gapPx / 2, planeY + planeH + 5);
+              ctx.moveTo(splitX + gapPx / 2, planeY - 5);
+              ctx.lineTo(splitX + gapPx / 2, planeY + planeH + 5);
+              ctx.stroke();
+              ctx.setLineDash([]);
+              ctx.fillStyle = '#f87171';
+              ctx.font = 'bold 9px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillText('SPLIT / GAP', splitX, planeY + planeH + 14);
+            } else {
+              roundRect(ctx, pcbX, planeY, pcbW, planeH, 3);
+              ctx.fill();
+            }
+          } else {
+            ctx.strokeStyle = '#f87171';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 4]);
+            roundRect(ctx, pcbX, planeY, pcbW, planeH, 3);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+
+          /* ── Signal trace (scaled width) ─────────────────────────────── */
+          // Trace visually spans the canvas, height = traceH_px
+          ctx.fillStyle = traceColor;
+          roundRect(ctx, pcbX, traceY - traceH_px, pcbW, traceH_px, 2);
+          ctx.fill();
+
+          /* ── Return current arrows ────────────────────────────────────
+             Key physics reflected:
+             1. Higher BW → arrows more tightly concentrated under trace (3H rule)
+             2. Higher height → arrows more spread (wider σ fraction)
+             3. Plane discontinuities → arrows deviate/scatter outward
+             4. Arrow opacity falls off as a Gaussian with the 3H roll-off
+          ─────────────────────────────────────────────────────────────── */
+          var numArrows = 18;
+          // σ in fraction of pcbW: tight at low height/high BW, loose at high height
+          // 3H rule: 95% within ±3H. Normalise to canvas: 3H_mil / some_ref
+          var threeH_frac = Math.min((3 * h_mil) / Math.max(w_mil * 3, 30), 0.48);
+          // Plane scatter widens the distribution
+          var scatter =
+            {
+              solid: 1.0,
+              power: 1.3,
+              split: 3.0,
+              float: 5.0,
+            }[r.planeT] || 1.0;
+          var tranScatter =
+            {
+              none: 1.0,
+              via: 1.1,
+              connector: 1.5,
+              cable: 2.2,
+              slot: 3.2,
+            }[r.planeTr] || 1.0;
+          var sigma_frac = Math.min(threeH_frac * scatter * tranScatter, 0.5);
+
+          var aYtop = traceY; // base of trace
+          var aYbot = planeY; // top of reference plane
+
+          for (var i = 0; i < numArrows; i++) {
+            var frac = (i + 0.5) / numArrows; // 0..1 across canvas
+            var ax = pcbX + frac * pcbW;
+            var distFromCentre = Math.abs(frac - 0.5); // 0 = centre, 0.5 = edge
+
+            // Gaussian opacity: peak at centre, falls off with σ_frac
+            var gauss = Math.exp(-0.5 * Math.pow(distFromCentre / sigma_frac, 2));
+            var opacity = 0.12 + 0.78 * gauss;
+
+            // Deviation curves: arrows near a gap detour outward
+            var deviation = 0;
+            if (r.gapW > 0 && (r.planeT === 'split' || r.planeTr === 'slot')) {
+              var gapFrac3 = Math.min(r.gapW / (r.len_m || 0.1), 0.35);
+              var dFromGap = Math.abs(frac - 0.5);
+              if (dFromGap < gapFrac3 * 1.5) {
+                deviation = (1 - dFromGap / (gapFrac3 * 1.5)) * (heightPx * 0.7);
+              }
+            }
+            // Via transition: arrows kink at mid-point
+            var viakink = 0;
+            if (r.planeTr === 'via' && frac > 0.6 && frac < 0.75) {
+              viakink = (1 - Math.abs(frac - 0.675) / 0.075) * heightPx * 0.25;
+            }
+
+            ctx.strokeStyle = arrowColor;
+            ctx.globalAlpha = opacity;
+            ctx.lineWidth = 1 + gauss;
+            ctx.setLineDash([3, 2]);
+            ctx.beginPath();
+            ctx.moveTo(ax, aYtop);
+
+            if (deviation > 0) {
+              var ctrlX = ax + (frac < 0.5 ? -pcbW * 0.12 : pcbW * 0.12);
+              ctx.quadraticCurveTo(ctrlX, aYbot + deviation, ax, aYbot);
+            } else if (viakink > 0) {
+              ctx.quadraticCurveTo(ax + 10, (aYtop + aYbot) / 2 - viakink, ax, aYbot);
+            } else {
+              ctx.lineTo(ax, aYbot);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Arrowhead — size proportional to opacity
+            if (opacity > 0.2) {
+              ctx.globalAlpha = Math.min(opacity * 1.2, 1);
+              drawArrow(
+                ctx,
+                ax,
+                aYtop + (aYbot - aYtop) * 0.5,
+                ax,
+                aYtop + 2,
+                arrowColor,
+                3 + gauss * 2
+              );
+            }
+          }
+          ctx.globalAlpha = 1;
+
+          /* ── Current density heatmap on reference plane ──────────────
+             Width of the hot zone = 6H (3H each side), scaled to canvas pixels.
+             Plane scatter broadens the heatmap.
+          ─────────────────────────────────────────────────────────────── */
+          var hotSigma = sigma_frac * pcbW; // px
+          for (var j = 0; j < pcbW; j++) {
+            var pxFromCentre = Math.abs(j - pcbW / 2);
+            var heatDensity = Math.exp(-0.5 * Math.pow(pxFromCentre / hotSigma, 2));
+            ctx.fillStyle = arrowColor;
+            ctx.globalAlpha = heatDensity * 0.55;
+            ctx.fillRect(pcbX + j, planeY, 1, planeH);
+          }
+          ctx.globalAlpha = 1;
+
+          /* ── 3H zone marker on plane ─────────────────────────────────── */
+          var zone3H_px = Math.min(threeH_frac * pcbW, pcbW / 2 - 2);
+          var zoneX1 = pcbX + pcbW / 2 - zone3H_px;
+          var zoneX2 = pcbX + pcbW / 2 + zone3H_px;
+          ctx.strokeStyle = arrowColor;
+          ctx.globalAlpha = 0.5;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 2]);
+          ctx.beginPath();
+          ctx.moveTo(zoneX1, planeY - 3);
+          ctx.lineTo(zoneX1, planeY + planeH + 3);
+          ctx.moveTo(zoneX2, planeY - 3);
+          ctx.lineTo(zoneX2, planeY + planeH + 3);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 0.7;
+          ctx.font = '8px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = arrowColor;
+          ctx.fillText('← 3H zone →', pcbX + pcbW / 2, planeY + planeH + 13);
+          ctx.globalAlpha = 1;
+
+          /* ── Height dimension arrow ──────────────────────────────────── */
+          var annX = pcbX + pcbW - 12;
+          ctx.strokeStyle = dimColor;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(annX, traceY);
+          ctx.lineTo(annX, planeY);
+          ctx.stroke();
+          // tick marks
+          ctx.beginPath();
+          ctx.moveTo(annX - 4, traceY);
+          ctx.lineTo(annX + 4, traceY);
+          ctx.moveTo(annX - 4, planeY);
+          ctx.lineTo(annX + 4, planeY);
+          ctx.stroke();
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(h_mil.toFixed(1) + ' mil', annX - 6, (traceY + planeY) / 2 + 4);
+
+          /* ── Trace width label ───────────────────────────────────────── */
+          ctx.fillStyle = traceColor;
+          ctx.font = '8px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(w_mil.toFixed(1) + ' mil wide', pcbX + pcbW / 2, traceY - traceH_px - 4);
+
+          /* ── Labels ──────────────────────────────────────────────────── */
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(
+            'Signal trace (' + (r.sigType || '') + ')',
+            pcbX + 4,
+            traceY - traceH_px - 4
+          );
+          ctx.textAlign = 'right';
+          var planeLabel = planePoor
+            ? 'No plane (floating)'
+            : r.planeT === 'power'
+              ? 'Power plane'
+              : r.planeT === 'split'
+                ? 'Split GND plane'
+                : 'Solid GND plane';
+          ctx.fillText(planeLabel, pcbX + pcbW - 18, planeY + planeH + (r.gapW > 0 ? 26 : 14));
+
+          /* ── Quality badge ───────────────────────────────────────────── */
+          var badge = {
+            good: '✓ Good return path',
+            warn: '⚠ Moderate risk',
+            bad: '✕ Poor return path',
+          }[pathQuality];
+          var badgeBg = {
+            good: 'rgba(52,211,153,.13)',
+            warn: 'rgba(251,191,36,.13)',
+            bad: 'rgba(248,113,113,.13)',
+          }[pathQuality];
+          ctx.fillStyle = badgeBg;
+          roundRect(ctx, pcbX, 6, 178, 18, 4);
+          ctx.fill();
+          ctx.fillStyle = arrowColor;
+          ctx.font = 'bold 8px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(badge, pcbX + 6, 18);
+
+          /* ── BW annotation ───────────────────────────────────────────── */
+          ctx.fillStyle = textColor;
+          ctx.font = '8px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(
+            'BW: ' +
+              (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+              '  ·  3H=' +
+              (3 * h_mil).toFixed(1) +
+              ' mil',
+            pcbX + pcbW,
+            18
+          );
+
+          /* ── Stitching vias ──────────────────────────────────────────── */
+          if (r.nVias > 0 && r.planeTr !== 'none') {
+            var viaY = (traceY + planeY) / 2;
+            var viaX0 = pcbX + pcbW * 0.72;
+            for (var v = 0; v < Math.min(r.nVias, 5); v++) {
+              ctx.fillStyle = '#60a5fa';
+              ctx.beginPath();
+              ctx.arc(viaX0 + v * 13, viaY, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = bgColor;
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+              // vertical barrel
+              ctx.strokeStyle = '#60a5fa';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]);
+              ctx.beginPath();
+              ctx.moveTo(viaX0 + v * 13, traceY);
+              ctx.lineTo(viaX0 + v * 13, planeY);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+            ctx.fillStyle = '#60a5fa';
+            ctx.font = 'bold 8px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(
+              r.nVias + ' stitching via' + (r.nVias > 1 ? 's' : ''),
+              viaX0 + (Math.min(r.nVias, 5) - 1) * 6.5,
+              viaY + 16
+            );
+          }
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+           TOP-VIEW THERMAL HEATMAP
+           Shows the PCB board from above. The signal trace runs L→R through
+           the middle. The return current density on the reference plane below
+           is shown as a thermal colour map (blue→cyan→yellow→red).
+           Plane discontinuities (splits, slots) scatter the heatmap.
+        ════════════════════════════════════════════════════════════════ */
+        function renderTopCanvas(r) {
+          var canvas = $('rpcTopCanvas');
+          if (!canvas) return;
+          var W = canvas.offsetWidth || 600;
+          var H = 180;
+          canvas.width = W * (window.devicePixelRatio || 1);
+          canvas.height = H * (window.devicePixelRatio || 1);
+          var ctx = canvas.getContext('2d');
+          var dpr = window.devicePixelRatio || 1;
+          ctx.scale(dpr, dpr);
+          ctx.clearRect(0, 0, W, H);
+
+          var isDark = document.documentElement.dataset.theme !== 'light';
+
+          /* ── Thermal colour map (blue → cyan → yellow → red) ─────── */
+          function thermalColor(t) {
+            // t = 0..1
+            t = Math.max(0, Math.min(1, t));
+            var r, g, b;
+            if (t < 0.25) {
+              // dark blue → blue
+              r = 0;
+              g = Math.round(t * 4 * 100);
+              b = Math.round(100 + t * 4 * 155);
+            } else if (t < 0.5) {
+              // blue → cyan
+              var s = (t - 0.25) * 4;
+              r = 0;
+              g = Math.round(100 + s * 155);
+              b = 255;
+            } else if (t < 0.75) {
+              // cyan → yellow
+              var s = (t - 0.5) * 4;
+              r = Math.round(s * 255);
+              g = 255;
+              b = Math.round(255 * (1 - s));
+            } else {
+              // yellow → red
+              var s = (t - 0.75) * 4;
+              r = 255;
+              g = Math.round(255 * (1 - s));
+              b = 0;
+            }
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+          }
+
+          /* ── Physics parameters ──────────────────────────────────── */
+          var h_mil = r.h_m / MIL;
+          var sigma_frac = Math.min((3 * h_mil) / Math.max((r.w_m / MIL) * 3, 30), 0.45);
+
+          // Plane scatter
+          var scatter = { solid: 1.0, power: 1.3, split: 2.8, float: 6.0 }[r.planeT] || 1.0;
+          var tScatter =
+            { none: 1.0, via: 1.1, connector: 1.5, cable: 2.2, slot: 3.2 }[r.planeTr] || 1.0;
+          var sigmaY = sigma_frac * scatter * tScatter; // lateral (across board)
+          var sigmaX = 0.45; // along trace (wide spread)
+
+          // Gap position and width
+          var hasGap = r.gapW > 0 || r.planeT === 'split' || r.planeTr === 'slot';
+          var gapCx = W * 0.5;
+          var gapWpx = hasGap ? Math.max((r.gapW / (r.len_m || 0.1)) * W * 0.6, 18) : 0;
+
+          /* ── Board outline ────────────────────────────────────────── */
+          var padX = 18,
+            padY = 28;
+          var bW = W - padX * 2,
+            bH = H - padY * 2;
+          var bX = padX,
+            bY = padY;
+
+          // Board fill (PCB green / dark)
+          ctx.fillStyle = isDark ? '#0d1f0d' : '#1a3a1a';
+          roundRect(ctx, bX, bY, bW, bH, 8);
+          ctx.fill();
+          ctx.strokeStyle = isDark ? '#22c55e' : '#15803d';
+          ctx.lineWidth = 1.5;
+          roundRect(ctx, bX, bY, bW, bH, 8);
+          ctx.stroke();
+
+          /* ── Thermal heatmap (pixel-level) on image data ─────────── */
+          // Draw into an offscreen canvas at board resolution, then draw scaled
+          var imgW = Math.round(bW),
+            imgH = Math.round(bH);
+          var offC = document.createElement('canvas');
+          offC.width = imgW;
+          offC.height = imgH;
+          var octx = offC.getContext('2d');
+          var imgData = octx.createImageData(imgW, imgH);
+
+          var traceRow = Math.round(imgH * 0.5); // trace runs across middle
+          var sigYpx = sigmaY * imgH;
+
+          for (var py = 0; py < imgH; py++) {
+            var dy = (py - traceRow) / sigYpx;
+            var gaussY = Math.exp(-0.5 * dy * dy);
+
+            for (var px = 0; px < imgW; px++) {
+              var fx = px / imgW;
+              // Along-trace variation: taper off near ends, dip at gap
+              var gaussX = Math.exp(-0.5 * Math.pow((fx - 0.5) / sigmaX, 2));
+
+              // Gap shadow: density drops sharply at gap location
+              var gapDrop = 1.0;
+              if (hasGap) {
+                var gapFracW = gapWpx / imgW;
+                var distGap = Math.abs(fx - 0.5);
+                if (distGap < gapFracW / 2) {
+                  gapDrop = Math.max(0.04, 1 - (1 - distGap / (gapFracW / 2)) * 0.96);
+                }
+              }
+
+              var density = gaussY * gaussX * gapDrop;
+
+              // Colour
+              var col = thermalColor(density);
+              var rgb = col.match(/\d+/g);
+              var idx = (py * imgW + px) * 4;
+              imgData.data[idx] = parseInt(rgb[0]);
+              imgData.data[idx + 1] = parseInt(rgb[1]);
+              imgData.data[idx + 2] = parseInt(rgb[2]);
+              imgData.data[idx + 3] = Math.round(220 * density + 30); // alpha: always show board
+            }
+          }
+          octx.putImageData(imgData, 0, 0);
+          ctx.drawImage(offC, bX, bY, bW, bH);
+
+          /* ── Signal trace overlay (orange line across middle) ─────── */
+          var traceY_px = bY + bH * 0.5;
+          var tracePx = Math.max(3, Math.min((r.w_m / MIL) * 0.6, 16));
+          ctx.fillStyle = '#d97706';
+          roundRect(ctx, bX, traceY_px - tracePx / 2, bW, tracePx, 2);
+          ctx.fill();
+
+          /* ── Gap/split overlay ───────────────────────────────────── */
+          if (hasGap) {
+            var gx = bX + bW * 0.5 - gapWpx / 2;
+            ctx.fillStyle = isDark ? 'rgba(10,14,26,.85)' : 'rgba(248,250,252,.85)';
+            ctx.fillRect(gx, bY, gapWpx, bH);
+            ctx.strokeStyle = '#f87171';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(gx, bY);
+            ctx.lineTo(gx, bY + bH);
+            ctx.moveTo(gx + gapWpx, bY);
+            ctx.lineTo(gx + gapWpx, bY + bH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#f87171';
+            ctx.font = 'bold 9px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SPLIT', bX + bW / 2, bY + bH / 2 + 4);
+          }
+
+          /* ── Via stitching dots ──────────────────────────────────── */
+          if (r.nVias > 0 && r.planeTr !== 'none') {
+            var viaBaseX = bX + bW * 0.72;
+            for (var v = 0; v < Math.min(r.nVias, 5); v++) {
+              ctx.fillStyle = '#60a5fa';
+              ctx.beginPath();
+              ctx.arc(viaBaseX + v * 14, traceY_px, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = '#1e3a5f';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+
+          /* ── ±3H zone lines ──────────────────────────────────────── */
+          var zone3H_px = Math.min(sigma_frac * bH * 3, bH / 2 - 2);
+          ctx.strokeStyle = 'rgba(255,255,255,.4)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 3]);
+          ctx.beginPath();
+          ctx.moveTo(bX, traceY_px - zone3H_px);
+          ctx.lineTo(bX + bW, traceY_px - zone3H_px);
+          ctx.moveTo(bX, traceY_px + zone3H_px);
+          ctx.lineTo(bX + bW, traceY_px + zone3H_px);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          /* ── Labels ──────────────────────────────────────────────── */
+          var txtColor = isDark ? '#94a3b8' : '#475569';
+          ctx.fillStyle = txtColor;
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('Signal trace →', bX + 4, traceY_px - tracePx / 2 - 4);
+          ctx.font = '8px Inter, sans-serif';
+          ctx.fillStyle = 'rgba(255,255,255,.5)';
+          ctx.fillText('← 3H zone', bX + 4, traceY_px - zone3H_px - 3);
+          ctx.fillText('← 3H zone', bX + 4, traceY_px + zone3H_px + 10);
+
+          // Current direction arrow along trace
+          ctx.fillStyle = '#d97706';
+          ctx.font = 'bold 10px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('→ I signal', bX + bW * 0.25, traceY_px - tracePx - 3);
+
+          ctx.fillStyle = isDark ? 'rgba(52,211,153,.8)' : 'rgba(5,150,105,.9)';
+          ctx.font = 'bold 10px Inter, sans-serif';
+          ctx.fillText('← I return', bX + bW * 0.68, traceY_px + zone3H_px * 0.55);
+
+          /* ── Top label bar ───────────────────────────────────────── */
+          ctx.fillStyle = txtColor;
+          ctx.font = '8px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(
+            'h=' +
+              h_mil.toFixed(1) +
+              ' mil  ·  ' +
+              (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz BW' : (r.bw / 1000).toFixed(2) + ' GHz BW') +
+              '  ·  plane: ' +
+              r.planeT,
+            bX + bW - 4,
+            bY - 4
+          );
+
+          /* ── Colour scale bar ────────────────────────────────────── */
+          var barX = bX + bW - 90,
+            barY = bY + bH + 5,
+            barW = 80,
+            barH = 7;
+          var grad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+          grad.addColorStop(0, 'rgb(30,58,95)');
+          grad.addColorStop(0.25, 'rgb(14,165,233)');
+          grad.addColorStop(0.5, 'rgb(34,211,238)');
+          grad.addColorStop(0.75, 'rgb(251,191,36)');
+          grad.addColorStop(1, 'rgb(248,113,113)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(barX, barY, barW, barH);
+          ctx.fillStyle = txtColor;
+          ctx.font = '7px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('Low', barX, barY + barH + 9);
+          ctx.textAlign = 'right';
+          ctx.fillText('Peak density', barX + barW, barY + barH + 9);
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.lineTo(x + w - r, y);
+          ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+          ctx.lineTo(x + w, y + h - r);
+          ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          ctx.lineTo(x + r, y + h);
+          ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.closePath();
+        }
+
+        function drawArrow(ctx, x1, y1, x2, y2, color, size) {
+          var angle = Math.atan2(y2 - y1, x2 - x1);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(
+            x2 - size * Math.cos(angle - Math.PI / 6),
+            y2 - size * Math.sin(angle - Math.PI / 6)
+          );
+          ctx.lineTo(
+            x2 - size * Math.cos(angle + Math.PI / 6),
+            y2 - size * Math.sin(angle + Math.PI / 6)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+         CHART.JS CHARTS
+      ════════════════════════════════════════════════════════════════ */
+        function chartDefaults() {
+          var isDark = document.documentElement.dataset.theme !== 'light';
+          return {
+            gridColor: isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.08)',
+            textColor: isDark ? '#64748b' : '#94a3b8',
+            tooltipBg: isDark ? '#1e293b' : '#f8fafc',
+          };
+        }
+
+        function renderImpChart(r) {
+          var ctx = $('rpcImpChart').getContext('2d');
+          if (impChart) {
+            impChart.destroy();
+          }
+          var nPts = 60;
+          var fMin = 1e3,
+            fMax = r.bw_Hz * 5;
+          var labels = [],
+            data = [],
+            solid = [];
+          for (var i = 0; i < nPts; i++) {
+            var f = fMin * Math.pow(fMax / fMin, i / (nPts - 1));
+            labels.push(
+              f >= 1e9
+                ? (f / 1e9).toFixed(1) + 'G'
+                : f >= 1e6
+                  ? (f / 1e6).toFixed(0) + 'M'
+                  : f >= 1e3
+                    ? (f / 1e3).toFixed(0) + 'k'
+                    : f.toFixed(0)
+            );
+            var omega = 2 * Math.PI * f;
+            data.push(Math.sqrt(r.R_dc * r.R_dc + Math.pow(omega * r.L_m, 2)));
+            // Solid plane reference
+            var Lsolid = r.L_m / (r.planeT === 'float' ? 8 : r.planeT === 'split' ? 3.5 : 1.2);
+            solid.push(Math.sqrt(r.R_dc * r.R_dc + Math.pow(omega * Lsolid, 2)));
+          }
+          var cd = chartDefaults();
+          impChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Current design',
+                  data: data,
+                  borderColor: '#06b6d4',
+                  backgroundColor: 'rgba(6,182,212,.08)',
+                  fill: true,
+                  pointRadius: 0,
+                  tension: 0.3,
+                },
+                {
+                  label: 'Solid GND ref',
+                  data: solid,
+                  borderColor: '#34d399',
+                  backgroundColor: 'transparent',
+                  borderDash: [4, 3],
+                  pointRadius: 0,
+                  tension: 0.3,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { labels: { color: cd.textColor, font: { size: 10 }, boxWidth: 20 } },
+                tooltip: {
+                  backgroundColor: cd.tooltipBg,
+                  titleColor: cd.textColor,
+                  bodyColor: cd.textColor,
+                  callbacks: {
+                    label: function (c) {
+                      var v = c.raw;
+                      return (
+                        c.dataset.label +
+                        ': ' +
+                        (v < 1 ? (v * 1000).toFixed(2) + ' mΩ' : v.toFixed(3) + ' Ω')
+                      );
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  ticks: { color: cd.textColor, font: { size: 9 }, maxTicksLimit: 8 },
+                  grid: { color: cd.gridColor },
+                },
+                y: {
+                  type: 'logarithmic',
+                  ticks: {
+                    color: cd.textColor,
+                    font: { size: 9 },
+                    callback: function (v) {
+                      return v < 1 ? (v * 1000).toFixed(0) + 'm' : v.toFixed(2);
+                    },
+                  },
+                  grid: { color: cd.gridColor },
+                },
+              },
+            },
+          });
+        }
+
+        function renderIndChart(r) {
+          var ctx = $('rpcIndChart').getContext('2d');
+          if (indChart) {
+            indChart.destroy();
+          }
+          var labels = [],
+            data = [];
+          for (var h = 1; h <= 30; h++) {
+            var h_m = h * MIL;
+            var loopA = r.len_m * h_m;
+            var L;
+            if (r.w_m >= h_m) {
+              L = ((MU0 * loopA) / r.w_m) * 1e9;
+            } else {
+              L = (MU0 / Math.PI) * r.len_m * Math.log((2 * h_m) / r.w_m + 0.5) * 1e9;
+            }
+            labels.push(h + ' mil');
+            data.push(Math.abs(L));
+          }
+          var cd = chartDefaults();
+          var curH = Math.round(r.h_m / MIL);
+          indChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Loop Inductance (nH)',
+                  data: data,
+                  borderColor: '#a78bfa',
+                  backgroundColor: 'rgba(167,139,250,.08)',
+                  fill: true,
+                  pointRadius: 0,
+                  tension: 0.4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: cd.tooltipBg,
+                  titleColor: cd.textColor,
+                  bodyColor: cd.textColor,
+                  callbacks: {
+                    label: function (c) {
+                      return c.raw.toFixed(3) + ' nH';
+                    },
+                  },
+                },
+                annotation: {},
+              },
+              scales: {
+                x: {
+                  ticks: { color: cd.textColor, font: { size: 9 }, maxTicksLimit: 8 },
+                  grid: { color: cd.gridColor },
+                },
+                y: {
+                  ticks: {
+                    color: cd.textColor,
+                    font: { size: 9 },
+                    callback: function (v) {
+                      return v.toFixed(2);
+                    },
+                  },
+                  grid: { color: cd.gridColor },
+                },
+              },
+            },
+          });
+        }
+
+        function renderDistChart(r) {
+          var ctx = $('rpcDistChart').getContext('2d');
+          if (distChart) {
+            distChart.destroy();
+          }
+
+          /* ── Return current density vs lateral distance from trace centre ──
+             Uses a fixed physical x-axis (±60 mil) so the curve visibly
+             narrows / widens as you change height above the plane.
+
+             Physical basis:
+               σ  = H  (1 sigma ≈ 1× height)
+               ±3H contains ~95% of the return current energy
+               Plane discontinuities (gap, split) also scatter the distribution.
+
+             The 3H rule: keep the reference plane clear within ±3H of trace.
+          ── */
+          var n = 80;
+          var h_mil = r.h_m / MIL; // height in mil
+          var sigma_mil = h_mil; // 1σ = H (Holloway model)
+          var threeH_mil = 3 * h_mil; // 95% boundary
+          /* Fixed axis range: wide enough to always show the tails,
+             but no wider than necessary for readability */
+          var range_mil = Math.max(threeH_mil * 2.5, 20);
+
+          // Plane discontinuity broadens + flattens the distribution
+          var scatterFactor =
+            {
+              solid: 1.0,
+              power: 1.2,
+              split: 2.8,
+              float: 6.0,
+            }[r.planeT] || 1.0;
+          var transFactor =
+            {
+              none: 1.0,
+              via: 1.1,
+              connector: 1.4,
+              cable: 2.0,
+              slot: 3.0,
+            }[r.planeTr] || 1.0;
+          var effSigma = sigma_mil * scatterFactor * transFactor;
+
+          var labels = [],
+            data = [],
+            bgColors = [];
+          for (var i = 0; i < n; i++) {
+            var pos_mil = ((i - n / 2) / (n / 2)) * range_mil;
+            labels.push(pos_mil.toFixed(0));
+            var density = Math.exp(-0.5 * Math.pow(pos_mil / effSigma, 2)) * 100;
+            data.push(density);
+            // Colour: green = inside 3H zone, yellow = 3-5H, blue = outside
+            var absMil = Math.abs(pos_mil);
+            bgColors.push(
+              absMil <= threeH_mil
+                ? 'rgba(52,211,153,.75)'
+                : absMil <= threeH_mil * 1.6
+                  ? 'rgba(251,191,36,.60)'
+                  : 'rgba(99,179,237,.30)'
+            );
+          }
+
+          // Mark the ±3H boundary positions for annotation text
+          var threeH_label = threeH_mil.toFixed(1) + ' mil';
+
+          var cd = chartDefaults();
+          distChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Current density (%)',
+                  data: data,
+                  backgroundColor: bgColors,
+                  borderWidth: 0,
+                  borderRadius: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: cd.tooltipBg,
+                  titleColor: cd.textColor,
+                  bodyColor: cd.textColor,
+                  callbacks: {
+                    title: function (items) {
+                      return Math.abs(parseFloat(items[0].label)).toFixed(1) + ' mil from centre';
+                    },
+                    label: function (c) {
+                      return 'Density: ' + c.raw.toFixed(1) + '%';
+                    },
+                    afterLabel: function (c) {
+                      var absMil = Math.abs(parseFloat(c.label));
+                      return absMil <= threeH_mil
+                        ? '✓ Inside 3H zone (95% band)'
+                        : '↓ Outside 3H zone';
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  display: true,
+                  ticks: {
+                    color: cd.textColor,
+                    font: { size: 8 },
+                    maxTicksLimit: 7,
+                    callback: function (val, idx) {
+                      var v = parseFloat(this.getLabelForValue(val));
+                      return Number.isInteger(Math.round(v / 10) * 10) && Math.abs(v % 10) < 1
+                        ? v + ' mil'
+                        : null;
+                    },
+                  },
+                  grid: { display: false },
+                  title: {
+                    display: true,
+                    text: 'Distance from trace centre (mil)',
+                    color: cd.textColor,
+                    font: { size: 9 },
+                  },
+                },
+                y: {
+                  ticks: {
+                    color: cd.textColor,
+                    font: { size: 9 },
+                    callback: function (v) {
+                      return v + '%';
+                    },
+                  },
+                  grid: { color: cd.gridColor },
+                  max: 100,
+                  title: {
+                    display: true,
+                    text: '% of return current',
+                    color: cd.textColor,
+                    font: { size: 9 },
+                  },
+                },
+              },
+            },
+          });
+
+          // Update card subtitle with live 3H value
+          var card = ctx.canvas.closest('.rpc-chart-card');
+          if (card) {
+            var h4 = card.querySelector('h4');
+            if (h4) {
+              h4.innerHTML =
+                'Return Current Distribution' +
+                ' <span style="font-weight:400;font-size:.75rem;color:var(--text-muted)">95% within ±' +
+                threeH_label +
+                (scatterFactor > 1 ? ' · broadened by ' + r.planeT + ' plane' : '') +
+                '</span>';
+            }
+          }
+        }
+
+        function renderGauge(r) {
+          var ctx = $('rpcGaugeCanvas').getContext('2d');
+          if (gaugeChart) {
+            gaugeChart.destroy();
+          }
+          var score = r.emiScore;
+          var remaining = 100 - score;
+          var color =
+            score < 30 ? '#34d399' : score < 60 ? '#fbbf24' : score < 80 ? '#fb923c' : '#f87171';
+          var label = score < 30 ? 'Low' : score < 60 ? 'Medium' : score < 80 ? 'High' : 'Critical';
+
+          gaugeChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              datasets: [
+                {
+                  data: [score, remaining],
+                  backgroundColor: [color, 'rgba(100,116,139,.15)'],
+                  borderWidth: 0,
+                  circumference: 180,
+                  rotation: 270,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '75%',
+              plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            },
+          });
+
+          $('gaugeScore').textContent = score;
+          $('gaugeScore').style.color = color;
+          $('gaugeText').textContent = label + ' EMI Risk';
+          $('gaugeText').style.color = color;
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+         RECOMMENDATIONS ENGINE
+      ════════════════════════════════════════════════════════════════ */
+        function renderRecommendations(r) {
+          /* ── Helper: compute L_nH for a given h and w (same model as main calc) ── */
+          function calcL(h_m, w_m, len_m) {
+            var loopA = len_m * h_m;
+            var L;
+            if (w_m >= h_m) {
+              L = (MU0 * loopA) / w_m;
+            } else {
+              L = (MU0 / Math.PI) * len_m * Math.log((2 * h_m) / w_m + 0.5);
+            }
+            return Math.abs(L) * 1e9; // nH
+          }
+          function calcZ(L_nH, R_dc, bw_Hz) {
+            var omega = 2 * Math.PI * bw_Hz;
+            return Math.sqrt(R_dc * R_dc + Math.pow(omega * L_nH * 1e-9, 2));
+          }
+          function fmtL(nH) {
+            return nH < 1 ? (nH * 1000).toFixed(0) + ' pH' : nH.toFixed(2) + ' nH';
+          }
+          function fmtZ(ohm) {
+            return ohm < 1 ? (ohm * 1000).toFixed(1) + ' mΩ' : ohm.toFixed(3) + ' Ω';
+          }
+          function dBchange(newVal, oldVal) {
+            return (20 * Math.log10(newVal / oldVal)).toFixed(1);
+          }
+          function pctDrop(newVal, oldVal) {
+            return ((1 - newVal / oldVal) * 100).toFixed(0);
+          }
+
+          var h_mil = r.h_m / MIL;
+          var w_mil = r.w_m / MIL;
+          var len_mm = r.len_m / MM;
+          var recs = [];
+
+          /* ─────────────────────────────────────────────────────────────
+             1. PLANE TYPE ISSUES
+          ───────────────────────────────────────────────────────────── */
+          if (r.planeT === 'float') {
+            // Compare: add solid GND plane at same height
+            var L_solid = calcL(r.h_m, r.w_m, r.len_m);
+            var Z_solid = calcZ(L_solid, r.R_dc, r.bw_Hz);
+            recs.push({
+              cls: 'bad',
+              icon: '🚨',
+              title: 'No Reference Plane — Critical',
+              msg:
+                'Without a reference plane return current has no defined path. Current loop inductance is ' +
+                fmtL(r.L_nH) +
+                '. <span class="rpc-improve">→ Fix: add a solid GND plane ' +
+                h_mil.toFixed(1) +
+                ' mil below the trace. ' +
+                'This would reduce inductance to ~' +
+                fmtL(L_solid) +
+                ' (' +
+                pctDrop(L_solid, r.L_nH) +
+                '% reduction) and return path impedance to ' +
+                fmtZ(Z_solid) +
+                ' at ' +
+                (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+                '.</span>',
+            });
+          }
+
+          if (r.planeT === 'split') {
+            var L_solidSplit = calcL(r.h_m, r.w_m, r.len_m);
+            var emiDropSplit = pctDrop(L_solidSplit, r.L_nH);
+            recs.push({
+              cls: 'bad',
+              icon: '⚠️',
+              title: 'Split Plane — Return Current Detour',
+              msg:
+                'Return current is forced to detour around the gap, increasing inductance by ~' +
+                Math.round((r.L_nH / L_solidSplit - 1) * 100) +
+                '% over a solid plane. ' +
+                '<span class="rpc-improve">→ Fix option A: reroute trace to avoid the split. ' +
+                'Fix option B: place a 100 nF ceramic capacitor bridging the split directly beneath the trace — this restores the AC return path and reduces loop inductance by ~' +
+                emiDropSplit +
+                '%.</span>',
+            });
+          }
+
+          if (r.planeT === 'power') {
+            recs.push({
+              cls: 'info',
+              icon: 'ℹ️',
+              title: 'Power Plane Reference — Decoupling Required',
+              msg:
+                'The power plane is an AC return path only when decoupled to GND. Without decoupling, return impedance peaks at the plane cavity resonance. ' +
+                '<span class="rpc-improve">→ Fix: place a 100 nF X7R ceramic (0402 or 0201) between the power and GND planes within 5 mm of every signal via. ' +
+                'For ' +
+                (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+                ' bandwidth, also add a 1 nF cap in parallel for the high-frequency range.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             2. HEIGHT ABOVE PLANE (loop area / inductance)
+          ───────────────────────────────────────────────────────────── */
+          if (r.loopArea_mm2 > 50 || r.L_nH > 5) {
+            // Suggest halving height
+            var h_target = r.h_m / 2;
+            var L_half = calcL(h_target, r.w_m, r.len_m);
+            var Z_half = calcZ(L_half, r.R_dc, r.bw_Hz);
+            var area_half = (r.len_m * h_target * 1e6).toFixed(1);
+            var emiDB = dBchange(L_half, r.L_nH);
+
+            var cls = r.loopArea_mm2 > 200 || r.L_nH > 20 ? 'bad' : 'warn';
+            recs.push({
+              cls: cls,
+              icon: cls === 'bad' ? '🚨' : '⚠️',
+              title:
+                (cls === 'bad' ? 'Excessive' : 'Elevated') +
+                ' Loop Area — ' +
+                r.loopArea_mm2.toFixed(0) +
+                ' mm²',
+              msg:
+                'Loop area is ' +
+                r.loopArea_mm2.toFixed(0) +
+                ' mm² (trace ' +
+                len_mm.toFixed(0) +
+                ' mm × ' +
+                h_mil.toFixed(1) +
+                ' mil height). ' +
+                'Loop inductance: ' +
+                fmtL(r.L_nH) +
+                ', return impedance: ' +
+                fmtZ(r.Z_at_bw) +
+                '.' +
+                '<span class="rpc-improve">→ Fix A — halve height to ' +
+                (h_mil / 2).toFixed(1) +
+                ' mil: ' +
+                'area → ' +
+                area_half +
+                ' mm², inductance → ' +
+                fmtL(L_half) +
+                ' (' +
+                pctDrop(L_half, r.L_nH) +
+                '% less), impedance → ' +
+                fmtZ(Z_half) +
+                ', radiated EMI ' +
+                Math.abs(parseFloat(emiDB)).toFixed(1) +
+                ' dB lower.' +
+                '<br>→ Fix B — shorten trace by 50% (to ' +
+                (len_mm / 2).toFixed(0) +
+                ' mm): inductance → ~' +
+                fmtL(r.L_nH / 2) +
+                ', area → ' +
+                (r.loopArea_mm2 / 2).toFixed(0) +
+                ' mm².' +
+                '<br>→ Fix C — use stripline (reference plane above and below): ' +
+                'effective height halved, inductance → ~' +
+                fmtL(L_half) +
+                '.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             3. TRACE WIDTH (wider → lower inductance for wide traces)
+          ───────────────────────────────────────────────────────────── */
+          if (w_mil < h_mil * 0.5 && r.L_nH > 3) {
+            // Suggest widening to match height
+            var w_target = r.h_m;
+            var L_wider = calcL(r.h_m, w_target, r.len_m);
+            recs.push({
+              cls: 'warn',
+              icon: '💡',
+              title: 'Trace Width Narrower Than Height — Sub-optimal Inductance',
+              msg:
+                'Trace width (' +
+                w_mil.toFixed(1) +
+                ' mil) is less than height (' +
+                h_mil.toFixed(1) +
+                ' mil). ' +
+                'The trace is in the narrow-trace regime where the inductance formula is less favourable.' +
+                '<span class="rpc-improve">→ Fix: widen trace to ≥' +
+                h_mil.toFixed(0) +
+                ' mil (matching height). ' +
+                'This shifts to the wide-trace regime and reduces inductance to ~' +
+                fmtL(L_wider) +
+                ' (' +
+                pctDrop(L_wider, r.L_nH) +
+                '% reduction). ' +
+                'Also improves signal integrity by lowering characteristic impedance closer to your target.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             4. VIA TRANSITION
+          ───────────────────────────────────────────────────────────── */
+          if (r.planeTr === 'via') {
+            if (r.nVias === 0) {
+              recs.push({
+                cls: 'bad',
+                icon: '⚠️',
+                title: 'Layer Transition — No Stitching Vias',
+                msg:
+                  'Return current has no path to follow the signal between planes. ' +
+                  'The entire return must find an alternate route, adding significant inductance and creating an EMI antenna.' +
+                  '<span class="rpc-improve">→ Fix: add 1 stitching via within 2 mm of the signal via on the GND net. ' +
+                  'Estimated via inductance with 1 via: ~' +
+                  (r.viaL_pH > 0 ? r.viaL_pH.toFixed(0) : '150') +
+                  ' pH. ' +
+                  'With 2 vias in parallel: ~' +
+                  (r.viaL_pH > 0 ? (r.viaL_pH / 2).toFixed(0) : '75') +
+                  ' pH (halved). ' +
+                  'For signals above 500 MHz place one via on each side of the signal via.</span>',
+              });
+            } else if (r.viaSpac / MM > 5) {
+              var optSpac = Math.max(r.bw_Hz > 500e6 ? 2 : 5, 1);
+              recs.push({
+                cls: 'warn',
+                icon: '⚠️',
+                title: 'Stitching Via Spacing Too Wide — ' + (r.viaSpac / MM).toFixed(1) + ' mm',
+                msg:
+                  'Via spacing of ' +
+                  (r.viaSpac / MM).toFixed(1) +
+                  ' mm is wider than the ' +
+                  (r.bw_Hz > 500e6 ? '2 mm' : '5 mm') +
+                  ' recommendation for your bandwidth.' +
+                  '<span class="rpc-improve">→ Fix: reduce stitching via spacing to ≤' +
+                  optSpac +
+                  ' mm. ' +
+                  'At ' +
+                  (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+                  ', λ/20 in FR4 (εr=' +
+                  (document.getElementById('epsilonR')
+                    ? document.getElementById('epsilonR').value
+                    : '4.2') +
+                  ') ≈ ' +
+                  ((((300 / Math.sqrt(4.2) / r.bw_Hz) * 1e9) / 20) * 1000).toFixed(1) +
+                  ' mm — use this as maximum spacing.</span>',
+              });
+            } else {
+              var parallelL = r.viaL_pH / r.nVias;
+              recs.push({
+                cls: 'good',
+                icon: '✅',
+                title:
+                  'Stitching Vias — ' +
+                  r.nVias +
+                  ' via' +
+                  (r.nVias > 1 ? 's' : '') +
+                  ' at ' +
+                  (r.viaSpac / MM).toFixed(1) +
+                  ' mm spacing',
+                msg:
+                  r.nVias +
+                  ' stitching via' +
+                  (r.nVias > 1 ? 's' : '') +
+                  ' provide a low-inductance return path. ' +
+                  'Combined via inductance: ' +
+                  parallelL.toFixed(0) +
+                  ' pH.' +
+                  (r.nVias < 3 && r.bw_Hz > 200e6
+                    ? '<span class="rpc-improve">→ Optimise: adding a third via would reduce via inductance to ~' +
+                      (r.viaL_pH / 3).toFixed(0) +
+                      ' pH (' +
+                      pctDrop(r.viaL_pH / 3, parallelL) +
+                      '% less).</span>'
+                    : ''),
+              });
+            }
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             5. CONNECTOR / CABLE
+          ───────────────────────────────────────────────────────────── */
+          if (r.planeTr === 'connector' || r.planeTr === 'cable') {
+            var isCable = r.planeTr === 'cable';
+            recs.push({
+              cls: 'warn',
+              icon: '⚠️',
+              title: (isCable ? 'Cable' : 'Connector') + ' Transition — Ground Bond Critical',
+              msg:
+                'Signal crosses a ' +
+                r.planeTr +
+                '. Uncontrolled ground return here is the #1 cause of cable radiation failures.' +
+                '<span class="rpc-improve">→ Fix ' +
+                (isCable ? 'A' : '') +
+                ': bond shield/ground at BOTH ends with a 360° low-inductance connection (not a pigtail). ' +
+                (isCable
+                  ? 'Fix B: add common-mode choke on the cable — rated above ' +
+                    (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+                    '. ' +
+                    'Fix C: route ground guard traces alongside the signal on the cable PCB footprint.'
+                  : '') +
+                ' Use filtered connectors (integrated EMI gasket) for signals above ' +
+                (r.bw / 10).toFixed(0) +
+                ' MHz.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             6. SLOT / GAP CROSSING
+          ───────────────────────────────────────────────────────────── */
+          if (r.planeTr === 'slot' || r.gapW > 0) {
+            var gapMM = (r.gapW / MM).toFixed(1);
+            recs.push({
+              cls: 'bad',
+              icon: '🚨',
+              title: 'Slot / Gap Crossing — ' + gapMM + ' mm gap',
+              msg:
+                'The ' +
+                gapMM +
+                ' mm gap adds ~' +
+                r.gapL_nH.toFixed(2) +
+                ' nH to the return path and forms an effective antenna at ' +
+                (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+                '. ' +
+                'This is among the most common causes of EMC test failures.' +
+                '<span class="rpc-improve">→ Fix A (best): reroute trace to avoid the slot entirely — eliminates ' +
+                r.gapL_nH.toFixed(2) +
+                ' nH and restores full return path.' +
+                '<br>→ Fix B: bridge the slot with a 100 nF capacitor placed directly beneath the trace crossing point — reduces effective inductance by ~60–80%.' +
+                '<br>→ Fix C: if the split is between power domains, add a ferrite bead bridge across the slot at the crossing point to provide a controlled HF return path.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             7. RISE TIME — suggest slowing if unnecessarily fast
+          ───────────────────────────────────────────────────────────── */
+          var tr_ns = r.tr_s * 1e9;
+          if (tr_ns < 0.5 && r.emiScore > 30) {
+            var tr2x_ns = tr_ns * 2;
+            var bw2x_MHz = 350 / tr2x_ns;
+            var emiDrop = (20 * Math.log10(tr2x_ns / tr_ns)).toFixed(1);
+            recs.push({
+              cls: 'info',
+              icon: '💡',
+              title: 'Very Fast Edge — Consider Slew Rate Control',
+              msg:
+                'Rise time of ' +
+                tr_ns.toFixed(2) +
+                ' ns gives ' +
+                r.bw.toFixed(0) +
+                ' MHz bandwidth. ' +
+                'Fast edges radiate more EMI even from the same return path geometry.' +
+                '<span class="rpc-improve">→ Fix: add a series termination resistor (22–33 Ω) or reduce driver slew rate to 2× rise time (' +
+                tr2x_ns.toFixed(2) +
+                ' ns). ' +
+                'This reduces bandwidth to ~' +
+                bw2x_MHz.toFixed(0) +
+                ' MHz and cuts radiated EMI by ~' +
+                emiDrop +
+                ' dB (at same loop area), ' +
+                'with no impact on logic function if the signal settles well before setup time.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             8. TRACE LENGTH — suggest shortening if long
+          ───────────────────────────────────────────────────────────── */
+          if (len_mm > 100 && r.L_nH > 3) {
+            var halfLen_L = calcL(r.h_m, r.w_m, r.len_m / 2);
+            recs.push({
+              cls: 'info',
+              icon: '💡',
+              title: 'Long Trace — ' + len_mm.toFixed(0) + ' mm',
+              msg:
+                'Trace length of ' +
+                len_mm.toFixed(0) +
+                ' mm contributes directly to loop inductance (L ∝ length). ' +
+                '<span class="rpc-improve">→ Fix: shorten trace to ' +
+                (len_mm / 2).toFixed(0) +
+                ' mm by moving the destination component closer or re-routing. ' +
+                'Inductance would fall from ' +
+                fmtL(r.L_nH) +
+                ' to ~' +
+                fmtL(halfLen_L) +
+                ' (' +
+                pctDrop(halfLen_L, r.L_nH) +
+                '% reduction).' +
+                '<br>→ Alternative: split into a differential pair if the signal type allows — common-mode cancellation significantly reduces effective radiation at the same length.</span>',
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             9. EMI RISK SUMMARY
+          ───────────────────────────────────────────────────────────── */
+          if (r.emiScore >= 70) {
+            recs.push({
+              cls: 'bad',
+              icon: '🚨',
+              title: 'High EMI Risk — ' + r.emiScore + '/100',
+              msg:
+                'This design is likely to fail radiated emissions testing (FCC Part 15 / CISPR 32). ' +
+                'Address all red items above before layout. ' +
+                '<span class="rpc-improve">→ Priority order: (1) fix plane discontinuities — largest single EMI contributor, ' +
+                '(2) reduce height above plane to cut loop area, ' +
+                '(3) add stitching vias at transitions, ' +
+                '(4) shorten the trace. ' +
+                'Run pre-compliance scan at prototype stage targeting ≥6 dB margin to the limit line.</span>',
+            });
+          } else if (r.emiScore >= 40) {
+            recs.push({
+              cls: 'warn',
+              icon: '⚠️',
+              title: 'Moderate EMI Risk — ' + r.emiScore + '/100',
+              msg:
+                'Design is borderline. Implement the improvements above to gain margin before EMC testing. ' +
+                '<span class="rpc-improve">→ Quick wins: add stitching vias, reduce trace height by 1–2 mil, and ensure no copper pour gaps within ±' +
+                r.returnWidth_mm.toFixed(1) +
+                ' mm of the trace centreline.</span>',
+            });
+          } else {
+            recs.push({
+              cls: 'good',
+              icon: '✅',
+              title: 'Low EMI Risk — ' + r.emiScore + '/100',
+              msg:
+                'Return path design is solid. ' +
+                (r.L_nH < 2
+                  ? 'Excellent loop inductance of ' +
+                    fmtL(r.L_nH) +
+                    '. This design should have strong EMC margins.'
+                  : 'Maintain continuous reference plane and stitching vias at all layer transitions.') +
+                (r.emiScore < 15
+                  ? '<span class="rpc-improve">→ Design is optimised. Consider documenting the plane stackup and via rules in a layout constraint file to preserve this performance through PCB revisions.</span>'
+                  : ''),
+            });
+          }
+
+          /* ─────────────────────────────────────────────────────────────
+             10. BANDWIDTH / 3H ZONE SUMMARY
+          ───────────────────────────────────────────────────────────── */
+          recs.push({
+            cls: 'info',
+            icon: '📐',
+            title:
+              'Bandwidth ' +
+              (r.bw < 1000 ? r.bw.toFixed(0) + ' MHz' : (r.bw / 1000).toFixed(2) + ' GHz') +
+              '  ·  3H zone ±' +
+              r.returnWidth_mm.toFixed(1) +
+              ' mm',
+            msg:
+              'BW = 0.35 / ' +
+              tr_ns.toFixed(2) +
+              ' ns rise time. 95% of return current is within ±' +
+              r.returnWidth_mm.toFixed(1) +
+              ' mm of the trace centreline (3H = 3 × ' +
+              h_mil.toFixed(1) +
+              ' mil = ' +
+              ((3 * h_mil * 25.4) / 1000).toFixed(2) +
+              ' mm). ' +
+              '<span class="rpc-improve">→ Keep the reference plane free of fills, anti-pads, slots, and copper pours connected to other nets within ±' +
+              r.returnWidth_mm.toFixed(1) +
+              ' mm of the trace centreline for its entire length.</span>',
+          });
+
+          /* ── Render ─────────────────────────────────────────────────── */
+          var container = $('rpcRecs');
+          container.innerHTML = recs
+            .map(function (rec) {
+              return (
+                '<div class="rpc-rec ' +
+                rec.cls +
+                '">' +
+                '<span class="rpc-rec-icon">' +
+                rec.icon +
+                '</span>' +
+                '<div><strong>' +
+                rec.title +
+                '</strong>' +
+                rec.msg +
+                '</div>' +
+                '</div>'
+              );
+            })
+            .join('');
+        }
+
+        /* ════════════════════════════════════════════════════════════════
+         SCENARIO COMPARISON
+      ════════════════════════════════════════════════════════════════ */
+        function renderScenarioA(r) {
+          $('scA-L').textContent = r.L_nH.toFixed(3) + ' nH';
+          $('scA-area').textContent = r.loopArea_mm2.toFixed(1) + ' mm²';
+          $('scA-emi').textContent = r.emiScore + '/100';
+          $('scA-z').textContent =
+            r.Z_at_bw < 1 ? (r.Z_at_bw * 1000).toFixed(1) + ' mΩ' : r.Z_at_bw.toFixed(3) + ' Ω';
+        }
+
+        function updateScenarioB(r) {
+          $('scB-L').textContent = r.L_nH.toFixed(3) + ' nH';
+          $('scB-area').textContent = r.loopArea_mm2.toFixed(1) + ' mm²';
+          $('scB-emi').textContent = r.emiScore + '/100';
+          $('scB-z').textContent =
+            r.Z_at_bw < 1 ? (r.Z_at_bw * 1000).toFixed(1) + ' mΩ' : r.Z_at_bw.toFixed(3) + ' Ω';
+        }
+
+        function showImprovement(current, ref) {
+          var badge = $('improveBadge');
+          var improve = ((ref.L_nH - current.L_nH) / ref.L_nH) * 100;
+          if (improve > 0) {
+            $('improveText').textContent = improve.toFixed(0) + '% inductance reduction';
+            badge.hidden = false;
+          } else if (improve < 0) {
+            badge.style.background = 'rgba(248,113,113,.15)';
+            badge.style.color = '#f87171';
+            badge.style.borderColor = 'rgba(248,113,113,.3)';
+            $('improveText').textContent = Math.abs(improve).toFixed(0) + '% inductance increase';
+            badge.hidden = false;
+          }
+        }
+
+        /* ── Alert helpers ─────────────────────────────────────────────── */
+        function showAlert(msg, type) {
+          var el = $('rpcAlert');
+          el.textContent = msg;
+          el.className = 'rpc-alert show ' + (type || 'warn');
+        }
+        function hideAlert() {
+          $('rpcAlert').className = 'rpc-alert';
+        }
+
+        /* ── Redraw canvas on resize ────────────────────────────────────── */
+        var resizeTimer;
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            if (lastResult) {
+              renderPCBCanvas(lastResult);
+              renderTopCanvas(lastResult);
+            }
+          }, 150);
+        });
+
+        /* ── Auto-run with preset on load ──────────────────────────────── */
+        window.addEventListener('DOMContentLoaded', function () {
+          // Trigger preset to show example immediately
+          $('rpcPresetBtn').click();
+        });
+      })();
+    </script>
+
+    <!-- ── Audio Explainer ─────────────────────────────────────────── -->
+    <script>
+      (function () {
+        'use strict';
+
+        var SCRIPT = [
+          'Welcome to the Return Path Calculator — a signal integrity and EMC engineering tool by Rising Edge Technologies.',
+          'Every high-speed signal needs a return path. At low frequencies, this return current follows the shortest physical route. But above about one megahertz, something interesting happens: the return current stops following the shortest distance and instead flows directly beneath the signal trace on the nearest reference plane, following the path of minimum inductance.',
+          'Why does this matter? Because the loop formed by the signal and its return current acts like an antenna. The larger the loop area, the more electromagnetic energy is radiated — and the more susceptible your board becomes to interference.',
+          'This tool lets you quantify exactly how good or bad your return path is. Enter your trace geometry: width, length, and height above the reference plane. Select your plane type — solid ground, split plane, power plane, or no plane at all. Add any layer transitions and stitching vias.',
+          "Hit Calculate and you'll get six key metrics: bandwidth of your signal, loop inductance in nanohenries, loop area in square millimetres, return path impedance at your signal bandwidth, path efficiency as a percentage, and via inductance in picohenries.",
+          'The PCB cross-section visualisation shows return current arrows flowing from signal trace back to the reference plane. Green arrows mean a clean, low-inductance path. Yellow arrows indicate a moderate discontinuity. Red arrows signal a problem — often a split plane or missing reference.',
+          'The impedance versus frequency chart shows how return path impedance rises with frequency — and compares your design against an ideal solid ground reference. The loop inductance chart shows how inductance scales with plane height, so you can see exactly how much you gain by moving the plane closer.',
+          'The EMI risk score from zero to one hundred combines loop area, signal bandwidth, plane type, plane transitions, and stitching via count into a single actionable number. Below thirty is low risk. Above seventy is critical — expect EMC test failures.',
+          'The recommendations engine explains exactly what to fix, with specific numbers from your inputs. Use the Scenario A versus B comparison to save a baseline and measure the improvement from your changes.',
+          'For best results: always keep your reference plane solid and continuous, add stitching vias at every layer transition, and never route high-speed signals across a plane split. Those three rules alone will prevent the majority of EMC failures.',
+          'Explore the Learning section below for in-depth explanations of return current theory, the three-H rule, image currents, ground bounce, and more. Good luck with your design.',
+        ].join(' ');
+
+        var synth = window.speechSynthesis;
+        var utt = null;
+        var playing = false;
+        var startTime = 0;
+        var elapsed = 0;
+        var ticker = null;
+
+        // Estimate total duration: ~160 words/min for synth
+        var wordCount = SCRIPT.split(/\s+/).length;
+        var totalSec = Math.round((wordCount / 160) * 60);
+
+        function fmt(s) {
+          var m = Math.floor(s / 60);
+          var sec = Math.floor(s % 60);
+          return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        function setPlaying(state) {
+          playing = state;
+          var playIcon = document.getElementById('iconPlay');
+          var pauseIcon = document.getElementById('iconPause');
+          var label = document.getElementById('rpcAudioLabel');
+          var wave = document.getElementById('rpcAudioWave');
+          var wrap = document.getElementById('rpcAudioProgressWrap');
+
+          if (state) {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = '';
+            label.textContent = 'Pause';
+            wave.classList.add('playing');
+            wrap.classList.add('visible');
+          } else {
+            playIcon.style.display = '';
+            pauseIcon.style.display = 'none';
+            label.textContent = 'Listen to explanation';
+            wave.classList.remove('playing');
+          }
+        }
+
+        function updateProgress() {
+          elapsed = (Date.now() - startTime) / 1000;
+          var pct = Math.min((elapsed / totalSec) * 100, 100);
+          var fill = document.getElementById('rpcAudioFill');
+          var time = document.getElementById('rpcAudioTime');
+          if (fill) fill.style.width = pct + '%';
+          if (time) time.textContent = fmt(elapsed) + ' / ' + fmt(totalSec);
+        }
+
+        function stop() {
+          synth.cancel();
+          clearInterval(ticker);
+          setPlaying(false);
+          var fill = document.getElementById('rpcAudioFill');
+          var time = document.getElementById('rpcAudioTime');
+          if (fill) fill.style.width = '0%';
+          if (time) time.textContent = '';
+          var wrap = document.getElementById('rpcAudioProgressWrap');
+          if (wrap) wrap.classList.remove('visible');
+          elapsed = 0;
+        }
+
+        function play() {
+          // Pick a natural-sounding voice if available
+          var voices = synth.getVoices();
+          var preferred =
+            voices.find(function (v) {
+              return /google us english|samantha|daniel|karen|moira|rishi/i.test(v.name);
+            }) ||
+            voices.find(function (v) {
+              return v.lang === 'en-US' && !v.name.includes('Compact');
+            }) ||
+            voices[0];
+
+          utt = new SpeechSynthesisUtterance(SCRIPT);
+          utt.rate = 0.92;
+          utt.pitch = 1.0;
+          utt.volume = 1.0;
+          if (preferred) utt.voice = preferred;
+
+          utt.onstart = function () {
+            startTime = Date.now() - elapsed * 1000;
+            setPlaying(true);
+            ticker = setInterval(updateProgress, 400);
+          };
+          utt.onend = utt.onerror = function () {
+            stop();
+          };
+
+          synth.speak(utt);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          var btn = document.getElementById('rpcAudioBtn');
+          if (!btn) return;
+
+          if (!('speechSynthesis' in window)) {
+            btn.disabled = true;
+            btn.title = 'Text-to-speech not supported in this browser';
+            return;
+          }
+
+          btn.addEventListener('click', function () {
+            if (playing) {
+              synth.pause();
+              clearInterval(ticker);
+              setPlaying(false);
+              // store elapsed so we can resume
+              elapsed = (Date.now() - startTime) / 1000;
+            } else if (synth.paused) {
+              synth.resume();
+              startTime = Date.now() - elapsed * 1000;
+              setPlaying(true);
+              ticker = setInterval(updateProgress, 400);
+            } else {
+              stop();
+              play();
+            }
+          });
+        });
+      })();
+    </script>
+    <script src="js/help.js"></script>
+  </body>
+</html>

@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Selecting FPGA power components: discrete regulators vs PMIC vs power modules, buck and LDO selection criteria, inductor ripple math, ceramic capacitor DC-bias derating with an interactive chart, and a worked Zynq-7000 parts table."
+    />
+    <title>Selecting Components | FPGA Power Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/02-component-selection.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 8px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin: 6px 0 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item active"
+            >02. Selecting Components</a
+          >
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Selecting Components</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 02</span>
+              <span class="badge badge-purple">Plotly</span>
+              <h1>How to Select Components</h1>
+              <p class="subtitle">
+                Architecture first, then parts: bucks for amps, LDOs for quiet, inductors that don't
+                saturate, and capacitors that are still capacitors at their working voltage.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- architecture -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Step 1 — Choose the architecture</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Approach</th>
+                        <th>Best for</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Discrete regulators</strong> (one buck/LDO per rail)</td>
+                        <td>2–4 rails, cost-driven, full control</td>
+                        <td>Cheapest BOM, per-rail optimization</td>
+                        <td>Most design + layout effort; DIY sequencing</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Multi-rail PMIC</strong></td>
+                        <td>4–8 rails, space-constrained</td>
+                        <td>Built-in sequencing, one datasheet, small area</td>
+                        <td>Rail current limits; single-vendor lock</td>
+                      </tr>
+                      <tr>
+                        <td><strong>FPGA-ready power module</strong></td>
+                        <td>Fast time-to-market, high current</td>
+                        <td>Pre-validated against vendor rail specs, integrated magnetics</td>
+                        <td>Cost; limited flexibility</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  Vendors publish <strong>reference power designs per FPGA family</strong> (TI, ADI,
+                  Infineon, Renesas all maintain FPGA power pages). Start from one — the rail
+                  grouping and sequencing homework is already done, then swap parts as needed.
+                </div>
+              </div>
+
+              <!-- buck -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Selecting bucks (the amps)</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Output current:</strong> margined rail current (Module 01) with headroom
+                    at max ambient — check the derating curve, not the headline number.
+                  </li>
+                  <li>
+                    <strong>Transient response:</strong> for VCCINT, prefer fast control loops
+                    (constant-on-time/D-CAP class) — they recover from load steps in µs and need
+                    less output capacitance to meet the droop budget.
+                  </li>
+                  <li>
+                    <strong>Switching frequency:</strong> 500 kHz–2 MHz typical; higher f = smaller
+                    L/C but more switching loss, and keep it away from sensitive bands (plan vs your
+                    EMC needs).
+                  </li>
+                  <li>
+                    <strong>Integrated vs external FETs:</strong> integrated to ~15–20 A;
+                    controllers + external FETs (or multi-phase) beyond. Multi-phase also cuts
+                    input/output ripple for big VCCINT.
+                  </li>
+                  <li>
+                    <strong>Remote sense:</strong> non-negotiable on high-current core rails — sense
+                    at the FPGA balls, not at the inductor.
+                  </li>
+                  <li>
+                    <strong>Soft-start &amp; enable:</strong> programmable soft-start and an EN pin
+                    are what make Module 04's sequencing possible; verify monotonic ramp.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- LDO -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Selecting LDOs (the quiet ones)</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Transceiver rails (VMGTAVCC/AVTT), PLL and ADC supplies want an LDO — or a buck
+                  followed by an LDO ("buck-then-LDO") when the current is too high to burn from the
+                  input rail directly.
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>PSRR vs frequency:</strong> the datasheet's "70 dB PSRR" is at 1 kHz. At
+                    the buck's 1 MHz switching frequency it may be 15–25 dB — check the curve at
+                    <em>your</em> upstream ripple frequency, and add an LC/ferrite post-filter if
+                    it's thin.
+                  </li>
+                  <li>
+                    <strong>Output noise:</strong> transceiver rails typically want &lt; 100
+                    µV<sub>RMS</sub>-class LDOs; check the jitter/noise budget in the FPGA's
+                    transceiver guide.
+                  </li>
+                  <li>
+                    <strong>Dropout &amp; thermal:</strong> P = (V<sub>in</sub> − V<sub>out</sub>) ×
+                    I. Feeding a 0.9 V/2 A rail from 1.8 V burns 1.8 W — pick the intermediate rail
+                    to keep dropout small (e.g. 1.2 V → 0.9 V), and run the junction-temperature
+                    check in Module 06.
+                  </li>
+                  <li>
+                    <strong>Stability:</strong> confirm the LDO is stable with your ceramic-only
+                    output network (ESR range).
+                  </li>
+                </ul>
+              </div>
+
+              <!-- inductor -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Inductors: the 30–40 % ripple rule</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Size L so peak-to-peak ripple current ΔI<sub>L</sub> ≈ 30–40 % of rated output: L
+                  = V<sub>out</sub>·(1 − V<sub>out</sub>/V<sub>in</sub>) /
+                  (f<sub>sw</sub>·ΔI<sub>L</sub>). Then check two ratings that are <em>not</em> the
+                  same number:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Saturation current I<sub>sat</sub></strong> &gt; I<sub>out</sub> +
+                    ΔI<sub>L</sub>/2 — with margin; a saturating inductor's current spikes destroy
+                    FETs.
+                  </li>
+                  <li>
+                    <strong>Thermal current I<sub>rms</sub></strong> &gt; I<sub>out</sub> — governed
+                    by DCR heating; lower DCR = better efficiency at heavy load.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- capacitors + plotly -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Capacitors: the DC-bias trap</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Class-II ceramics (X5R/X7R) lose capacitance under DC bias — dramatically in small
+                  packages. The "22 µF" 0402 on your 1.8 V rail may really be 8 µF. Every
+                  output-capacitance and PDN calculation must use the <em>derated</em> value from
+                  the manufacturer's bias curve.
+                </p>
+                <div class="plot-box">
+                  <div id="biasPlot" style="width: 100%; height: 320px"></div>
+                  <p class="diagram-caption">
+                    Typical effective capacitance vs DC bias for a 22 µF X5R in three package sizes
+                    (representative curves). Bigger package = more ceramic = less derating.
+                  </p>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Mix types:</strong> bulk (polymer/tantalum, stable C, some ESR for
+                    damping) + MLCC mid/high-frequency (Module 05 does the math).
+                  </li>
+                  <li>
+                    Input caps see high RMS ripple current — check their ripple rating, place them
+                    tight to the buck's VIN/GND loop.
+                  </li>
+                  <li>
+                    Prefer 0603/0805 over 0402 for bulk-ish MLCC duties on low-voltage rails; the
+                    derating chart is why.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- sequencer parts -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Sequencing &amp; supervision parts</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Option</th>
+                        <th>How</th>
+                        <th>Use when</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>PGOOD daisy-chain</td>
+                        <td>Rail N's PGOOD drives rail N+1's EN</td>
+                        <td>2–4 rails, simple fixed order</td>
+                      </tr>
+                      <tr>
+                        <td>PMIC internal sequencer</td>
+                        <td>Order + delays configured by OTP/I2C</td>
+                        <td>You chose a PMIC anyway</td>
+                      </tr>
+                      <tr>
+                        <td>Dedicated sequencer / PMBus manager</td>
+                        <td>Programmable slots, monitoring, fault response, telemetry</td>
+                        <td>6+ rails, compliance/telemetry needs, hot-swap systems</td>
+                      </tr>
+                      <tr>
+                        <td>Voltage supervisor</td>
+                        <td>Releases FPGA resets only when all rails valid</td>
+                        <td>Always — belt and braces for configuration</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- worked example -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Worked example: Zynq-7020-class parts table</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.6">
+                  Representative selection for a 5-rail tree from a 12 V input (parts illustrate the
+                  <em>class</em> of device — always re-verify against your current budget):
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Rail</th>
+                        <th>V / I (margined)</th>
+                        <th>Regulator class</th>
+                        <th>Example part class</th>
+                        <th>Why</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>VCCINT (+VCCBRAM)</td>
+                        <td>1.0 V / 4 A</td>
+                        <td>Sync buck, fast COT loop, remote sense</td>
+                        <td>TPS543x / TPS62x-class</td>
+                        <td>Droop budget, efficiency at amps</td>
+                      </tr>
+                      <tr>
+                        <td>VCCAUX + VCCADC</td>
+                        <td>1.8 V / 1 A</td>
+                        <td>Sync buck</td>
+                        <td>TPS62x / MP2x-class</td>
+                        <td>Mid current, up early in sequence</td>
+                      </tr>
+                      <tr>
+                        <td>VCCO banks</td>
+                        <td>1.5 V &amp; 3.3 V / 2 A</td>
+                        <td>Sync bucks (one per voltage)</td>
+                        <td>TPS62x-class ×2</td>
+                        <td>Set by DDR3 (1.5 V) + peripherals (3.3 V)</td>
+                      </tr>
+                      <tr>
+                        <td>VMGTAVCC</td>
+                        <td>1.0 V / 0.8 A</td>
+                        <td>Buck-then-LDO, low noise</td>
+                        <td>TPS7A5x / LP5912-class LDO from 1.8 V</td>
+                        <td>Transceiver jitter budget</td>
+                      </tr>
+                      <tr>
+                        <td>VMGTAVTT</td>
+                        <td>1.2 V / 0.6 A</td>
+                        <td>Low-noise LDO from 1.8 V</td>
+                        <td>same class</td>
+                        <td>Termination rail, quiet</td>
+                      </tr>
+                      <tr>
+                        <td>Sequencing</td>
+                        <td>—</td>
+                        <td>PGOOD chain + supervisor</td>
+                        <td>TPS3808-class supervisor</td>
+                        <td>5 rails, fixed order suffices</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>Pick the architecture (discrete / PMIC / module) before any part number.</li>
+                  <li>
+                    Bucks: transient response and remote sense for VCCINT; derated current at
+                    temperature.
+                  </li>
+                  <li>
+                    LDOs: PSRR at the <em>switching</em> frequency, not 1 kHz; thermal check every
+                    time.
+                  </li>
+                  <li>
+                    Inductors: I<sub>sat</sub> and I<sub>rms</sub> are different ratings — check
+                    both.
+                  </li>
+                  <li>Use derated (DC-bias) capacitance everywhere — especially 0402s.</li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="01-introduction.html">← Introduction</a>
+                <a class="btn btn-primary" href="03-power-tree.html"
+                  >Next: Building the Power Tree →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        function draw() {
+          var cs = getComputedStyle(document.documentElement);
+          var text = (cs.getPropertyValue('--text-sub') || '#94a3b8').trim();
+          var grid = 'rgba(128,140,160,0.18)';
+          var bias = [];
+          for (var v = 0; v <= 6; v += 0.25) bias.push(v);
+          function curve(k) {
+            return bias.map(function (v) {
+              return 22 / (1 + Math.pow(v / k, 2));
+            });
+          }
+          var traces = [
+            {
+              x: bias,
+              y: curve(1.6),
+              mode: 'lines',
+              name: '0402',
+              line: { color: '#f87171', width: 2.5 },
+            },
+            {
+              x: bias,
+              y: curve(2.8),
+              mode: 'lines',
+              name: '0603',
+              line: { color: '#fb923c', width: 2.5 },
+            },
+            {
+              x: bias,
+              y: curve(4.5),
+              mode: 'lines',
+              name: '0805',
+              line: { color: '#34d399', width: 2.5 },
+            },
+          ];
+          var layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: text, family: 'Inter, sans-serif', size: 11 },
+            margin: { l: 55, r: 20, t: 10, b: 45 },
+            xaxis: { title: { text: 'DC bias (V)' }, gridcolor: grid },
+            yaxis: {
+              title: { text: 'effective capacitance (µF)' },
+              gridcolor: grid,
+              range: [0, 24],
+            },
+            legend: { orientation: 'h', y: -0.25 },
+            shapes: [
+              {
+                type: 'line',
+                x0: 1.8,
+                x1: 1.8,
+                y0: 0,
+                y1: 24,
+                line: { dash: 'dash', color: 'rgba(34,211,238,0.7)', width: 1.5 },
+              },
+            ],
+            annotations: [
+              {
+                x: 1.8,
+                y: 23,
+                text: '1.8 V rail',
+                showarrow: false,
+                xanchor: 'left',
+                font: { color: '#22d3ee', size: 10 },
+              },
+            ],
+          };
+          Plotly.newPlot('biasPlot', traces, layout, { displayModeBar: false, responsive: true });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', draw);
+        } else {
+          draw();
+        }
+      })();
+    </script>
+  </body>
+</html>

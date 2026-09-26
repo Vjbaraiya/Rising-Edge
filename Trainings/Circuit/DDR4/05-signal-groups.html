@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 signal groups: clock (CK/CK#), command/address, control, data (DQ), data strobe (DQS/DQS#), data mask/DBI, VREF and ZQ — and the byte-lane grouping concept that drives routing rules."
+    />
+    <title>
+      Signal Groups &amp; Roles | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/05-signal-groups.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .signal-legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .signal-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item active"
+            >05. Signal Groups &amp; Roles</a
+          >
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Signal Groups &amp; Roles</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 05</span>
+              <span class="badge badge-cyan">Diagrams</span>
+              <h1>Signal Groups &amp; Their Roles</h1>
+              <p class="subtitle">
+                Every DDR4 pin belongs to one of a handful of functional groups. Knowing which group
+                a signal belongs to tells you immediately how it should be routed, terminated, and
+                matched — which is exactly why this grouping recurs throughout the rest of the
+                course.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Full signal map -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The full signal map</h3>
+                  <span class="badge badge-cyan">Diagram</span>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 620 260"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Block diagram of a DDR4 device showing clock, command/address, control, data, data strobe, VREF and ZQ signal groups entering the package"
+                  >
+                    <rect
+                      x="230"
+                      y="90"
+                      width="160"
+                      height="80"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="310"
+                      y="135"
+                      text-anchor="middle"
+                      font-size="13"
+                      font-weight="800"
+                      fill="var(--text-base)"
+                    >
+                      DDR4 DRAM
+                    </text>
+                    <!-- Clock -->
+                    <line x1="230" y1="105" x2="120" y2="60" stroke="#818cf8" stroke-width="2" />
+                    <rect
+                      x="20"
+                      y="45"
+                      width="100"
+                      height="26"
+                      rx="4"
+                      fill="rgba(129,140,248,0.12)"
+                      stroke="#818cf8"
+                    />
+                    <text
+                      x="70"
+                      y="62"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="#818cf8"
+                    >
+                      CK / CK# (clock)
+                    </text>
+                    <!-- CA -->
+                    <line
+                      x1="230"
+                      y1="130"
+                      x2="120"
+                      y2="130"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="20"
+                      y="115"
+                      width="100"
+                      height="30"
+                      rx="4"
+                      fill="rgba(251,146,60,0.12)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="70"
+                      y="128"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--warning,#fb923c)"
+                    >
+                      CA / Address
+                    </text>
+                    <text
+                      x="70"
+                      y="140"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--warning,#fb923c)"
+                    >
+                      (RAS/CAS/WE, bank)
+                    </text>
+                    <!-- Control -->
+                    <line x1="230" y1="155" x2="120" y2="200" stroke="#f472b6" stroke-width="2" />
+                    <rect
+                      x="20"
+                      y="188"
+                      width="100"
+                      height="30"
+                      rx="4"
+                      fill="rgba(244,114,182,0.12)"
+                      stroke="#f472b6"
+                    />
+                    <text
+                      x="70"
+                      y="201"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="#f472b6"
+                    >
+                      Control
+                    </text>
+                    <text x="70" y="213" text-anchor="middle" font-size="8" fill="#f472b6">
+                      CS / CKE / ODT / RESET#
+                    </text>
+                    <!-- Data -->
+                    <line
+                      x1="390"
+                      y1="105"
+                      x2="500"
+                      y2="60"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="500"
+                      y="45"
+                      width="100"
+                      height="26"
+                      rx="4"
+                      fill="rgba(34,211,238,0.12)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="550"
+                      y="62"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--cyan,#22d3ee)"
+                    >
+                      DQ[7:0] (data)
+                    </text>
+                    <!-- DQS -->
+                    <line
+                      x1="390"
+                      y1="130"
+                      x2="500"
+                      y2="130"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="500"
+                      y="115"
+                      width="100"
+                      height="30"
+                      rx="4"
+                      fill="rgba(52,211,153,0.12)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="550"
+                      y="128"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--success,#34d399)"
+                    >
+                      DQS / DQS#
+                    </text>
+                    <text
+                      x="550"
+                      y="140"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--success,#34d399)"
+                    >
+                      + DM/DBI
+                    </text>
+                    <!-- VREF / ZQ -->
+                    <line
+                      x1="390"
+                      y1="155"
+                      x2="500"
+                      y2="200"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="500"
+                      y="188"
+                      width="100"
+                      height="30"
+                      rx="4"
+                      fill="rgba(248,113,113,0.12)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="550"
+                      y="201"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--danger,#f87171)"
+                    >
+                      VREF / ZQ
+                    </text>
+                    <text
+                      x="550"
+                      y="213"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--danger,#f87171)"
+                    >
+                      reference &amp; cal.
+                    </text>
+                  </svg>
+                  <div class="signal-legend">
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: #818cf8"></span>Clock — differential,
+                      fly-by
+                    </div>
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: var(--warning, #fb923c)"></span
+                      >Command/Address — single-ended, fly-by
+                    </div>
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: #f472b6"></span>Control —
+                      single-ended, fly-by
+                    </div>
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: var(--cyan, #22d3ee)"></span>Data (DQ)
+                      — single-ended, point-to-point per lane
+                    </div>
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: var(--success, #34d399)"></span>Data
+                      strobe — differential, point-to-point per lane
+                    </div>
+                    <div class="signal-chip">
+                      <span class="swatch" style="background: var(--danger, #f87171)"></span>VREF/ZQ
+                      — reference &amp; calibration, not switching data
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detailed table -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Signal-by-signal reference</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Signal</th>
+                        <th>Type</th>
+                        <th>Role</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>CK / CK#</td>
+                        <td>Differential</td>
+                        <td>System clock the DRAM samples every other signal against.</td>
+                      </tr>
+                      <tr>
+                        <td>CS (chip select)</td>
+                        <td>Single-ended</td>
+                        <td>Selects which rank/device a command targets.</td>
+                      </tr>
+                      <tr>
+                        <td>RAS# / CAS# / WE# (or ACT_n + address, DDR4 encoding)</td>
+                        <td>Single-ended</td>
+                        <td>
+                          Encode the command type (ACTIVATE, READ, WRITE, PRECHARGE, REFRESH…).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Address (A[13:0], BA/BG)</td>
+                        <td>Single-ended</td>
+                        <td>Row/column address plus bank and bank-group select.</td>
+                      </tr>
+                      <tr>
+                        <td>CKE (clock enable)</td>
+                        <td>Single-ended</td>
+                        <td>Gates the clock for power-down/self-refresh states.</td>
+                      </tr>
+                      <tr>
+                        <td>ODT (on-die termination control)</td>
+                        <td>Single-ended</td>
+                        <td>Tells the DRAM when to enable its internal termination (Module 07).</td>
+                      </tr>
+                      <tr>
+                        <td>RESET#</td>
+                        <td>Single-ended</td>
+                        <td>Power-up/hard reset of the device.</td>
+                      </tr>
+                      <tr>
+                        <td>DQ[7:0] per byte</td>
+                        <td>Single-ended</td>
+                        <td>The actual data bus — 8 bits per byte lane.</td>
+                      </tr>
+                      <tr>
+                        <td>DQS / DQS# per byte</td>
+                        <td>Differential</td>
+                        <td>Source-synchronous strobe the controller/DRAM uses to sample DQ.</td>
+                      </tr>
+                      <tr>
+                        <td>DM / DBI per byte</td>
+                        <td>Single-ended</td>
+                        <td>
+                          Data mask (write byte enables) or, when configured, data-bus inversion for
+                          SI.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>VREF (DQ and CA, separate pins on DDR4)</td>
+                        <td>Reference</td>
+                        <td>Receiver decision threshold (Module 03).</td>
+                      </tr>
+                      <tr>
+                        <td>ZQ</td>
+                        <td>Reference</td>
+                        <td>
+                          Precision resistor input the DRAM uses to calibrate its own output driver
+                          and ODT impedance.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Byte lane grouping -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The byte-lane grouping concept</h3>
+                  <span class="badge badge-cyan">Diagram</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  DQ[7:0], DQS/DQS#, and DM/DBI for a given byte are not independent signals — they
+                  are sampled <em>relative to each other</em> and must be treated as a single
+                  routing/matching unit. This "byte lane" concept is the single most important idea
+                  for Module 09's length-matching rules.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 400 140"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Diagram of one byte lane group: eight DQ data lines, a differential DQS strobe pair, and a data mask line, all bounded together as one routing unit"
+                  >
+                    <rect
+                      x="10"
+                      y="10"
+                      width="380"
+                      height="120"
+                      rx="10"
+                      fill="none"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                      stroke-dasharray="6 4"
+                    />
+                    <text
+                      x="200"
+                      y="26"
+                      text-anchor="middle"
+                      font-size="10"
+                      font-weight="700"
+                      fill="var(--cyan,#22d3ee)"
+                    >
+                      Byte Lane 0 — one matched group
+                    </text>
+                    <g font-size="8" fill="var(--text-sub)">
+                      <rect
+                        x="24"
+                        y="38"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="41" y="49" text-anchor="middle">DQ0</text>
+                      <rect
+                        x="62"
+                        y="38"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="79" y="49" text-anchor="middle">DQ1</text>
+                      <rect
+                        x="100"
+                        y="38"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="117" y="49" text-anchor="middle">DQ2</text>
+                      <rect
+                        x="138"
+                        y="38"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="155" y="49" text-anchor="middle">DQ3</text>
+                      <rect
+                        x="24"
+                        y="58"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="41" y="69" text-anchor="middle">DQ4</text>
+                      <rect
+                        x="62"
+                        y="58"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="79" y="69" text-anchor="middle">DQ5</text>
+                      <rect
+                        x="100"
+                        y="58"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="117" y="69" text-anchor="middle">DQ6</text>
+                      <rect
+                        x="138"
+                        y="58"
+                        width="34"
+                        height="16"
+                        rx="3"
+                        fill="var(--bg-muted)"
+                        stroke="var(--border)"
+                      />
+                      <text x="155" y="69" text-anchor="middle">DQ7</text>
+                    </g>
+                    <rect
+                      x="200"
+                      y="38"
+                      width="70"
+                      height="36"
+                      rx="4"
+                      fill="rgba(52,211,153,0.12)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="235"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--success,#34d399)"
+                    >
+                      DQS / DQS#
+                    </text>
+                    <rect
+                      x="284"
+                      y="46"
+                      width="70"
+                      height="20"
+                      rx="4"
+                      fill="rgba(248,113,113,0.12)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="319"
+                      y="60"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--danger,#f87171)"
+                    >
+                      DM / DBI
+                    </text>
+                    <text
+                      x="200"
+                      y="110"
+                      text-anchor="middle"
+                      font-size="8.5"
+                      fill="var(--text-muted)"
+                    >
+                      All 10 signals here get the same tight length-matching tolerance (Module 09)
+                    </text>
+                  </svg>
+                </div>
+                <div class="tip-box">
+                  A x8 DRAM has one byte lane; a x16 device has two; the FPGA memory interface
+                  mirrors this same grouping on its I/O banks (Module 10) — pin-swap rules almost
+                  always respect byte-lane boundaries.
+                </div>
+              </div>
+
+              <!-- Differential vs single-ended -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Differential vs. single-ended handling</h3></div>
+                <table class="iface-spec-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>CK, DQS (differential)</th>
+                      <th>CA, DQ, control (single-ended)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Reference</td>
+                      <td>Complementary pair — each compares against the other</td>
+                      <td>Compares against VREF</td>
+                    </tr>
+                    <tr>
+                      <td>Noise immunity</td>
+                      <td>Higher — common-mode noise cancels</td>
+                      <td>Lower — sensitive to VREF noise (Module 08)</td>
+                    </tr>
+                    <tr>
+                      <td>Routing rule</td>
+                      <td>Tightly length- and impedance-matched pair (Module 09)</td>
+                      <td>Matched to the group's budget, referenced to VREF</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Six functional groups cover the whole interface: clock, command/address,
+                    control, data, data strobe, and reference/calibration (VREF, ZQ).
+                  </li>
+                  <li>
+                    Clock, CA and control are shared fly-by signals; DQ/DQS/DM are point-to-point
+                    per byte lane.
+                  </li>
+                  <li>
+                    A byte lane (DQ[7:0] + DQS/DQS# + DM/DBI) is the fundamental routing/matching
+                    unit for Module 09.
+                  </li>
+                  <li>
+                    Differential signals (CK, DQS) get their noise immunity from the complementary
+                    pair; single-ended signals depend entirely on a clean VREF.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="04-topologies.html">← Memory Topologies</a>
+                <a class="btn btn-primary" href="06-signal-integrity.html"
+                  >Next: Signal Integrity →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 termination strategies: series/source termination, parallel Thevenin (VTT) termination for the CA fly-by bus, on-die termination (ODT) for DQ/DQS, and differential termination for CK/DQS."
+    />
+    <title>
+      Termination Strategies | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/07-termination.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .topo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        margin-top: 10px;
+      }
+      .topo-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+      }
+      .topo-card h4 {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+        color: var(--text-base);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item active">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Termination Strategies</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 07</span>
+              <span class="badge badge-purple">Plotly</span>
+              <h1>Termination Strategies</h1>
+              <p class="subtitle">
+                Module 06 showed what an unterminated discontinuity does to the eye. Termination is
+                the fix: absorb the energy that would otherwise reflect, at the point in the circuit
+                where it does the least harm.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Reflection coefficient recap -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>The reflection coefficient, in one number</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Every termination decision comes back to one relationship: how close the
+                  termination resistance R<sub>t</sub> is to the line's characteristic impedance
+                  Z<sub>0</sub> (typically 40–50 Ω single-ended, ~85–100 Ω differential for DDR4).
+                  The reflection coefficient Γ = (R<sub>t</sub> − Z<sub>0</sub>) / (R<sub>t</sub> +
+                  Z<sub>0</sub>) tells you what fraction of the signal bounces back.
+                </p>
+                <div class="sim-controls">
+                  <div>
+                    <label class="slider-label" for="z0Slider"
+                      >Line impedance Z0: <span id="z0Val">50</span> Ω</label
+                    >
+                    <input type="range" id="z0Slider" min="35" max="65" step="1" value="50" />
+                  </div>
+                </div>
+                <div class="plot-box">
+                  <div id="gammaPlot" style="width: 100%; height: 300px"></div>
+                </div>
+                <div class="tip-box">
+                  Notice Γ = 0 only when R<sub>t</sub> = Z<sub>0</sub> exactly. A "perfect" 50 Ω
+                  termination on a 40 Ω trace still reflects roughly 11% of the signal — impedance
+                  control (Module 09) and termination selection have to agree with each other.
+                </div>
+              </div>
+
+              <!-- Strategy grid -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Four termination strategies, side by side</h3></div>
+                <div class="topo-grid">
+                  <div class="topo-card">
+                    <h4>Series (source) termination</h4>
+                    <svg
+                      viewBox="0 0 220 90"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                    >
+                      <rect
+                        x="6"
+                        y="35"
+                        width="46"
+                        height="24"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="29"
+                        y="50"
+                        text-anchor="middle"
+                        font-size="8"
+                        fill="var(--text-base)"
+                      >
+                        FPGA
+                      </text>
+                      <rect
+                        x="70"
+                        y="38"
+                        width="30"
+                        height="16"
+                        rx="3"
+                        fill="none"
+                        stroke="var(--warning,#fb923c)"
+                        stroke-width="2"
+                      />
+                      <text
+                        x="85"
+                        y="30"
+                        text-anchor="middle"
+                        font-size="8"
+                        fill="var(--warning,#fb923c)"
+                      >
+                        Rs
+                      </text>
+                      <line
+                        x1="52"
+                        y1="46"
+                        x2="70"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="100"
+                        y1="46"
+                        x2="180"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <rect
+                        x="180"
+                        y="35"
+                        width="36"
+                        height="24"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--success,#34d399)"
+                      />
+                      <text
+                        x="198"
+                        y="50"
+                        text-anchor="middle"
+                        font-size="8"
+                        fill="var(--text-base)"
+                      >
+                        DRAM
+                      </text>
+                    </svg>
+                    <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 6px">
+                      Small resistor at the driver, sized so R<sub>s</sub> + driver output impedance
+                      ≈ Z<sub>0</sub>. Common on point-to-point DQ/DQS from an FPGA when the on-die
+                      driver alone doesn't match the line.
+                    </p>
+                  </div>
+                  <div class="topo-card">
+                    <h4>Parallel / Thevenin (VTT) termination</h4>
+                    <svg
+                      viewBox="0 0 220 90"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                    >
+                      <line
+                        x1="10"
+                        y1="46"
+                        x2="170"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <rect
+                        x="10"
+                        y="35"
+                        width="34"
+                        height="22"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="27"
+                        y="49"
+                        text-anchor="middle"
+                        font-size="7.5"
+                        fill="var(--text-base)"
+                      >
+                        Driver
+                      </text>
+                      <circle cx="90" cy="46" r="3" fill="var(--warning,#fb923c)" />
+                      <rect
+                        x="80"
+                        y="46"
+                        width="20"
+                        height="14"
+                        rx="3"
+                        fill="none"
+                        stroke="var(--warning,#fb923c)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="170"
+                        y1="46"
+                        x2="185"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <rect
+                        x="185"
+                        y="10"
+                        width="24"
+                        height="16"
+                        rx="3"
+                        fill="none"
+                        stroke="var(--danger,#f87171)"
+                        stroke-width="2"
+                      />
+                      <text
+                        x="197"
+                        y="8"
+                        text-anchor="middle"
+                        font-size="7.5"
+                        fill="var(--danger,#f87171)"
+                      >
+                        Rtt
+                      </text>
+                      <line
+                        x1="197"
+                        y1="26"
+                        x2="197"
+                        y2="46"
+                        stroke="var(--danger,#f87171)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="185"
+                        y1="46"
+                        x2="209"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <text
+                        x="197"
+                        y="4"
+                        text-anchor="middle"
+                        font-size="7"
+                        fill="var(--danger,#f87171)"
+                      >
+                        VTT
+                      </text>
+                    </svg>
+                    <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 6px">
+                      Resistor(s) to a VTT rail (~VDDQ/2) at the far end of the fly-by bus. Used for
+                      the shared CA/CK/control lines, since a discrete DRAM has no on-die
+                      termination for those pins.
+                    </p>
+                  </div>
+                  <div class="topo-card">
+                    <h4>On-die termination (ODT)</h4>
+                    <svg
+                      viewBox="0 0 220 90"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                    >
+                      <rect
+                        x="10"
+                        y="35"
+                        width="40"
+                        height="22"
+                        rx="4"
+                        fill="var(--bg-muted)"
+                        stroke="var(--cyan,#22d3ee)"
+                      />
+                      <text
+                        x="30"
+                        y="49"
+                        text-anchor="middle"
+                        font-size="7.5"
+                        fill="var(--text-base)"
+                      >
+                        FPGA
+                      </text>
+                      <line
+                        x1="50"
+                        y1="46"
+                        x2="150"
+                        y2="46"
+                        stroke="var(--border)"
+                        stroke-width="2"
+                      />
+                      <rect
+                        x="150"
+                        y="20"
+                        width="55"
+                        height="45"
+                        rx="6"
+                        fill="var(--bg-muted)"
+                        stroke="var(--success,#34d399)"
+                      />
+                      <text
+                        x="177"
+                        y="36"
+                        text-anchor="middle"
+                        font-size="7.5"
+                        fill="var(--text-base)"
+                      >
+                        DRAM
+                      </text>
+                      <rect
+                        x="163"
+                        y="42"
+                        width="30"
+                        height="12"
+                        rx="3"
+                        fill="none"
+                        stroke="var(--success,#34d399)"
+                        stroke-width="1.6"
+                      />
+                      <text
+                        x="177"
+                        y="60"
+                        text-anchor="middle"
+                        font-size="6.5"
+                        fill="var(--success,#34d399)"
+                      >
+                        RTT (internal)
+                      </text>
+                    </svg>
+                    <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 6px">
+                      DQ/DQS/DM pins terminate <em>inside</em> the DRAM package itself, switched
+                      dynamically between RTT_nom (idle), RTT_wr (writes) and RTT_park — no
+                      board-level resistor needed.
+                    </p>
+                  </div>
+                  <div class="topo-card">
+                    <h4>Differential termination</h4>
+                    <svg
+                      viewBox="0 0 220 90"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 100%"
+                    >
+                      <line
+                        x1="10"
+                        y1="34"
+                        x2="150"
+                        y2="34"
+                        stroke="var(--cyan,#22d3ee)"
+                        stroke-width="2"
+                      />
+                      <line
+                        x1="10"
+                        y1="58"
+                        x2="150"
+                        y2="58"
+                        stroke="var(--cyan,#22d3ee)"
+                        stroke-width="2"
+                        stroke-dasharray="4 3"
+                      />
+                      <line
+                        x1="150"
+                        y1="34"
+                        x2="150"
+                        y2="58"
+                        stroke="var(--danger,#f87171)"
+                        stroke-width="3"
+                      />
+                      <text x="160" y="49" font-size="8" fill="var(--danger,#f87171)">~100Ω</text>
+                    </svg>
+                    <p style="font-size: 0.78rem; color: var(--text-sub); margin-top: 6px">
+                      A single resistor across the receiving end of CK/CK# or DQS/DQS# matches the
+                      pair's differential impedance directly — simplest and most effective
+                      termination in the whole interface.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ODT modes table -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>DDR4 ODT modes (data pins)</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Mode</th>
+                        <th>When active</th>
+                        <th>Typical value range</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>RTT_NOM</td>
+                        <td>Default/idle termination while not being written to</td>
+                        <td>34–120 Ω</td>
+                      </tr>
+                      <tr>
+                        <td>RTT_WR</td>
+                        <td>Enabled during writes to that rank</td>
+                        <td>60–240 Ω, or off</td>
+                      </tr>
+                      <tr>
+                        <td>RTT_PARK</td>
+                        <td>Value parked when ODT would otherwise be disabled</td>
+                        <td>Device/JEDEC defined</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 8px">
+                  These values are set by the FPGA memory controller through mode-register writes
+                  during initialization — matching them to your topology (Module 04) and trace
+                  impedance (Module 09) is normally handled by the memory-interface IP's timing/SI
+                  wizard, but knowing what the numbers mean is essential for debugging bring-up
+                  issues (Module 11).
+                </p>
+              </div>
+
+              <div class="warning-box">
+                A fly-by CA bus with no VTT termination at its far end is the classic "it never
+                calibrates" symptom in a first DDR4 board bring-up — the open end reflects nearly
+                100% of the signal back down the bus.
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Termination absorbs the energy that Module 06's reflections would otherwise
+                    bounce back — the goal is always Rt ≈ Z0.
+                  </li>
+                  <li>
+                    Series termination lives at the driver; parallel/Thevenin (VTT) termination
+                    lives at the far end of the shared fly-by CA bus.
+                  </li>
+                  <li>
+                    DDR4 data pins terminate on-die (ODT) with dynamically switched
+                    RTT_nom/RTT_wr/RTT_park — no board resistor required for DQ/DQS/DM.
+                  </li>
+                  <li>
+                    Differential termination is a single resistor across CK/CK# or DQS/DQS# at the
+                    receiver, matched to the pair's differential impedance.
+                  </li>
+                  <li>
+                    An unterminated fly-by CA bus is one of the most common causes of a board that
+                    fails to train at power-up.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="06-signal-integrity.html">← Signal Integrity</a>
+                <a class="btn btn-primary" href="08-decoupling-pdn.html"
+                  >Next: Decoupling &amp; PDN →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      function baseLayout(extra) {
+        var css = getComputedStyle(document.documentElement);
+        var textColor = css.getPropertyValue('--text-sub').trim() || '#94a3b8';
+        var gridColor = 'rgba(128,140,160,0.18)';
+        var base = {
+          autosize: true,
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: textColor, size: 11 },
+          showlegend: false,
+          xaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+          yaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+        };
+        for (var k in extra) {
+          if (base[k] && typeof base[k] === 'object' && typeof extra[k] === 'object') {
+            for (var kk in extra[k]) base[k][kk] = extra[k][kk];
+          } else {
+            base[k] = extra[k];
+          }
+        }
+        return base;
+      }
+
+      function draw() {
+        var z0 = parseFloat(document.getElementById('z0Slider').value);
+        document.getElementById('z0Val').textContent = z0.toFixed(0);
+        var rt = [];
+        var gamma = [];
+        for (var r = 10; r <= 150; r += 2) {
+          rt.push(r);
+          gamma.push((r - z0) / (r + z0));
+        }
+        var traces = [
+          {
+            x: rt,
+            y: gamma,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#22d3ee', width: 2.5 },
+            name: 'Γ(Rt)',
+          },
+          {
+            x: [z0],
+            y: [0],
+            mode: 'markers',
+            type: 'scatter',
+            marker: { color: '#34d399', size: 10 },
+            name: 'Rt = Z0',
+          },
+        ];
+        var layout = baseLayout({
+          xaxis: { title: 'Termination resistance Rt (Ω)' },
+          yaxis: { title: 'Reflection coefficient Γ', range: [-1, 1] },
+          height: 300,
+        });
+        Plotly.react('gammaPlot', traces, layout, { displayModeBar: false, responsive: true });
+      }
+
+      document.getElementById('z0Slider').addEventListener('input', draw);
+
+      var themeObserver = new MutationObserver(draw);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', draw);
+      } else {
+        draw();
+      }
+    </script>
+  </body>
+</html>

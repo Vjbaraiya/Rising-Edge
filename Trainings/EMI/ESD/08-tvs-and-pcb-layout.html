@@ -1,0 +1,1929 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="How to select a TVS diode against working voltage and clamp voltage, PCB layout rules that keep ESD current away from sensitive traces, and grounding/shielding practices that stop transients before the IC pin."
+    />
+    <title>
+      TVS Protection &amp; PCB Layout Best Practices | ESD Immunity Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/ESD/08-tvs-and-pcb-layout.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .toggle-tab {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 10px 0;
+      }
+      .slider-row label {
+        font-size: 0.8rem;
+        color: var(--text-sub);
+        min-width: 150px;
+      }
+      .slider-row input[type='range'] {
+        flex: 1;
+      }
+      .slider-row .val {
+        min-width: 60px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #3b82f6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Electrostatic Discharge (ESD) Immunity
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; What Is ESD</a>
+          <a href="02-physics-and-charge.html" class="module-item"
+            >02. Physics of Static Electricity &amp; Charge Build-Up</a
+          >
+          <a href="03-esd-models.html" class="module-item">03. ESD Models: HBM, MM &amp; CDM</a>
+          <a href="04-iec-61000-4-2-and-levels.html" class="module-item"
+            >04. IEC 61000-4-2, Test Levels &amp; Discharge Types</a
+          >
+          <a href="05-generator-and-waveform.html" class="module-item"
+            >05. ESD Generator, Test Setup &amp; Current Waveform</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. Product Categories &amp; Applicable Standards</a
+          >
+          <a href="07-failure-mechanisms.html" class="module-item"
+            >07. How ESD Damages Electronics &amp; Failure Mechanisms</a
+          >
+          <a href="08-tvs-and-pcb-layout.html" class="module-item active"
+            >08. TVS Protection &amp; PCB Layout Best Practices</a
+          >
+          <a href="09-case-studies.html" class="module-item"
+            >09. Engineering Case Studies (12 Failures)</a
+          >
+          <a href="10-debugging-and-summary.html" class="module-item"
+            >10. Debugging Workflow, Simulator &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Electrostatic Discharge (ESD) Immunity</a><span>/</span>
+            <span>TVS Protection &amp; PCB Layout Best Practices</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 8/10</span><span>80%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 08</div>
+              <h1 style="font-size: 2.2rem">TVS Protection &amp; PCB Layout Best Practices</h1>
+              <p class="subtitle">
+                The best ESD test result comes from a design that never lets the transient reach a
+                sensitive pin in the first place: the right TVS diode, placed and routed correctly,
+                stops most of the current before it ever gets close.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.25rem">Learning Objectives</h3>
+                <div
+                  class="objective-grid"
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                    gap: 12px;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🛡</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Select a TVS diode by working and clamp voltage
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">📐</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Apply PCB layout rules that keep transients off sensitive traces
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔌</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Apply grounding and shielding practices
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1: TVS selection -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: Selecting a TVS Diode (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    A TVS (transient voltage suppressor) diode must satisfy two conditions
+                    simultaneously: its <strong>working voltage</strong> (V<sub>RWM</sub>) must sit
+                    above your signal's normal operating range so it stays off during normal
+                    operation, and its <strong>clamp voltage</strong> (V<sub>C</sub>) at the
+                    expected ESD current must sit below the maximum voltage rating of the IC it
+                    protects.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">Try It: TVS Clamping Window</h3>
+                    <div class="slider-row">
+                      <label for="signalSlider">Signal operating voltage (V)</label>
+                      <input type="range" id="signalSlider" min="1" max="24" value="5" step="0.5" />
+                      <span class="val" id="signalVal">5.0 V</span>
+                    </div>
+                    <div class="slider-row">
+                      <label for="icRatingSlider">IC absolute max rating (V)</label>
+                      <input
+                        type="range"
+                        id="icRatingSlider"
+                        min="6"
+                        max="40"
+                        value="7"
+                        step="0.5"
+                      />
+                      <span class="val" id="icRatingVal">7.0 V</span>
+                    </div>
+                    <div class="slider-row">
+                      <label for="tvsWorkingSlider">TVS working voltage V_RWM (V)</label>
+                      <input
+                        type="range"
+                        id="tvsWorkingSlider"
+                        min="1"
+                        max="30"
+                        value="5.5"
+                        step="0.5"
+                      />
+                      <span class="val" id="tvsWorkingVal">5.5 V</span>
+                    </div>
+                    <div id="plotlyTvsWindow" style="width: 100%; height: 320px"></div>
+                    <div
+                      class="tribo-result"
+                      id="tvsVerdict"
+                      style="
+                        background: var(--bg-muted);
+                        border: 1px solid var(--border);
+                        border-radius: 10px;
+                        padding: 14px 16px;
+                        font-size: 0.85rem;
+                        color: var(--text-sub);
+                        line-height: 1.7;
+                        min-height: 50px;
+                        margin-top: 10px;
+                      "
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: PCB layout -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Good vs. Bad PCB Layout (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <div
+                    class="model-tabs"
+                    style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px"
+                    id="layoutTabs"
+                  >
+                    <button class="toggle-tab active" data-layout="0">Bad Layout</button>
+                    <button class="toggle-tab" data-layout="1">Good Layout</button>
+                  </div>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">Animated: Discharge Path Comparison</h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="layoutDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                  <table class="data-table" style="margin-top: 1rem">
+                    <thead>
+                      <tr>
+                        <th>Rule</th>
+                        <th>Why it matters</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Place TVS as close as possible to the connector/entry point</td>
+                        <td>
+                          Minimizes the trace length carrying the raw transient before it is clamped
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Route TVS ground return with a short, low-inductance path to chassis/earth
+                        </td>
+                        <td>
+                          A long or high-inductance ground path lets voltage build across it during
+                          the fast current pulse, reducing effective clamping
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Keep sensitive signal traces away from connector edges and seams</td>
+                        <td>
+                          Reduces direct or capacitively-coupled exposure to an air-discharge event
+                          near the enclosure opening
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Use a continuous ground plane under high-speed and I/O traces</td>
+                        <td>
+                          Provides a low-impedance return path and reduces loop area for coupled
+                          transients
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Add a moat or slot only with a deliberate single-point stitching strategy
+                        </td>
+                        <td>
+                          An unintentional ground-plane split can force return current through a
+                          much longer, higher-impedance path
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Section 3: grounding and shielding -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Section 3: Grounding &amp; Shielding Checklist</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+                      gap: 14px;
+                    "
+                  >
+                    <!-- 1. Star-point chassis ground -->
+                    <div
+                      style="
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 14px;
+                      "
+                    >
+                      <svg
+                        viewBox="0 0 280 130"
+                        style="width: 100%; height: auto; display: block"
+                        aria-label="Star-point chassis grounding diagram"
+                      >
+                        <!-- enclosure -->
+                        <rect
+                          x="10"
+                          y="18"
+                          width="260"
+                          height="100"
+                          rx="6"
+                          fill="none"
+                          stroke="var(--text-muted)"
+                          stroke-width="2.5"
+                        />
+                        <!-- PCB inside -->
+                        <rect
+                          x="55"
+                          y="48"
+                          width="180"
+                          height="46"
+                          rx="3"
+                          fill="rgba(34,197,94,0.15)"
+                          stroke="#22c55e"
+                          stroke-width="1.5"
+                        />
+                        <text
+                          x="145"
+                          y="76"
+                          text-anchor="middle"
+                          font-size="10"
+                          fill="var(--text-sub)"
+                        >
+                          PCB (signal GND plane)
+                        </text>
+                        <!-- connector at left wall -->
+                        <rect
+                          x="10"
+                          y="56"
+                          width="16"
+                          height="30"
+                          fill="var(--bg-muted)"
+                          stroke="var(--text-muted)"
+                          stroke-width="1.5"
+                        />
+                        <text
+                          x="18"
+                          y="52"
+                          text-anchor="middle"
+                          font-size="8"
+                          fill="var(--text-muted)"
+                        >
+                          I/O
+                        </text>
+                        <!-- single star-point strap near connector -->
+                        <line x1="40" y1="118" x2="55" y2="90" stroke="#22c55e" stroke-width="3" />
+                        <circle cx="40" cy="118" r="4" fill="#22c55e" />
+                        <text x="46" y="112" font-size="8.5" fill="#22c55e" font-weight="700">
+                          single star point
+                        </text>
+                        <!-- ESD bolt hitting chassis -->
+                        <path
+                          d="M 60 2 L 72 12 L 65 14 L 78 24"
+                          fill="none"
+                          stroke="#facc15"
+                          stroke-width="2.5"
+                        />
+                        <!-- current along chassis to star point -->
+                        <path
+                          d="M 78 24 Q 30 30 18 70 Q 14 100 38 116"
+                          fill="none"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                          stroke-dasharray="5 3"
+                        />
+                        <text
+                          x="235"
+                          y="14"
+                          text-anchor="end"
+                          font-size="8.5"
+                          fill="var(--text-muted)"
+                        >
+                          current stays on chassis
+                        </text>
+                      </svg>
+                      <p
+                        style="
+                          font-size: 0.82rem;
+                          color: var(--text-sub);
+                          line-height: 1.65;
+                          margin-top: 10px;
+                        "
+                      >
+                        <strong style="color: var(--text-base)">Star-point chassis ground.</strong>
+                        Chassis grounded to PCB ground at a single, low-impedance connection near
+                        the connector entry -- ESD current stays on the enclosure instead of
+                        crossing the signal ground plane.
+                      </p>
+                    </div>
+
+                    <!-- 2. Seam gasket / spring fingers -->
+                    <div
+                      style="
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 14px;
+                      "
+                    >
+                      <svg
+                        viewBox="0 0 280 130"
+                        style="width: 100%; height: auto; display: block"
+                        aria-label="Conductive gasket bridging an enclosure seam"
+                      >
+                        <!-- two enclosure halves with a seam -->
+                        <path
+                          d="M 15 100 L 15 30 Q 15 20 25 20 L 128 20"
+                          fill="none"
+                          stroke="var(--text-muted)"
+                          stroke-width="3"
+                        />
+                        <path
+                          d="M 152 20 L 255 20 Q 265 20 265 30 L 265 100"
+                          fill="none"
+                          stroke="var(--text-muted)"
+                          stroke-width="3"
+                        />
+                        <text
+                          x="140"
+                          y="12"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="var(--text-muted)"
+                        >
+                          seam
+                        </text>
+                        <!-- spring fingers bridging the seam -->
+                        <path
+                          d="M 128 20 q 6 8 12 0 q 6 8 12 0"
+                          fill="none"
+                          stroke="#22c55e"
+                          stroke-width="2.5"
+                        />
+                        <text
+                          x="140"
+                          y="44"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="#22c55e"
+                          font-weight="700"
+                        >
+                          gasket / spring fingers
+                        </text>
+                        <!-- air discharge at seam -->
+                        <path
+                          d="M 140 -2 L 148 6 L 142 8 L 149 16"
+                          fill="none"
+                          stroke="#facc15"
+                          stroke-width="2.5"
+                          transform="translate(0,4)"
+                        />
+                        <!-- current spreads along shell, not inside -->
+                        <path
+                          d="M 138 24 Q 80 26 30 32"
+                          fill="none"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                          stroke-dasharray="5 3"
+                        />
+                        <path
+                          d="M 148 24 Q 200 26 250 32"
+                          fill="none"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                          stroke-dasharray="5 3"
+                        />
+                        <!-- protected interior -->
+                        <rect
+                          x="85"
+                          y="64"
+                          width="110"
+                          height="30"
+                          rx="3"
+                          fill="rgba(59,130,246,0.12)"
+                          stroke="#3b82f6"
+                          stroke-width="1.5"
+                        />
+                        <text
+                          x="140"
+                          y="82"
+                          text-anchor="middle"
+                          font-size="9"
+                          fill="var(--text-sub)"
+                        >
+                          electronics stay quiet
+                        </text>
+                      </svg>
+                      <p
+                        style="
+                          font-size: 0.82rem;
+                          color: var(--text-sub);
+                          line-height: 1.65;
+                          margin-top: 10px;
+                        "
+                      >
+                        <strong style="color: var(--text-base)">Bridge every seam.</strong>
+                        Conductive gaskets or spring fingers keep the enclosure electrically
+                        continuous, so an air discharge at a seam spreads along the shield instead
+                        of finding a high-impedance path inside.
+                      </p>
+                    </div>
+
+                    <!-- 3. Ferrite / common-mode choke on cables -->
+                    <div
+                      style="
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 14px;
+                      "
+                    >
+                      <svg
+                        viewBox="0 0 280 130"
+                        style="width: 100%; height: auto; display: block"
+                        aria-label="Ferrite bead on a cable entering the enclosure"
+                      >
+                        <!-- enclosure wall -->
+                        <line
+                          x1="150"
+                          y1="10"
+                          x2="150"
+                          y2="120"
+                          stroke="var(--text-muted)"
+                          stroke-width="3"
+                        />
+                        <text x="158" y="18" font-size="8.5" fill="var(--text-muted)">
+                          enclosure wall
+                        </text>
+                        <!-- cable -->
+                        <path
+                          d="M 10 70 Q 60 60 110 66 L 250 66"
+                          fill="none"
+                          stroke="var(--text-sub)"
+                          stroke-width="4"
+                        />
+                        <!-- ferrite bead over cable at entry -->
+                        <rect
+                          x="122"
+                          y="52"
+                          width="34"
+                          height="28"
+                          rx="6"
+                          fill="var(--bg-muted)"
+                          stroke="#a78bfa"
+                          stroke-width="2.5"
+                        />
+                        <text
+                          x="139"
+                          y="96"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="#a78bfa"
+                          font-weight="700"
+                        >
+                          ferrite / CM choke
+                        </text>
+                        <!-- incoming transient: big spikes -->
+                        <path
+                          d="M 26 48 l 6 -14 l 5 22 l 6 -18 l 5 14"
+                          fill="none"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                        />
+                        <text x="42" y="24" text-anchor="middle" font-size="8.5" fill="#ef4444">
+                          fast transient
+                        </text>
+                        <!-- after bead: small ripple -->
+                        <path
+                          d="M 190 62 q 6 -6 12 0 q 6 6 12 0"
+                          fill="none"
+                          stroke="#22c55e"
+                          stroke-width="2"
+                        />
+                        <text x="208" y="46" text-anchor="middle" font-size="8.5" fill="#22c55e">
+                          attenuated
+                        </text>
+                      </svg>
+                      <p
+                        style="
+                          font-size: 0.82rem;
+                          color: var(--text-sub);
+                          line-height: 1.65;
+                          margin-top: 10px;
+                        "
+                      >
+                        <strong style="color: var(--text-base)">Choke the cables.</strong>
+                        Ferrite beads or common-mode chokes at the cable entry add high-frequency
+                        impedance in the ESD current's path without disturbing the intended
+                        low-frequency signal.
+                      </p>
+                    </div>
+
+                    <!-- 4. Two-stage clamp at I/O pins -->
+                    <div
+                      style="
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 14px;
+                      "
+                    >
+                      <svg
+                        viewBox="0 0 280 130"
+                        style="width: 100%; height: auto; display: block"
+                        aria-label="Two-stage clamp: TVS, series resistor, IC pin"
+                      >
+                        <!-- connector -->
+                        <rect
+                          x="12"
+                          y="42"
+                          width="34"
+                          height="40"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--text-muted)"
+                          stroke-width="1.5"
+                        />
+                        <text
+                          x="29"
+                          y="36"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="var(--text-muted)"
+                        >
+                          conn.
+                        </text>
+                        <!-- IC -->
+                        <rect
+                          x="228"
+                          y="42"
+                          width="42"
+                          height="40"
+                          rx="3"
+                          fill="var(--bg-muted)"
+                          stroke="var(--text-muted)"
+                          stroke-width="1.5"
+                        />
+                        <text
+                          x="249"
+                          y="36"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="var(--text-muted)"
+                        >
+                          IC pin
+                        </text>
+                        <!-- signal line -->
+                        <line
+                          x1="46"
+                          y1="62"
+                          x2="120"
+                          y2="62"
+                          stroke="var(--text-sub)"
+                          stroke-width="2"
+                        />
+                        <line
+                          x1="176"
+                          y1="62"
+                          x2="228"
+                          y2="62"
+                          stroke="var(--text-sub)"
+                          stroke-width="2"
+                        />
+                        <!-- series resistor zigzag -->
+                        <path
+                          d="M 120 62 l 6 -8 l 9 14 l 9 -14 l 9 14 l 9 -14 l 8 8"
+                          fill="none"
+                          stroke="var(--text-sub)"
+                          stroke-width="2"
+                        />
+                        <text
+                          x="148"
+                          y="42"
+                          text-anchor="middle"
+                          font-size="8.5"
+                          fill="var(--text-sub)"
+                        >
+                          series R
+                        </text>
+                        <!-- TVS to ground at connector side -->
+                        <line x1="76" y1="62" x2="76" y2="80" stroke="#22c55e" stroke-width="2" />
+                        <path
+                          d="M 68 80 L 84 80 L 76 94 Z"
+                          fill="rgba(34,197,94,0.3)"
+                          stroke="#22c55e"
+                          stroke-width="2"
+                        />
+                        <line x1="68" y1="94" x2="84" y2="94" stroke="#22c55e" stroke-width="2" />
+                        <line x1="76" y1="94" x2="76" y2="104" stroke="#22c55e" stroke-width="2" />
+                        <line
+                          x1="68"
+                          y1="104"
+                          x2="84"
+                          y2="104"
+                          stroke="#22c55e"
+                          stroke-width="2.5"
+                        />
+                        <line x1="71" y1="109" x2="81" y2="109" stroke="#22c55e" stroke-width="2" />
+                        <line x1="74" y1="114" x2="78" y2="114" stroke="#22c55e" stroke-width="2" />
+                        <text x="96" y="100" font-size="8.5" fill="#22c55e" font-weight="700">
+                          TVS
+                        </text>
+                        <!-- transient in -->
+                        <path
+                          d="M 4 20 L 16 30 L 9 32 L 22 42"
+                          fill="none"
+                          stroke="#facc15"
+                          stroke-width="2.5"
+                        />
+                        <!-- residual arrow small -->
+                        <path
+                          d="M 196 54 l 14 0 m -5 -4 l 5 4 l -5 4"
+                          fill="none"
+                          stroke="#22c55e"
+                          stroke-width="1.8"
+                        />
+                        <text x="203" y="46" text-anchor="middle" font-size="8.5" fill="#22c55e">
+                          small residue
+                        </text>
+                      </svg>
+                      <p
+                        style="
+                          font-size: 0.82rem;
+                          color: var(--text-sub);
+                          line-height: 1.65;
+                          margin-top: 10px;
+                        "
+                      >
+                        <strong style="color: var(--text-base)"
+                          >Two-stage clamp at exposed I/O.</strong
+                        >
+                        A TVS at the connector takes the bulk current; a small series resistor (or
+                        ESD-rated connector) after it drops the residual before the IC pin.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: step-by-step selection method -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec4body">
+                  <span
+                    >Section 4: Choosing the Right ESD Protection Part &mdash; Step-by-Step (with
+                    Worked Examples)</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Every protection-part selection is the same seven questions asked in the same
+                    order. Work through them once for each externally exposed interface on your
+                    product, and the datasheet parameters you need fall out automatically.
+                  </p>
+                  <div id="selSteps"></div>
+                  <div class="tip-box" style="margin-top: 1rem">
+                    Rule of thumb for step 4: an IEC 61000-4-2 discharge peaks at roughly
+                    <strong>3.75 A per kV</strong> of test voltage (8 kV &rarr; ~30 A first peak).
+                    The voltage your IC actually sees is V<sub>C</sub> &asymp; V<sub>BR</sub> +
+                    R<sub>dyn</sub> &times; I<sub>peak</sub> &mdash; so a TVS with 1 &ohm; dynamic
+                    resistance adds ~30 V at 8 kV. Low R<sub>dyn</sub> matters as much as the
+                    headline clamp figure.
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.5rem">
+                    <h3 style="margin-bottom: 0.5rem">Worked Examples: Pick Your Interface</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      The same seven steps applied to six common interfaces. Values are typical
+                      starting points &mdash; always verify against your product's governing
+                      standard and the protected IC's datasheet.
+                    </p>
+                    <div
+                      class="model-tabs"
+                      style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px"
+                      id="ifaceTabs"
+                    >
+                      <button class="toggle-tab active" data-iface="0">USB 2.0</button>
+                      <button class="toggle-tab" data-iface="1">USB 3.x / USB-C</button>
+                      <button class="toggle-tab" data-iface="2">HDMI 2.0</button>
+                      <button class="toggle-tab" data-iface="3">Gigabit Ethernet</button>
+                      <button class="toggle-tab" data-iface="4">CAN-FD (Automotive)</button>
+                      <button class="toggle-tab" data-iface="5">RS-485 (Industrial)</button>
+                    </div>
+                    <div id="ifaceDetail" style="overflow-x: auto"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 8 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 8%;
+                        background: linear-gradient(90deg, #3b82f6, #facc15);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="07-failure-mechanisms.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="09-case-studies.html">Next Lesson &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+      function drawPcbBoard(ctx, x, y, w, h) {
+        ctx.fillStyle = 'rgba(34,110,60,0.35)';
+        ctx.strokeStyle = 'rgba(34,110,60,0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
+        ctx.lineWidth = 1;
+      }
+    </script>
+
+    <!-- Section 1: TVS selection -->
+    <script>
+      function drawPlotlyTvsWindow() {
+        var el = document.getElementById('plotlyTvsWindow');
+        if (!el || !window.Plotly) return;
+        var signal = parseFloat(document.getElementById('signalSlider').value);
+        var icMax = parseFloat(document.getElementById('icRatingSlider').value);
+        var tvsWorking = parseFloat(document.getElementById('tvsWorkingSlider').value);
+        var clampVoltage = tvsWorking * 1.4; // approximate clamp ratio for illustrative purposes
+
+        var layout = Object.assign({}, getPlotlyLayoutBase(), {
+          xaxis: {
+            title: 'Voltage (V)',
+            range: [0, Math.max(icMax, clampVoltage) + 5],
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          yaxis: { showticklabels: false, range: [0, 1] },
+          shapes: [
+            {
+              type: 'rect',
+              x0: 0,
+              x1: signal,
+              y0: 0,
+              y1: 1,
+              fillcolor: 'rgba(59,130,246,0.15)',
+              line: { width: 0 },
+            },
+            {
+              type: 'rect',
+              x0: signal,
+              x1: tvsWorking,
+              y0: 0,
+              y1: 1,
+              fillcolor: 'rgba(250,204,21,0.12)',
+              line: { width: 0 },
+            },
+            {
+              type: 'rect',
+              x0: tvsWorking,
+              x1: clampVoltage,
+              y0: 0,
+              y1: 1,
+              fillcolor: 'rgba(76,223,139,0.15)',
+              line: { width: 0 },
+            },
+            {
+              type: 'rect',
+              x0: clampVoltage,
+              x1: Math.max(icMax, clampVoltage) + 5,
+              y0: 0,
+              y1: 1,
+              fillcolor: 'rgba(239,68,68,0.12)',
+              line: { width: 0 },
+            },
+            {
+              type: 'line',
+              x0: icMax,
+              x1: icMax,
+              y0: 0,
+              y1: 1,
+              line: { color: '#ef4444', width: 2, dash: 'dash' },
+            },
+          ],
+          annotations: [
+            {
+              x: signal / 2,
+              y: 1.06,
+              text: 'Signal range',
+              showarrow: false,
+              font: { size: 9, color: isLightTheme() ? '#334155' : '#e2e8f0' },
+            },
+            {
+              x: (signal + tvsWorking) / 2,
+              y: 1.06,
+              text: 'Margin',
+              showarrow: false,
+              font: { size: 9, color: isLightTheme() ? '#334155' : '#e2e8f0' },
+            },
+            {
+              x: (tvsWorking + clampVoltage) / 2,
+              y: 1.06,
+              text: 'Clamping',
+              showarrow: false,
+              font: { size: 9, color: isLightTheme() ? '#334155' : '#e2e8f0' },
+            },
+            {
+              x: icMax,
+              y: -0.12,
+              text: 'IC max: ' + icMax + ' V',
+              showarrow: false,
+              font: { size: 9, color: '#ef4444' },
+            },
+          ],
+        });
+        Plotly.newPlot(
+          el,
+          [{ x: [0], y: [0], mode: 'markers', marker: { opacity: 0 }, showlegend: false }],
+          layout,
+          { displayModeBar: false, responsive: true }
+        );
+
+        var signalEl = document.getElementById('signalVal');
+        var icEl = document.getElementById('icRatingVal');
+        var tvsEl = document.getElementById('tvsWorkingVal');
+        signalEl.textContent = signal.toFixed(1) + ' V';
+        icEl.textContent = icMax.toFixed(1) + ' V';
+        tvsEl.textContent = tvsWorking.toFixed(1) + ' V';
+
+        var verdict = document.getElementById('tvsVerdict');
+        var okWorking = tvsWorking > signal;
+        var okClamp = clampVoltage < icMax;
+        if (okWorking && okClamp) {
+          verdict.innerHTML =
+            '<strong style="color:#4cdf8b">Valid selection.</strong> TVS working voltage (' +
+            tvsWorking.toFixed(1) +
+            ' V) stays above the signal range (' +
+            signal.toFixed(1) +
+            ' V) so it remains off in normal operation, and the estimated clamp voltage (~' +
+            clampVoltage.toFixed(1) +
+            ' V) stays below the IC absolute max rating (' +
+            icMax.toFixed(1) +
+            ' V).';
+        } else if (!okWorking) {
+          verdict.innerHTML =
+            '<strong style="color:#ef4444">Invalid: TVS will conduct during normal operation.</strong> Working voltage (' +
+            tvsWorking.toFixed(1) +
+            ' V) must be raised above the signal range (' +
+            signal.toFixed(1) +
+            ' V).';
+        } else {
+          verdict.innerHTML =
+            '<strong style="color:#ef4444">Invalid: clamp voltage exceeds IC rating.</strong> Estimated clamp voltage (~' +
+            clampVoltage.toFixed(1) +
+            ' V) exceeds the IC absolute max rating (' +
+            icMax.toFixed(1) +
+            ' V) -- choose a lower-working-voltage TVS or a part with a lower clamping ratio.';
+        }
+      }
+      ['signalSlider', 'icRatingSlider', 'tvsWorkingSlider'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', drawPlotlyTvsWindow);
+      });
+      drawPlotlyTvsWindow();
+      window.addEventListener('resize', drawPlotlyTvsWindow);
+    </script>
+
+    <!-- Section 2: layout comparison -->
+    <script>
+      var currentLayout = 0;
+      document.querySelectorAll('#layoutTabs .toggle-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#layoutTabs .toggle-tab').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentLayout = parseInt(tab.getAttribute('data-layout'));
+          drawLayoutDiagram();
+        });
+      });
+
+      function drawLayoutDiagram() {
+        var canvas = document.getElementById('layoutDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        drawPcbBoard(ctx, w * 0.05, h * 0.1, w * 0.9, h * 0.8);
+
+        var connX = w * 0.1,
+          connY = h * 0.5;
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(connX - 8, connY - 20, 16, 40);
+        labelPlate(ctx, 'Connector', connX, connY - 32, 'center', 10);
+
+        var icX = w * 0.85,
+          icY = h * 0.5;
+        ctx.fillStyle = '#1c2530';
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.fillRect(icX - 20, icY - 20, 40, 40);
+        ctx.strokeRect(icX - 20, icY - 20, 40, 40);
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'IC', icX, icY - 32, 'center', 10);
+
+        if (currentLayout === 0) {
+          // BAD: TVS far from connector, long trace direct to IC, thin/long ground return
+          var tvsX = w * 0.6,
+            tvsY = h * 0.5;
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(connX + 8, connY);
+          ctx.lineTo(icX - 20, icY);
+          ctx.stroke();
+
+          ctx.fillStyle = '#1c2530';
+          ctx.strokeStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(tvsX, tvsY, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          labelPlate(ctx, 'TVS (too far, weak GND return)', tvsX, tvsY + 26, 'center', 9);
+
+          // long meandering ground return
+          ctx.strokeStyle = 'rgba(239,68,68,0.6)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(tvsX, tvsY + 10);
+          ctx.lineTo(tvsX, h * 0.85);
+          ctx.lineTo(w * 0.2, h * 0.85);
+          ctx.lineTo(w * 0.2, h * 0.2);
+          ctx.stroke();
+          labelPlate(ctx, 'Long, high-inductance GND path', w * 0.2, h * 0.15, 'center', 9);
+
+          // ESD entering, most current reaching IC
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(icX - 30, icY, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // GOOD: TVS right at connector, short direct GND stitch
+          var tvsX = connX + 30,
+            tvsY = connY;
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(connX + 8, connY);
+          ctx.lineTo(icX - 20, icY);
+          ctx.stroke();
+
+          ctx.fillStyle = '#1c2530';
+          ctx.strokeStyle = '#4cdf8b';
+          ctx.beginPath();
+          ctx.arc(tvsX, tvsY, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          labelPlate(ctx, 'TVS at entry, short GND stitch', tvsX, tvsY + 26, 'center', 9);
+
+          ctx.strokeStyle = 'rgba(76,223,139,0.8)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(tvsX, tvsY + 10);
+          ctx.lineTo(tvsX, tvsY + 30);
+          ctx.stroke();
+          labelPlate(ctx, 'Direct to GND plane', tvsX, tvsY + 46, 'center', 9);
+
+          // most current shunted at TVS, only small residual reaches IC
+          ctx.fillStyle = '#4cdf8b';
+          ctx.beginPath();
+          ctx.arc(tvsX, tvsY, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      drawLayoutDiagram();
+      window.addEventListener('resize', drawLayoutDiagram);
+    </script>
+
+    <!-- Section 4: selection method + worked examples -->
+    <script>
+      (function () {
+        var STEPS = [
+          {
+            t: 'Identify the interface and its exposure',
+            d: 'List every pin the outside world can reach: signal lines, power pins, shield, and any user-touchable metal. A connector recessed behind plastic may only need air-discharge consideration; exposed contacts need contact-discharge protection.',
+          },
+          {
+            t: 'Find the applicable standard and test level',
+            d: 'Your product family standard decides the level: consumer/IT products (IEC 62368-1) and multimedia typically invoke IEC 61000-4-2 at 4 kV contact / 8 kV air; industrial (IEC 61000-6-2) commonly 4-6 kV contact / 8 kV air; medical (IEC 60601-1-2) 8 kV contact / 15 kV air; automotive uses ISO 10605 with OEM levels frequently at 8 kV contact / 15 kV air, tested powered and unpowered.',
+          },
+          {
+            t: 'Set the working voltage V_RWM from the signal',
+            d: 'V_RWM must sit at or above the highest normal operating voltage on the line (including tolerance) so the TVS never conducts in normal operation. Signals that swing below ground, or differential buses with negative common-mode range, need a bidirectional part.',
+          },
+          {
+            t: 'Set the clamp target from the protected IC',
+            d: 'Find the IC pin absolute-maximum voltage (or its rated system-level immunity, if the pin has integrated protection). Your TVS clamp voltage at the expected peak current -- V_C = V_BR + R_dyn x I_peak -- must stay below it. At 8 kV contact the first peak is about 30 A, so dynamic resistance dominates.',
+          },
+          {
+            t: 'Respect the signal-integrity budget',
+            d: 'Line capacitance is the limit: about 3 pF is acceptable on USB 2.0 high-speed, but 6-10 Gbps interfaces (USB 3.x, HDMI 2.0) need under ~0.4 pF per line. Slow buses like CAN, RS-485 or audio tolerate tens of pF, which buys you far more rugged parts.',
+          },
+          {
+            t: 'Choose channel count and package for layout',
+            d: 'Match the array to the pin group (2/4/8 channels) and prefer flow-through packages that let the signal enter and leave the footprint in a straight line at the connector -- placement quality from Section 2 depends on this choice.',
+          },
+          {
+            t: 'Validate on paper, then in hardware',
+            d: 'Check the datasheet states IEC 61000-4-2 (not just HBM!) at or above your level, with repeated-strike endurance. Then verify at board level: discharge at the connector, confirm the required performance criterion (A/B) and re-test after layout changes.',
+          },
+        ];
+        var el = document.getElementById('selSteps');
+        if (el) {
+          el.innerHTML = STEPS.map(function (s, i) {
+            return (
+              '<div style="display:flex;gap:12px;margin-bottom:10px"><div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:rgba(59,130,246,0.15);color:#3b82f6;font-size:0.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px">' +
+              (i + 1) +
+              '</div><div style="font-size:0.85rem;color:var(--text-sub);line-height:1.65"><strong style="color:var(--text-base)">' +
+              s.t +
+              '.</strong> ' +
+              s.d +
+              '</div></div>'
+            );
+          }).join('');
+        }
+
+        var IFACES = [
+          {
+            name: 'USB 2.0 High-Speed (consumer device)',
+            rows: [
+              [
+                '1. Exposure',
+                'D+, D- data pair, VBUS (5 V), shield. Connector contacts user-accessible: contact discharge applies.',
+              ],
+              [
+                '2. Standard & level',
+                'IEC 62368-1 invoking IEC 61000-4-2: 4 kV contact / 8 kV air minimum; many OEM specs require 8 kV contact on connector pins.',
+              ],
+              [
+                '3. V_RWM',
+                'Data lines swing 0-3.3 V but share a connector with 5 V VBUS: choose V_RWM = 5.25-5.5 V so a VBUS short never turns the TVS on. Unidirectional is fine.',
+              ],
+              [
+                '4. Clamp target',
+                "USB PHY pins typically tolerate ~+6 V abs max with integrated protection: aim for V_C under ~15-20 V at 16 A (4 kV) with R_dyn under ~1 ohm and let the PHY's own clamp handle the residue.",
+              ],
+              [
+                '5. Capacitance',
+                '480 Mbps: keep line capacitance under ~3 pF; matched capacitance on D+/D- to protect signal balance.',
+              ],
+              [
+                '6. Package',
+                '2-channel low-cap array for D+/D- plus a separate 5 V TVS for VBUS; SOT-23/SOT-953 at the connector.',
+              ],
+              [
+                '7. Validate',
+                'Datasheet must state IEC 61000-4-2 8 kV contact on the protected pins; verify enumeration still works after 10 strikes per polarity.',
+              ],
+            ],
+          },
+          {
+            name: 'USB 3.x over USB-C (10 Gbps)',
+            rows: [
+              [
+                '1. Exposure',
+                'SuperSpeed TX/RX pairs, D+/D-, CC1/CC2, SBU, VBUS. CC pins negotiate up to 5 V; VBUS up to 20 V (or 28 V+ with EPR).',
+              ],
+              [
+                '2. Standard & level',
+                'IEC 62368-1 / IEC 61000-4-2: 4 kV contact / 8 kV air minimum; consumer OEMs commonly demand 8 kV contact on all connector pins.',
+              ],
+              [
+                '3. V_RWM',
+                'SS pairs: 3.6 V works (0.3-1.2 V signalling). D+/D-: 5.5 V. CC/SBU: 5.5 V (24 V-tolerant parts exist for cable-fault robustness). VBUS: V_RWM at or above the negotiated maximum, e.g. 22-24 V for 20 V PD.',
+              ],
+              [
+                '4. Clamp target',
+                '10 Gbps SerDes pins are fragile (CDM-class): prioritize deep-snapback or low-R_dyn parts, V_C under ~10 V at 16 A on SS lines.',
+              ],
+              [
+                '5. Capacitance',
+                'Under 0.3 pF per line on SS pairs; under 1 pF on D+/D-. CC/SBU tolerate a few pF.',
+              ],
+              [
+                '6. Package',
+                'Flow-through 4-channel arrays on the SS pairs placed in-line at the connector; separate parts for CC/SBU and a power TVS for VBUS.',
+              ],
+              [
+                '7. Validate',
+                'IEC 61000-4-2 rating on-datasheet, plus eye-diagram compliance re-run with the TVS fitted -- capacitance that passes on paper can still close a marginal eye.',
+              ],
+            ],
+          },
+          {
+            name: 'HDMI 2.0 (6 Gbps TMDS)',
+            rows: [
+              [
+                '1. Exposure',
+                '4 TMDS differential pairs, DDC (I2C, 5 V), CEC, HPD, +5 V power pin. Connector is user-facing: contact discharge applies.',
+              ],
+              [
+                '2. Standard & level',
+                'IEC 62368-1 / CE multimedia: IEC 61000-4-2 4 kV contact / 8 kV air; TV OEMs frequently specify 8 kV contact.',
+              ],
+              ['3. V_RWM', 'TMDS: 3.6 V (AVcc 3.3 V termination). DDC/CEC/HPD/+5 V: 5.5 V.'],
+              [
+                '4. Clamp target',
+                'HDMI receiver inputs typically ~4 V abs max: needs genuinely low clamping -- deep-snapback devices with V_C under ~7 V at 8 A are the norm on TMDS.',
+              ],
+              [
+                '5. Capacitance',
+                'Under 0.4 pF per TMDS line and tightly matched within each pair; DDC/CEC can take several pF.',
+              ],
+              [
+                '6. Package',
+                '8-channel flow-through array covering all four pairs keeps routing clean; separate 4-channel part for DDC/CEC/HPD/+5V.',
+              ],
+              [
+                '7. Validate',
+                'IEC 61000-4-2 8 kV contact rating plus HDMI compliance eye test with protection fitted.',
+              ],
+            ],
+          },
+          {
+            name: '10/100/1000BASE-T Ethernet',
+            rows: [
+              [
+                '1. Exposure',
+                '4 differential pairs through magnetics. The transformer gives galvanic isolation, but its interwinding capacitance still couples fast ESD edges to the PHY side.',
+              ],
+              [
+                '2. Standard & level',
+                'IT/industrial: IEC 61000-4-2 Level 3-4 (6-8 kV contact). Outdoor or building-wiring runs add IEC 61000-4-5 surge, which usually drives the line-side design.',
+              ],
+              [
+                '3. V_RWM',
+                'PHY side: 3.6 V parts on the MDI pairs. Line side: high-voltage isolation is provided by the magnetics and Bob Smith termination (75 ohm + 1-2 kV cap per pair).',
+              ],
+              [
+                '4. Clamp target',
+                'Modern PHYs tolerate little: V_C under ~15 V at 16 A on the PHY-side pairs; check the PHY datasheet for its stated system-level immunity.',
+              ],
+              [
+                '5. Capacitance',
+                '1000BASE-T tolerates ~2-3 pF per line if matched within the pair; use low-cap arrays, one per pair.',
+              ],
+              [
+                '6. Package',
+                'Four 2-channel low-cap arrays (or two 4-channel) between magnetics and PHY, placed at the PHY-side of the magnetics; keep the line side clean for isolation.',
+              ],
+              [
+                '7. Validate',
+                'Test both contact discharge to the shield and air discharge to the port opening; confirm link stays up (Criterion A/B per your standard).',
+              ],
+            ],
+          },
+          {
+            name: 'CAN-FD (automotive body network)',
+            rows: [
+              [
+                '1. Exposure',
+                'CANH/CANL on an unshielded twisted pair leaving the ECU; exposed during assembly and service. Powered and unpowered discharge both apply.',
+              ],
+              [
+                '2. Standard & level',
+                'ISO 10605 (automotive ESD): typical OEM requirement 8 kV contact / 15 kV air, plus packaging/handling levels; note ISO 10605 uses different R/C networks (330 ohm / 150-330 pF) than IEC 61000-4-2.',
+              ],
+              [
+                '3. V_RWM',
+                'OEM specs demand the bus survive shorts to battery and jump-start: bidirectional TVS with V_RWM at or above +/-24 V (or asymmetric parts matching -27 V/+40 V requirements).',
+              ],
+              [
+                '4. Clamp target',
+                "CAN transceivers are rugged (+/-58 V bus fault tolerance is common) -- clamp under ~40-50 V is generally acceptable; verify against the transceiver's stated ISO 10605 immunity.",
+              ],
+              [
+                '5. Capacitance',
+                '2-8 Mbps CAN-FD tolerates up to ~20-30 pF per line, but keep CANH/CANL capacitance matched to protect symmetry.',
+              ],
+              [
+                '6. Package',
+                'Dual-line bidirectional TVS in SOT-23 across CANH/CANL to ground at the connector; many parts are AEC-Q101 qualified -- required for automotive.',
+              ],
+              [
+                '7. Validate',
+                'ISO 10605 discharge to the harness connector powered and unpowered, plus verification the bus error counters stay clean during discharge (soft-failure check).',
+              ],
+            ],
+          },
+          {
+            name: 'RS-485 (industrial field terminal)',
+            rows: [
+              [
+                '1. Exposure',
+                'A/B bus terminals on a screw or pluggable terminal block -- hand-wired in the field, so worst-case human contact is guaranteed.',
+              ],
+              [
+                '2. Standard & level',
+                'IEC 61000-6-2 (industrial immunity): IEC 61000-4-2 4 kV contact / 8 kV air minimum -- but field terminals usually also need IEC 61000-4-4 EFT and 61000-4-5 surge, so protection is designed as a coordinated network.',
+              ],
+              [
+                '3. V_RWM',
+                'RS-485 common-mode range is -7 V to +12 V: use a bidirectional TVS rated for that asymmetric window (dedicated RS-485 protectors exist) or +/-15 V symmetric.',
+              ],
+              [
+                '4. Clamp target',
+                'Transceiver abs max is typically +/-14 to +/-18 V beyond the common-mode range: aim for V_C under ~30 V at 16 A, and add 10 ohm pulse-rated series resistors between TVS and transceiver to drop the residual.',
+              ],
+              [
+                '5. Capacitance',
+                'Up to ~40 pF per line is fine at 10 Mbps and below -- take advantage: bigger junctions mean lower R_dyn and surge survival.',
+              ],
+              [
+                '6. Package',
+                'TVS at the terminal block (within a few mm), series R after it, optional GDT in front if surge levels are high -- the classic three-stage industrial front end.',
+              ],
+              [
+                '7. Validate',
+                'IEC 61000-4-2 at the terminals plus repeated-strike endurance (field devices accumulate hundreds of small strikes -- see the latent-failure case study in Module 09).',
+              ],
+            ],
+          },
+        ];
+        var current = 0;
+        function renderIface() {
+          var c = IFACES[current];
+          var html =
+            '<div style="font-size:0.85rem;font-weight:700;color:var(--text-base);margin-bottom:8px">' +
+            c.name +
+            '</div><table class="data-table"><thead><tr><th style="width:180px">Step</th><th>Applied to this interface</th></tr></thead><tbody>';
+          c.rows.forEach(function (r) {
+            html += '<tr><td style="font-weight:600">' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+          });
+          html += '</tbody></table>';
+          document.getElementById('ifaceDetail').innerHTML = html;
+        }
+        document.querySelectorAll('#ifaceTabs .toggle-tab').forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            document.querySelectorAll('#ifaceTabs .toggle-tab').forEach(function (t) {
+              t.classList.remove('active');
+            });
+            tab.classList.add('active');
+            current = parseInt(tab.getAttribute('data-iface'));
+            renderIface();
+          });
+        });
+        renderIface();
+      })();
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What two conditions must a TVS diode satisfy for correct protection?',
+          opts: [
+            "Working voltage above the signal range, and clamp voltage below the protected IC's absolute max rating",
+            'Only that it has the lowest possible working voltage',
+            'Only that its clamp voltage exceeds the IC rating',
+            'Working voltage has no relevance to TVS selection',
+          ],
+          correct: 0,
+        },
+        {
+          q: "What happens if a TVS working voltage (V_RWM) is set below the signal's normal operating range?",
+          opts: [
+            'Nothing -- it has no effect',
+            'The TVS will conduct during normal operation, distorting or loading the signal',
+            'The TVS becomes immune to ESD events',
+            'The IC will always be destroyed instantly',
+          ],
+          correct: 1,
+        },
+        {
+          q: "What happens if a TVS clamp voltage exceeds the protected IC's absolute maximum rating?",
+          opts: [
+            'The IC is still guaranteed protection',
+            'The IC can still see a voltage above its rating during an ESD event, risking damage',
+            'Clamp voltage is irrelevant to IC protection',
+            'This condition is always acceptable in every design',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why should a TVS diode be placed as close as possible to a connector or entry point?',
+          opts: [
+            'It minimizes the trace length carrying the raw (unclamped) transient before it is clamped',
+            'Placement location has no effect on protection effectiveness',
+            "It reduces the diode's cost",
+            'It is only a cosmetic layout preference',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why does a long or high-inductance TVS ground return path reduce effective clamping?',
+          opts: [
+            'It has no effect on clamping performance',
+            'Voltage can build across that inductive path during the fast current pulse, effectively raising the voltage seen downstream',
+            'Longer ground paths always improve protection',
+            'Ground return path length only matters for DC signals',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why should sensitive signal traces be kept away from connector edges and enclosure seams?',
+          opts: [
+            'To reduce direct or capacitively-coupled exposure to an air-discharge event near the opening',
+            'Trace placement near seams has no bearing on ESD exposure',
+            'It only matters for radiated emissions, not ESD',
+            'Seams always block all electrical coupling automatically',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What is the benefit of a continuous ground plane under high-speed and I/O traces?',
+          opts: [
+            'It provides a low-impedance return path and reduces loop area for coupled transients',
+            'It has no effect on ESD performance',
+            'It only affects DC power delivery',
+            'It increases loop area, which is beneficial',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What risk does an unintentional split in the ground plane introduce?',
+          opts: [
+            'No risk -- splits are always harmless',
+            'It can force return current through a much longer, higher-impedance path',
+            'It always improves ESD immunity',
+            'Ground plane splits only affect thermal performance',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the purpose of conductive gaskets or spring fingers at enclosure seams?',
+          opts: [
+            'Purely cosmetic, with no electrical function',
+            'Keeping the enclosure electrically continuous so an air discharge at a seam does not find a high-impedance path inside',
+            "Increasing the enclosure's weight",
+            'Blocking all airflow through the enclosure',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What do ferrite beads or common-mode chokes on cables entering an enclosure accomplish?',
+          opts: [
+            'They remove all DC power from the cable',
+            'They add high-frequency impedance in the ESD current path without disturbing the intended low-frequency signal',
+            'They have no effect on transient currents',
+            'They are only used for radiated emissions, never ESD',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'How do series resistors combined with a downstream TVS form effective protection?',
+          opts: [
+            'They form a two-stage clamp, with the series impedance limiting current into the TVS/IC',
+            'Series resistors have no protective function',
+            'This combination is never used in practice',
+            'Series resistors eliminate the need for any TVS diode',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'In the good-layout example, why does most of the ESD current get diverted at the TVS rather than reaching the IC?',
+          opts: [
+            'Because the TVS sits close to the entry point with a short, low-inductance ground stitch, giving the current an easy low-impedance path to ground before it reaches the IC',
+            'Because the IC is disconnected from the circuit entirely',
+            'Because the connector blocks all current automatically',
+            'Layout has no bearing on where the current flows',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0,
+          score = 0,
+          answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="DDR4 decoupling and power delivery network design: target impedance, bulk vs MLCC decoupling capacitor stacks, mount inductance, and an interactive Plotly PDN impedance-vs-frequency explorer."
+    />
+    <title>
+      Decoupling &amp; PDN | DDR4 Memory Interface Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/08-decoupling-pdn.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item active">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Decoupling &amp; PDN</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 08</span>
+              <span class="badge badge-purple">Plotly</span>
+              <h1>Decoupling &amp; Power Delivery Network (PDN)</h1>
+              <p class="subtitle">
+                Module 06 mentioned simultaneous switching noise — this module is where you design
+                the fix. A DDR4 interface's power rail needs to look like a very low impedance
+                source from DC up through several hundred MHz, all at once.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Target impedance -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Target impedance: the PDN's one design spec</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Every capacitor placement decision traces back to a single target:
+                </p>
+                <div class="metrics-grid">
+                  <div class="metric-card">
+                    <div class="metric-value">Z_target = ΔV / ΔI</div>
+                    <div class="metric-label">Allowed ripple ÷ transient current</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">~20–50 mΩ</div>
+                    <div class="metric-label">Typical DDR4 VDDQ target</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">DC → ~500 MHz</div>
+                    <div class="metric-label">Frequency range that must stay under target</div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-sub);
+                    line-height: 1.75;
+                    margin-top: 10px;
+                  "
+                >
+                  No single capacitor covers that whole range — a voltage regulator handles low
+                  frequencies, bulk capacitors cover the mid-band, MLCCs cover the upper-mid band,
+                  and plane capacitance takes over above a few hundred MHz.
+                </p>
+              </div>
+
+              <!-- Interactive PDN plot -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Interactive: build a decoupling stack and watch impedance vs. frequency</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  The stack below combines a bulk capacitor bank with two MLCC values. Try lowering
+                  the MLCC count or raising mount inductance (poor placement / long via) and watch
+                  the impedance curve rise above the target line — especially the "anti-resonance"
+                  peak where the bulk and MLCC ranges hand off to each other.
+                </p>
+                <div class="sim-controls">
+                  <div>
+                    <label class="slider-label" for="mlccSlider"
+                      >0.1 µF MLCC count: <span id="mlccVal">8</span></label
+                    >
+                    <input type="range" id="mlccSlider" min="1" max="16" step="1" value="8" />
+                  </div>
+                  <div>
+                    <label class="slider-label" for="eslSlider"
+                      >Mount inductance per cap (placement): <span id="eslVal">0.8</span> nH</label
+                    >
+                    <input type="range" id="eslSlider" min="0.2" max="3" step="0.1" value="0.8" />
+                  </div>
+                </div>
+                <div class="plot-box">
+                  <div id="pdnPlot" style="width: 100%; height: 340px"></div>
+                </div>
+                <div class="info-box">
+                  Fewer MLCCs or longer via/pad loops (higher mount inductance) both push the curve
+                  upward and widen the anti-resonance peak — the two levers layout actually
+                  controls, versus capacitor selection which controls the flat regions on either
+                  side.
+                </div>
+              </div>
+
+              <!-- Cap stack table -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The decoupling stack, layer by layer</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Stage</th>
+                        <th>Typical value</th>
+                        <th>Covers</th>
+                        <th>Placement</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>VRM / regulator loop</td>
+                        <td>—</td>
+                        <td>DC – ~100 kHz</td>
+                        <td>Regulator feedback &amp; bulk output caps</td>
+                      </tr>
+                      <tr>
+                        <td>Bulk capacitors</td>
+                        <td>47–330 µF (polymer/tantalum)</td>
+                        <td>~100 kHz – few MHz</td>
+                        <td>Near the regulator and spread across the board</td>
+                      </tr>
+                      <tr>
+                        <td>Mid MLCC</td>
+                        <td>1 µF, 2.2 µF</td>
+                        <td>Few MHz – tens of MHz</td>
+                        <td>Ringed around FPGA/DRAM power pins</td>
+                      </tr>
+                      <tr>
+                        <td>High-frequency MLCC</td>
+                        <td>0.1 µF, 0.01 µF</td>
+                        <td>Tens – hundreds of MHz</td>
+                        <td>As close to each power ball as physically possible</td>
+                      </tr>
+                      <tr>
+                        <td>Plane capacitance</td>
+                        <td>Inherent to power/ground plane pair</td>
+                        <td>Hundreds of MHz and up</td>
+                        <td>Tight plane spacing, no discrete part needed</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Placement -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Why placement matters as much as capacitor value</h3>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 560 130"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Diagram comparing a decoupling capacitor placed close to a BGA power ball with a short via loop versus one placed far away with a long trace and via loop, showing the difference in loop inductance"
+                  >
+                    <text
+                      x="140"
+                      y="20"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--success,#34d399)"
+                    >
+                      Good: short loop, low ESL
+                    </text>
+                    <rect
+                      x="90"
+                      y="55"
+                      width="100"
+                      height="34"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text x="140" y="76" text-anchor="middle" font-size="8" fill="var(--text-base)">
+                      BGA ball
+                    </text>
+                    <rect
+                      x="115"
+                      y="95"
+                      width="14"
+                      height="18"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="122"
+                      y1="72"
+                      x2="122"
+                      y2="95"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="140"
+                      y="122"
+                      text-anchor="middle"
+                      font-size="7.5"
+                      fill="var(--success,#34d399)"
+                    >
+                      cap directly under/adjacent
+                    </text>
+
+                    <text
+                      x="430"
+                      y="20"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="700"
+                      fill="var(--danger,#f87171)"
+                    >
+                      Poor: long loop, high ESL
+                    </text>
+                    <rect
+                      x="380"
+                      y="55"
+                      width="100"
+                      height="34"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text x="430" y="76" text-anchor="middle" font-size="8" fill="var(--text-base)">
+                      BGA ball
+                    </text>
+                    <line
+                      x1="405"
+                      y1="72"
+                      x2="405"
+                      y2="100"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="405"
+                      y1="100"
+                      x2="490"
+                      y2="100"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="490"
+                      y="93"
+                      width="14"
+                      height="18"
+                      fill="none"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="447"
+                      y="120"
+                      text-anchor="middle"
+                      font-size="7.5"
+                      fill="var(--danger,#f87171)"
+                    >
+                      cap routed far away via long trace
+                    </text>
+                  </svg>
+                </div>
+                <div class="tip-box">
+                  Loop area (not just via count) drives mount inductance — a cap with a short, wide
+                  return path to the adjacent ground via beats a "closer on paper" cap with a long
+                  thin trace detour.
+                </div>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    The PDN has one governing spec — target impedance = allowed ripple ÷ transient
+                    current — that must hold from DC through several hundred MHz.
+                  </li>
+                  <li>
+                    No single capacitor covers that range; a
+                    bulk/mid-MLCC/high-frequency-MLCC/plane-capacitance stack covers different
+                    frequency bands together.
+                  </li>
+                  <li>
+                    Mount inductance (via + pad loop geometry), not just capacitor value, sets how
+                    well a cap performs at high frequency.
+                  </li>
+                  <li>
+                    Too few high-frequency MLCCs or long return loops create an anti-resonance peak
+                    that can push impedance above target right where DDR4 switching noise lives.
+                  </li>
+                  <li>
+                    This module and Module 06 (SI) both point to the same root cause — simultaneous
+                    switching noise — from two different design levers.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="07-termination.html">← Termination Strategies</a>
+                <a class="btn btn-primary" href="09-layout-routing.html"
+                  >Next: Layout &amp; Routing →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      function baseLayout(extra) {
+        var css = getComputedStyle(document.documentElement);
+        var textColor = css.getPropertyValue('--text-sub').trim() || '#94a3b8';
+        var gridColor = 'rgba(128,140,160,0.18)';
+        var base = {
+          autosize: true,
+          margin: { l: 60, r: 20, t: 20, b: 45 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: textColor, size: 11 },
+          showlegend: true,
+          legend: { orientation: 'h', y: -0.22 },
+          xaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+          yaxis: { gridcolor: gridColor, zerolinecolor: gridColor },
+        };
+        for (var k in extra) {
+          if (base[k] && typeof base[k] === 'object' && typeof extra[k] === 'object') {
+            for (var kk in extra[k]) base[k][kk] = extra[k][kk];
+          } else {
+            base[k] = extra[k];
+          }
+        }
+        return base;
+      }
+
+      function capImpedance(f, C, esr, esl) {
+        var w = 2 * Math.PI * f;
+        var xc = 1 / (w * C);
+        var xl = w * esl;
+        var xNet = xl - xc;
+        return Math.sqrt(esr * esr + xNet * xNet);
+      }
+
+      function buildFreqs() {
+        var freqs = [];
+        var fLog = 4; // 10^4 Hz = 10 kHz
+        while (fLog <= 9.3) {
+          freqs.push(Math.pow(10, fLog));
+          fLog += 0.03;
+        }
+        return freqs;
+      }
+
+      function draw() {
+        var mlccCount = parseInt(document.getElementById('mlccSlider').value, 10);
+        var eslNh = parseFloat(document.getElementById('eslSlider').value);
+        document.getElementById('mlccVal').textContent = mlccCount;
+        document.getElementById('eslVal').textContent = eslNh.toFixed(1);
+        var esl = eslNh * 1e-9;
+
+        var stack = [
+          { C: 220e-6, esr: 0.015, n: 4, esl: esl * 2.5 },
+          { C: 1e-6, esr: 0.02, n: 4, esl: esl * 1.3 },
+          { C: 0.1e-6, esr: 0.02, n: mlccCount, esl: esl },
+        ];
+
+        var freqs = buildFreqs();
+        var ztotal = [];
+        for (var i = 0; i < freqs.length; i++) {
+          var f = freqs[i];
+          var yTotal = 0;
+          for (var s = 0; s < stack.length; s++) {
+            var st = stack[s];
+            var zSingle = capImpedance(f, st.C, st.esr, st.esl);
+            yTotal += st.n / zSingle;
+          }
+          ztotal.push(1 / yTotal);
+        }
+
+        var target = 0.025; // 25 mOhm example target
+        var traces = [
+          {
+            x: freqs,
+            y: ztotal,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#22d3ee', width: 2.5 },
+            name: 'PDN impedance',
+          },
+          {
+            x: [freqs[0], freqs[freqs.length - 1]],
+            y: [target, target],
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#f87171', width: 1.5, dash: 'dash' },
+            name: 'Target (25 mΩ)',
+          },
+        ];
+        var layout = baseLayout({
+          xaxis: { title: 'Frequency (Hz)', type: 'log' },
+          yaxis: { title: 'Impedance (Ω)', type: 'log' },
+          height: 340,
+        });
+        Plotly.react('pdnPlot', traces, layout, { displayModeBar: false, responsive: true });
+      }
+
+      document.getElementById('mlccSlider').addEventListener('input', draw);
+      document.getElementById('eslSlider').addEventListener('input', draw);
+
+      var themeObserver = new MutationObserver(draw);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', draw);
+      } else {
+        draw();
+      }
+    </script>
+  </body>
+</html>

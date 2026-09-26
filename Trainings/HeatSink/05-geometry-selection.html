@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Learn how to choose the right heatsink geometry — pin-fin, straight-fin, or folded-fin — based on airflow conditions, footprint, and cost constraints, with an interactive decision tool."
+    />
+    <title>Heatsink Geometry Selection | Heatsink Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/HeatSink/05-geometry-selection.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Heatsink Design Academy
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction to Thermal Engineering</a
+          >
+          <a href="02-heat-transfer.html" class="module-item">02. Heat Transfer Fundamentals</a>
+          <a href="03-thermal-resistance.html" class="module-item"
+            >03. Thermal Resistance Networks</a
+          >
+          <a href="04-heatsink-fundamentals.html" class="module-item">04. Heatsink Fundamentals</a>
+          <a href="05-geometry-selection.html" class="module-item active"
+            >05. Heatsink Geometry Selection</a
+          >
+          <a href="06-natural-convection.html" class="module-item"
+            >06. Natural Convection Cooling</a
+          >
+          <a href="07-forced-convection.html" class="module-item">07. Forced Convection Cooling</a>
+          <a href="08-material-selection.html" class="module-item"
+            >08. Heatsink Material Selection</a
+          >
+          <a href="09-tim.html" class="module-item">09. Thermal Interface Materials (TIM)</a>
+          <a href="10-design-wizard.html" class="module-item">10. Heatsink Design Wizard</a>
+          <a href="11-fpga-project.html" class="module-item">11. Project: FPGA Thermal Design</a>
+          <a href="12-power-supply-project.html" class="module-item"
+            >12. Project: Power Supply Thermal Design</a
+          >
+          <a href="13-final-review.html" class="module-item"
+            >13. Final Review &amp; Knowledge Check</a
+          >
+          <div style="border-top: 1px solid var(--border); margin: var(--sp-3) 0"></div>
+          <div
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              color: var(--text-muted);
+              padding: 0 var(--sp-2) var(--sp-1);
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+            "
+          >
+            Tools
+          </div>
+          <a href="HS-Demo.html" class="module-item">Heatsink Design in 5 Minutes</a>
+          <a href="certificate.html" class="module-item">Course Certificate</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../home.html">Home</a><span>/</span>
+            <a href="../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Heatsink Design Academy</a><span>/</span>
+            <span>Heatsink Geometry Selection</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 5/13</span><span>38%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 38%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <!-- Hero -->
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 05</div>
+              <h1>Heatsink Geometry Selection</h1>
+              <p class="subtitle">
+                Pin-fin, straight-fin, and folded-fin heatsinks trade fin efficiency, pressure drop,
+                and cost differently. Pick the wrong geometry for your airflow and footprint and you
+                either under-cool the part or pay for surface area you can't use. This module builds
+                the selection logic and gives you a working interactive tool to apply it.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Learning Objectives -->
+              <div class="widget-container" style="margin-bottom: 2rem">
+                <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem">
+                  <li
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.6rem;
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    <span style="color: var(--cyan)">✓</span> Compare pin-fin, straight-fin, and
+                    folded-fin geometries on thermal, mechanical, and cost grounds
+                  </li>
+                  <li
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.6rem;
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    <span style="color: var(--cyan)">✓</span> Understand how airflow direction and
+                    velocity change which geometry performs best
+                  </li>
+                  <li
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.6rem;
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    <span style="color: var(--cyan)">✓</span> Apply footprint and height constraints
+                    to narrow the geometry decision
+                  </li>
+                  <li
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.6rem;
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    <span style="color: var(--cyan)">✓</span> Use an interactive decision tool to
+                    recommend a geometry from your own design inputs
+                  </li>
+                  <li
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.6rem;
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    <span style="color: var(--cyan)">✓</span> Recognize common geometry-selection
+                    mistakes before they reach layout
+                  </li>
+                </ul>
+              </div>
+
+              <!-- SECTION 1: Three Geometries -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: The Three Core Geometries</span>
+                  <span class="chevron">▾</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.5rem;
+                    "
+                  >
+                    Nearly every air-cooled heatsink on a production board is one of three fin
+                    geometries. Each is manufactured differently, and each has a different "sweet
+                    spot" of airflow and space where it outperforms the other two.
+                  </p>
+
+                  <div class="metrics-grid" style="margin-bottom: 1.5rem">
+                    <div class="metric-card">
+                      <div class="metric-value">Straight-Fin</div>
+                      <div class="metric-label">Extruded, lowest cost</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value">Pin-Fin</div>
+                      <div class="metric-label">Omnidirectional airflow</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value">Folded-Fin</div>
+                      <div class="metric-label">Highest fin density</div>
+                    </div>
+                  </div>
+
+                  <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem">
+                    Straight-Fin (Extruded / Skived)
+                  </h3>
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Straight-fin heatsinks are made by pushing aluminum through a die (extrusion) or
+                    by shaving thin fins up from a solid block (skiving). Fins run in one direction
+                    only. They are cheap in volume — extrusion tooling is a one-time cost and the
+                    process scales well — but the fin height-to-gap aspect ratio is limited to
+                    roughly 6:1 to 10:1 for standard extrusion, and airflow must be aligned with the
+                    fin channels or performance drops sharply. In cross-flow (perpendicular to the
+                    fins) an extruded heatsink can lose 40–60% of its rated performance.
+                  </p>
+
+                  <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem">Pin-Fin</h3>
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Pin-fin heatsinks use an array of round or square posts instead of continuous
+                    fins, made by die casting, forging, or CNC. Because there is no preferred fin
+                    direction, pin-fin geometry is airflow-direction-independent — it performs
+                    similarly whether air enters from the front, side, or a mix of directions, which
+                    matters in enclosures with turbulent or multi-directional flow (e.g. behind a
+                    card-cage fan wall). The trade-off is higher pressure drop per row of pins than
+                    an equivalent straight-fin channel, and die-cast pin-fins usually need a
+                    secondary machining pass on the base for a flat mounting surface.
+                  </p>
+
+                  <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem">
+                    Folded-Fin (Bonded / Corrugated)
+                  </h3>
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.85rem;
+                      line-height: 1.7;
+                      margin-bottom: 0.5rem;
+                    "
+                  >
+                    Folded-fin heatsinks start as a thin sheet of aluminum or copper, corrugated
+                    into a zig-zag, then bonded (epoxy or brazed) to a separate base plate. This
+                    process reaches fin densities of 20–40 fins per inch — 2–4× what extrusion can
+                    achieve — because the fin thickness is decoupled from the manufacturing process.
+                    That density gives the highest surface area per unit footprint of the three
+                    geometries, but it also gives the highest pressure drop, so folded- fin only
+                    pays off with adequate forced airflow. The bonded joint is also a secondary
+                    thermal resistance the other two geometries don't have.
+                  </p>
+
+                  <div class="callout tip-box">
+                    <strong>Rule of thumb:</strong> straight-fin for low-cost, axial/ducted airflow;
+                    pin-fin for multi-directional or turbulent flow and tight-tolerance mounting;
+                    folded-fin when you need maximum surface area in a small footprint and have a
+                    real fan pushing air through it.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: Comparison Table -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Side-by-Side Comparison</span>
+                  <span class="chevron">▾</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.5rem;
+                    "
+                  >
+                    The numbers below are typical ranges seen in commercial heatsink catalogs for a
+                    40–80 mm square footprint. Actual performance always depends on the specific fin
+                    pitch, height, and airflow velocity used.
+                  </p>
+                  <div style="overflow-x: auto">
+                    <table
+                      class="data-table"
+                      style="width: 100%; border-collapse: collapse; font-size: 0.82rem"
+                    >
+                      <thead>
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <th style="text-align: left; padding: 8px 10px; color: var(--text-base)">
+                            Attribute
+                          </th>
+                          <th style="text-align: left; padding: 8px 10px; color: var(--text-base)">
+                            Straight-Fin
+                          </th>
+                          <th style="text-align: left; padding: 8px 10px; color: var(--text-base)">
+                            Pin-Fin
+                          </th>
+                          <th style="text-align: left; padding: 8px 10px; color: var(--text-base)">
+                            Folded-Fin
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody style="color: var(--text-secondary)">
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <td style="padding: 8px 10px">Relative unit cost</td>
+                          <td style="padding: 8px 10px">$ (lowest)</td>
+                          <td style="padding: 8px 10px">$$</td>
+                          <td style="padding: 8px 10px">$$$ (highest)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <td style="padding: 8px 10px">Airflow directionality</td>
+                          <td style="padding: 8px 10px">Directional (aligned only)</td>
+                          <td style="padding: 8px 10px">Omnidirectional</td>
+                          <td style="padding: 8px 10px">Directional (ducted)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <td style="padding: 8px 10px">Typical fin density</td>
+                          <td style="padding: 8px 10px">3–8 FPI</td>
+                          <td style="padding: 8px 10px">4–10 pins/in²</td>
+                          <td style="padding: 8px 10px">20–40 FPI</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <td style="padding: 8px 10px">Pressure drop</td>
+                          <td style="padding: 8px 10px">Low</td>
+                          <td style="padding: 8px 10px">Medium–High</td>
+                          <td style="padding: 8px 10px">High</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border)">
+                          <td style="padding: 8px 10px">Best airflow regime</td>
+                          <td style="padding: 8px 10px">Natural conv. or ducted low-speed</td>
+                          <td style="padding: 8px 10px">Turbulent / multi-directional</td>
+                          <td style="padding: 8px 10px">Ducted, moderate-to-high velocity</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 8px 10px">
+                            Typical R<sub>SA</sub> at 2 m/s (40mm sq.)
+                          </td>
+                          <td style="padding: 8px 10px">~3–5 °C/W</td>
+                          <td style="padding: 8px 10px">~2–4 °C/W</td>
+                          <td style="padding: 8px 10px">~1–2.5 °C/W</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="callout info-box" style="margin-top: 1.5rem">
+                    <strong>Worked example.</strong> A 15 W FPGA needs R<sub>SA</sub> ≤ 4 °C/W at 2
+                    m/s ducted airflow in a 40×40 mm footprint. All three geometries can hit that
+                    R<sub>SA</sub> at this footprint — so the deciding factor becomes cost and
+                    manufacturing volume, not thermal performance. At high volume, a straight-fin
+                    extrusion at $2–3/unit wins outright. If the same problem instead had a 30×30 mm
+                    footprint limit, only folded-fin's higher fin density could still hit 4 °C/W,
+                    and cost becomes secondary to feasibility.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: Interactive Decision Tool -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Section 3: Interactive Geometry Selector</span>
+                  <span class="chevron">▾</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p
+                    style="
+                      color: var(--text-secondary);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1.5rem;
+                    "
+                  >
+                    Set your available airflow velocity and footprint below. The tool scores each
+                    geometry against those two constraints and highlights the recommended choice.
+                    Drag the sliders and watch the bar chart update in real time.
+                  </p>
+
+                  <div class="s1-settings-row">
+                    <div class="slider-group">
+                      <div class="slider-label">
+                        <span>Airflow Velocity</span>
+                        <span class="slider-value" id="velVal">2.0 m/s</span>
+                      </div>
+                      <input type="range" id="velSlider" min="0" max="6" step="0.1" value="2.0" />
+                    </div>
+                    <div class="slider-group">
+                      <div class="slider-label">
+                        <span>Available Footprint</span>
+                        <span class="slider-value" id="footVal">40 mm sq.</span>
+                      </div>
+                      <input type="range" id="footSlider" min="20" max="100" step="1" value="40" />
+                    </div>
+                  </div>
+
+                  <div class="widget-container" style="margin-bottom: 1.5rem">
+                    <div class="widget-header">
+                      <h3>Geometry Suitability</h3>
+                    </div>
+                    <div class="plot-area" style="height: 220px">
+                      <canvas id="geomCanvas"></canvas>
+                    </div>
+                  </div>
+
+                  <div class="widget-container" id="recoBox">
+                    <div class="widget-header">
+                      <h3>Recommendation</h3>
+                    </div>
+                    <div
+                      id="recoText"
+                      style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.7"
+                    >
+                      Adjust the sliders above to see a recommendation.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: Callouts -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec4body">
+                  <span>Section 4: Common Mistakes</span>
+                  <span class="chevron">▾</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <div class="callout warning-box">
+                    <strong>Mistake: sizing straight-fin heatsinks for cross-flow.</strong>
+                    Datasheet R<sub>SA</sub> curves for extruded heatsinks almost always assume
+                    airflow parallel to the fin channels. If your enclosure fan pushes air
+                    perpendicular to the fins, expect 40–60% worse real-world performance than the
+                    datasheet curve — verify orientation before you commit to a part number.
+                  </div>
+                  <div class="callout warning-box">
+                    <strong>Mistake: ignoring pressure drop on folded-fin selections.</strong>
+                    A folded-fin heatsink's high fin density looks great on a surface-area spec
+                    sheet, but if your fan can't overcome its pressure drop, actual airflow through
+                    the fin channels collapses and thermal performance falls below a much cheaper
+                    straight-fin part. Always check the heatsink pressure-drop curve against your
+                    fan's P-Q curve at the intended operating point.
+                  </div>
+                  <div class="callout info-box">
+                    <strong>Tip: pin-fin for uncertain airflow direction.</strong> If the product
+                    will be used in multiple chassis orientations, or airflow direction isn't locked
+                    down early in the program, pin-fin's direction-independence removes a variable
+                    from your thermal risk — even though it typically costs more than an equivalent
+                    straight-fin extrusion.
+                  </div>
+                  <div class="callout tip-box">
+                    <strong>Tip: don't over-spec fin density.</strong> Folded-fin and high-FPI
+                    pin-fin parts add cost and pressure drop. If a straight-fin extrusion already
+                    meets your R<sub>SA</sub> target with margin, a denser geometry only adds BOM
+                    cost with no thermal benefit.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 5: Quiz -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec5body">
+                  <span>Section 5: Knowledge Check</span>
+                  <span class="chevron">▾</span>
+                </button>
+                <div class="section-body" id="sec5body">
+                  <div class="quiz-container">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 0.5rem;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 0.8rem">
+                        <div class="badge">KNOWLEDGE CHECK</div>
+                        <h3 style="margin: 0">Module 5 Quiz</h3>
+                      </div>
+                      <div style="font-size: 0.82rem; color: var(--text-muted)">
+                        Score:
+                        <span id="quizScore" style="color: var(--cyan); font-weight: 700">0</span> /
+                        3
+                      </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                      Click an answer to check it — each question can be answered once.
+                    </p>
+                    <div
+                      style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem"
+                    >
+                      <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                        Question <span id="quizCurrentNum">1</span> of 3
+                      </div>
+                      <div
+                        style="
+                          flex: 1;
+                          height: 6px;
+                          background: var(--bg-secondary);
+                          border-radius: 3px;
+                          overflow: hidden;
+                        "
+                      >
+                        <div
+                          id="quizProgressBar"
+                          style="
+                            height: 100%;
+                            width: 33.3333%;
+                            background: linear-gradient(90deg, var(--cyan), #00d4aa);
+                            border-radius: 3px;
+                            transition: width 0.3s ease;
+                          "
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div id="quizSlides">
+                      <div class="quiz-slide" data-q="1">
+                        <div class="quiz-question">
+                          1. Which heatsink geometry performs best when airflow direction is
+                          uncertain or multi-directional?
+                        </div>
+                        <ul class="quiz-options" data-correct="1" id="quiz1">
+                          <li class="quiz-option" data-idx="0">Straight-fin (extruded)</li>
+                          <li class="quiz-option" data-idx="1">Pin-fin</li>
+                          <li class="quiz-option" data-idx="2">Folded-fin</li>
+                          <li class="quiz-option" data-idx="3">All perform identically</li>
+                        </ul>
+                        <div class="quiz-feedback" id="feedback1"></div>
+                      </div>
+
+                      <div class="quiz-slide" data-q="2" style="display: none">
+                        <div class="quiz-question">
+                          2. What is the main downside of a folded-fin heatsink's high fin density?
+                        </div>
+                        <ul class="quiz-options" data-correct="2" id="quiz2">
+                          <li class="quiz-option" data-idx="0">
+                            It cannot be manufactured in aluminum
+                          </li>
+                          <li class="quiz-option" data-idx="1">
+                            It has no thermal interface resistance
+                          </li>
+                          <li class="quiz-option" data-idx="2">
+                            It creates high pressure drop, requiring adequate fan capability
+                          </li>
+                          <li class="quiz-option" data-idx="3">
+                            It only works with natural convection
+                          </li>
+                        </ul>
+                        <div class="quiz-feedback" id="feedback2"></div>
+                      </div>
+
+                      <div class="quiz-slide" data-q="3" style="display: none">
+                        <div class="quiz-question">
+                          3. An extruded straight-fin heatsink is rated for axial airflow, but the
+                          enclosure fan blows across the fins (cross-flow). What should you expect?
+                        </div>
+                        <ul class="quiz-options" data-correct="1" id="quiz3">
+                          <li class="quiz-option" data-idx="0">No change in performance</li>
+                          <li class="quiz-option" data-idx="1">
+                            Significantly worse performance than the datasheet curve (roughly 40–60%
+                            loss)
+                          </li>
+                          <li class="quiz-option" data-idx="2">
+                            Improved performance due to added turbulence
+                          </li>
+                          <li class="quiz-option" data-idx="3">
+                            The heatsink will electrically short
+                          </li>
+                        </ul>
+                        <div class="quiz-feedback" id="feedback3"></div>
+                      </div>
+                    </div>
+
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-top: 1.5rem;
+                        padding-top: 1rem;
+                        border-top: 1px solid var(--border);
+                      "
+                    >
+                      <button
+                        class="btn btn-secondary"
+                        disabled
+                        id="quizPrevBtn"
+                        style="opacity: 0.4"
+                      >
+                        ← Previous
+                      </button>
+                      <div id="quizDots" style="display: flex; gap: 4px"></div>
+                      <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                    </div>
+                    <div
+                      id="quizSummary"
+                      style="
+                        display: none;
+                        margin-top: 2rem;
+                        padding: 1.5rem;
+                        border-radius: 10px;
+                        border: 1px solid var(--border);
+                        text-align: center;
+                      "
+                    >
+                      <div
+                        id="quizFinalScore"
+                        style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                      ></div>
+                      <div
+                        id="quizFinalMsg"
+                        style="font-size: 0.88rem; color: var(--text-secondary)"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="./04-heatsink-fundamentals.html"
+                  >← Previous: 04. Heatsink Fundamentals</a
+                >
+                <a class="btn btn-primary" href="./06-natural-convection.html"
+                  >Next: 06. Natural Convection Cooling →</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../assets/js/core.js"></script>
+    <script src="../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      // Accordion behavior
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              btn.classList.remove('active');
+            } else {
+              target.classList.add('open');
+              btn.classList.add('active');
+            }
+          });
+        });
+      })();
+
+      // Interactive geometry selector: sliders + canvas bar chart
+      (function () {
+        var velSlider = document.getElementById('velSlider');
+        var footSlider = document.getElementById('footSlider');
+        var velVal = document.getElementById('velVal');
+        var footVal = document.getElementById('footVal');
+        var canvas = document.getElementById('geomCanvas');
+        var recoText = document.getElementById('recoText');
+        if (!velSlider || !footSlider || !canvas) return;
+        var ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+          var rect = canvas.parentElement.getBoundingClientRect();
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+        }
+
+        function score(vel, foot) {
+          // Simple heuristic scoring model (0-10) for teaching purposes.
+          var straight = 5;
+          var pin = 5;
+          var folded = 5;
+
+          // Velocity effects
+          if (vel < 1.0) {
+            straight += 2; // fine at low/natural airflow
+            pin += 1;
+            folded -= 2; // needs forced air to be worth the pressure drop
+          } else if (vel < 3.0) {
+            straight += 1;
+            pin += 2;
+            folded += 1;
+          } else {
+            straight -= 1; // pressure drop starts limiting benefit
+            pin += 1;
+            folded += 3; // high density pays off with strong forced air
+          }
+
+          // Footprint effects (smaller footprint favors denser fin geometry)
+          if (foot < 35) {
+            straight -= 2;
+            pin += 0;
+            folded += 3;
+          } else if (foot < 65) {
+            straight += 1;
+            pin += 1;
+            folded += 1;
+          } else {
+            straight += 3; // plenty of room, cheap extrusion wins
+            pin += 1;
+            folded -= 1;
+          }
+
+          straight = Math.max(0, Math.min(10, straight));
+          pin = Math.max(0, Math.min(10, pin));
+          folded = Math.max(0, Math.min(10, folded));
+          return { straight: straight, pin: pin, folded: folded };
+        }
+
+        function draw() {
+          resizeCanvas();
+          var vel = parseFloat(velSlider.value);
+          var foot = parseFloat(footSlider.value);
+          var s = score(vel, foot);
+
+          var w = canvas.width;
+          var h = canvas.height;
+          ctx.clearRect(0, 0, w, h);
+
+          var bars = [
+            { label: 'Straight-Fin', value: s.straight, color: '#22d3ee' },
+            { label: 'Pin-Fin', value: s.pin, color: '#818cf8' },
+            { label: 'Folded-Fin', value: s.folded, color: '#34d399' },
+          ];
+
+          var margin = 30;
+          var barAreaW = (w - margin * 2) / bars.length;
+          var barW = barAreaW * 0.5;
+          var maxBarH = h - 50;
+
+          bars.forEach(function (b, i) {
+            var barH = (b.value / 10) * maxBarH;
+            var x = margin + i * barAreaW + (barAreaW - barW) / 2;
+            var y = h - 30 - barH;
+
+            ctx.fillStyle = b.color;
+            ctx.fillRect(x, y, barW, barH);
+
+            ctx.fillStyle =
+              getComputedStyle(document.documentElement).getPropertyValue('--text-sub') ||
+              '#94a3b8';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(b.label, x + barW / 2, h - 12);
+            ctx.fillText(b.value.toFixed(1), x + barW / 2, y - 6);
+          });
+
+          // Determine winner
+          var winnerKey = 'straight';
+          var winnerVal = s.straight;
+          if (s.pin > winnerVal) {
+            winnerKey = 'pin';
+            winnerVal = s.pin;
+          }
+          if (s.folded > winnerVal) {
+            winnerKey = 'folded';
+            winnerVal = s.folded;
+          }
+
+          var names = {
+            straight: 'Straight-Fin (extruded)',
+            pin: 'Pin-Fin',
+            folded: 'Folded-Fin',
+          };
+          var reasons = {
+            straight:
+              'Ample footprint and low-to-moderate airflow favor a low-cost extruded straight-fin design. Confirm the fan pushes air parallel to the fin channels.',
+            pin: 'Moderate airflow with a mid-size footprint suits pin-fin, which stays effective regardless of airflow direction.',
+            folded:
+              'Tight footprint and/or strong forced airflow favor a folded-fin design — its high fin density needs real airflow to pay off, so confirm your fan can overcome the added pressure drop.',
+          };
+
+          recoText.innerHTML =
+            '<strong style="color:var(--text-base)">Recommended: ' +
+            names[winnerKey] +
+            '</strong><br/>' +
+            reasons[winnerKey] +
+            '<br/><span style="color:var(--text-muted);font-size:0.8rem">At ' +
+            vel.toFixed(1) +
+            ' m/s airflow and ' +
+            foot.toFixed(0) +
+            ' mm sq. footprint.</span>';
+        }
+
+        velSlider.addEventListener('input', function () {
+          velVal.textContent = parseFloat(velSlider.value).toFixed(1) + ' m/s';
+          draw();
+        });
+        footSlider.addEventListener('input', function () {
+          footVal.textContent = parseFloat(footSlider.value).toFixed(0) + ' mm sq.';
+          draw();
+        });
+        window.addEventListener('resize', draw);
+        window.addEventListener('load', function () {
+          setTimeout(draw, 80);
+        });
+        draw();
+      })();
+
+      // Quiz logic — one question at a time with nav
+      (function () {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        var PASS_THRESHOLD = Math.ceil(totalQuestions * 0.8);
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= PASS_THRESHOLD) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      })();
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

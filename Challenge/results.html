@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta name="description" content="Weekly Hardware Design Challenge — your results." />
+    <title>Your Results — Week 34 | Weekly Hardware Design Challenge</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Challenge/results.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="challenge.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="page-header">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span> <a href="index.html">Weekly Challenge</a
+          ><span>/</span><span>Results</span>
+        </nav>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top: 1rem">
+      <div class="container" style="max-width: 860px">
+        <!-- empty state (no recent attempt) -->
+        <div
+          id="resultsEmpty"
+          class="wc-panel"
+          style="display: none; text-align: center; padding: 2.5rem 1.5rem"
+        >
+          <div style="font-size: 2rem">📊</div>
+          <h2 style="font-size: 1.3rem; margin: 10px 0 6px">No recent result to show</h2>
+          <p
+            style="color: var(--text-sub); font-size: 0.9rem; max-width: 460px; margin: 0 auto 16px"
+          >
+            Take this week’s challenge to see your score, breakdown, and ranking here.
+          </p>
+          <a href="index.html" class="btn btn-primary">Go to the challenge hub</a>
+        </div>
+
+        <!-- results content (populated from the live attempt) -->
+        <div id="resultsContent" style="display: none">
+          <!-- score summary -->
+          <div class="wc-hero" style="margin-bottom: 1.5rem">
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 180px 1fr;
+                gap: 2rem;
+                align-items: center;
+              "
+              class="wc-res-grid"
+            >
+              <div>
+                <div class="wc-scorewheel" id="wheel">
+                  <div class="big">0</div>
+                  <div class="sub">/ 0 pts</div>
+                </div>
+              </div>
+              <div>
+                <span
+                  class="badge badge-cyan"
+                  id="resChallenge"
+                  style="margin-bottom: 10px; display: inline-block"
+                  >Weekly Challenge</span
+                >
+                <h1 style="font-size: 1.6rem; margin-bottom: 8px" id="resHeadline">Your result</h1>
+                <p
+                  id="resSummary"
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.9rem;
+                    line-height: 1.6;
+                    margin-bottom: 14px;
+                  "
+                ></p>
+                <div class="wc-stat-grid">
+                  <div class="wc-stat">
+                    <div class="wc-stat-val accent" id="resPoints">—</div>
+                    <div class="wc-stat-label">Points earned</div>
+                  </div>
+                  <div class="wc-stat">
+                    <div class="wc-stat-val" id="resStreak">—</div>
+                    <div class="wc-stat-label">Streak</div>
+                  </div>
+                  <div class="wc-stat">
+                    <div class="wc-stat-val" id="resRank">—</div>
+                    <div class="wc-stat-label">Provisional rank</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- badge unlocked (shown only when present) -->
+          <div
+            id="resAwards"
+            style="display: none; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 1.5rem"
+            class="wc-two-col"
+          >
+            <div class="wc-panel" id="resBadgeCard" style="display: none; text-align: center">
+              <div class="wc-badge-ico">🏅</div>
+              <div
+                style="font-weight: 800; color: var(--text-base); margin-top: 8px"
+                id="resBadgeName"
+              >
+                Badge unlocked
+              </div>
+              <p
+                style="font-size: 0.8rem; color: var(--text-sub); margin: 6px 0 0"
+                id="resBadgeDesc"
+              ></p>
+            </div>
+          </div>
+
+          <!-- topic breakdown -->
+          <div class="wc-panel" style="margin-bottom: 1.5rem">
+            <div class="wc-panel-title">Your topic breakdown</div>
+            <div id="topicBars"></div>
+          </div>
+
+          <!-- question-by-question review -->
+          <div class="wc-panel">
+            <div class="wc-panel-title">Question review &amp; explanations</div>
+            <div id="reviewList"></div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1.75rem;
+            flex-wrap: wrap;
+          "
+        >
+          <a href="leaderboard.html" class="btn btn-primary">See the leaderboard</a>
+          <a href="profile.html" class="btn btn-secondary">Your trophy case</a>
+          <a href="index.html" class="btn btn-secondary">Back to challenge hub</a>
+        </div>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script src="challenge-api.js"></script>
+    <script>
+      // score wheel conic fill
+      function renderWheel(pct, label) {
+        var w = document.getElementById('wheel');
+        w.style.background =
+          'conic-gradient(var(--cyan, #22d3ee) 0 ' + pct + '%, var(--bg-muted) ' + pct + '% 100%)';
+        w.style.position = 'relative';
+        var inner = document.createElement('div');
+        inner.style.cssText =
+          'position:absolute;inset:12px;border-radius:50%;background:var(--bg-card);display:flex;flex-direction:column;align-items:center;justify-content:center';
+        inner.innerHTML =
+          '<div class="big">' +
+          Math.round(pct) +
+          '</div><div class="sub">' +
+          (label || '/ 100 pts') +
+          '</div>';
+        w.innerHTML = '';
+        w.appendChild(inner);
+      }
+      // topic bars
+      function renderTopics(topics) {
+        document.getElementById('topicBars').innerHTML = topics
+          .map(function (t) {
+            return (
+              '<div class="wc-topic-row"><div class="wc-topic-head"><span>' +
+              t.t +
+              '</span>' +
+              '<span style="color:' +
+              (t.weak ? 'var(--warning,#f59e0b)' : 'var(--text-base)') +
+              '">' +
+              t.pct +
+              '%</span></div>' +
+              '<div class="wc-topic-track"><div class="wc-topic-fill' +
+              (t.weak ? ' weak' : '') +
+              '" style="width:' +
+              t.pct +
+              '%"></div></div></div>'
+            );
+          })
+          .join('');
+      }
+      // review list
+      function renderReview(review) {
+        document.getElementById('reviewList').innerHTML = review
+          .map(function (r) {
+            return (
+              '<div class="wc-review ' +
+              (r.ok ? 'correct' : 'wrong') +
+              '">' +
+              '<div class="wc-review-q">' +
+              (r.ok ? '✓ ' : '✗ ') +
+              r.q +
+              '</div>' +
+              '<div style="font-size:0.8rem;color:var(--text-sub)">' +
+              r.a +
+              '</div>' +
+              '<div class="wc-review-exp">' +
+              r.exp +
+              '</div></div>'
+            );
+          })
+          .join('');
+      }
+      // ── Load the real attempt result (no mock data) ──
+      function showEmpty() {
+        document.getElementById('resultsEmpty').style.display = 'block';
+        document.getElementById('resultsContent').style.display = 'none';
+      }
+      (function () {
+        var attemptId, summary;
+        try {
+          attemptId = sessionStorage.getItem('whdc_attempt');
+          summary = JSON.parse(sessionStorage.getItem('whdc_result') || 'null');
+        } catch (e) {}
+
+        if (!window.WHDC || !attemptId) {
+          showEmpty();
+          return;
+        }
+
+        WHDC.result(attemptId)
+          .then(function (data) {
+            var a = data.attempt || {};
+            var review = data.review || [];
+            var total = review.length || 0;
+            var maxPts = total * 10; // 10 pts/question
+            var raw = Number(a.raw_score || 0);
+            var correct = review.filter(function (r) {
+              return r.correct;
+            }).length;
+
+            document.getElementById('resultsContent').style.display = 'block';
+            document.getElementById('resultsEmpty').style.display = 'none';
+
+            renderWheel(maxPts ? (raw / maxPts) * 100 : 0, raw + ' / ' + maxPts + ' pts');
+
+            // headline / summary
+            if (summary && summary.challengeTitle) {
+              document.getElementById('resChallenge').textContent = summary.challengeTitle;
+            } else {
+              document.getElementById('resChallenge').textContent = 'Weekly Challenge';
+            }
+            document.getElementById('resHeadline').textContent = 'Your result';
+            var mins = a.time_taken_sec ? Math.floor(a.time_taken_sec / 60) : null;
+            var secs = a.time_taken_sec ? a.time_taken_sec % 60 : null;
+            var timeStr = mins !== null ? mins + ':' + (secs < 10 ? '0' + secs : secs) : '—';
+            document.getElementById('resSummary').innerHTML =
+              'You answered <strong style="color:var(--text-base)">' +
+              correct +
+              ' of ' +
+              total +
+              '</strong> correctly in <strong style="color:var(--text-base)">' +
+              timeStr +
+              '</strong>. Provisional rank <strong style="color:var(--cyan,#22d3ee)">#' +
+              (data.provisionalRank || '—') +
+              '</strong> — final standings publish when the challenge closes, and the top 3 finishers earn the Champion/Podium badge.';
+
+            // points / streak / rank from the submit summary if available
+            document.getElementById('resPoints').textContent =
+              summary && summary.pointsAwarded != null ? '+' + summary.pointsAwarded : '—';
+            document.getElementById('resStreak').textContent =
+              summary && summary.streak != null ? '🔥 ' + summary.streak : '—';
+            document.getElementById('resRank').textContent = '#' + (data.provisionalRank || '—');
+
+            // awards
+            var showAwards = false;
+            if (summary && summary.newBadges && summary.newBadges.length) {
+              document.getElementById('resBadgeCard').style.display = 'block';
+              document.getElementById('resBadgeName').textContent =
+                'Badge unlocked: ' + summary.newBadges.join(', ');
+              document.getElementById('resBadgeDesc').textContent = 'Keep your streak going!';
+              showAwards = true;
+            }
+            if (showAwards) document.getElementById('resAwards').style.display = 'grid';
+
+            // review
+            renderReview(
+              review.map(function (r, i) {
+                return {
+                  ok: r.correct,
+                  q: 'Q' + (i + 1) + (r.topic ? ' — ' + r.topic : ''),
+                  a: (r.correct ? '✓ ' : '✗ ') + (r.pointsEarned || 0) + ' pts',
+                  exp: r.explanation || '',
+                };
+              })
+            );
+
+            // per-topic breakdown
+            var byTopic = {};
+            review.forEach(function (r) {
+              var k = r.topic || 'General';
+              byTopic[k] = byTopic[k] || { c: 0, n: 0 };
+              byTopic[k].n++;
+              if (r.correct) byTopic[k].c++;
+            });
+            renderTopics(
+              Object.keys(byTopic).map(function (k) {
+                var pct = Math.round((byTopic[k].c / byTopic[k].n) * 100);
+                return { t: k, pct: pct, weak: pct < 60 };
+              })
+            );
+          })
+          .catch(function () {
+            showEmpty();
+          });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+    <style>
+      @media (max-width: 700px) {
+        .wc-res-grid,
+        .wc-two-col {
+          grid-template-columns: 1fr !important;
+        }
+        .wc-res-grid .wc-scorewheel {
+          margin-bottom: 1rem;
+        }
+      }
+    </style>
+  </body>
+</html>

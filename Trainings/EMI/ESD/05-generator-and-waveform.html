@@ -1,0 +1,2179 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Anatomy of the IEC 61000-4-2 ESD generator, the horizontal and vertical coupling plane test setups, and a detailed breakdown of the standardized contact-discharge current waveform at each test level."
+    />
+    <title>
+      ESD Generator, Test Setup &amp; Current Waveform | ESD Immunity Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/ESD/05-generator-and-waveform.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .toggle-tab {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-tab.active {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+      }
+      .panel-btn {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text-sub);
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: left;
+      }
+      .panel-btn.active {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.12);
+        color: var(--text-base);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Electrostatic Discharge (ESD) Immunity
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; What Is ESD</a>
+          <a href="02-physics-and-charge.html" class="module-item"
+            >02. Physics of Static Electricity &amp; Charge Build-Up</a
+          >
+          <a href="03-esd-models.html" class="module-item">03. ESD Models: HBM, MM &amp; CDM</a>
+          <a href="04-iec-61000-4-2-and-levels.html" class="module-item"
+            >04. IEC 61000-4-2, Test Levels &amp; Discharge Types</a
+          >
+          <a href="05-generator-and-waveform.html" class="module-item active"
+            >05. ESD Generator, Test Setup &amp; Current Waveform</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. Product Categories &amp; Applicable Standards</a
+          >
+          <a href="07-failure-mechanisms.html" class="module-item"
+            >07. How ESD Damages Electronics &amp; Failure Mechanisms</a
+          >
+          <a href="08-tvs-and-pcb-layout.html" class="module-item"
+            >08. TVS Protection &amp; PCB Layout Best Practices</a
+          >
+          <a href="09-case-studies.html" class="module-item"
+            >09. Engineering Case Studies (12 Failures)</a
+          >
+          <a href="10-debugging-and-summary.html" class="module-item"
+            >10. Debugging Workflow, Simulator &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Electrostatic Discharge (ESD) Immunity</a><span>/</span>
+            <span>ESD Generator, Test Setup &amp; Current Waveform</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 5/10</span><span>50%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 05</div>
+              <h1 style="font-size: 2.2rem">ESD Generator, Test Setup &amp; Current Waveform</h1>
+              <p class="subtitle">
+                The ESD gun, the coupling planes it discharges through, and the exact shape of the
+                current pulse it injects are all tightly specified by IEC 61000-4-2 -- understanding
+                each piece is what makes a lab report readable and a design decision defensible.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.25rem">Learning Objectives</h3>
+                <div
+                  class="objective-grid"
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                    gap: 12px;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🔫</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Identify the parts of an ESD generator
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🗺️</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Understand HCP and VCP test setups
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">📈</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Read Ip, I30, and I60 waveform parameters
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🎚️</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Explore how waveform scales with test level
+                    </div>
+                  </div>
+                  <div
+                    class="objective-card"
+                    style="
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 12px;
+                      padding: 16px 14px;
+                      text-align: center;
+                    "
+                  >
+                    <span style="font-size: 1.6rem; display: block; margin-bottom: 8px">🧰</span>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.5">
+                      Explain the purpose, physics, and variants of every test-bench component
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1: Gun anatomy -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: Anatomy of the ESD Generator (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Click each part of the generator below to see what it does.
+                  </p>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                      gap: 8px;
+                      margin-bottom: 12px;
+                    "
+                    id="gunPanel"
+                  ></div>
+                  <div
+                    class="stage-detail"
+                    id="gunDetail"
+                    style="
+                      background: var(--bg-muted);
+                      border: 1px solid var(--border);
+                      border-radius: 10px;
+                      padding: 14px 16px;
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      line-height: 1.7;
+                      min-height: 60px;
+                    "
+                  ></div>
+                  <div class="widget-container" style="margin-top: 1rem">
+                    <h3 style="margin-bottom: 0.5rem">Diagram: ESD Generator</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      A detailed, to-scale illustration of a typical handheld pistol-grip ESD
+                      generator -- digital kV display, polarity switch, trigger, interchangeable
+                      tip, and return-strap coil. Built as an illustration rather than a stock photo
+                      so licensing never becomes a problem and every label stays in sync with the
+                      part you select above.
+                    </p>
+                    <div style="position: relative; width: 100%; height: 280px">
+                      <canvas
+                        id="gunDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: HCP/VCP -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Section 2: Coupling Plane Test Setups (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Two indirect-discharge coupling planes let the standard reproduce nearby
+                    discharges without touching the EUT directly, simulating a spark near (not
+                    necessarily on) the product.
+                  </p>
+                  <figure style="margin: 0 0 1rem">
+                    <img
+                      src="images/esd-gun-test-setup.jpg"
+                      alt="Engineer applying an ESD generator to a device on a bench with a vertical copper coupling plane behind it"
+                      loading="lazy"
+                      style="
+                        width: 100%;
+                        max-width: 560px;
+                        border-radius: 10px;
+                        border: 1px solid var(--border);
+                        display: block;
+                      "
+                      onerror="this.parentElement.style.display = 'none'"
+                    />
+                    <figcaption
+                      style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px"
+                    >
+                      A real bench setup: the ESD generator discharges to the EUT while a vertical
+                      coupling plane (the copper sheet behind) stands ready for indirect-discharge
+                      testing.
+                    </figcaption>
+                  </figure>
+                  <div
+                    class="model-tabs"
+                    style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px"
+                    id="cpTabs"
+                  >
+                    <button class="toggle-tab active" data-cp="0">
+                      Horizontal Coupling Plane (HCP)
+                    </button>
+                    <button class="toggle-tab" data-cp="1">Vertical Coupling Plane (VCP)</button>
+                  </div>
+                  <div
+                    class="stage-detail"
+                    id="cpDetail"
+                    style="
+                      background: var(--bg-muted);
+                      border: 1px solid var(--border);
+                      border-radius: 10px;
+                      padding: 14px 16px;
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      line-height: 1.7;
+                      min-height: 60px;
+                    "
+                  ></div>
+                  <div class="widget-container" style="margin-top: 1rem">
+                    <h3 style="margin-bottom: 0.5rem">Animated: Test Setup</h3>
+                    <div style="position: relative; width: 100%; height: 240px">
+                      <canvas
+                        id="cpDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Complete test bench deep dive -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3deepbody">
+                  <span
+                    >Section 3: Complete ESD Test Bench &mdash; Component-by-Component Deep Dive
+                    (Interactive)</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3deepbody">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    A compliant ESD test bench is more than just the gun -- every piece pictured in
+                    a typical IEC 61000-4-2 tabletop setup has a defined purpose, a physics reason
+                    for existing, and often more than one real-world variant. Select a component
+                    below for a detailed illustrated breakdown.
+                  </p>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                      gap: 8px;
+                      margin-bottom: 12px;
+                    "
+                    id="deepPanel"
+                  ></div>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem" id="deepTitle">ESD Generator ("The Gun")</h3>
+                    <div
+                      style="position: relative; width: 100%; height: 260px; margin-bottom: 12px"
+                    >
+                      <canvas
+                        id="deepDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                    <div style="margin-bottom: 10px">
+                      <p
+                        style="
+                          font-size: 0.78rem;
+                          font-weight: 700;
+                          color: #3b82f6;
+                          text-transform: uppercase;
+                          letter-spacing: 0.05em;
+                          margin-bottom: 4px;
+                        "
+                      >
+                        Purpose
+                      </p>
+                      <p
+                        style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.7"
+                        id="deepPurpose"
+                      ></p>
+                    </div>
+                    <div style="margin-bottom: 10px">
+                      <p
+                        style="
+                          font-size: 0.78rem;
+                          font-weight: 700;
+                          color: #3b82f6;
+                          text-transform: uppercase;
+                          letter-spacing: 0.05em;
+                          margin-bottom: 4px;
+                        "
+                      >
+                        Physics
+                      </p>
+                      <p
+                        style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.7"
+                        id="deepPhysics"
+                      ></p>
+                    </div>
+                    <div>
+                      <p
+                        style="
+                          font-size: 0.78rem;
+                          font-weight: 700;
+                          color: #3b82f6;
+                          text-transform: uppercase;
+                          letter-spacing: 0.05em;
+                          margin-bottom: 4px;
+                        "
+                      >
+                        Real-World Variants
+                      </p>
+                      <ul
+                        style="
+                          font-size: 0.85rem;
+                          color: var(--text-sub);
+                          line-height: 1.7;
+                          padding-left: 1.2rem;
+                        "
+                        id="deepVariants"
+                      ></ul>
+                    </div>
+                  </div>
+                  <table class="data-table" style="margin-top: 1rem">
+                    <thead>
+                      <tr>
+                        <th>Component</th>
+                        <th>Typical Spec</th>
+                        <th>Key Physics Role</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>ESD Generator</td>
+                        <td>150 pF / 330 O network, up to 15-30 kV</td>
+                        <td>Produces the standardized Ip/I30/I60 current waveform</td>
+                      </tr>
+                      <tr>
+                        <td>Contact discharge tip</td>
+                        <td>Sharp pointed metal tip</td>
+                        <td>Direct, repeatable galvanic connection at the relay-defined instant</td>
+                      </tr>
+                      <tr>
+                        <td>Air discharge tip</td>
+                        <td>Rounded ball tip, larger radius</td>
+                        <td>Controlled, if less repeatable, air-gap breakdown geometry</td>
+                      </tr>
+                      <tr>
+                        <td>HCP</td>
+                        <td>1.6 m x 0.8 m metal sheet</td>
+                        <td>Capacitive coupling path for indirect tabletop discharges</td>
+                      </tr>
+                      <tr>
+                        <td>VCP</td>
+                        <td>0.5 m x 0.5 m metal sheet</td>
+                        <td>Capacitive coupling path simulating a nearby person/object</td>
+                      </tr>
+                      <tr>
+                        <td>Ground reference plane</td>
+                        <td>Copper or galvanized steel, extends &ge;0.5 m beyond EUT</td>
+                        <td>Low-impedance common return reference for the whole setup</td>
+                      </tr>
+                      <tr>
+                        <td>Insulating table</td>
+                        <td>0.8 m height, non-conductive</td>
+                        <td>Standardizes the HCP-to-GRP stray capacitance geometry</td>
+                      </tr>
+                      <tr>
+                        <td>Bleed resistors</td>
+                        <td>470 kO, two per coupling plane</td>
+                        <td>Drain accumulated charge slowly without loading the fast transient</td>
+                      </tr>
+                      <tr>
+                        <td>Ground/bonding strap</td>
+                        <td>Short, wide braided copper</td>
+                        <td>Minimizes inductance in the generator's HF return path</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Section 4: Current waveform -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Section 4: The Standardized Current Waveform (Interactive)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    IEC 61000-4-2 specifies the exact current waveform a compliant generator must
+                    produce, defined by three parameters: the first peak current
+                    <strong>Ip</strong> (reached in a 0.7-1 ns rise time), the current at 30 ns
+                    (<strong>I30</strong>), and the current at 60 ns (<strong>I60</strong>). Select
+                    a test level to see the specified values.
+                  </p>
+                  <div
+                    class="model-tabs"
+                    style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px"
+                    id="levelTabs"
+                  >
+                    <button class="toggle-tab active" data-level="0">2 kV</button>
+                    <button class="toggle-tab" data-level="1">4 kV</button>
+                    <button class="toggle-tab" data-level="2">6 kV</button>
+                    <button class="toggle-tab" data-level="3">8 kV</button>
+                  </div>
+                  <div id="plotlyWaveformDetail" style="width: 100%; height: 360px"></div>
+                  <table class="data-table" style="margin-top: 1rem">
+                    <thead>
+                      <tr>
+                        <th>Level</th>
+                        <th>Test Voltage</th>
+                        <th>Ip</th>
+                        <th>I30</th>
+                        <th>I60</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td>2 kV</td>
+                        <td>7.5 A</td>
+                        <td>4 A</td>
+                        <td>2 A</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td>4 kV</td>
+                        <td>15 A</td>
+                        <td>8 A</td>
+                        <td>4 A</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td>6 kV</td>
+                        <td>22.5 A</td>
+                        <td>12 A</td>
+                        <td>6 A</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td>8 kV</td>
+                        <td>30 A</td>
+                        <td>16 A</td>
+                        <td>8 A</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 5 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 8%;
+                        background: linear-gradient(90deg, #3b82f6, #facc15);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="04-iec-61000-4-2-and-levels.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="06-product-categories.html">Next Lesson &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+    </script>
+
+    <!-- Section 1: Gun anatomy -->
+    <script>
+      var GUN_PARTS = [
+        {
+          name: 'Discharge tip',
+          detail:
+            'The metal tip (pointed for contact discharge, rounded for air discharge) that makes the actual electrical connection to the EUT or coupling plane.',
+        },
+        {
+          name: 'Discharge switch',
+          detail:
+            'A relay inside the gun that, on trigger, connects the charged internal capacitor to the tip -- this is what produces the fast contact-discharge current pulse.',
+        },
+        {
+          name: 'HV power supply',
+          detail:
+            'Charges the internal 150 pF capacitor to the selected test voltage (from a few hundred volts up to 15-30 kV depending on generator model).',
+        },
+        {
+          name: 'Return cable / ground strap',
+          detail:
+            'Connects the generator body back to the ground reference plane, completing the current return path so the injected pulse has somewhere to go.',
+        },
+        {
+          name: 'Trigger button',
+          detail:
+            'Operator-actuated control that fires a single discharge once the tip is positioned -- most labs test a minimum of 10 discharges per polarity per test point.',
+        },
+      ];
+      var currentGunPart = 0;
+      function renderGunPanel() {
+        var panel = document.getElementById('gunPanel');
+        var html = '';
+        GUN_PARTS.forEach(function (p, i) {
+          html +=
+            '<button class="panel-btn' +
+            (i === currentGunPart ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '">' +
+            p.name +
+            '</button>';
+        });
+        panel.innerHTML = html;
+        panel.querySelectorAll('.panel-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            currentGunPart = parseInt(btn.getAttribute('data-idx'));
+            renderGunPanel();
+            renderGunDetail();
+          });
+        });
+      }
+      function renderGunDetail() {
+        document.getElementById('gunDetail').innerHTML =
+          '<strong>' +
+          GUN_PARTS[currentGunPart].name +
+          '</strong> &mdash; ' +
+          GUN_PARTS[currentGunPart].detail;
+      }
+      renderGunPanel();
+      renderGunDetail();
+
+      function roundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      function drawGunDiagram() {
+        var canvas = document.getElementById('gunDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        function hi(idx) {
+          return currentGunPart === idx ? '#3b82f6' : inkColor(0.45);
+        }
+        function hiLW(idx, base) {
+          return currentGunPart === idx ? base + 1.5 : base;
+        }
+
+        var barrelY = h * 0.4;
+        var barrelH = h * 0.2;
+        var barrelX1 = w * 0.14,
+          barrelX2 = w * 0.62;
+
+        // ===== drop shadow under whole unit =====
+        ctx.fillStyle = isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.ellipse(w * 0.32, h * 0.94, w * 0.22, h * 0.035, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ===== barrel / body (HV supply housing) =====
+        var barrelGrad = ctx.createLinearGradient(
+          0,
+          barrelY - barrelH / 2,
+          0,
+          barrelY + barrelH / 2
+        );
+        barrelGrad.addColorStop(0, isLightTheme() ? '#4b5a6b' : '#3a4655');
+        barrelGrad.addColorStop(0.5, isLightTheme() ? '#2c3a48' : '#1c2530');
+        barrelGrad.addColorStop(1, isLightTheme() ? '#1c2530' : '#0f151c');
+        ctx.fillStyle = barrelGrad;
+        roundedRect(
+          ctx,
+          barrelX1,
+          barrelY - barrelH / 2,
+          barrelX2 - barrelX1,
+          barrelH,
+          barrelH * 0.35
+        );
+        ctx.fill();
+        ctx.strokeStyle = hi(2);
+        ctx.lineWidth = hiLW(2, 1.5);
+        roundedRect(
+          ctx,
+          barrelX1,
+          barrelY - barrelH / 2,
+          barrelX2 - barrelX1,
+          barrelH,
+          barrelH * 0.35
+        );
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        labelPlate(
+          ctx,
+          'HV supply housing',
+          barrelX1 + (barrelX2 - barrelX1) * 0.35,
+          barrelY - barrelH / 2 - 12,
+          'center',
+          10
+        );
+
+        // top highlight sheen on barrel
+        ctx.strokeStyle = isLightTheme() ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(barrelX1 + 10, barrelY - barrelH / 2 + 4);
+        ctx.lineTo(barrelX2 - 20, barrelY - barrelH / 2 + 4);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+
+        // ===== digital kV / polarity readout (the "switch" / control electronics) =====
+        var lcdX = barrelX1 + (barrelX2 - barrelX1) * 0.42,
+          lcdW = (barrelX2 - barrelX1) * 0.3,
+          lcdH = barrelH * 0.42;
+        var lcdY = barrelY - lcdH / 2;
+        ctx.fillStyle = '#0a1a12';
+        roundedRect(ctx, lcdX, lcdY, lcdW, lcdH, 3);
+        ctx.fill();
+        ctx.strokeStyle = hi(1);
+        ctx.lineWidth = hiLW(1, 1.5);
+        roundedRect(ctx, lcdX, lcdY, lcdW, lcdH, 3);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.fillStyle = currentGunPart === 1 ? '#4cdf8b' : 'rgba(76,223,139,0.75)';
+        ctx.font = 'bold ' + Math.max(9, lcdH * 0.5) + 'px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('8.0kV', lcdX + lcdW / 2, lcdY + lcdH * 0.68);
+        ctx.textAlign = 'left';
+        labelPlate(ctx, 'Voltage / polarity switch', lcdX + lcdW / 2, lcdY - 10, 'center', 9);
+
+        // ===== front collar + interchangeable tip =====
+        var collarX = barrelX2,
+          collarW = w * 0.02;
+        ctx.fillStyle = isLightTheme() ? '#8a95a3' : '#5a6675';
+        ctx.fillRect(collarX, barrelY - barrelH * 0.32, collarW, barrelH * 0.64);
+
+        var tipX1b = collarX + collarW,
+          tipX2b = tipX1b + w * 0.16;
+        ctx.strokeStyle = hi(0);
+        ctx.lineWidth = hiLW(0, 3);
+        ctx.beginPath();
+        ctx.moveTo(tipX1b, barrelY);
+        ctx.lineTo(tipX2b - 6, barrelY);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.fillStyle = hi(0);
+        ctx.beginPath();
+        ctx.moveTo(tipX2b - 8, barrelY - 4);
+        ctx.lineTo(tipX2b, barrelY);
+        ctx.lineTo(tipX2b - 8, barrelY + 4);
+        ctx.closePath();
+        ctx.fill();
+        labelPlate(ctx, 'Interchangeable tip', (tipX1b + tipX2b) / 2, barrelY - 18, 'center', 10);
+
+        // ===== pistol grip =====
+        var gripTopX = barrelX1 + (barrelX2 - barrelX1) * 0.22;
+        var gripTopY = barrelY + barrelH / 2 - 2;
+        var gripBotY = h * 0.82;
+        var gripGrad = ctx.createLinearGradient(gripTopX - 20, gripTopY, gripTopX + 20, gripBotY);
+        gripGrad.addColorStop(0, isLightTheme() ? '#3a4655' : '#232e3a');
+        gripGrad.addColorStop(1, isLightTheme() ? '#1c2530' : '#10161d');
+        ctx.fillStyle = gripGrad;
+        ctx.beginPath();
+        ctx.moveTo(gripTopX - 16, gripTopY);
+        ctx.lineTo(gripTopX + 22, gripTopY);
+        ctx.quadraticCurveTo(gripTopX + 30, (gripTopY + gripBotY) / 2, gripTopX + 16, gripBotY);
+        ctx.lineTo(gripTopX - 18, gripBotY);
+        ctx.quadraticCurveTo(gripTopX - 26, (gripTopY + gripBotY) / 2, gripTopX - 16, gripTopY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = inkColor(0.35);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'Pistol grip', gripTopX + 2, gripBotY + 16, 'center', 9);
+
+        // trigger guard (open loop) + trigger
+        var trigCx = gripTopX + 26,
+          trigCy = gripTopY + 22;
+        ctx.strokeStyle = inkColor(0.4);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(trigCx, trigCy, 13, 0.15 * Math.PI, 0.95 * Math.PI);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = hi(4);
+        ctx.lineWidth = hiLW(4, 2.5);
+        ctx.beginPath();
+        ctx.moveTo(trigCx + 2, trigCy - 8);
+        ctx.quadraticCurveTo(trigCx - 6, trigCy, trigCx + 2, trigCy + 9);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'Trigger', trigCx + 4, trigCy + 26, 'center', 9);
+
+        // ===== coiled return strap from base of grip =====
+        ctx.strokeStyle = hi(3);
+        ctx.lineWidth = hiLW(3, 2);
+        ctx.beginPath();
+        ctx.moveTo(gripTopX - 6, gripBotY - 4);
+        var coilX = gripTopX - 40,
+          coilY = gripBotY + 10;
+        for (var c = 0; c < 4; c++) {
+          ctx.arc(coilX + c * 10, coilY + (c % 2) * 4, 9, 0, Math.PI * 2);
+        }
+        ctx.moveTo(gripTopX - 6, gripBotY - 4);
+        ctx.bezierCurveTo(gripTopX - 30, gripBotY + 6, coilX + 30, coilY - 10, w * 0.04, h * 0.94);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        // ground plug icon
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.04 - 8, h * 0.94);
+        ctx.lineTo(w * 0.04 + 8, h * 0.94);
+        ctx.moveTo(w * 0.04 - 5, h * 0.94 + 4);
+        ctx.lineTo(w * 0.04 + 5, h * 0.94 + 4);
+        ctx.moveTo(w * 0.04 - 2, h * 0.94 + 8);
+        ctx.lineTo(w * 0.04 + 2, h * 0.94 + 8);
+        ctx.stroke();
+        labelPlate(ctx, 'Return cable / ground', w * 0.04, h * 0.94 + 22, 'center', 9);
+      }
+      drawGunDiagram();
+      window.addEventListener('resize', drawGunDiagram);
+      var gunObserver = new MutationObserver(drawGunDiagram);
+    </script>
+
+    <!-- Section 2: HCP/VCP -->
+    <script>
+      var CP = [
+        {
+          name: 'Horizontal Coupling Plane (HCP)',
+          detail:
+            'A grounded metal plane on the tabletop, larger than the EUT footprint, connected to the ground reference plane through 470 kO bleed resistors at each corner. The gun discharges directly to the HCP at defined points near the EUT (typically 0.1 m away), coupling the transient into the product capacitively without touching it.',
+        },
+        {
+          name: 'Vertical Coupling Plane (VCP)',
+          detail:
+            'A grounded metal plane positioned vertically, parallel to and 0.1 m from a side of the EUT, also bled to ground through 470 kO resistors. It represents a discharge from a nearby object or person standing beside the product rather than one on the tabletop.',
+        },
+      ];
+      var currentCp = 0;
+      function renderCpDetail() {
+        document.getElementById('cpDetail').innerHTML =
+          '<strong>' + CP[currentCp].name + '</strong> &mdash; ' + CP[currentCp].detail;
+      }
+      document.querySelectorAll('#cpTabs .toggle-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#cpTabs .toggle-tab').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentCp = parseInt(tab.getAttribute('data-cp'));
+          renderCpDetail();
+          drawCpDiagram();
+        });
+      });
+      renderCpDetail();
+
+      function drawCpDiagram() {
+        var canvas = document.getElementById('cpDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        var tableY = h * 0.75;
+        // ground reference plane / table
+        ctx.strokeStyle = inkColor(0.4);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.05, tableY);
+        ctx.lineTo(w * 0.95, tableY);
+        ctx.stroke();
+        labelPlate(ctx, 'Ground reference plane', w * 0.5, tableY + 20, 'center', 10);
+
+        // EUT
+        var eutX = w * 0.42,
+          eutW = w * 0.16,
+          eutH = h * 0.18;
+        ctx.fillStyle = '#1c2530';
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.fillRect(eutX, tableY - eutH, eutW, eutH);
+        ctx.strokeRect(eutX, tableY - eutH, eutW, eutH);
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'EUT', eutX + eutW / 2, tableY - eutH - 10, 'center', 10);
+
+        if (currentCp === 0) {
+          // HCP: horizontal plane under/around EUT
+          var hcpY = tableY - eutH - 30;
+          var hcpX1 = w * 0.1,
+            hcpX2 = w * 0.75;
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(hcpX1, hcpY);
+          ctx.lineTo(hcpX2, hcpY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'HCP', hcpX1, hcpY - 10, 'left', 10);
+          // bleed resistors at corners (small zigzags to table)
+          [hcpX1, hcpX2].forEach(function (bx) {
+            ctx.strokeStyle = inkColor(0.4);
+            ctx.beginPath();
+            ctx.moveTo(bx, hcpY);
+            ctx.lineTo(bx, tableY);
+            ctx.stroke();
+          });
+          // gun discharging into HCP near EUT
+          var gunTipX = hcpX2 - 15,
+            gunTipY = hcpY;
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(gunTipX + 40, gunTipY - 40);
+          ctx.lineTo(gunTipX, gunTipY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'ESD gun (0.1 m from EUT)', gunTipX + 40, gunTipY - 50, 'center', 9);
+        } else {
+          // VCP: vertical plane beside EUT
+          var vcpX = eutX + eutW + 24;
+          var vcpTop = tableY - eutH - 30,
+            vcpBot = tableY;
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(vcpX, vcpTop);
+          ctx.lineTo(vcpX, vcpBot);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'VCP', vcpX, vcpTop - 10, 'center', 10);
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.beginPath();
+          ctx.moveTo(vcpX, vcpBot);
+          ctx.lineTo(vcpX, tableY);
+          ctx.stroke();
+          // gun discharging into VCP
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(vcpX + 40, vcpTop + 20);
+          ctx.lineTo(vcpX, vcpTop + 20);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'ESD gun', vcpX + 40, vcpTop + 6, 'center', 9);
+        }
+      }
+      drawCpDiagram();
+      window.addEventListener('resize', drawCpDiagram);
+    </script>
+
+    <!-- Section 3: Complete test bench deep dive -->
+    <script>
+      var DEEP_PARTS = [
+        {
+          name: 'ESD Generator ("The Gun")',
+          purpose:
+            'The handheld or bench-mounted instrument that produces a repeatable, standardized electrostatic discharge on demand -- replacing an unpredictable human or object discharge with a calibrated, repeatable one so test results are comparable lab-to-lab.',
+          physics:
+            'Internally, a high-voltage supply charges a 150 pF storage capacitor to the selected test voltage. A discharge switch (relay) then connects that charged capacitor through a fixed 330 O resistor to the output tip, producing the exact Ip/I30/I60 current shape defined in Module 05 Section 4 and specified by IEC 61000-4-2.',
+          variants: [
+            'Handheld, battery-powered guns for field/portable testing versus bench-mounted, mains-powered systems for fixed lab setups',
+            'Single-polarity generators versus switchable positive/negative polarity models (a full test plan requires both polarities)',
+            'Simple manual-trigger units versus programmable systems that can run an automated sequence across many test points and voltage levels',
+          ],
+        },
+        {
+          name: 'Contact Discharge Tip',
+          purpose:
+            'A sharp, pointed metal tip designed to make direct galvanic contact with a conductive surface on the EUT or a coupling plane before the discharge is triggered.',
+          physics:
+            "Because the tip physically touches the target before the relay fires, there is no air-gap breakdown physics involved -- the current waveform is determined almost entirely by the generator's internal RC network, which is why contact discharge is far more repeatable than air discharge.",
+          variants: [
+            'Standard pointed tip for typical flat conductive surfaces',
+            'Extended or angled tips for reaching recessed connectors and tight enclosures',
+            'Interchangeable tip sets rated for the same 150 pF/330 O network but different mechanical reach',
+          ],
+        },
+        {
+          name: 'Air Discharge Tip',
+          purpose:
+            'A rounded, larger-radius tip used when the target surface is non-conductive (plastic housings, display glass) and a direct galvanic contact is not possible.',
+          physics:
+            "The gun is charged and then physically moved toward the surface; a spark jumps the shrinking air gap once the local electric field exceeds the air's breakdown strength. The rounded geometry is specified to make that breakdown point as consistent as practically possible, though it remains inherently less repeatable than contact discharge (Module 04).",
+          variants: [
+            'Standard round-ball tip per the IEC 61000-4-2 default geometry',
+            'Some generator manufacturers offer slightly different ball diameters, which can shift breakdown voltage slightly for a given gap',
+          ],
+        },
+        {
+          name: 'Horizontal Coupling Plane (HCP)',
+          purpose:
+            'A grounded metal sheet on the tabletop, larger than the EUT footprint, used for indirect discharges that simulate a spark to a nearby object on the same surface as the product rather than to the product itself.',
+          physics:
+            'The gun discharges directly into the HCP at defined points (typically 0.1 m from the EUT). The resulting fast transient couples into the EUT primarily through stray capacitance between the HCP, the EUT, and the ground reference plane below -- no direct galvanic path to the EUT is involved.',
+          variants: [
+            'Aluminum sheet (lighter, common in dedicated EMC labs)',
+            'Galvanized steel sheet (more common on production-floor pre-compliance benches)',
+            'Fixed 1.6 m x 0.8 m dimension per the standard, though some labs use larger planes for bigger EUTs with a correspondingly larger insulating table',
+          ],
+        },
+        {
+          name: 'Vertical Coupling Plane (VCP)',
+          purpose:
+            'A grounded metal sheet positioned vertically beside the EUT, representing an indirect discharge from a nearby standing person or object rather than one on the tabletop surface.',
+          physics:
+            "Positioned parallel to and 0.1 m from a side of the EUT, it couples the transient capacitively in the same way as the HCP, but the vertical orientation and closer proximity to the EUT's side (rather than its base) test a different coupling geometry that a horizontal plane alone would miss.",
+          variants: [
+            'Fixed 0.5 m x 0.5 m dimension per the standard',
+            'Various non-conductive mounting stands to hold the VCP at the correct height and offset',
+            'Some setups use a motorized or sliding stand to reposition the VCP quickly between test points on different EUT sides',
+          ],
+        },
+        {
+          name: 'Ground Reference Plane (GRP)',
+          purpose:
+            'A large, highly conductive sheet beneath the entire test setup that serves as the single common electrical reference every other grounded element (HCP, VCP, generator return, EUT safety ground) bonds back to.',
+          physics:
+            "Its low impedance is what makes the rest of the setup's current-return paths well-defined and repeatable; a poor or undersized GRP introduces uncontrolled ground impedance that can shift the effective discharge waveform seen by the EUT, undermining repeatability across labs.",
+          variants: [
+            'Copper sheet (best conductivity, common in accredited EMC labs)',
+            'Galvanized steel sheet (lower cost, adequate for most pre-compliance work)',
+            'Must extend at least 0.5 m beyond the EUT and its cabling on all sides per the standard',
+          ],
+        },
+        {
+          name: 'Insulating Table',
+          purpose:
+            'A non-conductive table that holds the EUT and HCP at a fixed, standardized height above the ground reference plane.',
+          physics:
+            "The specified 0.8 m height sets the stray capacitance between the HCP/EUT and the GRP below to a known, repeatable value -- change that height and the effective coupling capacitance (and therefore the transient seen by the EUT) changes too, which is why the dimension is called out explicitly in the standard rather than left to the lab's discretion.",
+          variants: [
+            'Solid wood or fiberglass composite tabletops',
+            'Four-legged insulating stands versus integrated insulating table/HCP assemblies sold as a single test furniture unit',
+          ],
+        },
+        {
+          name: 'Bleed Resistors (470 kO)',
+          purpose:
+            'High-value resistors connecting each coupling plane (HCP and VCP) back to the ground reference plane, positioned at opposite corners of the HCP and at the base of the VCP stand.',
+          physics:
+            'A value of 470 kO is a deliberate compromise: high enough that it presents essentially an open circuit to the nanosecond-scale ESD transient (so it does not divert or distort the fast current pulse the test is trying to characterize), yet low enough to continuously bleed away any accumulated static charge on the coupling plane over time, keeping it at a stable reference potential between discharges.',
+          variants: [
+            'Standard two-resistor placement at opposite HCP corners is most common',
+            'Some fixtures integrate the bleed resistors into the coupling-plane support legs themselves rather than as separate visible components',
+          ],
+        },
+        {
+          name: 'Ground / Bonding Straps',
+          purpose:
+            "Short, low-impedance connections that tie the ESD generator's return lead, the EUT's safety ground (where applicable), and the ground reference plane into one common, well-defined reference.",
+          physics:
+            "At the frequencies present in an ESD transient (energy content well up into the hundreds of MHz), even a short length of ordinary wire presents meaningful inductive impedance; a wide, flat braided strap has much lower inductance per unit length than a round wire, keeping the return path -- and therefore the effective discharge waveform -- close to the standard's intent.",
+          variants: [
+            'Braided copper strap (preferred, lowest inductance)',
+            'Simple round-wire ground lead (acceptable for less critical bench setups, but not ideal for accredited testing)',
+          ],
+        },
+      ];
+      var currentDeepIdx = 0;
+      var deepAnimStart = null;
+
+      function renderDeepPanel() {
+        var panel = document.getElementById('deepPanel');
+        var html = '';
+        DEEP_PARTS.forEach(function (p, i) {
+          html +=
+            '<button class="panel-btn' +
+            (i === currentDeepIdx ? ' active' : '') +
+            '" data-idx="' +
+            i +
+            '">' +
+            p.name +
+            '</button>';
+        });
+        panel.innerHTML = html;
+        panel.querySelectorAll('.panel-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            currentDeepIdx = parseInt(btn.getAttribute('data-idx'));
+            deepAnimStart = null;
+            renderDeepPanel();
+            renderDeepDetail();
+          });
+        });
+      }
+
+      function renderDeepDetail() {
+        var p = DEEP_PARTS[currentDeepIdx];
+        document.getElementById('deepTitle').textContent = p.name;
+        document.getElementById('deepPurpose').textContent = p.purpose;
+        document.getElementById('deepPhysics').textContent = p.physics;
+        var variantsHtml = '';
+        p.variants.forEach(function (v) {
+          variantsHtml += '<li>' + v + '</li>';
+        });
+        document.getElementById('deepVariants').innerHTML = variantsHtml;
+      }
+
+      renderDeepPanel();
+      renderDeepDetail();
+
+      function drawDeepDiagram(ts) {
+        var canvas = document.getElementById('deepDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawDeepDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (deepAnimStart === null) deepAnimStart = ts || 0;
+        var elapsed = ((ts || 0) - deepAnimStart) / 1000;
+        var pulse = (Math.sin(elapsed * 2.4) + 1) / 2;
+
+        var midY = h * 0.55;
+
+        if (currentDeepIdx === 0) {
+          // ESD generator overview
+          var bodyX = w * 0.15,
+            bodyW = w * 0.42,
+            bodyH = h * 0.3;
+          ctx.fillStyle = '#1c2530';
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.fillRect(bodyX, midY - bodyH / 2, bodyW, bodyH);
+          ctx.strokeRect(bodyX, midY - bodyH / 2, bodyW, bodyH);
+          ctx.lineWidth = 1;
+          labelPlate(
+            ctx,
+            'HV supply + 150 pF cap',
+            bodyX + bodyW / 2,
+            midY - bodyH / 2 - 10,
+            'center',
+            10
+          );
+          // internal cap symbol
+          ctx.strokeStyle = 'rgba(250,204,21,' + (0.5 + pulse * 0.5) + ')';
+          ctx.lineWidth = 2.5;
+          var capX = bodyX + bodyW * 0.6;
+          ctx.beginPath();
+          ctx.moveTo(capX - 6, midY - 14);
+          ctx.lineTo(capX - 6, midY + 14);
+          ctx.moveTo(capX + 6, midY - 14);
+          ctx.lineTo(capX + 6, midY + 14);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          // tip
+          var tipX1 = bodyX + bodyW,
+            tipX2 = tipX1 + w * 0.2;
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(tipX1, midY);
+          ctx.lineTo(tipX2, midY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(tipX2, midY, 3 + pulse * 2, 0, Math.PI * 2);
+          ctx.fill();
+          labelPlate(ctx, 'Discharge tip', tipX2, midY - 16, 'center', 10);
+          // return strap
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(bodyX, midY + bodyH * 0.3);
+          ctx.quadraticCurveTo(bodyX - w * 0.06, h * 0.85, w * 0.02, h * 0.85);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Return strap to GRP', w * 0.02 + 60, h * 0.85 + 16, 'center', 9);
+        } else if (currentDeepIdx === 1 || currentDeepIdx === 2) {
+          // tip close-up: contact (pointed) vs air (rounded)
+          var isAir = currentDeepIdx === 2;
+          var tX = w * 0.35;
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.08, midY);
+          ctx.lineTo(tX, midY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          if (isAir) {
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(tX + 10, midY, 10, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.moveTo(tX, midY - 6);
+            ctx.lineTo(tX + 22, midY);
+            ctx.lineTo(tX, midY + 6);
+            ctx.closePath();
+            ctx.fill();
+          }
+          var targetX = isAir ? w * 0.75 : tX + 24;
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(targetX, midY - 40);
+          ctx.lineTo(targetX, midY + 40);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(
+            ctx,
+            isAir ? 'Non-conductive surface' : 'Conductive surface',
+            targetX,
+            midY - 54,
+            'center',
+            10
+          );
+          if (isAir) {
+            var gapProgress = (Math.sin(elapsed * 1.3) + 1) / 2;
+            var sparkX = tX + 20 + (targetX - tX - 20) * (0.7 + gapProgress * 0.3);
+            if (gapProgress > 0.8) {
+              ctx.strokeStyle = 'rgba(239,68,68,0.85)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(tX + 20, midY);
+              ctx.lineTo((tX + 20 + targetX) / 2, midY - 6);
+              ctx.lineTo(targetX, midY);
+              ctx.stroke();
+              ctx.lineWidth = 1;
+            }
+            labelPlate(
+              ctx,
+              'Rounded tip approaches until breakdown',
+              (tX + targetX) / 2,
+              midY + 56,
+              'center',
+              9
+            );
+          } else {
+            ctx.fillStyle = 'rgba(239,68,68,' + (0.3 + pulse * 0.5) + ')';
+            ctx.beginPath();
+            ctx.arc(targetX, midY, 6 + pulse * 4, 0, Math.PI * 2);
+            ctx.fill();
+            labelPlate(
+              ctx,
+              'Pointed tip touches, then relay fires',
+              (tX + targetX) / 2,
+              midY + 56,
+              'center',
+              9
+            );
+          }
+        } else if (currentDeepIdx === 3 || currentDeepIdx === 4) {
+          // HCP / VCP
+          var isVcp = currentDeepIdx === 4;
+          var grpY = h * 0.88;
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.05, grpY);
+          ctx.lineTo(w * 0.95, grpY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Ground reference plane', w * 0.5, grpY + 18, 'center', 10);
+
+          var eutX = w * 0.42,
+            eutW = w * 0.14,
+            eutH = h * 0.16;
+          ctx.fillStyle = '#1c2530';
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 2;
+          ctx.fillRect(eutX, grpY - eutH - 30, eutW, eutH);
+          ctx.strokeRect(eutX, grpY - eutH - 30, eutW, eutH);
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'EUT', eutX + eutW / 2, grpY - eutH - 40, 'center', 10);
+
+          if (!isVcp) {
+            var hcpY = grpY - eutH - 30 - 22;
+            var hcpX1 = w * 0.1,
+              hcpX2 = w * 0.78;
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(hcpX1, hcpY);
+            ctx.lineTo(hcpX2, hcpY);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            labelPlate(ctx, 'HCP (1.6 m x 0.8 m)', hcpX1, hcpY - 10, 'left', 10);
+            [hcpX1, hcpX2].forEach(function (bx) {
+              ctx.strokeStyle = 'rgba(250,204,21,' + (0.4 + pulse * 0.5) + ')';
+              var zig = 4,
+                segH = (grpY - hcpY) / zig;
+              ctx.beginPath();
+              ctx.moveTo(bx, hcpY);
+              for (var i = 1; i <= zig; i++) {
+                ctx.lineTo(bx + (i % 2 === 0 ? 4 : -4), hcpY + segH * i);
+              }
+              ctx.stroke();
+            });
+            labelPlate(ctx, '470 kO bleed', hcpX1, grpY - 6, 'left', 8);
+          } else {
+            var vcpX = eutX + eutW + 24;
+            var vcpTop = grpY - eutH - 30 - 20,
+              vcpBot = grpY - 20;
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(vcpX, vcpTop);
+            ctx.lineTo(vcpX, vcpBot);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            labelPlate(ctx, 'VCP (0.5 m x 0.5 m)', vcpX, vcpTop - 10, 'center', 10);
+            ctx.strokeStyle = 'rgba(250,204,21,' + (0.4 + pulse * 0.5) + ')';
+            var zig2 = 3,
+              segH2 = (grpY - vcpBot) / zig2;
+            ctx.beginPath();
+            ctx.moveTo(vcpX, vcpBot);
+            for (var j = 1; j <= zig2; j++) {
+              ctx.lineTo(vcpX + (j % 2 === 0 ? 4 : -4), vcpBot + segH2 * j);
+            }
+            ctx.stroke();
+            labelPlate(ctx, '470 kO bleed', vcpX, grpY - 4, 'center', 8);
+          }
+          // coupling ripple pulse from plane toward EUT
+          var rippleR = 6 + pulse * 22;
+          ctx.strokeStyle = 'rgba(239,68,68,' + Math.max(0, 0.6 - pulse * 0.5) + ')';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(eutX + eutW / 2, grpY - eutH - 30 - 20, rippleR, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+        } else if (currentDeepIdx === 5) {
+          // Ground Reference Plane overview
+          var grpY2 = h * 0.75;
+          ctx.fillStyle = 'rgba(59,130,246,0.1)';
+          ctx.fillRect(w * 0.05, grpY2, w * 0.9, h * 0.12);
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(w * 0.05, grpY2, w * 0.9, h * 0.12);
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Ground reference plane (GRP)', w * 0.5, grpY2 - 12, 'center', 11);
+          var bondPts = [w * 0.2, w * 0.45, w * 0.65, w * 0.85];
+          bondPts.forEach(function (bx, i) {
+            var topY = grpY2 - 60 - (i % 2) * 20;
+            ctx.strokeStyle = inkColor(0.4);
+            ctx.beginPath();
+            ctx.moveTo(bx, topY);
+            ctx.lineTo(bx, grpY2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(76,223,139,' + (0.3 + pulse * 0.5) + ')';
+            var dotY = topY + (grpY2 - topY) * pulse;
+            ctx.beginPath();
+            ctx.arc(bx, dotY, 4, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          labelPlate(
+            ctx,
+            'HCP / VCP / gun return / EUT ground all bond here',
+            w * 0.5,
+            grpY2 - 76,
+            'center',
+            9
+          );
+        } else if (currentDeepIdx === 6) {
+          // Insulating table height
+          var tblGrpY = h * 0.85;
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, tblGrpY);
+          ctx.lineTo(w * 0.9, tblGrpY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'GRP', w * 0.15, tblGrpY + 16, 'left', 10);
+
+          var topY = h * 0.25;
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.25, topY);
+          ctx.lineTo(w * 0.75, topY);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'HCP / tabletop', w * 0.5, topY - 10, 'center', 10);
+          // legs
+          [w * 0.3, w * 0.7].forEach(function (lx) {
+            ctx.strokeStyle = inkColor(0.35);
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(lx, topY);
+            ctx.lineTo(lx, tblGrpY);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+          });
+          // height dimension arrow
+          var dimX = w * 0.85;
+          ctx.strokeStyle = 'rgba(59,130,246,0.7)';
+          ctx.beginPath();
+          ctx.moveTo(dimX, topY);
+          ctx.lineTo(dimX, tblGrpY);
+          ctx.stroke();
+          labelPlate(ctx, '0.8 m', dimX + 4, (topY + tblGrpY) / 2, 'left', 10);
+        } else if (currentDeepIdx === 7) {
+          // Bleed resistor close-up: slow bleed vs fast HF bypass
+          var rX1 = w * 0.25,
+            rX2 = w * 0.55;
+          var rY = midY;
+          ctx.strokeStyle = inkColor(0.5);
+          ctx.lineWidth = 2.5;
+          var zigN = 6,
+            segW = (rX2 - rX1) / zigN;
+          ctx.beginPath();
+          ctx.moveTo(rX1, rY);
+          for (var k = 1; k <= zigN; k++) {
+            ctx.lineTo(rX1 + segW * k, rY + (k % 2 === 0 ? -10 : 10));
+          }
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, '470 kO', (rX1 + rX2) / 2, rY - 22, 'center', 11);
+          labelPlate(ctx, 'Coupling plane', rX1, rY - 30, 'center', 9);
+          labelPlate(ctx, 'GRP', rX2 + 30, rY - 30, 'center', 9);
+
+          // slow bleed dot creeping through the resistor
+          var slowT = (elapsed % 4) / 4;
+          ctx.fillStyle = '#4cdf8b';
+          ctx.beginPath();
+          ctx.arc(rX1 + (rX2 - rX1) * slowT, rY + 20, 4, 0, Math.PI * 2);
+          ctx.fill();
+          labelPlate(ctx, 'Slow DC bleed', (rX1 + rX2) / 2, rY + 36, 'center', 9);
+
+          // fast HF pulse bypassing via direct capacitive path (drawn above)
+          ctx.strokeStyle = 'rgba(239,68,68,0.5)';
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(rX1, rY - 40);
+          ctx.lineTo(rX2 + 30, rY - 40);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          var fastT = (elapsed % 1.2) / 1.2;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(rX1 + (rX2 + 30 - rX1) * fastT, rY - 40, 4, 0, Math.PI * 2);
+          ctx.fill();
+          labelPlate(
+            ctx,
+            'Fast ESD transient (capacitive path, bypasses resistor)',
+            (rX1 + rX2 + 30) / 2,
+            rY - 54,
+            'center',
+            9
+          );
+        } else {
+          // Ground/bonding strap
+          var genX = w * 0.2,
+            genY = midY - 20;
+          ctx.fillStyle = '#1c2530';
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.fillRect(genX - 20, genY - 16, 40, 32);
+          ctx.strokeRect(genX - 20, genY - 16, 40, 32);
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'Generator', genX, genY - 26, 'center', 10);
+
+          var grpY3 = h * 0.85;
+          ctx.strokeStyle = inkColor(0.4);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, grpY3);
+          ctx.lineTo(w * 0.9, grpY3);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(ctx, 'GRP', w * 0.15, grpY3 + 16, 'left', 10);
+
+          // wide flat braided strap
+          var strapW = 10;
+          ctx.fillStyle = 'rgba(59,130,246,' + (0.35 + pulse * 0.4) + ')';
+          ctx.fillRect(genX - strapW / 2, genY + 16, strapW, grpY3 - genY - 16);
+          ctx.strokeStyle = '#3b82f6';
+          ctx.strokeRect(genX - strapW / 2, genY + 16, strapW, grpY3 - genY - 16);
+          labelPlate(ctx, 'Short, wide braided strap', genX + 70, (genY + grpY3) / 2, 'center', 9);
+
+          // narrow wire alternative shown faded for comparison
+          var wireX = genX + 90;
+          ctx.strokeStyle = inkColor(0.3);
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(wireX, genY + 16);
+          ctx.lineTo(wireX, grpY3);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          labelPlate(
+            ctx,
+            'Thin wire (higher inductance)',
+            wireX + 10,
+            (genY + grpY3) / 2,
+            'left',
+            9
+          );
+        }
+
+        requestAnimationFrame(drawDeepDiagram);
+      }
+      requestAnimationFrame(drawDeepDiagram);
+      window.addEventListener('resize', function () {
+        deepAnimStart = null;
+      });
+    </script>
+
+    <!-- Section 4: Current waveform Plotly -->
+    <script>
+      var LEVELS = [
+        { kv: 2, Ip: 7.5, I30: 4, I60: 2 },
+        { kv: 4, Ip: 15, I30: 8, I60: 4 },
+        { kv: 6, Ip: 22.5, I30: 12, I60: 6 },
+        { kv: 8, Ip: 30, I30: 16, I60: 8 },
+      ];
+      var currentLevel = 0;
+      function waveformAt(t, params) {
+        var fast = params.Ip * (t / 1) * Math.exp(1 - t / 1);
+        if (t > 3) fast = params.Ip * Math.exp(-(t - 1) / 3.2);
+        var slowTarget = params.I30;
+        var slow =
+          slowTarget *
+          Math.pow(Math.min(t, 60) / 30, 1.1) *
+          Math.exp(0.3 * (1 - Math.min(t, 60) / 30));
+        var val = Math.max(0, fast) + (t > 1 ? Math.max(0, slow * 0.55) : 0);
+        return val;
+      }
+      function drawPlotlyWaveformDetail() {
+        var el = document.getElementById('plotlyWaveformDetail');
+        if (!el || !window.Plotly) return;
+        var params = LEVELS[currentLevel];
+        var ns = [];
+        for (var t = 0; t <= 60; t += 0.15) ns.push(t);
+        var vals = ns.map(function (t) {
+          return waveformAt(t, params);
+        });
+        var layout = Object.assign({}, getPlotlyLayoutBase(), {
+          xaxis: {
+            title: 'Time (ns)',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          yaxis: {
+            title: 'Current (A)',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          annotations: [
+            {
+              x: 1,
+              y: params.Ip,
+              text: 'Ip = ' + params.Ip + ' A',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 40,
+              ay: -30,
+              font: { color: isLightTheme() ? '#334155' : '#e2e8f0', size: 10 },
+            },
+            {
+              x: 30,
+              y: params.I30,
+              text: 'I30 = ' + params.I30 + ' A',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 20,
+              ay: -30,
+              font: { color: isLightTheme() ? '#334155' : '#e2e8f0', size: 10 },
+            },
+            {
+              x: 60,
+              y: params.I60,
+              text: 'I60 = ' + params.I60 + ' A',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 0,
+              ay: -30,
+              font: { color: isLightTheme() ? '#334155' : '#e2e8f0', size: 10 },
+            },
+          ],
+        });
+        Plotly.newPlot(
+          el,
+          [
+            {
+              x: ns,
+              y: vals,
+              name: params.kv + ' kV contact discharge',
+              mode: 'lines',
+              line: { color: '#ef4444', width: 2.5 },
+              fill: 'tozeroy',
+              fillcolor: 'rgba(239,68,68,0.08)',
+            },
+          ],
+          layout,
+          { displayModeBar: false, responsive: true }
+        );
+      }
+      document.querySelectorAll('#levelTabs .toggle-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#levelTabs .toggle-tab').forEach(function (t) {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          currentLevel = parseInt(tab.getAttribute('data-level'));
+          drawPlotlyWaveformDetail();
+        });
+      });
+      drawPlotlyWaveformDetail();
+      window.addEventListener('resize', drawPlotlyWaveformDetail);
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What does the ESD generator discharge tip do?',
+          opts: [
+            'Makes the actual electrical connection to the EUT or coupling plane',
+            'Charges the internal capacitor',
+            'Measures ambient humidity',
+            'Displays the test level on a screen',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What triggers the fast contact-discharge current pulse inside the generator?',
+          opts: [
+            'The HV power supply directly',
+            'A relay-based discharge switch connecting the charged internal capacitor to the tip',
+            'The return cable',
+            'The trigger button alone, with no internal switch',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What does the return cable / ground strap on the generator do?',
+          opts: [
+            'Charges the capacitor',
+            'Completes the current return path back to the ground reference plane',
+            'Has no functional role',
+            'Measures the test voltage',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What does the Horizontal Coupling Plane (HCP) represent?',
+          opts: [
+            'A grounded metal tabletop plane used for indirect discharges near the EUT, bled to ground through 470 kO resistors',
+            'A vertical plane beside the EUT',
+            'The EUT chassis itself',
+            'A shielded enclosure around the whole test setup',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What does the Vertical Coupling Plane (VCP) represent?',
+          opts: [
+            'A discharge from a nearby object or person standing beside the product, via a vertical plane 0.1 m from the EUT',
+            'The same thing as the HCP',
+            'A cable-level conducted immunity test',
+            'A radiated emissions measurement antenna',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What value bleed resistor connects each coupling plane to the ground reference plane?',
+          opts: ['470 O', '470 kO', '4.7 O', '47 MO'],
+          correct: 1,
+        },
+        {
+          q: 'What three parameters define the IEC 61000-4-2 standardized contact-discharge current waveform?',
+          opts: [
+            'Voltage, frequency, and duty cycle',
+            'Ip (first peak), I30 (current at 30 ns), and I60 (current at 60 ns)',
+            'Only the peak voltage',
+            'Rise time and fall time only, with no current values',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the specified rise time to reach the first current peak (Ip)?',
+          opts: ['0.7-1 ns', '10-20 ns', '1-2 microseconds', '100 ns'],
+          correct: 0,
+        },
+        {
+          q: 'What is the specified Ip (first peak current) for an 8 kV contact discharge?',
+          opts: ['7.5 A', '15 A', '22.5 A', '30 A'],
+          correct: 3,
+        },
+        {
+          q: 'What is the specified I30 value for a 4 kV contact discharge?',
+          opts: ['4 A', '8 A', '12 A', '16 A'],
+          correct: 1,
+        },
+        {
+          q: 'How do Ip, I30, and I60 scale with test voltage level?',
+          opts: [
+            'They scale roughly proportionally with the test voltage',
+            'They stay constant regardless of test voltage',
+            'They decrease as test voltage increases',
+            'Only Ip changes; I30 and I60 never change',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why does a lab typically apply a minimum of 10 discharges per polarity at each test point?',
+          opts: [
+            'It is a legal requirement unrelated to test validity',
+            'Repeated discharges account for statistical variation and confirm consistent, repeatable pass/fail behavior rather than a single lucky result',
+            'The generator requires 10 discharges to warm up',
+            'Only the first discharge at each point is ever meaningful',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why is a contact-discharge tip pointed while an air-discharge tip is rounded?',
+          opts: [
+            'The pointed tip makes direct galvanic contact before the relay fires, while the rounded tip is shaped to make air-gap breakdown as consistent as practically possible',
+            'Tip shape has no effect on discharge behavior',
+            'Both tips are always identical regardless of discharge mode',
+            'The rounded tip is only used for cosmetic reasons',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why is 470 kO specifically chosen for the coupling-plane bleed resistors?',
+          opts: [
+            'It is high enough to look like an open circuit to the fast ESD transient, yet low enough to continuously bleed off accumulated static charge between discharges',
+            'It was chosen arbitrarily with no relationship to the transient frequency content',
+            'It is meant to carry the full ESD current back to ground',
+            '470 kO is the exact impedance of the ESD gun itself',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why does the insulating table height (0.8 m) matter for test repeatability?',
+          opts: [
+            'It sets the stray capacitance between the HCP/EUT and the ground reference plane to a known, repeatable value',
+            'Table height has no effect on the test result',
+            "It only matters for the operator's comfort",
+            'A taller table always increases the discharge voltage automatically',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0,
+          score = 0,
+          answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

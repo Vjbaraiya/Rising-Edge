@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep dive into the Configurable Logic Block (CLB) — the fundamental logic cell of Xilinx FPGAs, its internal structure, Slice contents, MUX hierarchy, and UltraScale changes."
+    />
+    <title>Configurable Logic Blocks | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/09-clb.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item active" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Configurable Logic Blocks</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 9/25</span><span>36%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 36%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 9 OF 25</span>
+                <span class="badge">12 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Configurable Logic Blocks (CLB)
+              </h1>
+              <p class="subtitle">
+                Understand the CLB — the fundamental repeating unit of FPGA logic fabric. Learn its
+                internal structure, Slice contents, MUX hierarchy, and how RTL maps to physical CLB
+                resources.
+              </p>
+            </div>
+          </section>
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                What is a CLB?
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The <strong>Configurable Logic Block (CLB)</strong> is the fundamental repeating
+                unit of FPGA programmable logic. Thousands to hundreds-of-thousands of CLBs tile the
+                majority of the FPGA die area, forming a regular 2D array. Each CLB connects to the
+                surrounding routing network through a local switch matrix, allowing signals to
+                travel between CLBs and to dedicated resources (BRAM, DSP, IO).
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In <strong>Xilinx 7-series</strong>, each CLB contains <strong>2 Slices</strong>.
+                The two Slices in a CLB share a switch matrix and are in close physical proximity,
+                making intra-CLB routing fast and cheap. Adjacent CLBs are organized in columns and
+                rows, with BRAM and DSP columns interspersed at regular intervals.
+              </p>
+
+              <!-- CLB Internal Structure SVG -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                CLB Internal Structure
+              </h3>
+              <svg
+                viewBox="0 0 700 380"
+                xmlns="http://www.w3.org/2000/svg"
+                style="
+                  width: 100%;
+                  max-width: 700px;
+                  display: block;
+                  margin: 0 auto 20px;
+                  border-radius: 12px;
+                  border: 1px solid var(--border);
+                "
+              >
+                <rect width="700" height="380" rx="8" fill="#0f172a" />
+                <!-- CLB outer box -->
+                <rect
+                  x="30"
+                  y="20"
+                  width="640"
+                  height="340"
+                  rx="8"
+                  fill="none"
+                  stroke="#334155"
+                  stroke-width="2"
+                />
+                <text
+                  x="350"
+                  y="15"
+                  text-anchor="middle"
+                  fill="#94a3b8"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  CLB (Configurable Logic Block)
+                </text>
+                <!-- Switch Matrix -->
+                <rect
+                  x="290"
+                  y="150"
+                  width="120"
+                  height="80"
+                  rx="6"
+                  fill="#1e2a3a"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="350"
+                  y="186"
+                  text-anchor="middle"
+                  fill="#94a3b8"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  Switch
+                </text>
+                <text
+                  x="350"
+                  y="201"
+                  text-anchor="middle"
+                  fill="#94a3b8"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  Matrix
+                </text>
+                <!-- Slice A (left) -->
+                <rect
+                  x="50"
+                  y="40"
+                  width="210"
+                  height="300"
+                  rx="8"
+                  fill="#1a2035"
+                  stroke="#6366f1"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="155"
+                  y="65"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="12"
+                  font-weight="800"
+                  font-family="Inter,sans-serif"
+                >
+                  SLICE A
+                </text>
+                <!-- LUTs in Slice A -->
+                <rect
+                  x="65"
+                  y="80"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="105"
+                  y="101"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (A)
+                </text>
+                <rect
+                  x="65"
+                  y="122"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="105"
+                  y="143"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (B)
+                </text>
+                <rect
+                  x="65"
+                  y="164"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="105"
+                  y="185"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (C)
+                </text>
+                <rect
+                  x="65"
+                  y="206"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#6366f1"
+                  stroke-width="1"
+                />
+                <text
+                  x="105"
+                  y="227"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (D)
+                </text>
+                <!-- FFs in Slice A -->
+                <rect
+                  x="165"
+                  y="80"
+                  width="75"
+                  height="160"
+                  rx="5"
+                  fill="#1c2230"
+                  stroke="#a78bfa"
+                  stroke-width="1"
+                />
+                <text
+                  x="202"
+                  y="103"
+                  text-anchor="middle"
+                  fill="#a78bfa"
+                  font-size="9"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  FF×8
+                </text>
+                <text
+                  x="202"
+                  y="118"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="9"
+                  font-family="Inter,sans-serif"
+                >
+                  CE SR CLK
+                </text>
+                <text
+                  x="202"
+                  y="155"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <text
+                  x="202"
+                  y="170"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <text
+                  x="202"
+                  y="185"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <text
+                  x="202"
+                  y="200"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <text
+                  x="202"
+                  y="215"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <text
+                  x="202"
+                  y="230"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="8"
+                  font-family="Inter,sans-serif"
+                >
+                  D Q
+                </text>
+                <!-- CARRY4 in Slice A -->
+                <rect
+                  x="65"
+                  y="260"
+                  width="175"
+                  height="35"
+                  rx="5"
+                  fill="#1a2c1a"
+                  stroke="#34d399"
+                  stroke-width="1"
+                />
+                <text
+                  x="152"
+                  y="282"
+                  text-anchor="middle"
+                  fill="#34d399"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  CARRY4 (Cin → CO → Cout)
+                </text>
+                <!-- F7MUX in Slice A -->
+                <rect
+                  x="65"
+                  y="303"
+                  width="175"
+                  height="28"
+                  rx="5"
+                  fill="#2a1a1a"
+                  stroke="#fb923c"
+                  stroke-width="1"
+                />
+                <text
+                  x="152"
+                  y="322"
+                  text-anchor="middle"
+                  fill="#fb923c"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  F7MUX / F8MUX
+                </text>
+
+                <!-- Slice B (right) -->
+                <rect
+                  x="440"
+                  y="40"
+                  width="210"
+                  height="300"
+                  rx="8"
+                  fill="#1a2035"
+                  stroke="#22d3ee"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="545"
+                  y="65"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="12"
+                  font-weight="800"
+                  font-family="Inter,sans-serif"
+                >
+                  SLICE B
+                </text>
+                <!-- LUTs in Slice B -->
+                <rect
+                  x="455"
+                  y="80"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="495"
+                  y="101"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (E)
+                </text>
+                <rect
+                  x="455"
+                  y="122"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="495"
+                  y="143"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (F)
+                </text>
+                <rect
+                  x="455"
+                  y="164"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="495"
+                  y="185"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (G)
+                </text>
+                <rect
+                  x="455"
+                  y="206"
+                  width="80"
+                  height="34"
+                  rx="5"
+                  fill="#1e293b"
+                  stroke="#22d3ee"
+                  stroke-width="1"
+                />
+                <text
+                  x="495"
+                  y="227"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  LUT6 (H)
+                </text>
+                <!-- FFs in Slice B -->
+                <rect
+                  x="545"
+                  y="80"
+                  width="75"
+                  height="160"
+                  rx="5"
+                  fill="#1c2230"
+                  stroke="#06b6d4"
+                  stroke-width="1"
+                />
+                <text
+                  x="582"
+                  y="103"
+                  text-anchor="middle"
+                  fill="#06b6d4"
+                  font-size="9"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  FF×8
+                </text>
+                <text
+                  x="582"
+                  y="118"
+                  text-anchor="middle"
+                  fill="#64748b"
+                  font-size="9"
+                  font-family="Inter,sans-serif"
+                >
+                  CE SR CLK
+                </text>
+                <!-- CARRY4 in Slice B -->
+                <rect
+                  x="455"
+                  y="260"
+                  width="175"
+                  height="35"
+                  rx="5"
+                  fill="#1a2c1a"
+                  stroke="#34d399"
+                  stroke-width="1"
+                />
+                <text
+                  x="542"
+                  y="282"
+                  text-anchor="middle"
+                  fill="#34d399"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  CARRY4 (Cin → CO → Cout)
+                </text>
+                <!-- F7MUX Slice B -->
+                <rect
+                  x="455"
+                  y="303"
+                  width="175"
+                  height="28"
+                  rx="5"
+                  fill="#2a1a1a"
+                  stroke="#fb923c"
+                  stroke-width="1"
+                />
+                <text
+                  x="542"
+                  y="322"
+                  text-anchor="middle"
+                  fill="#fb923c"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  F7MUX / F8MUX
+                </text>
+
+                <!-- Connections to switch matrix -->
+                <line
+                  x1="260"
+                  y1="190"
+                  x2="290"
+                  y2="190"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-end="url(#arr)"
+                />
+                <line
+                  x1="410"
+                  y1="190"
+                  x2="440"
+                  y2="190"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-start="url(#arr)"
+                />
+                <defs>
+                  <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#475569" />
+                  </marker>
+                </defs>
+                <!-- Routing labels -->
+                <text
+                  x="350"
+                  y="145"
+                  text-anchor="middle"
+                  fill="#475569"
+                  font-size="9"
+                  font-family="Inter,sans-serif"
+                >
+                  ↑ To routing
+                </text>
+                <text
+                  x="350"
+                  y="260"
+                  text-anchor="middle"
+                  fill="#475569"
+                  font-size="9"
+                  font-family="Inter,sans-serif"
+                >
+                  ↓ From routing
+                </text>
+              </svg>
+              <p
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.8rem;
+                  text-align: center;
+                  margin-top: -8px;
+                  margin-bottom: 24px;
+                "
+              >
+                Xilinx 7-series CLB structure: 2 Slices, each with 4 LUT6s, 8 FFs, CARRY4, and MUX
+                hierarchy
+              </p>
+
+              <!-- Slice Details -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Slice Contents (7-Series)
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Each Slice in a 7-series FPGA contains the following resources:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 20px;
+                  margin-bottom: 20px;
+                "
+              >
+                <li>
+                  <strong>4× LUT6</strong> — 6-input look-up tables (labeled A, B, C, D). Each
+                  implements any Boolean function of up to 6 variables. Can be split into two LUT5s
+                  for area efficiency.
+                </li>
+                <li>
+                  <strong>8× Storage Elements</strong> — configurable as D flip-flops or transparent
+                  latches. Two per LUT (one after the LUT output, one can bypass the LUT). All share
+                  a common clock, CE, and SR signal per Slice.
+                </li>
+                <li>
+                  <strong>1× CARRY4</strong> — 4-bit fast carry chain for arithmetic. Connects
+                  vertically to CARRY4s in adjacent Slices above/below.
+                </li>
+                <li>
+                  <strong>F7MUX</strong> — combines O6 outputs of two adjacent LUTs (A+B or C+D) to
+                  create a 7-input function or a 2:1 MUX with a 6-bit select.
+                </li>
+                <li>
+                  <strong>F8MUX</strong> — combines the outputs of two F7MUXes (one from each LUT
+                  pair) to create an 8-input function or a 4:1 MUX.
+                </li>
+                <li>
+                  <strong>Output MUXes</strong> — each LUT output can be taken directly
+                  (combinatorial) or registered (through the FF). The routing receives whichever the
+                  tool selects.
+                </li>
+              </ul>
+
+              <!-- Signal Flow Mermaid -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Signal Flow Through a Slice
+              </h3>
+              <div class="mermaid">
+                graph LR IN[6 Inputs\nA1–A6 from routing] --> LUT6[LUT6\n64-bit memory\nany Boolean
+                fn] LUT6 --> O6[O6 output] LUT6 --> O5[O5 output\nLUT5 split mode] O6 -->
+                MUXF7[F7MUX\n7-input or 2:1 MUX] O6 --> OUTMUX[Output MUX\ndirect or registered]
+                OUTMUX --> FF[D Flip-Flop\nCLK / CE / SR] OUTMUX --> DIRECT[Direct combinatorial\nto
+                routing] FF --> Q[Q → routing network] CARRY4[CARRY4\nCin S O CO] --> FF MUXF7 -->
+                F8MUX[F8MUX\n8-input function] F8MUX --> OUTMUX2[Output MUX\nregistered or direct]
+              </div>
+
+              <!-- F7MUX Explanation -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                The F7MUX and F8MUX — Wide Logic
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                A LUT6 can implement any 6-input Boolean function. But what if your HDL code needs a
+                7-input function, or a large CASE statement with many conditions? The F7MUX and
+                F8MUX solve this efficiently:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 20px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong>F7MUX:</strong> Combines O6 outputs of two LUT6s. Input 7 (I6) selects
+                  which LUT output passes through. This implements any 7-input Boolean function, or
+                  a 2:1 MUX where select is one bit and data comes from the two LUTs.
+                </li>
+                <li>
+                  <strong>F8MUX:</strong> Combines two F7MUX outputs. Implements 8-input functions
+                  or 4:1 MUXes. Used heavily for wide case statements (address decode, FSM
+                  next-state logic).
+                </li>
+              </ul>
+
+              <!-- CLB Generation Comparison Table -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                CLB Architecture — Generation Comparison
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>7-Series CLB</th>
+                    <th>UltraScale CLB</th>
+                    <th>UltraScale+ CLB</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Slices per CLB</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                  </tr>
+                  <tr>
+                    <td>LUTs per Slice</td>
+                    <td>4× LUT6</td>
+                    <td>8× LUT6</td>
+                    <td>8× LUT6</td>
+                  </tr>
+                  <tr>
+                    <td>FFs per Slice</td>
+                    <td>8</td>
+                    <td>16</td>
+                    <td>16</td>
+                  </tr>
+                  <tr>
+                    <td>Carry chain per Slice</td>
+                    <td>1× CARRY4 (4-bit)</td>
+                    <td>1× CARRY8 (8-bit)</td>
+                    <td>1× CARRY8 (8-bit)</td>
+                  </tr>
+                  <tr>
+                    <td>Wide MUX</td>
+                    <td>F7MUX, F8MUX</td>
+                    <td>F7MUX, F8MUX, F9MUX</td>
+                    <td>F7MUX, F8MUX, F9MUX</td>
+                  </tr>
+                  <tr>
+                    <td>Distributed RAM</td>
+                    <td>Slice M only</td>
+                    <td>All Slices</td>
+                    <td>All Slices</td>
+                  </tr>
+                  <tr>
+                    <td>SRL</td>
+                    <td>Slice M only</td>
+                    <td>All Slices</td>
+                    <td>All Slices</td>
+                  </tr>
+                  <tr>
+                    <td>FF-to-LUT ratio</td>
+                    <td>2:1</td>
+                    <td>2:1</td>
+                    <td>2:1</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- How Logic Maps to CLB -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                How RTL Logic Maps to CLB Resources
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Vivado's synthesis engine automatically maps RTL to CLB primitives. Here are common
+                examples:
+              </p>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>RTL Construct</th>
+                    <th>LUTs Used</th>
+                    <th>FFs Used</th>
+                    <th>CARRY4</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>4-input AND gate</td>
+                    <td>1× LUT6</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>All 4 inputs fit in one LUT</td>
+                  </tr>
+                  <tr>
+                    <td>8-input AND gate</td>
+                    <td>2× LUT6 + F7MUX</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>Uses F7MUX to combine two LUTs</td>
+                  </tr>
+                  <tr>
+                    <td>4-bit registered counter</td>
+                    <td>4× LUT6</td>
+                    <td>4</td>
+                    <td>1</td>
+                    <td>CARRY4 propagates carry</td>
+                  </tr>
+                  <tr>
+                    <td>8-bit adder</td>
+                    <td>2× CARRY4</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>Each CARRY4 handles 4 bits</td>
+                  </tr>
+                  <tr>
+                    <td>16:1 MUX (4-bit data)</td>
+                    <td>~8× LUT6</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>F7/F8MUX used for wide select</td>
+                  </tr>
+                  <tr>
+                    <td>D flip-flop (no logic)</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>FF used standalone, LUT bypassed</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Callouts -->
+              <div class="callout callout-info">
+                <strong>Tool Reports Use "Slice LUTs", Not "CLBs"</strong>
+                When Vivado reports resource utilization, it shows "Slice LUTs" (individual LUT6
+                primitives), "Slice Registers" (individual FFs), and "Slice" counts. It rarely
+                reports CLB count directly. When you see "45,000 Slice LUTs used," that means 45,000
+                individual LUT6s — distributed across at most 45,000/4 = 11,250 Slices.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip: Balance LUT and FF Utilization</strong>
+                If your design shows 85% LUT utilization but only 40% FF utilization, the design is
+                logic-heavy and timing will be difficult. Add pipeline registers between logic
+                stages to reduce the critical path and balance the ratio. Pipelining adds latency
+                but dramatically improves maximum clock frequency and reduces routing congestion.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question: What is the F7MUX?</strong>
+                Q: What is the F7MUX used for in a Xilinx 7-series Slice?<br />
+                A: F7MUX combines the O6 outputs of two adjacent LUT6s to implement a 7-input
+                Boolean function (where input 7 acts as the MUX select). This is critical for wide
+                logic — large CASE statements in HDL, address decoders with 7+ address bits, and any
+                function requiring more than 6 inputs. F8MUX extends this to 8 inputs by combining
+                two F7MUX outputs.
+              </div>
+
+              <div class="callout callout-danger">
+                <strong>Common Mistake: Slice Utilization vs LUT Utilization</strong>
+                Vivado may show "60% Slice utilization" even when LUT utilization is 40%. A Slice is
+                counted as "used" even if only 1 of its 4 LUTs is occupied. The tool tries to pack
+                multiple logic functions into each Slice, but routing constraints can prevent tight
+                packing. Always check BOTH "Slice LUTs" and "Slice" percentages to understand true
+                resource pressure.
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <p class="quiz-q">1. How many Slices are in one Xilinx 7-series CLB?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>A</span> 1
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>B</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>C</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>D</span> 8
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb1">
+                  Correct! Each 7-series CLB = 2 Slices. In UltraScale/UltraScale+, each CLB = 1
+                  Slice (with 8 LUTs per Slice instead of 4).
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <p class="quiz-q">2. How many LUT6s are in one 7-series Slice?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>A</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>B</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>C</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>D</span> 6
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb2">
+                  Correct! Each 7-series Slice has 4 LUT6s (labeled A, B, C, D). UltraScale+ has 8
+                  LUT6s per Slice.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <p class="quiz-q">3. How many flip-flops does each 7-series Slice provide?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>A</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>B</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>C</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>D</span> 2
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb3">
+                  Correct! 8 storage elements per 7-series Slice — 2 per LUT, all configurable as D
+                  flip-flops or transparent latches.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <p class="quiz-q">4. What is the primary purpose of the F7MUX in a Xilinx CLB?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>A</span> To merge carry signals from adjacent CARRY4 chains
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>B</span> To implement 7-input Boolean functions by combining two LUT6
+                    outputs
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>C</span> To select between synchronous and asynchronous reset
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>D</span> To route global clock signals into the Slice
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb4">
+                  Correct! F7MUX combines the O6 outputs of two LUT6s, creating a 7-input function
+                  (the 7th input is the MUX select). It is also used for wide data multiplexers in
+                  large CASE statements.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <p class="quiz-q">5. How many CARRY4 primitives are in one 7-series Slice?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>A</span> 1
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>B</span> 2
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>C</span> 4
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>D</span> 0 — carry logic is in the LUT
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb5">
+                  Correct! One CARRY4 per Slice in 7-series. It handles 4-bit carry propagation
+                  using dedicated, fast wiring. Multiple CARRY4s cascade vertically between Slices
+                  for wider arithmetic.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-info">
+                <strong>Manual CLB Resource Mapping</strong>
+                Estimate the CLB resources for each of the following designs, then verify by
+                implementing in Vivado and checking the synthesis report:
+                <ol style="margin: 8px 0 0; padding-left: 18px; line-height: 2">
+                  <li>A 2:1 MUX with 4-bit data buses (sel, a[3:0], b[3:0] → y[3:0])</li>
+                  <li>A 4-input XOR gate (a, b, c, d → y)</li>
+                  <li>A 3-bit synchronous up-counter with enable and synchronous reset</li>
+                </ol>
+                For each: predict LUT count, FF count, and CARRY4 usage. Compare your predictions to
+                the Vivado synthesis report. If they differ, read the synthesis log to understand
+                how the tool optimized the implementation.
+              </div>
+              <div class="lesson-nav">
+                <a href="08-internal-architecture.html">← FPGA Internal Architecture Overview</a>
+                <a href="10-slices.html">Slices →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-09';
+      const TOTAL = 25;
+      async function loadProgress() {
+        try {
+          var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          var token = session.accessToken || session.token || '';
+          if (!token) return;
+          var r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          var data = await r.json();
+          var done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              var link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          var pct = Math.round((done / TOTAL) * 100);
+          var sbp = document.getElementById('sb-pct');
+          var sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        var token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          var r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        var btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        var fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

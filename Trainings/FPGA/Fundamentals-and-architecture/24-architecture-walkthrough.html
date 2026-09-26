@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Complete FPGA architecture walkthrough — trace a signal from IO pin through IBUFDS, BUFG, routing fabric, BRAM, DSP48E1, CLB, and output IO in a unified FIR filter design example."
+    />
+    <title>Complete FPGA Architecture Walkthrough | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/24-architecture-walkthrough.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .layer-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 12px 0;
+        border-left: 3px solid #22d3ee;
+      }
+      .layer-card h4 {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .layer-card p {
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+        margin: 0;
+      }
+      .layer-num {
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 900;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">--</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a
+            href="24-architecture-walkthrough.html"
+            class="module-item active"
+            data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Architecture Walkthrough</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 24/25</span><span>96%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 96%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 24 OF 25</span>
+                <span class="badge">20 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Complete FPGA Architecture Walkthrough
+              </h1>
+              <p class="subtitle">
+                Unify all 23 lessons into one cohesive design example — trace a real signal from IO
+                pin through IBUFDS, clock network, routing fabric, BRAM, DSP48E1 FIR filter, CLB
+                control logic, and output path with CDC crossing.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                The Unified Architecture — Putting It All Together
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Over the previous 23 lessons, we studied each FPGA building block in isolation:
+                LUTs, flip-flops, carry chains, routing, clock networks, BRAM, DSP slices, IO banks,
+                transceivers, and configuration. Now we bring them all together in one complete
+                design — a <strong>16-tap FIR low-pass filter</strong> receiving data from an LVDS
+                ADC interface — and trace every signal from the physical IO pin through every
+                architectural layer to the filtered output.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Device: <strong>XC7A200T (Artix-7)</strong> — 215,360 LUTs, 269,200 flip-flops, 365
+                BRAM36, 740 DSP48E1, GTX transceivers in HP banks.
+              </p>
+
+              <div class="callout callout-info">
+                <strong>Why This Design?</strong>
+                A FIR filter touches almost every FPGA resource: IBUFDS and ISERDES (IO), BUFG and
+                MMCM (clocks), RAMB36E1 (sample history), DSP48E1 (multiply-accumulate), CARRY4
+                (comparator), CLB Slice M (state machine), clock domain crossing synchronizer, and
+                OBUF (output). It is the ideal vehicle for a unified architectural tour.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Full System Architecture
+              </h3>
+              <div class="mermaid">
+                graph TD PCB[PCB and ADC chip] -->|LVDS differential pair 250 Mbps| IOB[IBUFDS and
+                IDELAY2 and ISERDES\nIO Bank 35 HP 1.8V] PCB -->|LVDS differential clock 250 MHz|
+                CLKIO[IBUFDS for clock] CLKIO --> BUFG[BUFG H-tree network] BUFG --> MMCM[MMCM 100
+                MHz in 250 MHz out] MMCM -->|250 MHz| CLK250[250 MHz domain clock] MMCM -->|100 MHz|
+                CLK100[100 MHz domain clock] IOB -->|8-bit parallel data| ROUTE1[Routing Fabric\nSL6
+                segments 1.5 ns] ROUTE1 --> BRAM[RAMB36E1 SDP mode\n512 x 16-bit sample FIFO] BRAM
+                -->|sample history| DSP[8x DSP48E1 cascade\nSymmetric FIR PCOUT chain] DSP
+                -->|48-bit accumulator| CLB[CLB Slice M\nThreshold comparator CARRY4\nState machine
+                FFs] CLB -->|status flag| CDC[2-FF synchronizer\nCDC 250 MHz to 100 MHz] CDC -->|100
+                MHz domain| OUT[OBUF LVCMOS33\nOutput IO Bank 34 3.3V] CLK250 -->|clock| BRAM CLK250
+                -->|clock| DSP CLK250 -->|clock| CLB CLK100 -->|clock| CDC CLK100 -->|clock| OUT
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 16px;
+                "
+              >
+                Layer-by-Layer Signal Trace
+              </h3>
+
+              <div class="layer-card">
+                <h4><span class="layer-num">LAYER 1</span> Package and Die</h4>
+                <p>
+                  The ADC output signal enters the FPGA package via a BGA solder ball, travels
+                  through the package interposer to the silicon IO pad. The XC7A200T uses a BGA
+                  package with IO pads arranged around the die perimeter in banks of 50 pins each.
+                  Inside the die, CLB columns run vertically through the center; BRAM and DSP
+                  columns flank them; clock spines run horizontally; IO banks frame the perimeter.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4>
+                  <span class="layer-num">LAYER 2</span> IO Bank Entry — IBUFDS, IDELAY2, ISERDES
+                </h4>
+                <p>
+                  The ADC transmits 12-bit data serialized 8:1 at 2 Gbps over an LVDS differential
+                  pair at 1.8V into an HP bank. The <strong>IBUFDS</strong> converts the
+                  differential pair to a single-ended signal. An
+                  <strong>IDELAY2</strong> (programmable 0–511 steps at 78 ps each) compensates for
+                  PCB trace length skew. The <strong>ISERDES8</strong> deserializes 8:1 — converting
+                  2 Gbps serial to 8-bit parallel at 250 MHz. An IOB flip-flop captures the parallel
+                  data on the 250 MHz clock edge before it enters the routing fabric, eliminating
+                  the PCB-to-fabric setup time from the critical path.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4><span class="layer-num">LAYER 3</span> Clock Network — IBUFDS, BUFG, MMCM</h4>
+                <p>
+                  The ADC also sends a 250 MHz differential LVDS clock. This enters via a second
+                  <strong>IBUFDS</strong>, then immediately into a <strong>BUFG</strong> — the
+                  global clock buffer that drives the H-tree network, delivering the 250 MHz clock
+                  to every flip-flop in the design with less than 100 ps skew. An
+                  <strong>MMCM</strong> synthesizes a second 100 MHz output for the slower control
+                  domain. The XDC constraints:
+                  <code>create_clock -period 4.0 [get_ports adc_clk_p]</code> and
+                  <code>create_generated_clock</code> for the MMCM output.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4>
+                  <span class="layer-num">LAYER 4</span> Routing Fabric — Connection Box and Switch
+                  Matrix
+                </h4>
+                <p>
+                  The 8-bit parallel data from ISERDES exits the IOB via a
+                  <strong>Connection Box</strong> into the routing fabric. The Vivado router selects
+                  <strong>SL6 hex segments</strong> (6 CLB reach, ~0.5 ns each) to reach the BRAM
+                  column approximately 6 CLBs away. The total routing delay from IOB to BRAM write
+                  port is approximately 1.5 ns — three SL6 hops. The BRAM column is visible in
+                  Vivado's Device view as a dark vertical stripe, placed by the P&amp;R tool to
+                  minimize routing distance from the ISERDES.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4>
+                  <span class="layer-num">LAYER 5</span> Block RAM — RAMB36E1 Sample History FIFO
+                </h4>
+                <p>
+                  The FIR filter needs the 16 most recent input samples to compute each output. A
+                  <strong>RAMB36E1</strong> in SDP (Simple Dual Port) mode, configured as
+                  512x16-bit, stores them as a circular buffer. The write port captures the latest
+                  sample on each 250 MHz clock edge; the read port simultaneously outputs all 16
+                  history samples needed by the DSP cascade. The circular buffer write pointer
+                  increments each cycle; read addresses are offset by 0 through 15 from the write
+                  pointer. Using BRAM here (rather than FFs) saves 16 x 16 = 256 flip-flops, leaving
+                  them available for pipeline registers.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4><span class="layer-num">LAYER 6</span> DSP48E1 — Symmetric FIR Filter Core</h4>
+                <p>
+                  A 16-tap symmetric FIR filter requires multiplying each sample by a coefficient.
+                  Because the filter is symmetric (h[0]=h[15], h[1]=h[14], etc.), we can use the
+                  DSP48E1 <strong>pre-adder</strong> to compute (sample[n-k] + sample[n-(15-k)])
+                  before the multiplier, halving the DSP count from 16 to 8. Eight DSP48E1
+                  primitives cascade via <strong>PCOUT to PCIN</strong> (dedicated zero-delay
+                  cascade wires) accumulating the partial products. The final 48-bit accumulator P
+                  output is right-shifted 15 bits (Q15 fixed-point format) to produce the 16-bit
+                  filtered output. Each DSP runs all 3 pipeline stages at 741 MHz max — comfortably
+                  meeting the 250 MHz target.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4>
+                  <span class="layer-num">LAYER 7</span> CLB Logic — Comparator and State Machine
+                </h4>
+                <p>
+                  A threshold comparator checks if the filter output magnitude exceeds a
+                  programmable limit — implemented as a 16-bit signed comparator using a
+                  <strong>CARRY4 cascade</strong> (4 CARRY4 primitives in a column). A small state
+                  machine (idle / active / overflow / clear) tracks filter status using
+                  <strong>FDRE flip-flops in Slice M</strong>. The LUT6 cells in the same Slices
+                  implement the next-state logic and overflow flag decode. Vivado places these CLBs
+                  adjacent to the DSP column to minimize routing delay on the critical
+                  accumulator-to-comparator path.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4>
+                  <span class="layer-num">LAYER 8</span> Clock Domain Crossing — 2-FF Synchronizer
+                </h4>
+                <p>
+                  The overflow flag, generated in the 250 MHz domain, must be consumed by a 100 MHz
+                  output controller. Crossing clock domains without synchronization causes
+                  metastability — the FPGA randomly produces a 0 or 1 with no guaranteed settling
+                  time. The fix: a <strong>2-FF synchronizer</strong> — two flip-flops in series
+                  clocked by 100 MHz, placed in the same Slice column to minimize routing between
+                  them. The XDC constraint
+                  <code>set_clock_groups -asynchronous -group {clk_250} -group {clk_100}</code>
+                  tells Vivado not to time this path, since the synchronizer inherently violates
+                  single-cycle timing.
+                </p>
+              </div>
+
+              <div class="layer-card">
+                <h4><span class="layer-num">LAYER 9</span> Output Path — OBUF and IO Bank</h4>
+                <p>
+                  The 16-bit filtered result and overflow flag exit through an HR bank (Bank 34,
+                  VCCO=3.3V) using <strong>LVCMOS33</strong> IO standard with DRIVE=8 and SLEW=SLOW
+                  for EMI reduction. The <strong>OBUF</strong> buffers the fabric signal to the IO
+                  pad voltage. IOB output flip-flops are used — Vivado automatically places the last
+                  register before OBUF inside the IOB cell, eliminating routing delay on the output
+                  setup path. The XDC:
+                  <code>set_property IOSTANDARD LVCMOS33 [get_ports {data_out[*]}]</code> and
+                  <code>set_output_delay -clock clk_100 -max 2.0 [get_ports {data_out[*]}]</code>.
+                </p>
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Resource Utilization Summary
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Resource</th>
+                    <th>Count</th>
+                    <th>Architectural Role</th>
+                    <th>Lesson</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>IBUFDS</td>
+                    <td>2</td>
+                    <td>LVDS data + clock entry</td>
+                    <td>19</td>
+                  </tr>
+                  <tr>
+                    <td>IDELAY2</td>
+                    <td>1</td>
+                    <td>PCB trace delay calibration</td>
+                    <td>19</td>
+                  </tr>
+                  <tr>
+                    <td>ISERDES8</td>
+                    <td>1</td>
+                    <td>8:1 deserializer</td>
+                    <td>19</td>
+                  </tr>
+                  <tr>
+                    <td>BUFG</td>
+                    <td>2</td>
+                    <td>250 MHz + 100 MHz H-tree</td>
+                    <td>15</td>
+                  </tr>
+                  <tr>
+                    <td>MMCM</td>
+                    <td>1</td>
+                    <td>100 MHz synthesis from 250 MHz</td>
+                    <td>15</td>
+                  </tr>
+                  <tr>
+                    <td>RAMB36E1</td>
+                    <td>1</td>
+                    <td>16-sample circular FIFO</td>
+                    <td>16</td>
+                  </tr>
+                  <tr>
+                    <td>DSP48E1</td>
+                    <td>8</td>
+                    <td>FIR filter MACC cascade</td>
+                    <td>18</td>
+                  </tr>
+                  <tr>
+                    <td>CARRY4</td>
+                    <td>4</td>
+                    <td>16-bit magnitude comparator</td>
+                    <td>13</td>
+                  </tr>
+                  <tr>
+                    <td>LUT6</td>
+                    <td>~52</td>
+                    <td>State machine + decode logic</td>
+                    <td>11</td>
+                  </tr>
+                  <tr>
+                    <td>FDRE</td>
+                    <td>~96</td>
+                    <td>Pipeline registers + CDC sync</td>
+                    <td>12</td>
+                  </tr>
+                  <tr>
+                    <td>OBUF</td>
+                    <td>17</td>
+                    <td>16-bit data + overflow flag</td>
+                    <td>19</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Critical Path Timing Breakdown
+              </h3>
+              <div id="timing-chart" style="height: 300px; margin: 16px 0"></div>
+
+              <table class="data-table" style="margin-top: 16px">
+                <thead>
+                  <tr>
+                    <th>Path Segment</th>
+                    <th>Delay</th>
+                    <th>Resource</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>FDRE clock-to-Q (DSP input FF)</td>
+                    <td>0.45 ns</td>
+                    <td>FDRE in CLB</td>
+                  </tr>
+                  <tr>
+                    <td>Routing: CLB to DSP48E1 input</td>
+                    <td>0.55 ns</td>
+                    <td>SL2 segment x2</td>
+                  </tr>
+                  <tr>
+                    <td>DSP48E1 pre-adder + multiplier + accumulator</td>
+                    <td>2.10 ns</td>
+                    <td>DSP48E1 (no pipeline)</td>
+                  </tr>
+                  <tr>
+                    <td>PCOUT to PCIN cascade (7 hops)</td>
+                    <td>0.00 ns</td>
+                    <td>Dedicated cascade wire</td>
+                  </tr>
+                  <tr>
+                    <td>Routing: DSP to CARRY4</td>
+                    <td>0.48 ns</td>
+                    <td>SL1 segment</td>
+                  </tr>
+                  <tr>
+                    <td>CARRY4 comparator (4 stages)</td>
+                    <td>0.42 ns</td>
+                    <td>CARRY4 column</td>
+                  </tr>
+                  <tr>
+                    <td>Setup time FDRE</td>
+                    <td>0.12 ns</td>
+                    <td>FDRE</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Total critical path</strong></td>
+                    <td><strong>4.12 ns</strong></td>
+                    <td><strong>WNS = +0.38 ns at 250 MHz (4 ns period)</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-tip">
+                <strong>Timing Closure Strategy for This Design</strong>
+                The critical path is the non-pipelined DSP accumulation path. If WNS was negative,
+                the fix would be to add a pipeline register after the DSP accumulator (between the
+                48-bit P output and the CARRY4 comparator) — adding 1 clock cycle of latency but
+                breaking the 2.1 ns DSP internal delay. With full 3-stage DSP pipelining, this
+                design could run at over 600 MHz.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: In the FIR filter design described, why does a 16-tap symmetric filter only need
+                8 DSP48E1 primitives?<br /><br />
+                A: Because the DSP48E1 pre-adder computes D + A before the multiplier. For a
+                symmetric filter where h[k] = h[N-1-k], we can compute (sample[n-k] +
+                sample[n-(N-1-k)]) x h[k] in one DSP instead of two separate multiply-and-accumulate
+                operations. This halves the DSP count from 16 to 8, which is why the pre-adder
+                exists in the DSP48E1 architecture.
+              </div>
+
+              <div class="callout callout-info">
+                <strong>The Big Picture</strong>
+                Every element in this walkthrough — IOB, BUFG, MMCM, routing, BRAM, DSP, CLB, CDC,
+                OBUF — appears in virtually every real FPGA design. The names change, the protocols
+                change, the data widths change, but this fundamental pattern of: receive data at IO,
+                buffer clock, route to processing fabric, use hard blocks for compute, manage clock
+                crossings, and drive output — remains constant across every FPGA project.
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q1" data-answered="">
+                  1. Which primitive converts an LVDS differential pair to a single-ended signal
+                  inside the FPGA?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    IBUF
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    IBUFDS
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    BUFG
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    ISERDES
+                  </li>
+                </ul>
+                <div id="fb1" class="quiz-fb">
+                  IBUFDS (Input Buffer Differential Signaling) takes the P and N pins of an LVDS
+                  pair and converts them to a single-ended signal for the FPGA fabric. IBUF handles
+                  single-ended inputs only.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q2" data-answered="">
+                  2. In the FIR filter example, why is RAMB36E1 used for sample history instead of
+                  flip-flops?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    BRAM runs at a higher clock frequency than CLB flip-flops
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    BRAM stores 16 x 16-bit samples in one block, saving 256 flip-flops for other
+                    use
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    Distributed RAM cannot store more than 64 bits total
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    BRAM supports asynchronous read which FIFOs require
+                  </li>
+                </ul>
+                <div id="fb2" class="quiz-fb">
+                  One RAMB36E1 holds 36 Kbits of storage. Sixteen 16-bit samples = 256 bits — far
+                  smaller than the BRAM capacity. Using BRAM saves those 256 flip-flops (which
+                  occupy valuable CLB resources) for pipeline registers and other logic.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q3" data-answered="">
+                  3. How many DSP48E1 primitives does a 16-tap symmetric FIR filter need when using
+                  the pre-adder?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    16 — one per tap
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    4 — one per filter quarter
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    8 — the pre-adder pairs symmetric samples before the multiplier
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    32 — two DSPs per tap for pre-adder and multiplier
+                  </li>
+                </ul>
+                <div id="fb3" class="quiz-fb">
+                  For a symmetric 16-tap filter (h[0]=h[15], h[1]=h[14] ...), we pair samples:
+                  (x[n-k] + x[n-(15-k)]) x h[k]. The DSP48E1 pre-adder computes the pair sum before
+                  the multiplier, so 8 pairs = 8 DSPs instead of 16.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q4" data-answered="">
+                  4. What is the purpose of the 2-FF synchronizer between the 250 MHz and 100 MHz
+                  domains?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    To slow down the signal from 250 MHz to 100 MHz rate
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    To prevent metastability when a signal crosses from the 250 MHz clock domain to
+                    the 100 MHz clock domain
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    To double-register data for pipeline depth
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    To buffer the overflow flag so it lasts two extra cycles
+                  </li>
+                </ul>
+                <div id="fb4" class="quiz-fb">
+                  When a signal crosses between asynchronous clock domains, a flip-flop may enter
+                  metastability — an undefined state where the output is neither 0 nor 1. Two
+                  flip-flops in series give the signal two clock cycles to resolve. The MTBF (mean
+                  time between failures) from metastability improves exponentially with each FF
+                  added.
+                </div>
+              </div>
+
+              <div class="quiz-wrap">
+                <div class="quiz-q" id="q5" data-answered="">
+                  5. What XDC constraint tells Vivado's timing engine to ignore paths between the
+                  250 MHz and 100 MHz clock domains?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    set_false_path -from clk_250 -to clk_100
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    set_clock_groups -asynchronous -group {clk_250} -group {clk_100}
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    create_clock -period 4.0 -name clk_250
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    set_multicycle_path 2 -from clk_250 -to clk_100
+                  </li>
+                </ul>
+                <div id="fb5" class="quiz-fb">
+                  set_clock_groups -asynchronous tells Vivado that the two clock groups have no
+                  timing relationship — paths between them should not be analyzed by the timing
+                  engine. This is correct for unrelated clock domains handled by synchronizers.
+                  set_false_path would also work but is less precise about the direction of the
+                  exemption.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-tip">
+                <strong>Design Exercise — 4-Tap Symmetric FIR Filter</strong>
+                Implement a simplified version of this walkthrough in Vivado:<br /><br />
+                <strong>Specification:</strong> 4-tap symmetric FIR filter, 12-bit signed input,
+                12-bit signed output, 100 MHz clock, target XC7A35T.<br /><br />
+                <strong>Coefficients (Q12 format):</strong> h[0]=h[3]=256, h[1]=h[2]=2048 (low-pass
+                filter)<br /><br />
+                <strong>Architecture:</strong><br />
+                - Use 2 DSP48E1 primitives with pre-adder (connect PCOUT of DSP0 to PCIN of DSP1)<br />
+                - Use 1 RAMB36E1 in SDP mode (64x12-bit) as circular sample buffer<br />
+                - Add ILA on the output with (* mark_debug = "true" *)<br /><br />
+                <strong>Verification:</strong> In simulation, apply a 1 kHz sine wave and a 30 kHz
+                sine wave simultaneously. Verify the 30 kHz component is attenuated at the output
+                while 1 kHz passes through. Then implement, program hardware (if available), and
+                observe output with ILA.
+              </div>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 1rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                Summary
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                This walkthrough connected every FPGA architectural layer into a single coherent
+                design. From the LVDS pad through IBUFDS and ISERDES, into the BUFG clock tree,
+                through the routing fabric to BRAM and DSP48E1 cascade, past the CLB comparator and
+                state machine, across a 2-FF CDC boundary, and out through OBUF — every block you
+                studied in isolation has a natural place in a real system. Understanding these
+                interconnections is what separates an FPGA beginner from a professional design
+                engineer.
+              </p>
+
+              <nav class="lesson-nav" aria-label="Lesson navigation">
+                <a href="23-development-flow.html">&#8592; Dev Flow</a>
+                <a href="25-course-summary.html">Course Summary &#8594;</a>
+              </nav>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-24';
+      const TOTAL = 25;
+
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+
+      function renderCharts() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        const tc = isDark ? '#94a3b8' : '#475569';
+        const gc = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        Plotly.newPlot(
+          'timing-chart',
+          [
+            {
+              type: 'bar',
+              x: [
+                'FDRE clk-Q',
+                'SL2 Routing x2',
+                'DSP48E1 internal',
+                'CARRY4 x4',
+                'Routing to FF',
+                'FDRE setup',
+              ],
+              y: [0.45, 0.55, 2.1, 0.42, 0.48, 0.12],
+              marker: { color: ['#818cf8', '#22d3ee', '#f87171', '#34d399', '#22d3ee', '#818cf8'] },
+              text: ['0.45ns', '0.55ns', '2.10ns', '0.42ns', '0.48ns', '0.12ns'],
+              textposition: 'outside',
+              textfont: { color: tc, size: 11 },
+            },
+          ],
+          {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: tc },
+            xaxis: { title: 'Path Segment', gridcolor: gc, tickfont: { size: 11 } },
+            yaxis: { title: 'Delay (ns)', gridcolor: gc, range: [0, 2.6] },
+            margin: { t: 20, b: 80, l: 60, r: 20 },
+            shapes: [
+              {
+                type: 'line',
+                x0: -0.5,
+                x1: 5.5,
+                y0: 4.0,
+                y1: 4.0,
+                line: { color: '#f87171', width: 2, dash: 'dash' },
+              },
+            ],
+            annotations: [
+              {
+                x: 5,
+                y: 4.0,
+                text: '4.0 ns budget (250 MHz)',
+                showarrow: false,
+                font: { color: '#f87171', size: 11 },
+                yshift: 10,
+              },
+            ],
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      }
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        renderCharts();
+      });
+    </script>
+  </body>
+</html>

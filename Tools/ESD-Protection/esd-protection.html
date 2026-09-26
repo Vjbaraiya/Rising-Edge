@@ -1,0 +1,1776 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Identify and review ESD protection requirements from schematic PDFs. Recommends TVS diodes, generates layout guidelines, and charts clamping waveforms."
+    />
+    <title>ESD Protection Analyzer | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/ESD-Protection/esd-protection.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/esd-protection.css" />
+    <link rel="stylesheet" href="css/esd-learn.css" />
+    <link rel="stylesheet" href="css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <main class="esd-page">
+      <!-- ── HERO ── -->
+      <header class="esd-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../../home.html">Home</a><span>/</span><a href="../tools.html">Tools</a
+          ><span>/</span><span>ESD Protection Analyzer</span>
+        </nav>
+        <div class="esd-hero-grid">
+          <div>
+            <div class="esd-kicker">ESD &amp; Signal Integrity Tool</div>
+            <h1>ESD Protection Analyzer</h1>
+            <p>
+              Upload a schematic PDF to automatically identify signals requiring ESD protection,
+              recommend TVS diodes, and generate PCB layout guidelines.
+            </p>
+            <div class="esd-tags">
+              <span class="badge badge-blue">Intermediate</span>
+              <span class="badge badge-green">2–5 min</span>
+              <span class="badge badge-purple">v2.0</span>
+              <span class="badge badge-gray">Updated Jul 2026</span>
+            </div>
+          </div>
+          <div class="esd-hero-actions">
+            <button class="btn btn-primary" id="analyseBtn" disabled>
+              <svg
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5"
+                />
+              </svg>
+              Analyse Schematic
+            </button>
+            <button class="btn btn-outline" data-help-open aria-haspopup="dialog">? Help</button>
+            <a class="btn btn-ghost" href="#esd-ilc">Engineering Notes</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- ── INTRO ── -->
+      <section class="esd-intro card" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">Systematic ESD protection starts with signal identification</h2>
+          <p>
+            Every signal that crosses a PCB boundary—connectors, cables, user interfaces—is an ESD
+            entry point. The energy level, speed, and working voltage of each interface determines
+            the TVS device characteristics needed. This tool extracts signal names from your
+            schematic PDF and maps them to proven protection strategies.
+          </p>
+        </div>
+        <div class="alert alert-info">
+          <strong>Common mistake:</strong> Using a TVS with too high a capacitance on a high-speed
+          differential pair (USB, HDMI, LVDS) causes signal degradation even when the part
+          technically provides ESD protection. Always verify C<sub>LINE</sub> against the data-rate
+          budget.
+        </div>
+      </section>
+
+      <!-- ── UPLOAD WORKSPACE ── -->
+      <section class="esd-workspace" aria-label="ESD analyzer workspace">
+        <div class="esd-inputs">
+          <!-- Step 01 — Upload -->
+          <div class="card esd-card" id="tour-upload">
+            <div class="esd-card-head">
+              <div>
+                <span class="esd-step">01</span>
+                <h2>
+                  Upload Schematic
+                  <button
+                    class="help-tip"
+                    data-help-topic="upload"
+                    aria-label="Help for schematic upload"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span class="esd-hint">PDF format, up to 50 MB</span>
+            </div>
+
+            <div
+              class="upload-zone"
+              id="uploadZone"
+              role="button"
+              tabindex="0"
+              aria-label="Drop schematic PDF here or click to browse"
+            >
+              <input type="file" id="fileInput" accept=".pdf" aria-label="Select schematic PDF" />
+              <div class="upload-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                  />
+                </svg>
+              </div>
+              <div class="upload-title">Drop schematic PDF here or click to browse</div>
+              <div class="upload-hint">Supports multi-page schematics up to 50 MB</div>
+            </div>
+
+            <div class="file-info" id="fileInfo" hidden>
+              <svg
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
+              </svg>
+              <span id="fileName" class="file-name">—</span>
+              <span id="fileSize" class="file-size">—</span>
+              <button
+                class="file-remove"
+                id="fileRemove"
+                title="Remove file"
+                aria-label="Remove file"
+              >
+                ×
+              </button>
+            </div>
+
+            <div class="esd-analyse-row">
+              <span class="esd-hint" id="analyseHint">Upload a schematic PDF to begin</span>
+            </div>
+
+            <!-- Analysis Progress -->
+            <div class="status-panel" id="statusPanel" hidden>
+              <div class="esd-kicker" style="margin-bottom: 12px">ANALYSIS IN PROGRESS</div>
+              <div class="status-steps" id="statusSteps">
+                <div class="status-step">
+                  <div class="step-icon pending" id="step1Icon">1</div>
+                  <span class="step-label" id="step1Label">Extracting text from schematic PDF</span>
+                </div>
+                <div class="status-step">
+                  <div class="step-icon pending" id="step2Icon">2</div>
+                  <span class="step-label" id="step2Label"
+                    >Identifying IO ports &amp; external connectors</span
+                  >
+                </div>
+                <div class="status-step">
+                  <div class="step-icon pending" id="step3Icon">3</div>
+                  <span class="step-label" id="step3Label"
+                    >Identifying user-facing interface elements</span
+                  >
+                </div>
+                <div class="status-step">
+                  <div class="step-icon pending" id="step4Icon">4</div>
+                  <span class="step-label" id="step4Label"
+                    >Classifying signals by interface type</span
+                  >
+                </div>
+                <div class="status-step">
+                  <div class="step-icon pending" id="step5Icon">5</div>
+                  <span class="step-label" id="step5Label"
+                    >Recommending TVS protection components</span
+                  >
+                </div>
+                <div class="status-step">
+                  <div class="step-icon pending" id="step6Icon">6</div>
+                  <span class="step-label" id="step6Label"
+                    >Generating layout placement guidelines</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Extracted Text Preview -->
+            <div class="extracted-panel" id="extractedPanel" hidden>
+              <div class="extracted-head">
+                <div class="extracted-head-left">
+                  <div class="extracted-icon">✓</div>
+                  <div>
+                    <div class="extracted-title">Extracted Text</div>
+                    <div class="extracted-sub">Text successfully extracted from schematic PDF</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline btn-sm" id="downloadExtractedText">
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                    />
+                  </svg>
+                  Download .txt
+                </button>
+              </div>
+              <pre class="extracted-preview" id="extractedPreview">—</pre>
+              <div class="extracted-meta">
+                <span><strong>Pages:</strong> <span id="extractedPages">—</span></span>
+                <span><strong>Characters:</strong> <span id="extractedChars">—</span></span>
+                <span><strong>Lines:</strong> <span id="extractedLines">—</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 02 — Options -->
+          <div class="card esd-card" id="tour-options">
+            <div class="esd-card-head">
+              <div>
+                <span class="esd-step">02</span>
+                <h2>
+                  Analysis Options
+                  <button
+                    class="help-tip"
+                    data-help-topic="options"
+                    aria-label="Help for analysis options"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+            </div>
+            <div class="esd-form-grid">
+              <label
+                >ESD test standard
+                <select class="select" id="esdStandard">
+                  <option value="IEC 61000-4-2">IEC 61000-4-2 (Consumer / Industrial)</option>
+                  <option value="ISO 10605">ISO 10605 (Automotive)</option>
+                  <option value="JEDEC JS-001">JEDEC JS-001 (HBM — Semiconductor)</option>
+                  <option value="IEC 61000-4-5">IEC 61000-4-5 (Surge / Lightning)</option>
+                </select>
+              </label>
+              <label
+                >Severity level
+                <select class="select" id="esdLevel">
+                  <option value="Level 2 (±2kV contact)">Level 2 (±2kV contact)</option>
+                  <option value="Level 3 (±4kV contact)">Level 3 (±4kV contact)</option>
+                  <option value="Level 4 (±8kV contact)" selected>Level 4 (±8kV contact)</option>
+                </select>
+              </label>
+              <label
+                >Default VDD rail <span>V</span>
+                <input
+                  class="input"
+                  id="defaultVdd"
+                  type="number"
+                  min="0.9"
+                  max="48"
+                  step="0.1"
+                  value="3.3"
+                />
+              </label>
+              <label
+                >Include internal signals
+                <select class="select" id="includeInternal">
+                  <option value="no" selected>No (external only)</option>
+                  <option value="yes">Yes (all detected signals)</option>
+                </select>
+              </label>
+            </div>
+            <div class="esd-button-row">
+              <button class="btn btn-primary esd-wide" id="analyseBtn2" disabled>
+                Run ESD Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RESULTS COLUMN ── -->
+        <div class="esd-results">
+          <!-- Step 03 — Summary Stats -->
+          <div class="card esd-card esd-summary-card" id="tour-results">
+            <div class="esd-card-head">
+              <div>
+                <span class="esd-step">03</span>
+                <h2>
+                  Analysis Summary
+                  <button
+                    class="help-tip"
+                    data-help-topic="results"
+                    aria-label="Help interpreting results"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span id="result-status" class="badge badge-gray">Not analysed</span>
+            </div>
+            <div class="esd-stats">
+              <div><span>Signals found</span><strong id="stat-signals">—</strong></div>
+              <div><span>TVS devices</span><strong id="stat-tvs">—</strong></div>
+              <div><span>High-speed</span><strong id="stat-highspeed">—</strong></div>
+              <div><span>Pages scanned</span><strong id="stat-pages">—</strong></div>
+            </div>
+            <!-- Chart area: ESD waveform -->
+            <div
+              id="esd-waveform-chart"
+              class="esd-chart"
+              data-tour-chart
+              role="img"
+              aria-label="ESD clamping waveform chart"
+            >
+              <div class="esd-empty">
+                Run an analysis to view the ESD clamping waveform and TVS characteristic curve.
+              </div>
+            </div>
+          </div>
+
+          <!-- TVS Chart Card -->
+          <div class="card esd-card" id="tour-tvs-chart">
+            <div class="esd-card-head"><h2>TVS Capacitance vs Data Rate</h2></div>
+            <div id="esd-capacitance-chart" class="esd-chart esd-chart-sm">
+              <div class="esd-empty">
+                Select devices to visualize capacitance vs data rate constraints.
+              </div>
+            </div>
+          </div>
+
+          <!-- Export -->
+          <div class="card esd-card" id="tour-export">
+            <div class="esd-card-head">
+              <h2>
+                Reports &amp; Export
+                <button class="help-tip" data-help-topic="reports" aria-label="Help for reports">
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="esd-export-grid">
+              <button class="btn btn-outline" id="exportCsv" disabled>Export CSV</button>
+              <button class="btn btn-outline" id="exportJson" disabled>Export JSON</button>
+              <button class="btn btn-outline" id="saveConfig">Save config</button>
+              <label class="btn btn-outline esd-file-label"
+                >Load config<input id="loadConfig" type="file" accept="application/json"
+              /></label>
+              <button class="btn btn-primary" id="printReport" disabled>Print report</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── RESULTS TABLE (shown after analysis) ── -->
+      <section class="esd-table-section" id="resultsSection" hidden>
+        <div class="esd-results-header">
+          <div>
+            <h2>ESD Protection Requirements</h2>
+            <p>Signals identified as requiring ESD protection, with recommended components.</p>
+          </div>
+          <div class="esd-filter-row">
+            <button class="chip chip-active filter-chip" data-filter="all">ALL</button>
+            <button class="chip filter-chip" data-filter="power">POWER</button>
+            <button class="chip filter-chip" data-filter="high-speed">HIGH-SPEED</button>
+            <button class="chip filter-chip" data-filter="low-speed">LOW-SPEED</button>
+            <button class="chip filter-chip" data-filter="analog-rf">ANALOG/RF</button>
+            <button class="chip filter-chip" data-filter="ui">USER I/F</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="esdTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Signal Name</th>
+                <th>Component</th>
+                <th>Interface</th>
+                <th>Category</th>
+                <th>Key Threat</th>
+                <th>Critical ESD Property</th>
+                <th>V<sub>WRK</sub></th>
+                <th>Polarity</th>
+                <th>Data Rate / Freq</th>
+                <th>Standards</th>
+                <th>Surge Req.</th>
+                <th>Protection Part</th>
+              </tr>
+            </thead>
+            <tbody id="esdTableBody"></tbody>
+          </table>
+        </div>
+        <div id="noResults" class="esd-no-results" hidden>
+          No ESD-relevant signals were detected in this schematic. Verify the PDF contains readable
+          text layers (not scanned images).
+        </div>
+      </section>
+
+      <!-- ── TVS RECOMMENDATIONS ── -->
+      <section class="esd-tvs-section" id="tvsSection" hidden>
+        <div class="esd-section-head">
+          <div>
+            <h2>Recommended TVS Diodes</h2>
+            <p>
+              Matched components based on signal characteristics, clamping voltage, and parasitic
+              capacitance requirements.
+            </p>
+          </div>
+          <div class="esd-tvs-legend">
+            <span class="chip chip-active">V<sub>C</sub> &lt; V<sub>ABS MAX</sub></span>
+            <span class="chip">Low R<sub>DYN</sub></span>
+            <span class="chip">C<sub>LINE</sub> matched to data rate</span>
+          </div>
+        </div>
+        <div class="tvs-grid" id="tvsGrid"></div>
+      </section>
+
+      <!-- ── LAYOUT GUIDELINES ── -->
+      <section class="esd-layout-section" id="layoutSection" hidden>
+        <div class="esd-section-head">
+          <h2>PCB Layout Guidelines</h2>
+          <p>Critical placement and routing requirements for effective ESD protection.</p>
+        </div>
+        <div class="guidelines-grid">
+          <div class="guideline-card">
+            <div class="guideline-icon">📍</div>
+            <h4>Place TVS at Connector Edge</h4>
+            <p>
+              TVS diodes must be the first component the ESD pulse encounters — within 5 mm of the
+              connector pins.
+            </p>
+            <ul>
+              <li>Route ESD current path before any trace branches</li>
+              <li>Minimize inductance between connector pin and TVS anode</li>
+              <li>Trace length from connector to TVS: &lt; 5 mm</li>
+            </ul>
+          </div>
+          <div class="guideline-card">
+            <div class="guideline-icon">⏚</div>
+            <h4>Ground Return Path</h4>
+            <p>
+              The TVS ground connection is as critical as the signal connection. A poor ground path
+              negates protection entirely.
+            </p>
+            <ul>
+              <li>Multiple vias to ground plane directly under TVS</li>
+              <li>Ground via pitch ≤ 0.5 mm for low inductance</li>
+              <li>Avoid routing ground through thin traces — use planes</li>
+            </ul>
+          </div>
+          <div class="guideline-card">
+            <div class="guideline-icon">→</div>
+            <h4>Signal Routing Order</h4>
+            <p>
+              PCB trace must flow: Connector → TVS → Protected IC. Never branch before the TVS or
+              the pulse bypasses protection.
+            </p>
+            <ul>
+              <li>Connector → short trace → TVS → trace → IC</li>
+              <li>No stubs or T-branches before the TVS element</li>
+              <li>For differential pairs, maintain symmetry through TVS</li>
+            </ul>
+          </div>
+          <div class="guideline-card">
+            <div class="guideline-icon">⚡</div>
+            <h4>Parasitic Capacitance Budget</h4>
+            <p>
+              TVS capacitance directly impacts signal integrity. Match C<sub>LINE</sub> to your data
+              rate requirements.
+            </p>
+            <ul>
+              <li>USB 2.0 HS (480 Mbps): C<sub>LINE</sub> &lt; 1.0 pF</li>
+              <li>USB 3.0 SS (5 Gbps): C<sub>LINE</sub> &lt; 0.2 pF</li>
+              <li>HDMI 2.0 (6 Gbps): C<sub>LINE</sub> &lt; 0.15 pF</li>
+              <li>Ethernet 10/100: C<sub>LINE</sub> &lt; 5 pF acceptable</li>
+            </ul>
+          </div>
+          <div class="guideline-card">
+            <div class="guideline-icon">⚠</div>
+            <h4>Clamping Voltage Verification</h4>
+            <p>
+              V<sub>C</sub> at the peak ESD pulse current must be below the absolute maximum voltage
+              of the protected IC pin.
+            </p>
+            <ul>
+              <li>V<sub>C</sub> &lt; V<sub>ABS MAX</sub> of IC (with margin)</li>
+              <li>Check V<sub>C</sub> at actual ESD current, not at 1 mA</li>
+              <li>Account for trace inductance adding to V<sub>C</sub></li>
+              <li>Use TLP (Transmission Line Pulse) data when available</li>
+            </ul>
+          </div>
+          <div class="guideline-card">
+            <div class="guideline-icon">🛡</div>
+            <h4>Multi-Stage Protection</h4>
+            <p>
+              For harsh environments (IEC 61000-4-5 surge), use a two-stage approach combining a
+              GDT/MOV with a fast TVS.
+            </p>
+            <ul>
+              <li>Stage 1 (primary): GDT or MOV absorbs bulk energy</li>
+              <li>Decoupling inductor or resistor between stages</li>
+              <li>Stage 2 (secondary): Fast TVS clamps residual</li>
+              <li>Required for Ethernet, RS-485, outdoor feeds</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── INTERACTIVE LEARNING CENTER ── -->
+      <section id="esd-ilc" class="elc-section">
+        <div class="elc-header">
+          <span class="esd-kicker">Interactive Learning Center</span>
+          <h2>ESD Engineering Deep-Dive</h2>
+          <p class="esd-section-lead">
+            Ten topics with live charts, SVG animations, and interactive tools.
+          </p>
+        </div>
+
+        <!-- Tab navigation -->
+        <nav class="elc-tabs" aria-label="Learning topics">
+          <button class="elc-tab active" data-topic="fundamentals">① Fundamentals</button>
+          <button class="elc-tab" data-topic="tvs-construction">② TVS Construction</button>
+          <button class="elc-tab" data-topic="clamping-voltage">③ Clamping vs Breakdown</button>
+          <button class="elc-tab" data-topic="capacitance">④ Capacitance &amp; SI</button>
+          <button class="elc-tab" data-topic="polarity">⑤ Uni vs Bidirectional</button>
+          <button class="elc-tab" data-topic="eos-esd">⑥ EOS vs ESD</button>
+          <button class="elc-tab" data-topic="iec-waveform">⑦ IEC 61000-4-2</button>
+          <button class="elc-tab" data-topic="pcb-layout">⑧ PCB Layout</button>
+          <button class="elc-tab" data-topic="mistakes">⑨ Design Mistakes</button>
+          <button class="elc-tab" data-topic="interfaces">⑩ Interface Examples</button>
+        </nav>
+
+        <!-- ─── PANEL 1: ESD FUNDAMENTALS ─────────────────────────────── -->
+        <div class="elc-panel active" id="elc-fundamentals">
+          <div class="elc-grid elc-grid-wide">
+            <div>
+              <h3>What is ESD?</h3>
+              <p>
+                Electrostatic discharge is the rapid, spontaneous transfer of charge between two
+                objects at different potentials. A human body walking on carpet can accumulate 10–35
+                kV. When a charged person touches an IC pin, the stored charge equalises in under 1
+                nanosecond.
+              </p>
+              <div class="elc-callout danger">
+                <strong>Why ICs fail:</strong> Modern CMOS gate oxides are 2–5 nm thick and rupture
+                at as little as 2–3 V across the dielectric. A 15 kV discharge that reaches the gate
+                is fatal — even if the current is only microamperes.
+              </div>
+              <h4 style="margin-top: 16px">Human Body Model (HBM)</h4>
+              <p>
+                The HBM circuit models the human body as a 100 pF capacitor in series with a 1500 Ω
+                resistor. It produces a discharge with a 2–10 ns rise time and a ~150 ns decay.
+              </p>
+              <div class="elc-formula">E = ½ C V² &nbsp;|&nbsp; I_pk = V / R</div>
+              <p style="margin-top: 8px">
+                At 8 kV HBM: E ≈ 3.2 mJ, I_pk ≈ 5.3 A. That is enough energy to permanently destroy
+                an unprotected CMOS input.
+              </p>
+
+              <!-- Energy calculator -->
+              <h4 style="margin-top: 20px">⚡ HBM Energy Calculator</h4>
+              <label class="elc-slider-label">
+                Discharge voltage: <span id="elc-calc-v">8.0 kV</span>
+              </label>
+              <input
+                class="elc-range"
+                id="elc-volt-slider"
+                type="range"
+                min="500"
+                max="25000"
+                step="500"
+                value="8000"
+              />
+              <div class="elc-result">
+                <div class="elc-result-item">
+                  <span class="elc-result-value" id="elc-calc-e">3.20 mJ</span>
+                  <span>Stored energy</span>
+                </div>
+                <div class="elc-result-item">
+                  <span class="elc-result-value" id="elc-calc-i">5.3 A</span>
+                  <span>Peak current</span>
+                </div>
+                <div class="elc-result-item">
+                  <span class="elc-result-value" id="elc-calc-t">750 ns</span>
+                  <span>Discharge (5τ)</span>
+                </div>
+              </div>
+              <div id="elc-calc-risk" class="elc-risk-label bad">⚠ Risk level: High</div>
+            </div>
+
+            <div class="elc-visual">
+              <div class="elc-visual-head">ESD Discharge Path (HBM)</div>
+              <div class="elc-visual-body elc-svg-box">
+                <!-- HBM discharge path SVG animation -->
+                <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <marker
+                      id="arr"
+                      markerWidth="6"
+                      markerHeight="6"
+                      refX="3"
+                      refY="3"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L6,3 L0,6 Z" fill="#60a5fa" />
+                    </marker>
+                    <filter id="glow-f">
+                      <feGaussianBlur stdDeviation="2" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <!-- Human body outline (simplified) -->
+                  <ellipse
+                    cx="80"
+                    cy="55"
+                    rx="22"
+                    ry="22"
+                    fill="none"
+                    stroke="#475569"
+                    stroke-width="1.5"
+                  />
+                  <line x1="80" y1="77" x2="80" y2="130" stroke="#475569" stroke-width="1.5" />
+                  <line x1="80" y1="95" x2="55" y2="115" stroke="#475569" stroke-width="1.5" />
+                  <line x1="80" y1="95" x2="105" y2="115" stroke="#475569" stroke-width="1.5" />
+                  <line x1="80" y1="130" x2="65" y2="165" stroke="#475569" stroke-width="1.5" />
+                  <line x1="80" y1="130" x2="95" y2="165" stroke="#475569" stroke-width="1.5" />
+                  <!-- Charge halo on body -->
+                  <text x="80" y="30" text-anchor="middle" font-size="9" fill="#fbbf24">
+                    ⚡ 8–35 kV
+                  </text>
+                  <!-- Finger tip -->
+                  <circle cx="105" cy="118" r="5" fill="#fbbf24" filter="url(#glow-f)">
+                    <animate attributeName="r" values="5;7;5" dur="1.4s" repeatCount="indefinite" />
+                  </circle>
+                  <!-- ESD arc to IC pin -->
+                  <path
+                    d="M110,118 Q148,100 175,118"
+                    fill="none"
+                    stroke="#fbbf24"
+                    stroke-width="2"
+                    stroke-dasharray="4 3"
+                    filter="url(#glow-f)"
+                  >
+                    <animate
+                      attributeName="stroke-dashoffset"
+                      from="0"
+                      to="-14"
+                      dur="0.4s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                  <!-- IC chip -->
+                  <rect
+                    x="175"
+                    y="100"
+                    width="60"
+                    height="50"
+                    rx="4"
+                    fill="#0f1729"
+                    stroke="#334155"
+                    stroke-width="1.5"
+                  />
+                  <text x="205" y="121" text-anchor="middle" font-size="8" fill="#94a3b8">IC</text>
+                  <text x="205" y="133" text-anchor="middle" font-size="7" fill="#64748b">
+                    CMOS
+                  </text>
+                  <!-- IC pins -->
+                  <line x1="175" y1="115" x2="162" y2="115" stroke="#64748b" stroke-width="1.5" />
+                  <line x1="175" y1="128" x2="162" y2="128" stroke="#64748b" stroke-width="1.5" />
+                  <line x1="235" y1="115" x2="248" y2="115" stroke="#64748b" stroke-width="1.5" />
+                  <line x1="235" y1="128" x2="248" y2="128" stroke="#64748b" stroke-width="1.5" />
+                  <!-- TVS between pin and GND -->
+                  <line x1="163" y1="100" x2="163" y2="155" stroke="#334155" stroke-width="1" />
+                  <rect
+                    x="153"
+                    y="118"
+                    width="20"
+                    height="12"
+                    rx="2"
+                    fill="#1a2236"
+                    stroke="#60a5fa"
+                    stroke-width="1.2"
+                  />
+                  <text x="163" y="127" text-anchor="middle" font-size="7" fill="#60a5fa">TVS</text>
+                  <!-- Current flow arrow down through TVS -->
+                  <line
+                    x1="163"
+                    y1="130"
+                    x2="163"
+                    y2="170"
+                    stroke="#60a5fa"
+                    stroke-width="1.5"
+                    marker-end="url(#arr)"
+                  >
+                    <animate
+                      attributeName="opacity"
+                      values="0;1;0"
+                      dur="1.4s"
+                      repeatCount="indefinite"
+                    />
+                  </line>
+                  <!-- GND rail -->
+                  <line x1="100" y1="175" x2="270" y2="175" stroke="#475569" stroke-width="1.5" />
+                  <line x1="110" y1="178" x2="260" y2="178" stroke="#475569" stroke-width="1" />
+                  <line x1="120" y1="181" x2="250" y2="181" stroke="#475569" stroke-width="0.5" />
+                  <text x="185" y="195" text-anchor="middle" font-size="8" fill="#64748b">
+                    GND (chassis / PCB)
+                  </text>
+                  <!-- Labels -->
+                  <text x="163" y="113" text-anchor="middle" font-size="7" fill="#94a3b8">Pin</text>
+                  <text x="80" y="200" text-anchor="middle" font-size="8" fill="#94a3b8">
+                    Charged
+                  </text>
+                  <text x="80" y="210" text-anchor="middle" font-size="8" fill="#94a3b8">
+                    human body
+                  </text>
+                </svg>
+              </div>
+              <div class="elc-callout" style="margin: 10px 0 0">
+                TVS clamps the pin voltage before the arc energy reaches the gate oxide.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 2: TVS CONSTRUCTION ───────────────────── -->
+        <div class="elc-panel" id="elc-tvs-construction">
+          <div class="elc-grid elc-grid-wide">
+            <div>
+              <h3>Inside a TVS Diode</h3>
+              <p>
+                A transient voltage suppressor is a heavily doped PN junction engineered for large
+                avalanche current capacity. Unlike a signal Zener (which targets precision voltage
+                reference), a TVS is optimised for peak pulse power — 200 W to 30 kW for 1 ms.
+              </p>
+              <h4>Key structural features</h4>
+              <ul style="margin: 8px 0 0 18px; line-height: 1.9">
+                <li><strong>Thick epilayer</strong> — wide depletion region absorbs more energy</li>
+                <li>
+                  <strong>Guard rings</strong> — prevent avalanche at die edge (field crowding)
+                </li>
+                <li>
+                  <strong>Low-ohmic substrate</strong> — minimises R<sub>dyn</sub> → lower V<sub
+                    >C</sub
+                  >
+                </li>
+                <li>
+                  <strong>Large junction area</strong> — distributes current density, prevents hot
+                  spots
+                </li>
+              </ul>
+              <div class="elc-callout warn" style="margin-top: 14px">
+                <strong>Unidirectional vs Bidirectional:</strong> A unidirectional TVS has one PN
+                junction in reverse (high V<sub>BR</sub>) and a forward diode drop (~0.7 V) in the
+                other direction. A bidirectional (symmetrical) device stacks two junctions
+                back-to-back, giving equal clamping in both polarities.
+              </div>
+              <div class="elc-formula" style="margin-top: 14px">
+                V_C = V_BR + I_PP × R_dyn<br />
+                R_dyn ≈ (V_C − V_BR) / I_PP
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">TVS Die Cross-Section</div>
+              <div class="elc-visual-body elc-svg-box">
+                <svg viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="pGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.7" />
+                      <stop offset="100%" stop-color="#4c1d95" stop-opacity="0.5" />
+                    </linearGradient>
+                    <linearGradient id="nGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0e7490" stop-opacity="0.7" />
+                      <stop offset="100%" stop-color="#0369a1" stop-opacity="0.5" />
+                    </linearGradient>
+                    <linearGradient id="depGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3" />
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.15" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="30" y="15" width="240" height="18" rx="2" fill="#334155" />
+                  <text x="150" y="28" text-anchor="middle" font-size="9" fill="#94a3b8">
+                    Anode (metal contact)
+                  </text>
+                  <rect x="30" y="33" width="240" height="28" fill="url(#pGrad)" />
+                  <text x="150" y="52" text-anchor="middle" font-size="9" fill="#e2d8ff">
+                    P&#x207A; anode region
+                  </text>
+                  <rect x="52" y="33" width="12" height="14" rx="1" fill="#9f7aea" opacity="0.6" />
+                  <rect x="236" y="33" width="12" height="14" rx="1" fill="#9f7aea" opacity="0.6" />
+                  <text x="58" y="60" text-anchor="middle" font-size="7" fill="#a78bfa">Guard</text>
+                  <text x="242" y="60" text-anchor="middle" font-size="7" fill="#a78bfa">
+                    Guard
+                  </text>
+                  <rect x="30" y="61" width="240" height="24" fill="url(#depGrad)" />
+                  <text x="150" y="77" text-anchor="middle" font-size="9" fill="#fbbf24">
+                    &#x27F5; Depletion region &#x27F6;
+                  </text>
+                  <rect
+                    x="30"
+                    y="61"
+                    width="240"
+                    height="24"
+                    fill="none"
+                    stroke="#fbbf24"
+                    stroke-width="0.5"
+                    stroke-dasharray="3 4"
+                  >
+                    <animate
+                      attributeName="stroke-dashoffset"
+                      from="0"
+                      to="14"
+                      dur="2s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                  <rect x="30" y="85" width="240" height="46" fill="url(#nGrad)" />
+                  <text x="150" y="105" text-anchor="middle" font-size="9" fill="#bae6fd">
+                    N epitaxial layer
+                  </text>
+                  <text x="150" y="118" text-anchor="middle" font-size="8" fill="#7dd3fc">
+                    (thick — high energy absorption)
+                  </text>
+                  <rect x="30" y="131" width="240" height="28" fill="#0c4a6e" opacity="0.8" />
+                  <text x="150" y="149" text-anchor="middle" font-size="9" fill="#7dd3fc">
+                    N&#x207A; substrate (low R
+                    <tspan dy="-4" font-size="7">dyn</tspan>
+                    <tspan dy="4">)</tspan>
+                  </text>
+                  <rect x="30" y="159" width="240" height="18" rx="2" fill="#334155" />
+                  <text x="150" y="172" text-anchor="middle" font-size="9" fill="#94a3b8">
+                    Cathode (metal contact)
+                  </text>
+                  <text x="12" y="49" font-size="7" fill="#a78bfa" text-anchor="middle">
+                    P&#x207A;
+                  </text>
+                  <text x="12" y="112" font-size="7" fill="#7dd3fc" text-anchor="middle">N</text>
+                  <text x="12" y="148" font-size="7" fill="#38bdf8" text-anchor="middle">
+                    N&#x207A;
+                  </text>
+                  <text x="150" y="200" text-anchor="middle" font-size="8" fill="#64748b">
+                    Avalanche occurs in depletion region at V &#x2265; V
+                    <tspan dy="-3" font-size="6">BR</tspan>
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 3: CLAMPING vs BREAKDOWN ────────────────── -->
+        <div class="elc-panel" id="elc-clamping-voltage">
+          <div class="elc-grid elc-grid-narrow">
+            <div>
+              <h3>Clamping Voltage vs Breakdown Voltage</h3>
+              <p>
+                Engineers often confuse V<sub>BR</sub> with V<sub>C</sub>. They are different
+                parameters that matter at different operating points.
+              </p>
+              <div class="elc-compare">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Typical value</th>
+                      <th>Meaning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>V<sub>RWM</sub></td>
+                      <td class="good">5.0 V</td>
+                      <td>Max DC working voltage (no conduction)</td>
+                    </tr>
+                    <tr>
+                      <td>V<sub>BR</sub></td>
+                      <td>6.0&#x2013;6.6 V</td>
+                      <td>Breakdown at 1 mA test current</td>
+                    </tr>
+                    <tr>
+                      <td>V<sub>C</sub></td>
+                      <td class="warn">10.0 V @ 16 A</td>
+                      <td>Clamping at IEC L4 peak current</td>
+                    </tr>
+                    <tr>
+                      <td>I<sub>PP</sub></td>
+                      <td>15&#x2013;30 A</td>
+                      <td>Peak pulse current (8/20 &#x00B5;s)</td>
+                    </tr>
+                    <tr>
+                      <td>R<sub>dyn</sub></td>
+                      <td class="bad">0.25 &#x03A9;</td>
+                      <td>Drives V<sub>C</sub> above V<sub>BR</sub></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="elc-callout warn" style="margin-top: 14px">
+                <strong>Design rule:</strong> V<sub>C</sub> at peak IEC current must be
+                <em>below</em> the IC's absolute maximum input voltage. V<sub>BR</sub> alone is not
+                a safe indicator — at 30 A, R<sub>dyn</sub> can add 4&#x2013;8 V.
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">TVS I&#x2013;V Characteristic (interactive)</div>
+              <div class="elc-visual-body" style="padding: 8px">
+                <div id="elc-iv-chart" style="height: 300px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 4: CAPACITANCE & HIGH-SPEED SI ──────────── -->
+        <div class="elc-panel" id="elc-capacitance">
+          <div class="elc-grid elc-grid-narrow">
+            <div>
+              <h3>Capacitance and Signal Integrity</h3>
+              <p>
+                Every TVS diode adds capacitance to the signal line. At high data rates, this
+                creates a low-pass filter that closes the eye diagram and increases bit-error rate.
+              </p>
+              <div class="elc-formula">
+                f<sub>-3dB</sub> = 1 / (2&#x03C0; &#x00D7; Z<sub>0</sub> &#x00D7; C<sub>LINE</sub>)
+              </div>
+              <p style="margin-top: 10px">
+                For a 50 &#x03A9; system with C<sub>LINE</sub> = 1 pF: f<sub>-3dB</sub> &#x2248; 3.2
+                GHz
+              </p>
+              <h4 style="margin-top: 14px">Capacitance budgets by interface</h4>
+              <div class="elc-compare">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Interface</th>
+                      <th>Max C<sub>LINE</sub></th>
+                      <th>Typical TVS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>USB 3.0 / DP</td>
+                      <td class="good">&lt; 0.2 pF</td>
+                      <td>GaN process</td>
+                    </tr>
+                    <tr>
+                      <td>HDMI 2.0</td>
+                      <td class="good">&lt; 0.15 pF</td>
+                      <td>SiGe rail-to-rail</td>
+                    </tr>
+                    <tr>
+                      <td>USB 2.0 HS</td>
+                      <td class="warn">&lt; 1 pF</td>
+                      <td>Standard Si TVS</td>
+                    </tr>
+                    <tr>
+                      <td>GbE</td>
+                      <td class="warn">&lt; 2.5 pF</td>
+                      <td>Standard Si TVS</td>
+                    </tr>
+                    <tr>
+                      <td>RS-485 / CAN</td>
+                      <td class="bad">&lt; 20 pF</td>
+                      <td>Any bipolar TVS</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">Eye Opening vs TVS Capacitance</div>
+              <div class="elc-visual-body" style="padding: 8px">
+                <div id="elc-cap-chart" style="height: 300px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 5: UNIDIRECTIONAL vs BIDIRECTIONAL ────────── -->
+        <div class="elc-panel" id="elc-polarity">
+          <div class="elc-grid elc-grid-wide">
+            <div>
+              <h3>Unidirectional vs Bidirectional TVS</h3>
+              <p>
+                Choosing the wrong polarity configuration is a common design mistake that leads to
+                either inadequate protection or unwanted signal clamping.
+              </p>
+              <div class="elc-compare">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Unidirectional</th>
+                      <th>Bidirectional</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Negative clamping</td>
+                      <td class="good">~0.7 V (forward diode)</td>
+                      <td class="warn">Symmetric V<sub>BR</sub></td>
+                    </tr>
+                    <tr>
+                      <td>Positive clamping</td>
+                      <td>V<sub>C</sub> (high)</td>
+                      <td>V<sub>C</sub> (same)</td>
+                    </tr>
+                    <tr>
+                      <td>Leakage at V<sub>RWM</sub></td>
+                      <td class="good">Lower</td>
+                      <td class="warn">Higher</td>
+                    </tr>
+                    <tr>
+                      <td>AC / differential use</td>
+                      <td class="bad">Not suitable</td>
+                      <td class="good">Required</td>
+                    </tr>
+                    <tr>
+                      <td>Polarity error risk</td>
+                      <td class="warn">Reversed = no protection</td>
+                      <td class="good">None</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="elc-callout" style="margin-top: 14px">
+                <strong>Use unidirectional</strong> on single-ended DC-biased signals (GPIO, power
+                rails). <strong>Use bidirectional</strong> on AC-coupled signals, differential
+                pairs, and any line that swings both ways (USB D+/D&#x2212;, RS-485, audio).
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">Circuit Symbols</div>
+              <div class="elc-visual-body elc-svg-box">
+                <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                  <text x="75" y="20" text-anchor="middle" font-size="9" fill="#94a3b8">
+                    Unidirectional
+                  </text>
+                  <line x1="75" y1="28" x2="75" y2="50" stroke="#60a5fa" stroke-width="1.5" />
+                  <polygon
+                    points="55,80 95,80 75,50"
+                    fill="none"
+                    stroke="#60a5fa"
+                    stroke-width="1.5"
+                  />
+                  <line x1="55" y1="80" x2="95" y2="80" stroke="#60a5fa" stroke-width="2" />
+                  <line x1="55" y1="80" x2="49" y2="72" stroke="#60a5fa" stroke-width="1.5" />
+                  <line x1="95" y1="80" x2="101" y2="72" stroke="#60a5fa" stroke-width="1.5" />
+                  <line x1="75" y1="80" x2="75" y2="102" stroke="#60a5fa" stroke-width="1.5" />
+                  <line x1="60" y1="102" x2="90" y2="102" stroke="#60a5fa" stroke-width="1.5" />
+                  <line x1="65" y1="107" x2="85" y2="107" stroke="#60a5fa" stroke-width="1" />
+                  <line x1="70" y1="112" x2="80" y2="112" stroke="#60a5fa" stroke-width="0.5" />
+                  <text x="40" y="46" font-size="8" fill="#94a3b8">A</text>
+                  <text x="40" y="96" font-size="8" fill="#94a3b8">K</text>
+                  <text x="108" y="72" font-size="8" fill="#34d399">&#x2190; 0.7 V</text>
+                  <text x="108" y="85" font-size="8" fill="#f87171">&#x2192; V_C</text>
+                  <text x="220" y="20" text-anchor="middle" font-size="9" fill="#94a3b8">
+                    Bidirectional
+                  </text>
+                  <line x1="220" y1="28" x2="220" y2="50" stroke="#a78bfa" stroke-width="1.5" />
+                  <polygon
+                    points="200,80 240,80 220,50"
+                    fill="none"
+                    stroke="#a78bfa"
+                    stroke-width="1.5"
+                  />
+                  <line x1="200" y1="80" x2="240" y2="80" stroke="#a78bfa" stroke-width="2" />
+                  <line x1="200" y1="80" x2="194" y2="72" stroke="#a78bfa" stroke-width="1.5" />
+                  <line x1="240" y1="80" x2="246" y2="72" stroke="#a78bfa" stroke-width="1.5" />
+                  <polygon
+                    points="200,80 240,80 220,110"
+                    fill="none"
+                    stroke="#a78bfa"
+                    stroke-width="1.5"
+                  />
+                  <line x1="200" y1="110" x2="240" y2="110" stroke="#a78bfa" stroke-width="2" />
+                  <line x1="200" y1="110" x2="194" y2="118" stroke="#a78bfa" stroke-width="1.5" />
+                  <line x1="240" y1="110" x2="246" y2="118" stroke="#a78bfa" stroke-width="1.5" />
+                  <line x1="220" y1="110" x2="220" y2="132" stroke="#a78bfa" stroke-width="1.5" />
+                  <line x1="205" y1="132" x2="235" y2="132" stroke="#a78bfa" stroke-width="1.5" />
+                  <line x1="210" y1="137" x2="230" y2="137" stroke="#a78bfa" stroke-width="1" />
+                  <line x1="215" y1="142" x2="225" y2="142" stroke="#a78bfa" stroke-width="0.5" />
+                  <text x="155" y="75" font-size="8" fill="#f87171">&#x2190; V_C</text>
+                  <text x="155" y="110" font-size="8" fill="#f87171">&#x2192; V_C</text>
+                  <text x="150" y="175" text-anchor="middle" font-size="8" fill="#64748b">
+                    Bidirectional: symmetric clamping both polarities
+                  </text>
+                  <text x="150" y="188" text-anchor="middle" font-size="8" fill="#64748b">
+                    Required for USB D&#x00B1;, RS-485, AC audio, HDMI TMDS
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 6: EOS vs ESD ──────────────────────────── -->
+        <div class="elc-panel" id="elc-eos-esd">
+          <div class="elc-grid elc-grid-narrow">
+            <div>
+              <h3>EOS vs ESD &#x2014; What's the Difference?</h3>
+              <p>
+                Electrical Overstress (EOS) and Electrostatic Discharge are both transient failure
+                modes, but they differ fundamentally in duration, energy, and cause.
+              </p>
+              <div class="elc-compare">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>ESD</th>
+                      <th>EOS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Duration</td>
+                      <td class="good">&lt; 1 &#x00B5;s</td>
+                      <td class="bad">1 &#x00B5;s &#x2013; minutes</td>
+                    </tr>
+                    <tr>
+                      <td>Energy</td>
+                      <td class="good">&lt; 1 mJ</td>
+                      <td class="bad">mJ &#x2013; kJ</td>
+                    </tr>
+                    <tr>
+                      <td>Cause</td>
+                      <td>Charged object / body</td>
+                      <td>Power fault, inductive kick, supply transient</td>
+                    </tr>
+                    <tr>
+                      <td>Failure mode</td>
+                      <td>Gate oxide rupture, junction punch-through</td>
+                      <td>Metal trace melt, bond wire fuse, oxide degrade</td>
+                    </tr>
+                    <tr>
+                      <td>TVS helps?</td>
+                      <td class="good">Yes &#x2014; primary protection</td>
+                      <td class="warn">Partial &#x2014; need TVS + transient suppressor</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="elc-callout danger" style="margin-top: 14px">
+                <strong>Misdiagnosis is common:</strong> Many "ESD failures" in the field are
+                actually EOS events caused by power supply noise, motor back-EMF, or cable inductive
+                kickback. TVS alone won't fix these &#x2014; add a bulk capacitor + ferrite bead or
+                a TVS with higher energy rating (P<sub>PPK</sub> &#x2265; 600 W).
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">Energy vs Pulse Duration Map</div>
+              <div class="elc-visual-body" style="padding: 8px">
+                <div id="elc-eos-chart" style="height: 300px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 7: IEC 61000-4-2 WAVEFORM ─────────────── -->
+        <div class="elc-panel" id="elc-iec-waveform">
+          <div class="elc-grid elc-grid-narrow">
+            <div>
+              <h3>IEC 61000-4-2 Test Waveform</h3>
+              <p>
+                This is the international ESD immunity standard for end-equipment (not IC-level).
+                The contact discharge test is the most aggressive &#x2014; a charged electrode
+                touches the EUT directly.
+              </p>
+              <h4>Test levels</h4>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0">
+                <button class="elc-level-btn" data-level="1">L1 &#x00B1;2 kV</button>
+                <button class="elc-level-btn" data-level="2">L2 &#x00B1;4 kV</button>
+                <button class="elc-level-btn" data-level="3">L3 &#x00B1;6 kV</button>
+                <button class="elc-level-btn active" data-level="4">
+                  L4 &#x00B1;8 kV &#x2605;
+                </button>
+              </div>
+              <div style="display: flex; gap: 16px; margin: 12px 0">
+                <div class="elc-iec-stat">
+                  <span id="elc-iec-peak">30 A</span>
+                  <label>I<sub>peak</sub></label>
+                </div>
+                <div class="elc-iec-stat">
+                  <span id="elc-iec-kv">&#x00B1;8 kV</span>
+                  <label>Voltage</label>
+                </div>
+              </div>
+              <div class="elc-callout warn" style="margin-top: 4px">
+                <strong>Waveform key specs:</strong>
+                Rise time &#x2264; 0.8 ns (10%&#x2192;90%) &#x00B7; First peak at 0.8&#x2013;1 ns
+                &#x00B7; Decay to 50% at ~30 ns &#x00B7; Second hump (discharge network) peaks
+                ~10&#x2013;20 ns.
+              </div>
+              <p style="margin-top: 10px">
+                TVS selection: the device must absorb the waveform energy and clamp below the IC's
+                absolute max in &lt; 1 ns. "Fast" Zeners with slow avalanche response will fail.
+              </p>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">IEC 61000-4-2 Current Waveform</div>
+              <div class="elc-visual-body" style="padding: 8px">
+                <div id="elc-iec-chart" style="height: 280px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 8: PCB LAYOUT ──────────────────────────── -->
+        <div class="elc-panel" id="elc-pcb-layout">
+          <div class="elc-grid elc-grid-wide">
+            <div>
+              <h3>PCB Layout Best Practices</h3>
+              <p>
+                Even a correctly chosen TVS fails to protect if the PCB layout is wrong. The goal:
+                the ESD current must flow through the TVS to GND <em>before</em> reaching the IC
+                pin, with the shortest possible path.
+              </p>
+              <h4>The 6 rules</h4>
+              <ol style="margin: 8px 0 0 18px; line-height: 2">
+                <li>Place TVS within <strong>3 mm</strong> of the connector pin</li>
+                <li>Route: Connector &#x2192; TVS &#x2192; IC (never the reverse)</li>
+                <li>
+                  TVS GND via must connect to <strong>chassis/PCB GND plane</strong> directly
+                  &#x2014; no traces
+                </li>
+                <li>Avoid 90&#x00B0; trace bends near TVS &#x2014; they create inductance</li>
+                <li>Never share TVS GND via with decoupling cap vias (limits peak current)</li>
+                <li>Pour GND copper around TVS footprint to reduce thermal resistance</li>
+              </ol>
+              <div class="elc-callout danger" style="margin-top: 14px">
+                A 10 mm trace adds ~10 nH of inductance. At 30 A / 1 ns, that generates V<sub
+                  >L</sub
+                >
+                = L &#x00D7; dI/dt = 300 V &#x2014; which defeats the TVS completely.
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 16px">
+                <button class="elc-toggle-btn good active" id="elc-pcb-good-btn">
+                  &#x2713; Good layout
+                </button>
+                <button class="elc-toggle-btn bad" id="elc-pcb-bad-btn">&#x2717; Bad layout</button>
+              </div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">PCB Layout Diagram</div>
+              <div class="elc-visual-body elc-svg-box">
+                <svg id="elc-pcb-good" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                  <rect
+                    x="10"
+                    y="10"
+                    width="280"
+                    height="180"
+                    rx="6"
+                    fill="#0a1628"
+                    stroke="#1e293b"
+                    stroke-width="1"
+                  />
+                  <text x="150" y="24" text-anchor="middle" font-size="8" fill="#334155">
+                    GND plane (inner layer)
+                  </text>
+                  <rect
+                    x="18"
+                    y="80"
+                    width="36"
+                    height="50"
+                    rx="3"
+                    fill="#1e293b"
+                    stroke="#475569"
+                    stroke-width="1.2"
+                  />
+                  <text x="36" y="101" text-anchor="middle" font-size="8" fill="#94a3b8">CON</text>
+                  <text x="36" y="113" text-anchor="middle" font-size="7" fill="#64748b">J1</text>
+                  <line x1="54" y1="100" x2="90" y2="100" stroke="#34d399" stroke-width="2" />
+                  <text x="72" y="93" text-anchor="middle" font-size="7" fill="#34d399">3 mm</text>
+                  <rect
+                    x="90"
+                    y="88"
+                    width="32"
+                    height="24"
+                    rx="3"
+                    fill="#0f1729"
+                    stroke="#34d399"
+                    stroke-width="1.5"
+                  />
+                  <text x="106" y="98" text-anchor="middle" font-size="7" fill="#34d399">TVS</text>
+                  <text x="106" y="108" text-anchor="middle" font-size="6" fill="#34d399">D1</text>
+                  <circle cx="106" cy="120" r="4" fill="none" stroke="#34d399" stroke-width="1.5" />
+                  <text x="106" y="134" text-anchor="middle" font-size="7" fill="#34d399">
+                    GND via
+                  </text>
+                  <line x1="122" y1="100" x2="195" y2="100" stroke="#60a5fa" stroke-width="1.5" />
+                  <rect
+                    x="195"
+                    y="78"
+                    width="70"
+                    height="44"
+                    rx="4"
+                    fill="#0f1729"
+                    stroke="#3b82f6"
+                    stroke-width="1.2"
+                  />
+                  <text x="230" y="96" text-anchor="middle" font-size="8" fill="#60a5fa">IC</text>
+                  <text x="230" y="108" text-anchor="middle" font-size="7" fill="#3b82f6">U1</text>
+                  <text x="150" y="170" text-anchor="middle" font-size="9" fill="#34d399">
+                    &#x2713; TVS first, then IC &#x2014; short GND via
+                  </text>
+                </svg>
+                <svg
+                  id="elc-pcb-bad"
+                  viewBox="0 0 300 200"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style="display: none"
+                >
+                  <rect
+                    x="10"
+                    y="10"
+                    width="280"
+                    height="180"
+                    rx="6"
+                    fill="#0a1628"
+                    stroke="#1e293b"
+                    stroke-width="1"
+                  />
+                  <text x="150" y="24" text-anchor="middle" font-size="8" fill="#334155">
+                    GND plane (inner layer)
+                  </text>
+                  <rect
+                    x="18"
+                    y="80"
+                    width="36"
+                    height="50"
+                    rx="3"
+                    fill="#1e293b"
+                    stroke="#475569"
+                    stroke-width="1.2"
+                  />
+                  <text x="36" y="101" text-anchor="middle" font-size="8" fill="#94a3b8">CON</text>
+                  <text x="36" y="113" text-anchor="middle" font-size="7" fill="#64748b">J1</text>
+                  <polyline
+                    points="54,100 150,100 150,140 195,140 195,100"
+                    fill="none"
+                    stroke="#f87171"
+                    stroke-width="2"
+                  />
+                  <text x="120" y="93" text-anchor="middle" font-size="7" fill="#f87171">
+                    Long trace w/ bends
+                  </text>
+                  <rect
+                    x="195"
+                    y="78"
+                    width="70"
+                    height="44"
+                    rx="4"
+                    fill="#0f1729"
+                    stroke="#ef4444"
+                    stroke-width="1.5"
+                  />
+                  <text x="230" y="96" text-anchor="middle" font-size="8" fill="#f87171">IC</text>
+                  <text x="230" y="108" text-anchor="middle" font-size="7" fill="#ef4444">
+                    U1 &#x2190; sees ESD first!
+                  </text>
+                  <rect
+                    x="250"
+                    y="130"
+                    width="32"
+                    height="24"
+                    rx="3"
+                    fill="#0f1729"
+                    stroke="#f87171"
+                    stroke-width="1.2"
+                  />
+                  <text x="266" y="140" text-anchor="middle" font-size="7" fill="#f87171">TVS</text>
+                  <text x="266" y="150" text-anchor="middle" font-size="6" fill="#f87171">
+                    too far!
+                  </text>
+                  <polyline
+                    points="266,154 266,175 106,175"
+                    fill="none"
+                    stroke="#f87171"
+                    stroke-width="1.5"
+                    stroke-dasharray="4 3"
+                  />
+                  <text x="186" y="170" text-anchor="middle" font-size="7" fill="#f87171">
+                    Long GND trace = +10 nH
+                  </text>
+                  <text x="150" y="192" text-anchor="middle" font-size="9" fill="#f87171">
+                    &#x2717; IC before TVS &#x2014; long GND path
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 9: DESIGN MISTAKES ────────────────────── -->
+        <div class="elc-panel" id="elc-mistakes">
+          <h3>Common ESD Design Mistakes</h3>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              gap: 14px;
+              margin-top: 12px;
+            "
+          >
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev critical">CRITICAL</div>
+              <h4>TVS placed after the IC</h4>
+              <p>
+                ESD current flows through the IC before reaching the TVS. Correct: connector
+                &#x2192; TVS &#x2192; IC.
+              </p>
+              <div class="elc-mistake-fix">Move TVS within 3 mm of connector, upstream of IC.</div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev critical">CRITICAL</div>
+              <h4>Wrong polarity TVS</h4>
+              <p>
+                Unidirectional TVS installed backward &#x2014; forward diode faces the rail instead
+                of GND. Provides zero protection.
+              </p>
+              <div class="elc-mistake-fix">
+                Verify anode &#x2192; signal, cathode &#x2192; GND for unidirectional. Use
+                bidirectional for AC/differential.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev high">HIGH</div>
+              <h4>C_LINE exceeds SI budget</h4>
+              <p>
+                Using a 2 pF TVS on a USB 3.0 line (budget: 0.2 pF) collapses the eye diagram at 5
+                Gbps.
+              </p>
+              <div class="elc-mistake-fix">
+                Select process-optimised device (GaN/SiGe). Measure CLINE at frequency, not just
+                datasheet Cj0.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev high">HIGH</div>
+              <h4>V_C exceeds IC abs max</h4>
+              <p>
+                Selecting TVS by V_BR only &#x2014; forgetting R_dyn adds 4&#x2013;8 V at 30 A peak.
+                IC gets 18 V spike instead of 10 V.
+              </p>
+              <div class="elc-mistake-fix">
+                Look up V_C at IEC peak current (I_PP column), not at 1 mA test current.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev high">HIGH</div>
+              <h4>Long GND return path</h4>
+              <p>
+                TVS GND routed through a shared trace &#x2014; 10 mm of trace adds ~10 nH, injecting
+                300 V at 30 A / 1 ns.
+              </p>
+              <div class="elc-mistake-fix">
+                Dedicated via directly to GND plane. No shared traces with other components.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev medium">MEDIUM</div>
+              <h4>Missing secondary stage</h4>
+              <p>
+                Single TVS on a long cable run &#x2014; primary surge saturates TVS and residual
+                energy still damages IC.
+              </p>
+              <div class="elc-mistake-fix">
+                Two-stage: GDT or MOV at cable entry + TVS near IC, with series resistor/bead
+                between stages.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev medium">MEDIUM</div>
+              <h4>Using ESD rating as EOS protection</h4>
+              <p>
+                TVS rated for ESD (&#x00B5;J energy) installed on a 24 V power line with inductive
+                loads &#x2014; TVS immediately fails on first motor shutoff.
+              </p>
+              <div class="elc-mistake-fix">
+                Use TVS with P_PPK &#x2265; 600 W (8/20 &#x00B5;s pulse), or TRANSZORB / MOV for
+                inductive load energy.
+              </div>
+            </div>
+            <div class="elc-mistake-card">
+              <div class="elc-mistake-sev medium">MEDIUM</div>
+              <h4>Differential pairs: protecting only one leg</h4>
+              <p>
+                Single TVS on USB D+ only. D&#x2212; is unprotected and the asymmetric load degrades
+                CMRR.
+              </p>
+              <div class="elc-mistake-fix">
+                Use matched dual TVS array (e.g., PRTR5V0U2X) that protects D+ and D&#x2212;
+                simultaneously.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PANEL 10: INTERFACE EXAMPLES ─────────────────── -->
+        <div class="elc-panel" id="elc-interfaces">
+          <div class="elc-grid elc-grid-wide">
+            <div>
+              <h3>Interface-Specific Protection</h3>
+              <p>Select an interface to see its ESD protection requirements.</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0">
+                <button class="elc-iface-btn active" data-iface="USB 2.0">USB 2.0</button>
+                <button class="elc-iface-btn" data-iface="USB 3.0">USB 3.0</button>
+                <button class="elc-iface-btn" data-iface="HDMI 2.0">HDMI 2.0</button>
+                <button class="elc-iface-btn" data-iface="Ethernet">Ethernet</button>
+                <button class="elc-iface-btn" data-iface="RS-485">RS-485</button>
+                <button class="elc-iface-btn" data-iface="CAN Bus">CAN Bus</button>
+                <button class="elc-iface-btn" data-iface="GPIO">GPIO</button>
+                <button class="elc-iface-btn" data-iface="Audio Jack">Audio Jack</button>
+              </div>
+              <div id="elc-iface-detail" class="elc-iface-detail"></div>
+            </div>
+            <div class="elc-visual">
+              <div class="elc-visual-head">Multi-stage Protection Topology</div>
+              <div class="elc-visual-body elc-svg-box">
+                <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <marker
+                      id="a2"
+                      markerWidth="5"
+                      markerHeight="5"
+                      refX="2.5"
+                      refY="2.5"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L5,2.5 L0,5 Z" fill="#60a5fa" />
+                    </marker>
+                  </defs>
+                  <text x="32" y="18" text-anchor="middle" font-size="8" fill="#94a3b8">Cable</text>
+                  <text x="32" y="28" text-anchor="middle" font-size="8" fill="#94a3b8">entry</text>
+                  <line x1="55" y1="80" x2="250" y2="80" stroke="#475569" stroke-width="1.5" />
+                  <line x1="30" y1="160" x2="270" y2="160" stroke="#1e3a4a" stroke-width="2" />
+                  <text x="150" y="175" text-anchor="middle" font-size="8" fill="#334155">
+                    GND / Chassis
+                  </text>
+                  <rect
+                    x="18"
+                    y="65"
+                    width="36"
+                    height="30"
+                    rx="3"
+                    fill="#1e293b"
+                    stroke="#475569"
+                  />
+                  <text x="36" y="80" text-anchor="middle" font-size="7.5" fill="#94a3b8">CON</text>
+                  <text x="36" y="90" text-anchor="middle" font-size="7" fill="#64748b">J1</text>
+                  <rect
+                    x="80"
+                    y="65"
+                    width="36"
+                    height="30"
+                    rx="3"
+                    fill="#0f1729"
+                    stroke="#fbbf24"
+                    stroke-width="1.5"
+                  />
+                  <text x="98" y="78" text-anchor="middle" font-size="7" fill="#fbbf24">
+                    Stage 1
+                  </text>
+                  <text x="98" y="89" text-anchor="middle" font-size="6.5" fill="#fbbf24">
+                    GDT/MOV
+                  </text>
+                  <line
+                    x1="98"
+                    y1="95"
+                    x2="98"
+                    y2="160"
+                    stroke="#fbbf24"
+                    stroke-width="1.5"
+                    marker-end="url(#a2)"
+                  />
+                  <text x="105" y="130" font-size="7" fill="#fbbf24">Surge &#x2193;</text>
+                  <rect
+                    x="140"
+                    y="74"
+                    width="28"
+                    height="12"
+                    rx="2"
+                    fill="#0f1729"
+                    stroke="#94a3b8"
+                    stroke-width="1.2"
+                  />
+                  <text x="154" y="83" text-anchor="middle" font-size="7" fill="#94a3b8">
+                    R/Bead
+                  </text>
+                  <rect
+                    x="195"
+                    y="65"
+                    width="36"
+                    height="30"
+                    rx="3"
+                    fill="#0f1729"
+                    stroke="#60a5fa"
+                    stroke-width="1.5"
+                  />
+                  <text x="213" y="78" text-anchor="middle" font-size="7" fill="#60a5fa">
+                    Stage 2
+                  </text>
+                  <text x="213" y="89" text-anchor="middle" font-size="6.5" fill="#60a5fa">
+                    TVS array
+                  </text>
+                  <line
+                    x1="213"
+                    y1="95"
+                    x2="213"
+                    y2="160"
+                    stroke="#60a5fa"
+                    stroke-width="1.5"
+                    marker-end="url(#a2)"
+                  />
+                  <text x="220" y="130" font-size="7" fill="#60a5fa">ESD &#x2193;</text>
+                  <rect
+                    x="248"
+                    y="63"
+                    width="38"
+                    height="34"
+                    rx="4"
+                    fill="#0f1729"
+                    stroke="#3b82f6"
+                    stroke-width="1.2"
+                  />
+                  <text x="267" y="78" text-anchor="middle" font-size="7.5" fill="#60a5fa">IC</text>
+                  <text x="267" y="90" text-anchor="middle" font-size="7" fill="#3b82f6">
+                    Protected
+                  </text>
+                  <text x="98" y="148" text-anchor="middle" font-size="7" fill="#fbbf24">
+                    High energy
+                  </text>
+                  <text x="213" y="148" text-anchor="middle" font-size="7" fill="#60a5fa">
+                    Fast ESD
+                  </text>
+                  <text x="55" y="58" text-anchor="middle" font-size="7.5" fill="#94a3b8">
+                    &#x2192; Signal flow &#x2192;
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── HELP DIALOG ── -->
+    <div class="help-backdrop" id="help-dialog" hidden>
+      <section class="help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <header class="help-header">
+          <div>
+            <span class="esd-kicker">Built-in Help Center</span>
+            <h2 id="help-title">ESD Protection Analyzer Guide</h2>
+            <p>Version 2.0 &middot; Updated July 2026</p>
+          </div>
+          <button class="help-close" data-help-close aria-label="Close help">&times;</button>
+        </header>
+        <div class="help-search-wrap">
+          <label for="help-search">Search help topics</label>
+          <input
+            class="input"
+            id="help-search"
+            type="search"
+            placeholder="Search topics&hellip;"
+            autocomplete="off"
+          />
+          <span id="help-search-status" class="help-search-status" aria-live="polite"></span>
+        </div>
+        <div class="help-layout">
+          <nav class="help-nav" id="help-nav" aria-label="Help topics"></nav>
+          <div class="help-content" id="help-content" tabindex="-1"></div>
+        </div>
+        <footer class="help-footer">
+          <button class="btn btn-outline btn-sm" id="help-start-tour">Start guided tour</button>
+          <a
+            class="btn btn-primary"
+            href="help/esd-protection-user-guide.html"
+            target="_blank"
+            rel="noopener"
+            >Open full user manual</a
+          >
+        </footer>
+      </section>
+    </div>
+
+    <!-- ── TOUR ── -->
+    <div class="tour-backdrop" id="tour-backdrop" hidden></div>
+    <aside
+      class="tour-popover"
+      id="tour-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-title"
+      hidden
+    >
+      <span id="tour-progress"></span>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-actions">
+        <button class="btn btn-ghost btn-sm" id="tour-skip">Skip</button>
+        <button class="btn btn-outline btn-sm" id="tour-prev">Previous</button>
+        <button class="btn btn-primary btn-sm" id="tour-next">Next</button>
+      </div>
+    </aside>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="../../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script src="js/esd-calculations.js"></script>
+    <script src="js/esd-charts.js"></script>
+    <script src="js/esd-protection.js"></script>
+    <script src="js/help.js"></script>
+    <script src="js/esd-learn.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

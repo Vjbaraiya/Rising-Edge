@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Worked example: connecting an AMD Versal SoC (XCVC1902) to two 16-bit-wide DDR4 SDRAM devices (Micron MT40A512M16) in parallel for a 32-bit interface, with a parameter-by-parameter cross-reference between both datasheets."
+    />
+    <title>
+      Worked Example: Versal SoC + Dual x16 DDR4 | DDR4 Memory Interface Design Academy | Rising
+      Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/DDR4/13-example-design-versal.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .part-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 10px 0;
+      }
+      .part-card h4 {
+        font-size: 0.95rem;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .part-card .pn {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: var(--cyan, #22d3ee);
+        font-weight: 700;
+      }
+      .part-card .ds-ref {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >DDR4 Memory Interface Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; DDR Landscape</a
+          >
+          <a href="02-component-selection-datasheets.html" class="module-item"
+            >02. Component Selection &amp; Datasheets</a
+          >
+          <a href="03-key-parameters.html" class="module-item"
+            >03. Key Electrical &amp; Timing Parameters</a
+          >
+          <a href="04-topologies.html" class="module-item">04. Memory Topologies</a>
+          <a href="05-signal-groups.html" class="module-item">05. Signal Groups &amp; Roles</a>
+          <a href="06-signal-integrity.html" class="module-item">06. Signal Integrity</a>
+          <a href="07-termination.html" class="module-item">07. Termination Strategies</a>
+          <a href="08-decoupling-pdn.html" class="module-item">08. Decoupling &amp; PDN</a>
+          <a href="09-layout-routing.html" class="module-item">09. Layout &amp; Routing</a>
+          <a href="10-fpga-considerations.html" class="module-item"
+            >10. FPGA-Specific Considerations</a
+          >
+          <a href="11-checklist-bringup.html" class="module-item">11. Checklist &amp; Bring-Up</a>
+          <a href="12-capstone-bridge.html" class="module-item">12. Capstone Bridge</a>
+          <a href="13-example-design-versal.html" class="module-item active"
+            >Bonus: Versal + DDR4 Example</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">DDR4 Academy</a><span>/</span>
+            <span>Worked Example: Versal + DDR4</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-orange">Bonus</span>
+              <span class="badge badge-cyan">Real Parts</span>
+              <span class="badge badge-cyan">Diagrams</span>
+              <h1>Worked Example: Versal SoC + Dual x16 DDR4</h1>
+              <p class="subtitle">
+                A concrete pairing of a real AMD Versal adaptive SoC and two real 16-bit-wide DDR4
+                devices wired in parallel for a 32-bit interface — with every design decision traced
+                to a specific parameter in one or both datasheets.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- Scenario -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The scenario</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Two identical 16-bit-wide (x16) DDR4 components are placed side by side and wired
+                  to share one command/address/clock bus, while each keeps its own data byte lanes —
+                  exactly the "devices per byte lane" pattern from Module 04, applied to build a
+                  32-bit-wide, single-rank, component-based (non-DIMM) DDR4 interface for a Versal
+                  SoC memory controller.
+                </p>
+                <div class="metrics-grid">
+                  <div class="metric-card">
+                    <div class="metric-value">32-bit</div>
+                    <div class="metric-label">Total data width (2 × x16)</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">2 GB</div>
+                    <div class="metric-label">Total capacity (2 × 8Gb)</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">DDR4-3200</div>
+                    <div class="metric-label">Speed grade, CL22</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-value">1 rank</div>
+                    <div class="metric-label">Single-rank, component architecture</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- The two parts -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The bill of materials: two real parts</h3></div>
+
+                <div class="part-card">
+                  <h4>FPGA / SoC — AMD Versal AI Core series</h4>
+                  <div class="pn">XCVC1902-2MSEVSVA2197</div>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      margin-top: 6px;
+                      line-height: 1.7;
+                    "
+                  >
+                    Versal adaptive SoC with a hardened
+                    <strong>DDR Memory Controller (DDRMC)</strong>
+                    attached to the on-chip Network-on-Chip (NoC) — DDR4/LPDDR4/LPDDR4X are
+                    supported directly in hardened silicon rather than built from FPGA fabric, which
+                    is the Versal-specific angle Module 10 introduced.
+                  </p>
+                  <div class="ds-ref">
+                    Reference docs: <strong>DS950</strong> — Versal Architecture and Product Data
+                    Sheet: Overview (device/NoC architecture); <strong>AM011</strong> — Versal ACAP
+                    Technical Reference Manual, "DDR4 Memory Controller" chapter (DDRMC
+                    capabilities, PHY calibration); <strong>AM013</strong> — Versal ACAP Packaging
+                    and Pinouts Architecture Manual (bank diagrams for the VSVA2197 package);
+                    <strong>PG313</strong> — Versal Adaptive SoC Programmable NoC and Integrated
+                    Memory Controller Product Guide, "Pinout Rules" chapter (which banks/pins the
+                    DDRMC can legally use); <strong>UG863</strong> — Versal Adaptive SoC PCB Design
+                    User Guide (DDR4 signal/termination/routing rules, used throughout this page).
+                  </div>
+                </div>
+
+                <div class="part-card">
+                  <h4>DDR4 SDRAM — Micron, x16, DDR4-3200</h4>
+                  <div class="pn">MT40A512M16LY-062E:E</div>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-sub);
+                      margin-top: 6px;
+                      line-height: 1.7;
+                    "
+                  >
+                    8Gb (512 Meg × 16) DDR4 SDRAM, 96-ball FBGA, 1.2V VDD/VDDQ, DDR4-3200 CL22 speed
+                    bin. Two of these devices, identical part number, are placed in parallel — the
+                    exact requirement Module 04/07 flagged for a clean fly-by bus.
+                  </p>
+                  <div class="ds-ref">
+                    Reference doc: Micron <strong>"8Gb: x4, x8, x16 DDR4 SDRAM"</strong> datasheet
+                    (MT40A512M16 family) — Features/Ballout, Electrical Characteristics, ZQ
+                    Calibration, Mode Register 1 (MR1), and AC Timing/Speed Bin Table sections are
+                    cited by name throughout this page.
+                  </div>
+                </div>
+
+                <div class="warning-box">
+                  Straight from UG863: "When creating a DDR4 interface, all components in the
+                  interface must share the same part number, data width, density, and speed grade."
+                  Both DDR4 devices here must be the exact same orderable part number — not just the
+                  same density or speed bin.
+                </div>
+              </div>
+
+              <!-- Block diagram -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Block diagram</h3>
+                  <span class="badge badge-cyan">Diagram</span>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 620 280"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Block diagram of a Versal SoC DDRMC bank connected to two parallel x16 DDR4 devices sharing one fly-by command/address/clock bus terminated to VTT, with independent point-to-point data byte lanes to each device"
+                  >
+                    <rect
+                      x="20"
+                      y="90"
+                      width="120"
+                      height="100"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="80"
+                      y="130"
+                      text-anchor="middle"
+                      font-size="10"
+                      font-weight="800"
+                      fill="var(--text-base)"
+                    >
+                      Versal SoC
+                    </text>
+                    <text x="80" y="145" text-anchor="middle" font-size="8" fill="var(--text-sub)">
+                      XCVC1902
+                    </text>
+                    <text
+                      x="80"
+                      y="160"
+                      text-anchor="middle"
+                      font-size="7.5"
+                      fill="var(--text-muted)"
+                    >
+                      Hard DDRMC
+                    </text>
+                    <text
+                      x="80"
+                      y="172"
+                      text-anchor="middle"
+                      font-size="7.5"
+                      fill="var(--text-muted)"
+                    >
+                      (bank 700/701)
+                    </text>
+
+                    <!-- CA/CK fly-by bus -->
+                    <line
+                      x1="140"
+                      y1="105"
+                      x2="440"
+                      y2="105"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="290"
+                      y="98"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--warning,#fb923c)"
+                    >
+                      CA / CK / CTRL — shared fly-by bus
+                    </text>
+                    <rect
+                      x="440"
+                      y="97"
+                      width="20"
+                      height="16"
+                      rx="3"
+                      fill="none"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="450"
+                      y="90"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--danger,#f87171)"
+                    >
+                      39Ω
+                    </text>
+                    <line
+                      x1="460"
+                      y1="105"
+                      x2="480"
+                      y2="105"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="2"
+                    />
+                    <text x="500" y="108" font-size="7.5" fill="var(--danger,#f87171)">VTT</text>
+
+                    <!-- Device 1 -->
+                    <rect
+                      x="220"
+                      y="55"
+                      width="90"
+                      height="55"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="265"
+                      y="78"
+                      text-anchor="middle"
+                      font-size="8.5"
+                      fill="var(--text-base)"
+                    >
+                      DDR4 x16 #1
+                    </text>
+                    <text
+                      x="265"
+                      y="90"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      MT40A512M16
+                    </text>
+                    <text
+                      x="265"
+                      y="100"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      DQ[15:0]
+                    </text>
+
+                    <!-- Device 2 -->
+                    <rect
+                      x="340"
+                      y="55"
+                      width="90"
+                      height="55"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="385"
+                      y="78"
+                      text-anchor="middle"
+                      font-size="8.5"
+                      fill="var(--text-base)"
+                    >
+                      DDR4 x16 #2
+                    </text>
+                    <text
+                      x="385"
+                      y="90"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      MT40A512M16
+                    </text>
+                    <text
+                      x="385"
+                      y="100"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      DQ[31:16]
+                    </text>
+
+                    <!-- data lanes, point to point -->
+                    <line
+                      x1="140"
+                      y1="150"
+                      x2="265"
+                      y2="110"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="140"
+                      y1="165"
+                      x2="385"
+                      y2="110"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <text x="150" y="215" font-size="8" fill="var(--cyan,#22d3ee)">
+                      DQ[15:0]/DQS[1:0]/DM[1:0] — point-to-point to #1
+                    </text>
+                    <text x="150" y="230" font-size="8" fill="var(--cyan,#22d3ee)">
+                      DQ[31:16]/DQS[3:2]/DM[3:2] — point-to-point to #2
+                    </text>
+
+                    <!-- ZQ resistors -->
+                    <rect
+                      x="255"
+                      y="118"
+                      width="20"
+                      height="12"
+                      fill="none"
+                      stroke="var(--text-muted)"
+                      stroke-width="1.5"
+                    />
+                    <text
+                      x="265"
+                      y="140"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      ZQ 240Ω
+                    </text>
+                    <rect
+                      x="375"
+                      y="118"
+                      width="20"
+                      height="12"
+                      fill="none"
+                      stroke="var(--text-muted)"
+                      stroke-width="1.5"
+                    />
+                    <text
+                      x="385"
+                      y="140"
+                      text-anchor="middle"
+                      font-size="7"
+                      fill="var(--text-muted)"
+                    >
+                      ZQ 240Ω
+                    </text>
+
+                    <!-- IO_VR -->
+                    <text x="80" y="60" text-anchor="middle" font-size="7" fill="var(--text-muted)">
+                      IO_VR 240Ω → VCCO
+                    </text>
+
+                    <text
+                      x="310"
+                      y="255"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="var(--text-muted)"
+                    >
+                      Two identical MT40A512M16 devices, one shared CA/CK/CTRL bus, two independent
+                      data byte-lane groups
+                    </text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Parameter cross-reference table -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Parameter cross-reference: what drives each circuit decision</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  This is the table that actually connects the two datasheets — every value below
+                  comes from a named section or field in one datasheet, cross-checked against the
+                  other.
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Design decision</th>
+                        <th>Versal-side reference</th>
+                        <th>Micron-side reference</th>
+                        <th>Resulting circuit value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>CA/CK/CTRL termination</td>
+                        <td>
+                          UG863, "Signals and Connections for DDR4 Interfaces":
+                          address/command/control signals require 39 Ω to VTT at the far end, fly-by
+                          routing
+                        </td>
+                        <td>
+                          Datasheet input pin electrical spec confirms standard fly-by-compatible
+                          input receivers on address/command pins
+                        </td>
+                        <td>
+                          39 Ω ± resistors from the last device's CA/CK/CTRL pins to a VTT rail
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Differential clock impedance</td>
+                        <td>
+                          UG863, "Physical Design Rules for DDR4 Signals": differential CK/DQS
+                          impedance 90 Ω ± 10%
+                        </td>
+                        <td>
+                          CK_t/CK_c differential input characteristics (AC/DC input spec, Clock
+                          section)
+                        </td>
+                        <td>Route CK_t/CK_c as a 90 Ω differential pair, tightly coupled</td>
+                      </tr>
+                      <tr>
+                        <td>Single-ended CAC/data impedance</td>
+                        <td>
+                          UG863, "Physical Design Rules for DDR4 Signals": single-ended CAC and data
+                          signal impedance 50 Ω ± 10%
+                        </td>
+                        <td>Single-ended input/output characteristics (SSTL/POD-class I/O spec)</td>
+                        <td>Target 50 Ω single-ended trace impedance for CA and DQ</td>
+                      </tr>
+                      <tr>
+                        <td>DQ/DQS/DM termination</td>
+                        <td>
+                          UG863 signal table: data and strobe signals use no PCB termination — ODT
+                          only, point-to-point routing
+                        </td>
+                        <td>
+                          Mode Register 1 (MR1): RTT_NOM field (bits 9, 6, 2) selects the on-die
+                          termination value the device applies internally
+                        </td>
+                        <td>
+                          No board resistors on DQ/DQS/DM; select RTT_NOM via mode-register init in
+                          the memory IP
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>FPGA-side I/O calibration</td>
+                        <td>
+                          UG863 signal table: IO_VR_7xx/8xx calibration reference, 240 Ω to
+                          VCCO_7xx/8xx; AM011 DDRMC PHY calibration description
+                        </td>
+                        <td>—</td>
+                        <td>
+                          One 240 Ω ± 1% resistor from the IO_VR pin to VCCO on each I/O bank used
+                          by the DDRMC
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>DRAM-side ZQ calibration</td>
+                        <td>—</td>
+                        <td>
+                          ZQ Calibration section: 240 Ω ± 1% reference resistor from ZQ pin to GND,
+                          used to calibrate Ron/RTT over PVT
+                        </td>
+                        <td>One 240 Ω ± 1% resistor per device, ZQ pin to GND</td>
+                      </tr>
+                      <tr>
+                        <td>Speed grade / timing budget</td>
+                        <td>
+                          AM011, "DDR4 Memory Controller" chapter: maximum supported data rate for
+                          the selected DDRMC configuration
+                        </td>
+                        <td>
+                          AC Timing/Speed Bin Table: DDR4-3200 CL22 → tCK = 0.625 ns, tRCD = tRP =
+                          22 × tCK = 13.75 ns
+                        </td>
+                        <td>
+                          Confirm the DDRMC configuration in the memory IP is set for 3200 MT/s,
+                          CL22 before layout
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Supply voltage</td>
+                        <td>
+                          UG863, "Versal Adaptive SoC Power Rails": VCCO for the DDR4 bank set to
+                          the POD12 1.2 V I/O standard
+                        </td>
+                        <td>
+                          Electrical Characteristics: VDD = VDDQ = 1.2 V ± 60 mV (1.14–1.26 V)
+                        </td>
+                        <td>
+                          Shared 1.2 V rail feeds both the DDRMC bank VCCO and both DRAM VDD/VDDQ
+                          pins
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>RESET_N</td>
+                        <td>UG863 signal table: RESET_N — 4.7 kΩ to GND at far end, fly-by</td>
+                        <td>
+                          RESET_n pin description: power-up/reset sequencing input, held low during
+                          initialization
+                        </td>
+                        <td>
+                          One 4.7 kΩ pulldown, fly-by net from the Versal reset output to both
+                          devices
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Trace length / via budget</td>
+                        <td>
+                          UG863, "Physical Design Rules for DDR4 Signals": max 11,000 mils (CAC),
+                          5,500 mils (data/strobe); via count ≤ (2 × device count) + 2 for CAC
+                        </td>
+                        <td>—</td>
+                        <td>
+                          For 2 devices: CAC via budget ≤ 6; keep both DDR4 packages within the
+                          length envelope
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Package/ballout cross-check</td>
+                        <td>
+                          Versal package pin table for the selected I/O bank (per XCVC1902 package
+                          files)
+                        </td>
+                        <td>Ballout diagram: 96-ball FBGA, DQ/DQS/DM grouping per byte</td>
+                        <td>
+                          Verify byte-lane pin assignment against Micron's ball map before locking
+                          the footprint (Module 09/10)
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Pin/bank selection -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Which FPGA pins to use — and why</h3>
+                  <span class="badge badge-cyan">Diagrams</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  This is the one place Versal design genuinely differs from a soft-controller FPGA:
+                  you do not hand-pick individual balls for CK/CA/DQ. Module 10 established that the
+                  hard DDRMC has a fixed physical PHY; here's what "pin selection" actually means in
+                  practice, and why each step is done the way it is.
+                </p>
+                <div class="warning-box">
+                  Straight from the Versal ACAP Technical Reference Manual (AM011): "I/Os in some
+                  banks on the left and right edges of the XPIO rows do not have direct access to
+                  all I/O logic resources and can only be used for DDR memory controller (DDRMC)"
+                  applications. Those banks are not general-purpose — they exist specifically to
+                  reach the hardened DDRMC.
+                </div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Step</th>
+                        <th>What you actually choose</th>
+                        <th>Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1. Pick a DDRMC-capable bank, not any XPIO bank</td>
+                        <td>
+                          Only the specific XPIO banks wired to a DDRMC slice on the die can host a
+                          DDR4 interface
+                        </td>
+                        <td>
+                          AM011 confirms these edge banks "can only be used for DDR memory
+                          controller (DDRMC)" — a generic XPIO/HDIO bank has no DDRMC datapath
+                          behind it at all, so it is physically not an option, not just a poor
+                          choice
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>2. Check that bank's I/O budget against the byte-lane count needed</td>
+                        <td>
+                          Confirm the chosen DDRMC-capable bank(s) on the XCVC1902/VSVA2197
+                          combination (per AM013's "VC1902 Bank Diagram Overview" for that package)
+                          provide enough sites for 4 byte lanes (32-bit) plus the shared CA/CK/CTRL
+                          group
+                        </td>
+                        <td>
+                          Each XPIO bank provides a fixed number of XPHY sites (9 per bank, up to 54
+                          single-ended I/O per UG1273); running out mid-design forces a bank or
+                          device change, so this is checked before layout, not after
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>3. Keep both DDR4 devices on the same DDRMC instance</td>
+                        <td>
+                          Both MT40A512M16 devices' byte lanes must land in the same
+                          memory-controller instance / adjacent banks, never split across two
+                          independent DDRMCs
+                        </td>
+                        <td>
+                          A single DDRMC schedules one logical rank; splitting one rank's byte lanes
+                          across two controllers isn't a supported topology — this is the FPGA-side
+                          twin of Module 04's "one shared command/address domain" rule
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>4. Let the Vivado NoC/DDRMC IP wizard assign the physical pins</td>
+                        <td>
+                          Specify the DRAM part (MT40A512M16), width (32-bit), rank count (1), and
+                          component (not DIMM) architecture in the AXI NoC / DDRMC IP customization
+                          GUI; the wizard emits the CK/CA/CTRL/DQS pin-to-ball mapping
+                        </td>
+                        <td>
+                          PG313's "Pinout Rules" chapter defines a fixed silicon-level mapping
+                          between each bank's balls and the DDRMC's internal byte lanes — this
+                          mapping is enforced by the tool, not editable by hand, echoing Module 10's
+                          "DQS and CK pins are fixed" rule
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>5. Use only the DQ-within-byte-lane swap table the wizard reports</td>
+                        <td>
+                          The single remaining degree of freedom is reassigning which physical DQ
+                          ball carries which data bit inside one byte lane
+                        </td>
+                        <td>
+                          Matches Module 10's pin-swap rules exactly — DQ bits swap freely, DQS/CK
+                          do not
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>6. Cross-check the exported XDC before schematic capture</td>
+                        <td>
+                          Compare the wizard's generated constraints against PG313's Pinout Rules
+                          chapter and AM013's bank diagram for the VSVA2197 package
+                        </td>
+                        <td>
+                          AMD's own XTP546 "Versal Adaptive SoC Schematic Review Checklist" exists
+                          specifically to catch illegal or suboptimal DDR pin assignments before
+                          tape-out — this is the formal gate before Module 09's routing begins
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="info-box">
+                  In short: for a hard-DDRMC device like Versal, "selecting pins" means selecting
+                  the right <em>bank</em> and letting the memory IP wizard lock the CK/CA/CTRL/DQS
+                  mapping for you — the designer's real decisions are which DDRMC-capable bank to
+                  dedicate to this interface and confirming it has enough I/O for a 32-bit, 2-device
+                  fly-by bus.
+                </div>
+              </div>
+
+              <!-- Capacity math -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Capacity and width, worked out</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Each MT40A512M16 is 512 Meg × 16 = 8 Gb of capacity, in a single x16 device.
+                  </li>
+                  <li>
+                    Two devices in parallel double the <em>data width</em> (16 → 32 bits) while the
+                    shared CA/CK/CTRL bus keeps both devices addressed together — this yields 8 Gb +
+                    8 Gb = 16 Gb = <strong>2 GB total, at 32 bits wide</strong>.
+                  </li>
+                  <li>
+                    Each device contributes one independent data byte-pair group
+                    (DQ[15:0]/DQS[1:0]/DM[1:0] and DQ[31:16]/DQS[3:2]/DM[3:2]) — the same "devices
+                    per byte lane" pattern from Module 04/05, just with x16 devices instead of x8.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Every termination and impedance value in this design traces to a named table in
+                    UG863 (Versal PCB Design User Guide) — nothing here is a rule of thumb.
+                  </li>
+                  <li>
+                    ODT/RTT_NOM lives entirely in the Micron datasheet's Mode Register 1 field; the
+                    board carries no DQ/DQS termination resistors at all.
+                  </li>
+                  <li>
+                    ZQ (DRAM-side) and IO_VR (Versal-side) are the same idea on opposite ends of the
+                    interface — a precision 240 Ω reference resistor that calibrates on-die
+                    impedance over PVT.
+                  </li>
+                  <li>
+                    Both DDR4 devices must be the exact same part number, per UG863's explicit
+                    requirement — this isn't optional for a component-based fly-by bus.
+                  </li>
+                  <li>
+                    Capacity and width scale independently: adding a second x16 device doubles width
+                    (16→32 bit), not depth — depth would require a second rank instead.
+                  </li>
+                  <li>
+                    "Selecting FPGA pins" on Versal means selecting a DDRMC-capable bank and letting
+                    the memory IP wizard lock the CK/CA/CTRL/DQS mapping (per PG313's Pinout Rules)
+                    — not hand-picking individual balls.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- References -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>References</h3></div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px">
+                  Every value and rule cited on this page traces to one of the documents below.
+                </p>
+                <p
+                  class="cat-label-ref"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--text-muted);
+                    margin: 14px 0 6px;
+                  "
+                >
+                  AMD / Versal
+                </p>
+                <ul style="font-size: 0.85rem; color: var(--text-sub); line-height: 2">
+                  <li>
+                    <a
+                      href="https://docs.amd.com/v/u/en-US/ds950-versal-overview"
+                      target="_blank"
+                      rel="noopener"
+                      >DS950 — Versal Architecture and Product Data Sheet: Overview</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/am011-versal-acap-trm/DDR4-Memory-Controller"
+                      target="_blank"
+                      rel="noopener"
+                      >AM011 — Versal ACAP Technical Reference Manual: DDR4 Memory Controller</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/am013-versal-pkg-pinout"
+                      target="_blank"
+                      rel="noopener"
+                      >AM013 — Versal ACAP Packaging and Pinouts Architecture Manual (overview)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/am013-versal-pkg-pinout/VSVA2197-Package-VC1902-Pin-Map"
+                      target="_blank"
+                      rel="noopener"
+                      >AM013 — VSVA2197 Package, VC1902 Pin Map</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/am013-versal-pkg-pinout/VC1902-Bank-Diagram-Overview"
+                      target="_blank"
+                      rel="noopener"
+                      >AM013 — VC1902 Bank Diagram Overview</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/am013-versal-pkg-pinout/Bank-Diagram-by-Package-for-VC1902"
+                      target="_blank"
+                      rel="noopener"
+                      >AM013 — Bank Diagram by Package for VC1902</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.xilinx.com/support/documentation/ip_documentation/axi_noc/v1_0/pg313-network-on-chip.pdf"
+                      target="_blank"
+                      rel="noopener"
+                      >PG313 — Versal Adaptive SoC Programmable NoC and Integrated Memory Controller
+                      Product Guide (see "Pinout Rules")</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/ug863-versal-pcb-design"
+                      target="_blank"
+                      rel="noopener"
+                      >UG863 — Versal Adaptive SoC PCB Design User Guide (overview)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/ug863-versal-pcb-design/Signals-and-Connections-for-DDR4-Interfaces"
+                      target="_blank"
+                      rel="noopener"
+                      >UG863 — Signals and Connections for DDR4 Interfaces</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/ug863-versal-pcb-design/Physical-Design-Rules-for-DDR4-Signals"
+                      target="_blank"
+                      rel="noopener"
+                      >UG863 — Physical Design Rules for DDR4 Signals</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/ug863-versal-pcb-design/PCB-Routing-Guidelines-for-DDR4-Interfaces"
+                      target="_blank"
+                      rel="noopener"
+                      >UG863 — PCB Routing Guidelines for DDR4 Interfaces</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.amd.com/r/en-US/ug863-versal-pcb-design/Differences-in-XPIO-HDIO-and-Transceiver-Count"
+                      target="_blank"
+                      rel="noopener"
+                      >UG863 — Differences in XPIO, HDIO, and Transceiver Count</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/762675221/Versal+NoC+and+DDR+MC+Design+Process+Guide"
+                      target="_blank"
+                      rel="noopener"
+                      >Versal NoC and DDR MC Design Process Guide (index to PG313 Pinout Rules,
+                      XTP546 checklist, and memory pinout tutorials)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.xilinx.com/member/forms/download/design-license.html?cid=90f995d8-c517-4adc-a95c-13a8994d6618&filename=xtp546-versal-schematic-review-checklist.zip"
+                      target="_blank"
+                      rel="noopener"
+                      >XTP546 — Versal Adaptive SoC Schematic Review Checklist</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.centennialsoftwaresolutions.com/help/xcvc1902-2msevsva2197-at-a-glance/"
+                      target="_blank"
+                      rel="noopener"
+                      >XCVC1902-2MSEVSVA2197 — part/package reference</a
+                    >
+                  </li>
+                </ul>
+
+                <p
+                  class="cat-label-ref"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--text-muted);
+                    margin: 18px 0 6px;
+                  "
+                >
+                  Micron / DDR4 device
+                </p>
+                <ul style="font-size: 0.85rem; color: var(--text-sub); line-height: 2">
+                  <li>
+                    <a
+                      href="https://www.alldatasheet.com/html-pdf/2170856/MICRON/MT40A512M16LY-062E:E/19505/72/MT40A512M16LY-062E:E.html"
+                      target="_blank"
+                      rel="noopener"
+                      >MT40A512M16LY-062E:E — datasheet listing (8Gb: x4, x8, x16 DDR4 SDRAM
+                      family)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.mouser.com/datasheet/2/671/ddr4_16gb_x16_1cs_twindie-1545782.pdf"
+                      target="_blank"
+                      rel="noopener"
+                      >Micron DDR4 SDRAM datasheet (x16, TwinDie) — ZQ calibration and Mode Register
+                      1 (MR1) reference</a
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="12-capstone-bridge.html">← Capstone Bridge</a>
+                <a class="btn btn-primary" href="index.html">Back to Course Home</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

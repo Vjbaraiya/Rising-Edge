@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Design and validate a decoupling capacitor network against a target PDN impedance."
+    />
+    <title>PDN Optimizer | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Tools/PDN-Optimizer/pdn-optimizer.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/pdn-optimizer.css" />
+    <link rel="stylesheet" href="css/help.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <main class="pdn-page">
+      <header class="pdn-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../../home.html">Home</a><span>/</span><a href="../tools.html">Tools</a
+          ><span>/</span><span>PDN Optimizer</span>
+        </nav>
+        <div class="pdn-hero-grid">
+          <div>
+            <div class="pdn-kicker">Power Integrity Engineering Tool</div>
+            <h1>PDN Optimizer</h1>
+            <p>
+              Build, optimize, and validate a decoupling network across frequency using complex RLC
+              models, target-impedance analysis, and anti-resonance detection.
+            </p>
+            <div class="pdn-tags">
+              <span class="badge badge-blue">Intermediate</span
+              ><span class="badge badge-green">5–10 min</span
+              ><span class="badge badge-purple">v2.0</span
+              ><span class="badge badge-gray">Updated Jun 2026</span>
+            </div>
+          </div>
+          <div class="pdn-hero-actions">
+            <button class="btn btn-primary" data-action="optimize">Run optimization</button
+            ><button class="btn btn-outline" data-action="load-preset">Load example</button
+            ><button class="btn btn-outline" data-help-open aria-haspopup="dialog">? Help</button
+            ><a class="btn btn-ghost" href="#pdn-learn">Learn the method</a>
+          </div>
+        </div>
+      </header>
+
+      <section class="pdn-intro card" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">Design for a flat, low-impedance rail</h2>
+          <p>
+            A PDN must supply transient current without exceeding the permitted ripple. Target
+            impedance converts that requirement into a frequency-domain limit. A useful capacitor
+            network spans bulk, mid-frequency, and high-frequency energy storage while controlling
+            ESL-driven anti-resonance.
+          </p>
+        </div>
+        <div class="alert alert-info">
+          <strong>Common mistake:</strong> Adding many identical capacitors lowers ESR but does not
+          extend bandwidth. Package, mounting inductance, and value diversity matter.
+        </div>
+      </section>
+
+      <div id="pdn-alert" class="pdn-alert" role="alert" aria-live="polite" hidden></div>
+      <section class="pdn-workspace" aria-label="PDN optimizer workspace">
+        <div class="pdn-inputs">
+          <div class="card pdn-card" id="tour-power">
+            <div class="pdn-card-head">
+              <div>
+                <span class="pdn-step">01</span>
+                <h2>
+                  Power rail
+                  <button
+                    class="help-tip"
+                    data-help-topic="inputs"
+                    aria-label="Help for power rail inputs"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span class="pdn-hint">Ztarget = ΔV / ΔI</span>
+            </div>
+            <div class="pdn-form-grid">
+              <label
+                >Rail voltage <span>V</span
+                ><input class="input" id="vdd" type="number" min="0.01" step="0.1" value="1.0"
+              /></label>
+              <label
+                >Max current step <span>A</span
+                ><input class="input" id="delta-i" type="number" min="0.001" step="0.5" value="10"
+              /></label>
+              <label
+                >Allowed ripple <span>%</span
+                ><input
+                  class="input"
+                  id="ripple"
+                  type="number"
+                  min="0.01"
+                  max="100"
+                  step="0.1"
+                  value="3"
+              /></label>
+              <label
+                >Design margin <span>%</span
+                ><input
+                  class="input"
+                  id="margin"
+                  type="number"
+                  min="0"
+                  max="90"
+                  step="1"
+                  value="10"
+              /></label>
+            </div>
+            <label class="pdn-check"
+              ><input id="manual-target-toggle" type="checkbox" /> Override target impedance</label
+            >
+            <label id="manual-target-wrap" hidden
+              >Manual target <span>mΩ</span
+              ><input
+                class="input"
+                id="manual-target"
+                type="number"
+                min="0.001"
+                step="0.1"
+                value="3"
+            /></label>
+            <div class="pdn-target">
+              <span
+                >Design target
+                <button
+                  class="help-tip"
+                  data-help-topic="calculations"
+                  aria-label="Explain target impedance"
+                >
+                  ?
+                </button></span
+              ><strong id="target-display">2.700 mΩ</strong
+              ><small id="target-formula">(1.0 V × 3.0%) / 10.0 A, with 10% margin</small>
+            </div>
+          </div>
+
+          <div class="card pdn-card" id="tour-frequency">
+            <div class="pdn-card-head">
+              <div>
+                <span class="pdn-step">02</span>
+                <h2>
+                  Frequency & PCB model
+                  <button
+                    class="help-tip"
+                    data-help-topic="inputs"
+                    aria-label="Help for frequency and PCB inputs"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+            </div>
+            <div class="pdn-form-grid">
+              <label
+                >Start frequency <span>Hz</span
+                ><input class="input" id="f-start" type="number" min="1" value="10000"
+              /></label>
+              <label
+                >Stop frequency <span>Hz</span
+                ><input class="input" id="f-stop" type="number" min="10" value="1000000000"
+              /></label>
+              <label
+                >Data points <span>log</span
+                ><input
+                  class="input"
+                  id="points"
+                  type="number"
+                  min="100"
+                  max="5000"
+                  step="100"
+                  value="1200"
+              /></label>
+              <label
+                >Via / mount inductance <span>nH</span
+                ><input class="input" id="l-via" type="number" min="0" step="0.1" value="0.5"
+              /></label>
+              <label
+                >Plane inductance <span>nH</span
+                ><input class="input" id="l-plane" type="number" min="0" step="0.1" value="0"
+              /></label>
+              <label
+                >Plane resistance <span>mΩ</span
+                ><input class="input" id="r-plane" type="number" min="0" step="0.1" value="0"
+              /></label>
+              <label
+                >Package inductance <span>nH</span
+                ><input class="input" id="l-package" type="number" min="0" step="0.1" value="0"
+              /></label>
+            </div>
+          </div>
+
+          <div class="card pdn-card" id="tour-capacitors">
+            <div class="pdn-card-head">
+              <div>
+                <span class="pdn-step">03</span>
+                <h2>
+                  Capacitor network
+                  <button
+                    class="help-tip"
+                    data-help-topic="interface"
+                    aria-label="Help for capacitor network"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <div class="pdn-tabs" role="tablist">
+                <button class="active" data-mode="auto" role="tab">Auto</button
+                ><button data-mode="manual" role="tab">Manual</button>
+              </div>
+            </div>
+            <div id="auto-panel">
+              <div class="pdn-form-grid">
+                <label
+                  >Max iterations<input
+                    class="input"
+                    id="max-iterations"
+                    type="number"
+                    min="10"
+                    max="500"
+                    value="100" /></label
+                ><label
+                  >Maximum capacitors<input
+                    class="input"
+                    id="max-caps"
+                    type="number"
+                    min="1"
+                    max="500"
+                    value="200"
+                /></label>
+              </div>
+              <button class="btn btn-primary pdn-wide" data-action="optimize">
+                Optimize capacitor network
+              </button>
+            </div>
+            <div id="manual-panel" hidden>
+              <div class="pdn-add-row">
+                <label>Library capacitor<select class="select" id="cap-select"></select></label
+                ><label
+                  >Qty<input
+                    class="input"
+                    id="cap-qty"
+                    type="number"
+                    min="1"
+                    max="200"
+                    value="1" /></label
+                ><button class="btn btn-primary" data-action="add-library">Add</button>
+              </div>
+              <details class="pdn-custom">
+                <summary>Add a custom capacitor</summary>
+                <div class="pdn-form-grid">
+                  <label>Name<input class="input" id="custom-name" value="Custom 10µF" /></label
+                  ><label
+                    >Capacitance <span>F</span
+                    ><input
+                      class="input"
+                      id="custom-cap"
+                      type="number"
+                      step="0.000000001"
+                      value="0.00001" /></label
+                  ><label
+                    >ESR <span>Ω</span
+                    ><input
+                      class="input"
+                      id="custom-esr"
+                      type="number"
+                      step="0.001"
+                      value="0.005" /></label
+                  ><label
+                    >ESL <span>H</span
+                    ><input
+                      class="input"
+                      id="custom-esl"
+                      type="number"
+                      step="0.0000000001"
+                      value="0.000000001" /></label
+                  ><label>Package<input class="input" id="custom-package" value="0603" /></label
+                  ><label
+                    >Manufacturer<input class="input" id="custom-maker" placeholder="Optional"
+                  /></label>
+                </div>
+                <button class="btn btn-outline" data-action="add-custom">
+                  Add custom capacitor
+                </button>
+              </details>
+              <div class="pdn-list-head">
+                <strong>Selected capacitors</strong><span id="manual-count">0 devices</span>
+              </div>
+              <div id="manual-list" class="pdn-cap-list"></div>
+              <div class="pdn-button-row">
+                <button class="btn btn-primary" data-action="simulate">Simulate circuit</button
+                ><button class="btn btn-outline" data-action="load-preset">Load preset</button
+                ><button class="btn btn-ghost" data-action="clear">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdn-results">
+          <div class="card pdn-card pdn-results-card" id="tour-results">
+            <div class="pdn-card-head">
+              <div>
+                <span class="pdn-step">04</span>
+                <h2>
+                  Results
+                  <button
+                    class="help-tip"
+                    data-help-topic="results"
+                    aria-label="Help interpreting results"
+                  >
+                    ?
+                  </button>
+                </h2>
+              </div>
+              <span id="result-status" class="badge badge-gray">Not simulated</span>
+            </div>
+            <div class="pdn-stats">
+              <div><span>Worst impedance</span><strong id="stat-worst">—</strong></div>
+              <div><span>Margin</span><strong id="stat-margin">—</strong></div>
+              <div><span>Devices</span><strong id="stat-caps">—</strong></div>
+              <div><span>Effective C</span><strong id="stat-capacitance">—</strong></div>
+            </div>
+            <div
+              id="impedance-chart"
+              class="pdn-chart"
+              data-tour-chart
+              role="img"
+              aria-label="Logarithmic PDN impedance versus frequency chart"
+            >
+              <div class="pdn-empty">
+                Run an optimization or simulation to plot the frequency response.
+              </div>
+            </div>
+            <p id="chart-summary" class="sr-only" aria-live="polite"></p>
+          </div>
+
+          <div class="card pdn-card" id="tour-board">
+            <div class="pdn-card-head">
+              <div>
+                <h2>Board layout &amp; current flow</h2>
+              </div>
+              <span id="board-status" class="badge badge-gray">Example layout</span>
+            </div>
+            <div
+              id="pdn-board"
+              class="pdn-board"
+              role="img"
+              aria-label="PCB layout: power supply section feeding a shared VDD/GND rail, a rotated decoupling capacitor bank, and the IC, with a cascading current wave and per-capacitor charge indicators"
+            ></div>
+            <p class="pdn-board-caption">
+              Power supply (DC in → D1 → L1 → U1 buck regulator) feeds a shared VDD rail (gold) and
+              GND rail (blue) running the length of the board. Bulk capacitance sits nearest the
+              regulator; smaller, faster capacitors sit closest to the IC. Current leaves the
+              regulator as a single wave that travels the rail left → right, charging each capacitor
+              in turn — bulk cap first, smallest cap last — before finally supplying the device.
+              Each capacitor's LED pulses blue as that wave arrives and flashes orange as it hands
+              current onward, with the lead dot reversing direction to match. Ground returns
+              continuously in parallel along the bottom rail.
+            </p>
+          </div>
+
+          <div class="card pdn-card" id="tour-scope">
+            <div class="pdn-card-head">
+              <div>
+                <h2>Power rail — oscilloscope view</h2>
+              </div>
+              <span id="scope-status" class="badge badge-gray">Preview</span>
+            </div>
+            <div
+              id="pdn-scope"
+              class="pdn-scope"
+              role="img"
+              aria-label="Oscilloscope view of the VDD rail: a time-domain CH1 trace whose noise amplitude and ringing frequency respond to the input current and decoupling capacitors"
+            ></div>
+            <p class="pdn-board-caption">
+              <strong>CH1 (time):</strong> a load step sags the rail and the decoupling network
+              rings it back toward target — the sag size and ring rate scale with your input current
+              step and the capacitors selected, the left axis reads actual rail voltage, dashed
+              lines mark the ripple limit and the sub-label reads the ring frequency. Turns green
+              when the design stays inside target and red when it breaches.
+            </p>
+          </div>
+
+          <div class="card pdn-card">
+            <div class="pdn-card-head">
+              <h2>Selected capacitor matrix</h2>
+              <button class="btn btn-ghost btn-sm" data-action="sort">Sort by SRF</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>Qty</th>
+                    <th>Value</th>
+                    <th>ESR</th>
+                    <th>ESL</th>
+                    <th>SRF</th>
+                  </tr>
+                </thead>
+                <tbody id="result-table">
+                  <tr>
+                    <td colspan="6" class="pdn-table-empty">No result yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card pdn-card">
+            <div class="pdn-card-head"><h2>Warnings & recommendations</h2></div>
+            <div id="recommendations" class="pdn-recommendations">
+              <p>Results-driven engineering guidance will appear here.</p>
+            </div>
+          </div>
+          <div class="card pdn-card" id="tour-export">
+            <div class="pdn-card-head">
+              <h2>
+                Configuration & report
+                <button
+                  class="help-tip"
+                  data-help-topic="reports"
+                  aria-label="Help for reports and exports"
+                >
+                  ?
+                </button>
+              </h2>
+            </div>
+            <div class="pdn-export-grid">
+              <button class="btn btn-outline" data-action="export-csv">Export CSV</button
+              ><button class="btn btn-outline" data-action="export-json">Export JSON</button
+              ><button class="btn btn-outline" data-action="save">Save configuration</button
+              ><label class="btn btn-outline pdn-file"
+                >Load configuration<input
+                  id="load-file"
+                  type="file"
+                  accept="application/json" /></label
+              ><button class="btn btn-primary" data-action="print">Print report</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pdn-library card pdn-card">
+        <details>
+          <summary>
+            <span
+              ><strong>Capacitor database</strong
+              ><small>Reference values used by the optimizer</small></span
+            >
+          </summary>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Part</th>
+                  <th>Value</th>
+                  <th>ESR</th>
+                  <th>ESL</th>
+                  <th>Package</th>
+                  <th>Rating</th>
+                </tr>
+              </thead>
+              <tbody id="library-table"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+
+      <section id="pdn-learn" class="pdn-learn">
+        <h2>PDN design notes</h2>
+        <p class="pdn-section-lead">
+          The model treats each populated capacitor type as a parallel branch containing
+          quantity-scaled series RLC impedance.
+        </p>
+        <div class="pdn-accordion">
+          <details open>
+            <summary>Target impedance</summary>
+            <p>
+              Ztarget = VDD × ripple fraction / transient current. The selected design margin lowers
+              that ceiling before optimization, leaving room for model and layout uncertainty.
+            </p>
+          </details>
+          <details>
+            <summary>ESR, ESL, and self resonance</summary>
+            <p>
+              Below SRF, capacitance dominates. At SRF the branch approaches ESR. Above SRF,
+              mounting and package inductance dominate. Smaller packages and shorter via loops
+              extend useful bandwidth.
+            </p>
+          </details>
+          <details>
+            <summary>Parallel capacitors and anti-resonance</summary>
+            <p>
+              Mixed capacitor values widen bandwidth but can create high-Q peaks between resonances.
+              Intermediate values, controlled ESR, and reduced connection inductance damp these
+              peaks.
+            </p>
+          </details>
+          <details>
+            <summary>Placement strategy</summary>
+            <p>
+              Place the smallest, lowest-ESL capacitors closest to IC power pins with one power and
+              one ground via at the pads. Use bulk capacitors near the VRM and distribute mid-value
+              parts around the load.
+            </p>
+          </details>
+          <details>
+            <summary>Model limitations</summary>
+            <p>
+              This first-order model is for topology exploration. Validate the final layout with
+              vendor S-parameters, DC-bias derating, VRM output impedance, package/plane models, and
+              full-wave extraction where appropriate.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <div class="help-backdrop" id="help-dialog" hidden>
+      <section class="help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <header class="help-header">
+          <div>
+            <span class="pdn-kicker">Built-in Help Center</span>
+            <h2 id="help-title">PDN Optimizer Guide</h2>
+            <p>Version 2.0 · Updated June 2026</p>
+          </div>
+          <button class="help-close" data-help-close aria-label="Close help">×</button>
+        </header>
+        <div class="help-search-wrap">
+          <label for="help-search">Search help topics</label
+          ><input
+            class="input"
+            id="help-search"
+            type="search"
+            placeholder="Try ESR, target impedance, export…"
+            autocomplete="off"
+          /><span id="help-search-status" aria-live="polite"></span>
+        </div>
+        <div class="help-layout">
+          <nav class="help-nav" id="help-nav" aria-label="Help topics"></nav>
+          <article class="help-content" id="help-content" tabindex="0"></article>
+        </div>
+        <footer class="help-footer">
+          <button class="btn btn-outline" id="help-start-tour">Start feature tour</button
+          ><a
+            class="btn btn-primary"
+            href="help/pdn-optimizer-user-guide.html"
+            target="_blank"
+            rel="noopener"
+            >Open full user manual</a
+          >
+        </footer>
+      </section>
+    </div>
+    <div class="tour-backdrop" id="tour-backdrop" hidden></div>
+    <aside
+      class="tour-popover"
+      id="tour-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-title"
+      hidden
+    >
+      <span id="tour-progress"></span>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-actions">
+        <button class="btn btn-ghost btn-sm" id="tour-skip">Skip</button
+        ><button class="btn btn-outline btn-sm" id="tour-prev">Previous</button
+        ><button class="btn btn-primary btn-sm" id="tour-next">Next</button>
+      </div>
+    </aside>
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="../../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script src="js/pdn-optimizer.js"></script>
+    <script src="js/help.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

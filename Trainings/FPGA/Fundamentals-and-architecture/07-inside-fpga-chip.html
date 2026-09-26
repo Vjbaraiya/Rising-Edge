@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Explore the physical structure of an FPGA chip — die, package, IO banks, SSI technology, power rails, and clock regions — with annotated diagrams."
+    />
+    <title>Inside an FPGA Chip | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/07-inside-fpga-chip.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)" aria-label="Course lessons">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item active" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09"
+            >09. Configurable Logic Blocks</a
+          >
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Inside an FPGA Chip</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 7/25</span><span>28%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 28%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 7 OF 25</span>
+                <span class="badge">12 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Inside an FPGA Chip
+              </h1>
+              <p class="subtitle">
+                Peel back the BGA package to understand the physical silicon — die anatomy, IO
+                banks, SSI multi-die technology, power domains, and clock regions.
+              </p>
+            </div>
+          </section>
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 16px;
+                "
+              >
+                Die and Package
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Most Xilinx 7-series and UltraScale FPGAs ship in BGA (Ball Grid Array) packages.
+                The BGA has hundreds to thousands of solder balls on its underside — these carry
+                power, ground, and signal connections to the PCB. Inside the package sits the
+                <strong>die</strong>: the actual patterned silicon chip, mounted and connected via
+                flip-chip bumps or wire bonds.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The die contains all the programmable logic, routing, IO buffers, BRAM, DSP slices,
+                transceivers, clock management, and configuration logic. Its size varies enormously
+                — from a few mm² for a small Spartan-7 to over 800 mm² for a large Virtex-7.
+              </p>
+
+              <!-- Die Floor Plan SVG -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                FPGA Die Floor Plan (Annotated)
+              </h3>
+              <svg
+                viewBox="0 0 720 440"
+                xmlns="http://www.w3.org/2000/svg"
+                style="
+                  width: 100%;
+                  max-width: 720px;
+                  display: block;
+                  margin: 0 auto 20px;
+                  border-radius: 12px;
+                  border: 1px solid var(--border);
+                "
+              >
+                <rect width="720" height="440" rx="8" fill="#0f172a" />
+                <!-- IO banks border -->
+                <rect
+                  x="10"
+                  y="10"
+                  width="700"
+                  height="420"
+                  rx="6"
+                  fill="none"
+                  stroke="#334155"
+                  stroke-width="1.5"
+                />
+                <!-- Top IO bank -->
+                <rect x="10" y="10" width="700" height="50" rx="4" fill="#1e3a5f" opacity=".8" />
+                <text
+                  x="360"
+                  y="42"
+                  text-anchor="middle"
+                  fill="#60a5fa"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  IO BANKS (Top) — HP/HR Banks
+                </text>
+                <!-- Bottom IO bank -->
+                <rect x="10" y="380" width="700" height="50" rx="4" fill="#1e3a5f" opacity=".8" />
+                <text
+                  x="360"
+                  y="412"
+                  text-anchor="middle"
+                  fill="#60a5fa"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  IO BANKS (Bottom) — Config Logic + JTAG
+                </text>
+                <!-- Left IO bank -->
+                <rect x="10" y="60" width="60" height="320" rx="4" fill="#1e3a5f" opacity=".8" />
+                <text
+                  x="40"
+                  y="224"
+                  text-anchor="middle"
+                  fill="#60a5fa"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,40,224)"
+                >
+                  IO BANKS (Left)
+                </text>
+                <!-- Right IO bank -->
+                <rect x="650" y="60" width="60" height="320" rx="4" fill="#1e3a5f" opacity=".8" />
+                <text
+                  x="680"
+                  y="224"
+                  text-anchor="middle"
+                  fill="#60a5fa"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(90,680,224)"
+                >
+                  IO BANKS (Right)
+                </text>
+                <!-- CLB fabric main area -->
+                <rect x="70" y="60" width="200" height="320" rx="4" fill="#1a2744" opacity=".9" />
+                <text
+                  x="170"
+                  y="198"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  CLB
+                </text>
+                <text
+                  x="170"
+                  y="214"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  FABRIC
+                </text>
+                <text
+                  x="170"
+                  y="232"
+                  text-anchor="middle"
+                  fill="#6366f1"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  Slices + LUTs
+                </text>
+                <text
+                  x="170"
+                  y="246"
+                  text-anchor="middle"
+                  fill="#6366f1"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  Flip-Flops + Carry
+                </text>
+                <!-- Clock spine center -->
+                <rect
+                  x="270"
+                  y="60"
+                  width="60"
+                  height="320"
+                  rx="4"
+                  fill="#162032"
+                  stroke="#22d3ee"
+                  stroke-width="1.5"
+                  opacity=".9"
+                />
+                <text
+                  x="300"
+                  y="195"
+                  text-anchor="middle"
+                  fill="#22d3ee"
+                  font-size="10"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,300,220)"
+                >
+                  CLOCK SPINE — BUFG / MMCM / PLL
+                </text>
+                <!-- BRAM columns -->
+                <rect x="330" y="60" width="60" height="320" rx="4" fill="#1a2c1a" opacity=".9" />
+                <text
+                  x="360"
+                  y="205"
+                  text-anchor="middle"
+                  fill="#34d399"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,360,220)"
+                >
+                  BRAM COLUMNS (36Kb each)
+                </text>
+                <!-- DSP columns -->
+                <rect x="395" y="60" width="60" height="320" rx="4" fill="#2a1a1a" opacity=".9" />
+                <text
+                  x="425"
+                  y="205"
+                  text-anchor="middle"
+                  fill="#fb923c"
+                  font-size="11"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                  transform="rotate(-90,425,220)"
+                >
+                  DSP48 COLUMNS
+                </text>
+                <!-- More CLB fabric -->
+                <rect x="455" y="60" width="195" height="320" rx="4" fill="#1a2744" opacity=".9" />
+                <text
+                  x="552"
+                  y="198"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  CLB
+                </text>
+                <text
+                  x="552"
+                  y="214"
+                  text-anchor="middle"
+                  fill="#818cf8"
+                  font-size="12"
+                  font-weight="700"
+                  font-family="Inter,sans-serif"
+                >
+                  FABRIC
+                </text>
+                <text
+                  x="552"
+                  y="232"
+                  text-anchor="middle"
+                  fill="#6366f1"
+                  font-size="10"
+                  font-family="Inter,sans-serif"
+                >
+                  Slices + LUTs
+                </text>
+                <!-- Clock region boundaries -->
+                <line
+                  x1="70"
+                  y1="167"
+                  x2="650"
+                  y2="167"
+                  stroke="#334155"
+                  stroke-width="1"
+                  stroke-dasharray="4,4"
+                />
+                <line
+                  x1="70"
+                  y1="274"
+                  x2="650"
+                  y2="274"
+                  stroke="#334155"
+                  stroke-width="1"
+                  stroke-dasharray="4,4"
+                />
+                <text x="80" y="120" fill="#475569" font-size="9" font-family="Inter,sans-serif">
+                  Clock Region 0
+                </text>
+                <text x="80" y="225" fill="#475569" font-size="9" font-family="Inter,sans-serif">
+                  Clock Region 1
+                </text>
+                <text x="80" y="330" fill="#475569" font-size="9" font-family="Inter,sans-serif">
+                  Clock Region 2
+                </text>
+                <!-- Legend -->
+                <rect x="20" y="390" width="1" height="1" fill="none" />
+              </svg>
+              <p
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.8rem;
+                  text-align: center;
+                  margin-top: -8px;
+                  margin-bottom: 24px;
+                "
+              >
+                Simplified top-view floor plan of a Xilinx 7-series FPGA die (not to scale)
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                SSI Technology — Multi-Die FPGAs
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The largest Xilinx FPGAs cannot fit on a single reticle-limited die (silicon
+                manufacturing limits the maximum die area a single exposure can print). To overcome
+                this, Xilinx developed
+                <strong>SSI (Stacked Silicon Interconnect)</strong> technology.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                SSI tiles multiple smaller FPGA dies — called
+                <strong>SLRs (Super Logic Regions)</strong> — on a passive silicon interposer.
+                Thousands of micro-bumps connect the SLRs to the interposer, which routes signals
+                between them. From the designer's perspective, the device looks like one large FPGA,
+                but signals crossing SLR boundaries travel via
+                <strong>SLL (Super Long Lines)</strong> and incur extra routing delay (typically 1–2
+                extra cycles of latency).
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 20px">
+                Devices using SSI: Virtex-7 2000T, Kintex UltraScale+ KU15P, Virtex UltraScale+ VU9P
+                (3 SLRs), VU13P (4 SLRs).
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                IO Banks
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Xilinx 7-series divides IO pins into <strong>banks</strong> — groups of
+                approximately 50 pins that share a common IO supply voltage (VCCO). There are two
+                types of banks:
+              </p>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Bank Type</th>
+                    <th>VCCO Range</th>
+                    <th>Use</th>
+                    <th>Speed Grade</th>
+                    <th>Voltage Standards</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>HP (High Performance)</strong></td>
+                    <td>1.0V – 1.8V</td>
+                    <td>High-speed interfaces (DDR, LVDS, SerDes support)</td>
+                    <td>Up to 1.6 Gbps LVDS</td>
+                    <td>LVCMOS12/15/18, LVDS, SSTL, HSUL</td>
+                  </tr>
+                  <tr>
+                    <td><strong>HR (High Range)</strong></td>
+                    <td>1.2V – 3.3V</td>
+                    <td>General purpose, 3.3V interfaces</td>
+                    <td>Up to 1.25 Gbps LVDS</td>
+                    <td>LVCMOS12/15/18/33, LVTTL, SSTL, PCI</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Power Rails
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                FPGA power delivery is more complex than most digital ICs. Multiple independent
+                rails serve different sections of the die:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 20px;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong>VCCINT</strong> — Core logic supply. 1.0V for 7-series; 0.85V for
+                  UltraScale+. Supplies the CLB fabric, routing, and most logic.
+                </li>
+                <li>
+                  <strong>VCCAUX</strong> — Auxiliary supply. 1.8V. Powers MMCM/PLL, configuration
+                  logic, JTAG, and IO logic stages.
+                </li>
+                <li>
+                  <strong>VCCO</strong> — IO bank supply. Per-bank, variable 1.0V–3.3V. Must match
+                  the IO standard used in that bank.
+                </li>
+                <li>
+                  <strong>VCCBRAM</strong> — Block RAM supply. 1.0V. Separate from VCCINT to allow
+                  BRAM retention during partial power-down.
+                </li>
+                <li>
+                  <strong>VCCADC</strong> — XADC (on-chip ADC) supply. 1.8V. Isolated supply for
+                  analog accuracy.
+                </li>
+              </ul>
+
+              <!-- Power Distribution Mermaid -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Power Distribution Tree
+              </h3>
+              <div class="mermaid">
+                graph TD VCC[External Power Supplies] --> VCCINT[VCCINT\n1.0V Core Logic] VCC -->
+                VCCAUX[VCCAUX\n1.8V Auxiliary] VCC --> VCCO_HP[VCCO HP Banks\n1.0V–1.8V] VCC -->
+                VCCO_HR[VCCO HR Banks\n1.2V–3.3V] VCC --> VCCBRAM[VCCBRAM\n1.0V Block RAM] VCC -->
+                VCCADC[VCCADC\n1.8V XADC] VCCINT --> CLB[CLB Array\nSlices + Routing] VCCINT -->
+                DSP[DSP48 Slices] VCCBRAM --> BRAM[Block RAM\n36Kb Tiles] VCCAUX --> MMCM[MMCM /
+                PLL\nClock Management] VCCAUX --> CFG[Config Logic\nJTAG + SPI] VCCO_HP --> HP_IO[HP
+                IO Buffers] VCCO_HR --> HR_IO[HR IO Buffers]
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 28px 0 12px;
+                "
+              >
+                Clock Regions
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                The FPGA fabric is divided into rectangular <strong>clock regions</strong>. Each
+                clock region spans the full width of the fabric and contains approximately 50 CLBs
+                in height. Each region has its own local horizontal clock buffer (BUFH) that taps
+                from the global clock spine.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                Clock regions in Xilinx 7-series devices:
+              </p>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Device</th>
+                    <th>Clock Regions</th>
+                    <th>BUFG Available</th>
+                    <th>MMCM per Region</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Artix-7 XC7A35T</td>
+                    <td>6</td>
+                    <td>32</td>
+                    <td>5 total</td>
+                  </tr>
+                  <tr>
+                    <td>Artix-7 XC7A200T</td>
+                    <td>10</td>
+                    <td>32</td>
+                    <td>10 total</td>
+                  </tr>
+                  <tr>
+                    <td>Kintex-7 XC7K325T</td>
+                    <td>12</td>
+                    <td>32</td>
+                    <td>10 total</td>
+                  </tr>
+                  <tr>
+                    <td>Virtex-7 XC7V585T</td>
+                    <td>18</td>
+                    <td>32</td>
+                    <td>18 total</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Callouts -->
+              <div class="callout callout-warning">
+                <strong>Never Mix Voltages in the Same IO Bank</strong>
+                If Bank 34 is set to 3.3V LVCMOS (by your XDC constraint or board VCCO rail), every
+                IO in that bank must use a 3.3V-compatible standard. Mixing, for example, 3.3V
+                LVCMOS and 1.8V SSTL in the same bank causes either immediate device damage or
+                intermittent signal integrity failures. The PCB VCCO rail for that bank determines
+                the operating voltage.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip: Use HP Banks for High-Speed Signals</strong>
+                HP (High Performance) IO banks support lower voltage swings (1.0V–1.8V VCCO) and
+                achieve faster edge rates needed for DDR4, LVDS, and high-speed differential
+                interfaces. Place your fastest, most critical signals in HP banks. HR banks are
+                better for mixed-voltage general-purpose IO including 3.3V legacy interfaces.
+              </div>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question: What is SSI Technology?</strong>
+                Q: What is SSI technology and why does Xilinx use it?<br />
+                A: SSI (Stacked Silicon Interconnect) tiles multiple independent FPGA dies (SLRs —
+                Super Logic Regions) on a passive silicon interposer, connected by thousands of
+                micro-bumps. Xilinx uses it because single FPGA dies cannot exceed the reticle limit
+                (~800 mm² with standard lithography). SSI allows effectively larger devices. The
+                trade-off is that signals crossing SLR boundaries use SLL (Super Long Lines) which
+                add latency, so designers must be mindful of SLR crossing in their floorplan.
+              </div>
+
+              <div class="callout callout-danger">
+                <strong>Common PCB Mistake: Under-Decoupled Power Rails</strong>
+                Always include adequate decoupling capacitors on every VCCINT and VCCO rail — per
+                Xilinx's PCB Design Guidelines (UG483). Under-decoupled FPGAs exhibit intermittent
+                configuration failures, noise-induced bitflips, and reduced reliability at speed.
+                Place 100nF and 10µF caps as close to each power ball group as physically possible
+                on the PCB.
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 16px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <p class="quiz-q">1. What does SSI stand for, and what problem does it solve?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>A</span> Single Silicon Integration — reduces manufacturing cost
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>B</span> Stacked Silicon Interconnect — allows larger devices than
+                    single-die reticle limits
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>C</span> Substrate Signal Interconnect — improves PCB routing
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>D</span> Serialized Silicon Interface — speeds up IO
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb1">
+                  Correct! SSI = Stacked Silicon Interconnect. Multiple SLR dies are tiled on a
+                  silicon interposer, enabling FPGA devices larger than what a single reticle
+                  exposure can produce.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <p class="quiz-q">
+                  2. Which VCCO voltage range is supported by HP (High Performance) IO banks in
+                  Xilinx 7-series?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>A</span> 1.2V – 3.3V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>B</span> 1.0V – 1.8V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>C</span> 1.8V – 3.3V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>D</span> 0.85V – 1.8V
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb2">
+                  Correct! HP banks support VCCO from 1.0V to 1.8V. This lower swing enables
+                  high-speed standards like DDR4 (1.2V) and LVDS (1.8V). HR banks extend to 3.3V for
+                  legacy interfaces.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <p class="quiz-q">3. What is the VCCINT voltage for Xilinx UltraScale+ devices?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>A</span> 1.8V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>B</span> 1.0V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>C</span> 0.85V
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>D</span> 1.2V
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb3">
+                  Correct! UltraScale+ devices run at 0.85V VCCINT (vs 1.0V for 7-series). The 16nm
+                  FinFET process enables this lower core voltage, significantly reducing dynamic
+                  power.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <p class="quiz-q">
+                  4. How many global clock buffers (BUFG) are available in Xilinx 7-series devices?
+                </p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>A</span> 8
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>B</span> 16
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>C</span> 32
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>D</span> 64
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb4">
+                  Correct! Xilinx 7-series provides 32 global clock buffers (BUFG) per device. This
+                  limits you to at most 32 simultaneously active global clock networks, which is
+                  usually more than enough.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <p class="quiz-q">5. What is an SLR in the context of Xilinx SSI FPGAs?</p>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>A</span> Shared Logic Resource — a pool of shared DSP and BRAM
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>B</span> Serializer Logic Region — transceiver grouping
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>C</span> Super Logic Region — one individual die in a multi-die SSI FPGA
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>D</span> Static Logic Register — a set of configuration bits
+                  </li>
+                </ul>
+                <div class="quiz-fb correct" id="fb5">
+                  Correct! SLR = Super Logic Region. Each SLR is a separate silicon die in an SSI
+                  FPGA. Signals crossing SLR boundaries travel over SLL (Super Long Lines) on the
+                  interposer and add latency.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div class="callout callout-info">
+                <strong>Power Supply Design Exercise</strong>
+                Design the power supply network for an Artix-7 XC7A200T on a custom PCB. Using the
+                Xilinx datasheet DS181 as reference, identify and specify:
+                <ul style="margin: 8px 0 0; padding-left: 18px; line-height: 2">
+                  <li>VCCINT voltage and typical current (medium utilization estimate)</li>
+                  <li>VCCAUX voltage and rail current</li>
+                  <li>VCCO for Bank 34 (used for DDR3L interface at 1.35V)</li>
+                  <li>VCCO for Bank 14 (used for 3.3V LVCMOS general IO)</li>
+                  <li>VCCBRAM voltage and typical current</li>
+                </ul>
+                Sketch the power sequencing order (which rail powers up first?) and identify which
+                rails can share a single voltage regulator.
+              </div>
+              <div class="lesson-nav">
+                <a href="06-fpga-families.html">← AMD Xilinx FPGA Families</a>
+                <a href="08-internal-architecture.html">FPGA Internal Architecture Overview →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-07';
+      const TOTAL = 25;
+      async function loadProgress() {
+        try {
+          var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+          var token = session.accessToken || session.token || '';
+          if (!token) return;
+          var r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          if (!r.ok) return;
+          var data = await r.json();
+          var done = 0;
+          data.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              var link = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (link) link.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          var pct = Math.round((done / TOTAL) * 100);
+          var sbp = document.getElementById('sb-pct');
+          var sbf = document.getElementById('sb-fill');
+          if (sbp) sbp.textContent = pct + '%';
+          if (sbf) sbf.style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        var session = JSON.parse(localStorage.getItem('re_session') || '{}');
+        var token = session.accessToken || session.token || '';
+        if (!token) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          var r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        var btn = document.getElementById('mark-complete-btn');
+        if (btn) {
+          btn.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          btn.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        var fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+    </script>
+  </body>
+</html>

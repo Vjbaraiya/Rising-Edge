@@ -1,0 +1,2047 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Site Health Report | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Admin/site-health/site-health.html"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0a0f1e;
+        --bg-card: #0f1729;
+        --bg-muted: #131c30;
+        --bg-hover: #1a2540;
+        --border: #1e2d47;
+        --border-med: #243452;
+        --text: #e2e8f0;
+        --text-sub: #94a3b8;
+        --text-faint: #64748b;
+        --primary: #3b82f6;
+        --primary-dim: rgba(59, 130, 246, 0.15);
+        --success: #10b981;
+        --success-dim: rgba(16, 185, 129, 0.12);
+        --warn: #f59e0b;
+        --warn-dim: rgba(245, 158, 11, 0.12);
+        --danger: #ef4444;
+        --danger-dim: rgba(239, 68, 68, 0.12);
+        --cyan: #06b6d4;
+        --cyan-dim: rgba(6, 182, 212, 0.1);
+        --purple: #a855f7;
+        --radius: 10px;
+        --radius-lg: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 0 0 80px;
+      }
+
+      /* ── header ── */
+      .site-header {
+        background: linear-gradient(160deg, #060d1a, #09152a);
+        border-bottom: 1px solid var(--border);
+        padding: 28px 40px 0;
+      }
+      .header-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary), var(--cyan));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .brand-name {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .brand-sub-title {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .gen-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        padding: 4px 12px;
+        border-radius: 20px;
+      }
+
+      /* score ring + summary */
+      .header-body {
+        display: flex;
+        align-items: flex-end;
+        gap: 40px;
+        flex-wrap: wrap;
+        padding-bottom: 28px;
+      }
+      .score-ring {
+        flex-shrink: 0;
+      }
+      .score-ring svg {
+        display: block;
+      }
+      .score-ring-text {
+        font-size: 2rem;
+        font-weight: 900;
+        fill: var(--text);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .score-ring-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        fill: var(--text-faint);
+        text-anchor: middle;
+        dominant-baseline: central;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .header-stats {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+        padding-bottom: 6px;
+      }
+      .hstat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .hstat-val {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .hstat-lbl {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .c-green {
+        color: var(--success);
+      }
+      .c-red {
+        color: var(--danger);
+      }
+      .c-warn {
+        color: var(--warn);
+      }
+      .c-blue {
+        color: var(--primary);
+      }
+      .c-cyan {
+        color: var(--cyan);
+      }
+
+      /* ── tab bar ── */
+      .tab-bar {
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0;
+      }
+      .tab-btn {
+        padding: 14px 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-faint);
+        border: none;
+        background: none;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+      }
+      .tab-btn.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      /* ── main layout ── */
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 32px 40px;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px 16px;
+        }
+        .site-header {
+          padding: 20px 16px 0;
+        }
+        .header-stats {
+          gap: 20px;
+        }
+      }
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      /* ── cards ── */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 24px;
+        margin-bottom: 16px;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+      }
+      .stat-card-val {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .stat-card-lbl {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+      .stat-card-sub {
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        margin-top: 4px;
+      }
+
+      /* ── section heading ── */
+      .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .section-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+
+      /* ── page table ── */
+      .page-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .page-table th {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        background: var(--bg-muted);
+      }
+      .page-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+        vertical-align: top;
+      }
+      .page-table tr:last-child td {
+        border-bottom: none;
+      }
+      .page-table tr:hover td {
+        background: var(--bg-hover);
+      }
+      .file-path {
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 0.8125rem;
+        color: var(--text);
+        font-weight: 600;
+      }
+      .file-dir {
+        color: var(--text-muted);
+      }
+
+      /* ── badges ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 20px;
+        white-space: nowrap;
+      }
+      .badge-green {
+        background: var(--success-dim);
+        color: var(--success);
+      }
+      .badge-red {
+        background: var(--danger-dim);
+        color: var(--danger);
+      }
+      .badge-warn {
+        background: var(--warn-dim);
+        color: var(--warn);
+      }
+      .badge-blue {
+        background: var(--primary-dim);
+        color: var(--primary);
+      }
+      .badge-cyan {
+        background: var(--cyan-dim);
+        color: var(--cyan);
+      }
+      .badge-gray {
+        background: rgba(100, 116, 139, 0.12);
+        color: var(--text-muted);
+      }
+      .badge-purple {
+        background: rgba(168, 85, 247, 0.12);
+        color: var(--purple);
+      }
+
+      /* ── issue list ── */
+      .issue-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .issue-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        padding: 5px 8px;
+        border-radius: 6px;
+        background: var(--bg-muted);
+      }
+      .issue-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+      .issue-dot.error {
+        background: var(--danger);
+      }
+      .issue-dot.warn {
+        background: var(--warn);
+      }
+
+      /* ── toggle row ── */
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+      }
+      .toggle-icon {
+        transition: transform 0.2s;
+        color: var(--text-faint);
+        font-size: 1.2rem;
+      }
+      .toggle-icon.open {
+        transform: rotate(90deg);
+      }
+      .collapsible {
+        display: none;
+      }
+      .collapsible.open {
+        display: block;
+      }
+
+      /* ── filter bar ── */
+      .filter-bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .filter-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-muted);
+        color: var(--text-sub);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .filter-btn:hover,
+      .filter-btn.active {
+        background: var(--primary-dim);
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      /* ── asset grid ── */
+      .asset-group {
+        margin-bottom: 24px;
+      }
+      .asset-group-title {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+      .asset-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 0.75rem;
+        color: var(--text-sub);
+        margin: 4px;
+      }
+      .asset-pill .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--success);
+        flex-shrink: 0;
+      }
+
+      /* ── donut chart ── */
+      .donut-wrap {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
+      .donut-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.875rem;
+      }
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* ── recommendation cards ── */
+      .rec-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 18px 22px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 16px;
+      }
+      .rec-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.25rem;
+      }
+      .rec-body {
+        flex: 1;
+      }
+      .rec-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .rec-desc {
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+      }
+      .rec-priority {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-left: 8px;
+      }
+
+      /* ── progress bar ── */
+      .prog-bar {
+        height: 6px;
+        background: var(--bg-muted);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .prog-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.6s;
+      }
+
+      /* ── grid ── */
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 900px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── folder breakdown ── */
+      .folder-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .folder-row:last-child {
+        border-bottom: none;
+      }
+      .folder-name {
+        font-family: monospace;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text);
+        min-width: 160px;
+      }
+      .folder-bar-wrap {
+        flex: 1;
+        height: 8px;
+        background: var(--bg-muted);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .folder-bar {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+      }
+      .folder-count {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        min-width: 40px;
+        text-align: right;
+      }
+
+      /* scrollable table wrapper */
+      .table-wrap {
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-top">
+          <div class="brand">
+            <div class="brand-icon">
+              <svg
+                width="22"
+                height="22"
+                fill="none"
+                stroke="#fff"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+            <div>
+              <div class="brand-name">Rising Edge Technologies</div>
+              <div class="brand-sub-title">Site Health Report</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+            <div class="gen-time" id="gen-time">Generated: 2026-06-26</div>
+            <button
+              id="run-audit-btn"
+              onclick="startLiveAudit()"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 5px 14px;
+                border-radius: 20px;
+                border: 1px solid rgba(59, 130, 246, 0.4);
+                background: rgba(59, 130, 246, 0.08);
+                color: #60a5fa;
+                font-size: 0.8125rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.15s;
+              "
+            >
+              <svg
+                width="13"
+                height="13"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Run Audit
+            </button>
+            <span
+              id="run-audit-status"
+              style="font-size: 0.75rem; color: var(--text-muted); display: none"
+            ></span>
+          </div>
+        </div>
+        <!-- Live audit progress bar (hidden until run) -->
+        <div
+          id="audit-prog-bar"
+          style="display: none; padding: 10px 40px 0; max-width: 1280px; margin: 0 auto"
+        >
+          <div
+            style="
+              height: 4px;
+              background: rgba(255, 255, 255, 0.06);
+              border-radius: 2px;
+              overflow: hidden;
+              margin-bottom: 4px;
+            "
+          >
+            <div
+              id="audit-prog-fill"
+              style="
+                height: 100%;
+                background: linear-gradient(90deg, #3b82f6, #06b6d4);
+                border-radius: 2px;
+                width: 0%;
+                transition: width 0.3s;
+              "
+            ></div>
+          </div>
+          <div id="audit-prog-text" style="font-size: 0.75rem; color: var(--text-muted)">
+            Initialising…
+          </div>
+        </div>
+
+        <div class="header-body">
+          <!-- Score ring -->
+          <div class="score-ring">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle
+                cx="60"
+                cy="60"
+                r="50"
+                fill="none"
+                stroke="rgba(255,255,255,.06)"
+                stroke-width="10"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r="50"
+                fill="none"
+                stroke="#10b981"
+                stroke-width="10"
+                stroke-dasharray="314"
+                stroke-dashoffset="47"
+                stroke-linecap="round"
+                transform="rotate(-90 60 60)"
+              />
+              <text x="60" y="54" class="score-ring-text">85</text>
+              <text x="60" y="72" class="score-ring-label">/ 100</text>
+            </svg>
+          </div>
+
+          <div class="header-stats">
+            <div class="hstat">
+              <span class="hstat-val c-green">33</span>
+              <span class="hstat-lbl">Healthy Pages</span>
+            </div>
+            <div class="hstat">
+              <span class="hstat-val c-warn">1</span>
+              <span class="hstat-lbl">Degraded</span>
+            </div>
+            <div class="hstat">
+              <span class="hstat-val c-red">1</span>
+              <span class="hstat-lbl">Legacy</span>
+            </div>
+            <div class="hstat">
+              <span class="hstat-val c-blue">39</span>
+              <span class="hstat-lbl">Total Files</span>
+            </div>
+            <div class="hstat">
+              <span class="hstat-val c-cyan">94%</span>
+              <span class="hstat-lbl">Pass Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="showTab('overview', this)">Overview</button>
+          <button class="tab-btn" onclick="showTab('pages', this)">All Pages</button>
+          <button class="tab-btn" onclick="showTab('issues', this)">Issues</button>
+          <button class="tab-btn" onclick="showTab('assets', this)">Assets</button>
+          <button class="tab-btn" onclick="showTab('recs', this)">Recommendations</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════ OVERVIEW ═══ -->
+    <div class="container">
+      <div class="panel active" id="panel-overview">
+        <div class="card-grid">
+          <div class="stat-card">
+            <div class="stat-card-val c-green">33</div>
+            <div class="stat-card-lbl">Healthy Pages</div>
+            <div class="stat-card-sub">No errors or warnings</div>
+            <div class="prog-bar">
+              <div class="prog-fill" style="width: 94%; background: var(--success)"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val c-warn">1</div>
+            <div class="stat-card-lbl">Degraded</div>
+            <div class="stat-card-sub">content.html — 6 missing SI modules</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val c-blue">4</div>
+            <div class="stat-card-lbl">Minimal / Stubs</div>
+            <div class="stat-card-sub">index.html, hello.html, pages/test.html, architecture/</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" style="color: var(--cyan)">8</div>
+            <div class="stat-card-lbl">CSS Files</div>
+            <div class="stat-card-sub">All present and accounted for</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" style="color: var(--purple)">1</div>
+            <div class="stat-card-lbl">JS Bundle</div>
+            <div class="stat-card-sub">core.js — single source of truth</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val c-green">0</div>
+            <div class="stat-card-lbl">Truncated Files</div>
+            <div class="stat-card-sub">4 fixed this session</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val c-green">85</div>
+            <div class="stat-card-lbl">Health Score</div>
+            <div class="stat-card-sub">Good — minor issues in 2 files</div>
+          </div>
+        </div>
+
+        <!-- Folder breakdown -->
+        <div class="card">
+          <div class="section-heading">
+            <span class="section-title">Pages by Folder</span>
+          </div>
+          <div id="folder-breakdown"></div>
+        </div>
+
+        <!-- Donut breakdown -->
+        <div class="two-col">
+          <div class="card">
+            <div class="section-heading">
+              <span class="section-title">Page Status Distribution</span>
+            </div>
+            <div class="donut-wrap">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="50"
+                  fill="none"
+                  stroke="var(--success)"
+                  stroke-width="24"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="50"
+                  fill="none"
+                  stroke="var(--warn)"
+                  stroke-width="24"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="290"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="50"
+                  fill="none"
+                  stroke="var(--danger)"
+                  stroke-width="24"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="305"
+                  transform="rotate(-90 70 70)"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="50"
+                  fill="none"
+                  stroke="rgba(100,116,139,.3)"
+                  stroke-width="24"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="315"
+                  transform="rotate(-90 70 70)"
+                />
+                <text
+                  x="70"
+                  y="65"
+                  style="
+                    font-size: 1.6rem;
+                    font-weight: 800;
+                    fill: var(--text);
+                    text-anchor: middle;
+                    dominant-baseline: central;
+                  "
+                >
+                  85%
+                </text>
+                <text
+                  x="70"
+                  y="83"
+                  style="
+                    font-size: 0.55rem;
+                    font-weight: 700;
+                    fill: var(--text-faint);
+                    text-anchor: middle;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                  "
+                >
+                  PASS RATE
+                </text>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: var(--success)"></div>
+                  <span>Healthy (33)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: var(--warn)"></div>
+                  <span>Degraded (1)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: var(--danger)"></div>
+                  <span>Legacy (1)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: rgba(100, 116, 139, 0.4)"></div>
+                  <span>Minimal / Stub (4)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-heading">
+              <span class="section-title">Fixes Applied This Session</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px 12px;
+                  background: var(--bg-muted);
+                  border-radius: 8px;
+                "
+              >
+                <span style="color: var(--success); font-size: 1.1rem">✓</span>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 600">login.html</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted)">
+                    Restored missing &lt;/html&gt; closing tag
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px 12px;
+                  background: var(--bg-muted);
+                  border-radius: 8px;
+                "
+              >
+                <span style="color: var(--success); font-size: 1.1rem">✓</span>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 600">verify-email.html</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted)">
+                    Restored truncated startResendCooldown() + closing tags
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px 12px;
+                  background: var(--bg-muted);
+                  border-radius: 8px;
+                "
+              >
+                <span style="color: var(--success); font-size: 1.1rem">✓</span>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 600">Admin/training-admin.html</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted)">
+                    Closed truncated JS string + &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px 12px;
+                  background: var(--bg-muted);
+                  border-radius: 8px;
+                "
+              >
+                <span style="color: var(--success); font-size: 1.1rem">✓</span>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 600">
+                    training-admin.html (root)
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted)">
+                    Closed truncated JS string + &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px 12px;
+                  background: var(--success-dim);
+                  border-radius: 8px;
+                  border: 1px solid rgba(16, 185, 129, 0.2);
+                "
+              >
+                <span style="color: var(--success); font-size: 1.1rem">✓</span>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 600; color: var(--success)">
+                    0 truncated files remaining
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-sub)">
+                    All active pages have proper HTML structure
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ ALL PAGES ═══ -->
+      <div class="panel" id="panel-pages">
+        <div class="filter-bar" id="filter-bar"></div>
+        <div class="card" style="padding: 0">
+          <div class="table-wrap">
+            <table class="page-table" id="pages-table">
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Status</th>
+                  <th>Lines</th>
+                  <th>Size</th>
+                  <th>Errors</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody id="pages-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ ISSUES ═══ -->
+      <div class="panel" id="panel-issues">
+        <div id="issues-list"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ ASSETS ═══ -->
+      <div class="panel" id="panel-assets">
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="section-heading">
+                <span class="section-title">CSS Files</span>
+                <span class="badge badge-green" id="css-badge">8 files</span>
+              </div>
+              <div class="asset-group">
+                <div id="css-assets"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="section-heading">
+                <span class="section-title">JavaScript</span>
+                <span class="badge badge-green" id="js-badge">1 bundle</span>
+              </div>
+              <div id="js-assets"></div>
+              <div
+                style="
+                  margin-top: 14px;
+                  padding: 12px 14px;
+                  background: var(--bg-muted);
+                  border-radius: 8px;
+                  font-size: 0.8125rem;
+                  color: var(--text-sub);
+                "
+              >
+                <strong style="color: var(--text)">Architecture:</strong> Single
+                <code style="color: var(--cyan)">core.js</code> handles nav, footer, data layer,
+                theme, modals, components injection, and all shared utilities. All 35 active pages
+                reference it.
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="section-heading">
+                <span class="section-title">Images</span>
+                <span class="badge badge-warn" id="img-badge">1 image</span>
+              </div>
+              <div id="img-assets"></div>
+              <div
+                style="
+                  margin-top: 14px;
+                  padding: 12px 14px;
+                  background: var(--warn-dim);
+                  border: 1px solid rgba(245, 158, 11, 0.2);
+                  border-radius: 8px;
+                  font-size: 0.8125rem;
+                  color: var(--text-sub);
+                "
+              >
+                <strong style="color: var(--warn)">Note:</strong> Only 1 image asset (RE_Logo.png).
+                All icons are inline SVG — no external image dependencies.
+              </div>
+            </div>
+            <div class="card">
+              <div class="section-heading">
+                <span class="section-title">main.css imports</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="font-size: 0.8125rem; color: var(--text-sub); margin-bottom: 6px">
+                  main.css bundles all partials in order:
+                </div>
+                <div
+                  style="
+                    font-family: monospace;
+                    font-size: 0.8rem;
+                    color: var(--text-muted);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                  "
+                >
+                  <span
+                    >@import tokens.css
+                    <span style="color: var(--text-muted)">— design tokens</span></span
+                  >
+                  <span
+                    >@import base.css
+                    <span style="color: var(--text-muted)">— reset + typography</span></span
+                  >
+                  <span
+                    >@import components.css
+                    <span style="color: var(--text-muted)">— buttons, cards, inputs</span></span
+                  >
+                  <span
+                    >@import layouts.css
+                    <span style="color: var(--text-muted)">— nav, footer, grid</span></span
+                  >
+                  <span
+                    >@import themes.css
+                    <span style="color: var(--text-muted)">— light/night overrides</span></span
+                  >
+                  <span
+                    >@import utilities.css
+                    <span style="color: var(--text-muted)">— helpers</span></span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page size chart -->
+        <div class="card">
+          <div class="section-heading">
+            <span class="section-title">Largest Pages (by file size)</span>
+          </div>
+          <div id="size-chart"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════ RECS ═══ -->
+      <div class="panel" id="panel-recs">
+        <div id="recs-list"></div>
+      </div>
+    </div>
+    <!-- /.container -->
+
+    <script>
+      var AUDIT = {
+        generated: '2026-06-26',
+        total_html: 39,
+        active_pages: 35,
+        minimal_pages: 4,
+        total_errors: 21,
+        total_warns: 1,
+        healthy_active: 33,
+        css_files: [
+          'assets/css/admin.css',
+          'assets/css/base.css',
+          'assets/css/components.css',
+          'assets/css/layouts.css',
+          'assets/css/main.css',
+          'assets/css/themes.css',
+          'assets/css/tokens.css',
+          'assets/css/utilities.css',
+        ],
+        js_files: ['assets/js/core.js'],
+        img_files: ['assets/images/RE_Logo.png'],
+        folders: ['/ (root)', 'Admin/', 'User/', 'Trainings/SI/', 'architecture/', 'pages/'],
+        results: [
+          {
+            file: 'Admin/analytics.html',
+            lines: 169,
+            size_kb: 12.9,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'Admin/audit.html', lines: 127, size_kb: 11.8, status: 'healthy', issues: [] },
+          {
+            file: 'Admin/certificates.html',
+            lines: 126,
+            size_kb: 13.1,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'Admin/coupons.html', lines: 143, size_kb: 13.0, status: 'healthy', issues: [] },
+          { file: 'Admin/index.html', lines: 202, size_kb: 17.2, status: 'healthy', issues: [] },
+          {
+            file: 'Admin/resources-admin.html',
+            lines: 402,
+            size_kb: 38.9,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'Admin/settings.html', lines: 243, size_kb: 17.5, status: 'healthy', issues: [] },
+          {
+            file: 'Admin/training-admin.html',
+            lines: 340,
+            size_kb: 21.5,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'Admin/users.html', lines: 159, size_kb: 13.6, status: 'healthy', issues: [] },
+          {
+            file: 'User/certificates.html',
+            lines: 172,
+            size_kb: 12.9,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'User/dashboard.html', lines: 311, size_kb: 24.8, status: 'healthy', issues: [] },
+          {
+            file: 'User/my-learning.html',
+            lines: 200,
+            size_kb: 14.2,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'User/profile.html', lines: 229, size_kb: 16.2, status: 'healthy', issues: [] },
+          { file: 'User/settings.html', lines: 197, size_kb: 16.2, status: 'healthy', issues: [] },
+          { file: 'about.html', lines: 105, size_kb: 12.4, status: 'healthy', issues: [] },
+          { file: 'admin.html', lines: 602, size_kb: 30.6, status: 'healthy', issues: [] },
+          {
+            file: 'architecture/auth-system-design.html',
+            lines: 1965,
+            size_kb: 86.7,
+            status: 'minimal',
+            issues: [],
+          },
+          { file: 'case-studies.html', lines: 130, size_kb: 13.5, status: 'healthy', issues: [] },
+          { file: 'consultancy.html', lines: 120, size_kb: 11.3, status: 'healthy', issues: [] },
+          { file: 'contact.html', lines: 131, size_kb: 11.0, status: 'healthy', issues: [] },
+          {
+            file: 'content.html',
+            lines: 77,
+            size_kb: 17.3,
+            status: 'degraded',
+            issues: [
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/04-reflections.html (module not built yet)',
+              },
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/05-crosstalk.html (module not built yet)',
+              },
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/07-differential-signaling.html (module not built yet)',
+              },
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/08-eye-diagrams.html (module not built yet)',
+              },
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/09-jitter.html (module not built yet)',
+              },
+              {
+                sev: 'error',
+                type: 'broken_link',
+                msg: 'Broken link \u2192 Trainings/SI/10-via-modeling.html (module not built yet)',
+              },
+            ],
+          },
+          { file: 'dashboard.html', lines: 591, size_kb: 27.9, status: 'healthy', issues: [] },
+          {
+            file: 'forgot-password.html',
+            lines: 291,
+            size_kb: 13.2,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'hello.html', lines: 1, size_kb: 0.0, status: 'minimal', issues: [] },
+          { file: 'home.html', lines: 143, size_kb: 9.2, status: 'healthy', issues: [] },
+          { file: 'index.html', lines: 5, size_kb: 0.2, status: 'minimal', issues: [] },
+          { file: 'login.html', lines: 481, size_kb: 22.0, status: 'healthy', issues: [] },
+          { file: 'my-learning.html', lines: 143, size_kb: 13.5, status: 'healthy', issues: [] },
+          { file: 'pages/test.html', lines: 1, size_kb: 0.0, status: 'minimal', issues: [] },
+          { file: 'profile.html', lines: 109, size_kb: 12.2, status: 'healthy', issues: [] },
+          { file: 'register.html', lines: 425, size_kb: 20.3, status: 'healthy', issues: [] },
+          {
+            file: 'resources-admin.html',
+            lines: 389,
+            size_kb: 36.1,
+            status: 'healthy',
+            issues: [],
+          },
+          { file: 'resources.html', lines: 96, size_kb: 14.6, status: 'healthy', issues: [] },
+          { file: 'review-tool.html', lines: 119, size_kb: 16.0, status: 'healthy', issues: [] },
+          { file: 'tools.html', lines: 64, size_kb: 2.9, status: 'healthy', issues: [] },
+          { file: 'training-admin.html', lines: 327, size_kb: 18.2, status: 'healthy', issues: [] },
+          { file: 'trainings.html', lines: 55, size_kb: 23.2, status: 'healthy', issues: [] },
+          { file: 'verify-email.html', lines: 353, size_kb: 16.2, status: 'healthy', issues: [] },
+        ],
+      };
+
+      // Holds whichever audit snapshot is currently rendered — the static
+      // baked-in AUDIT object until a live scan completes, then the live
+      // discovered-and-checked result set (all render functions read from
+      // this, not the AUDIT const directly, so a live scan can refresh
+      // every tab).
+      var CURRENT_AUDIT = AUDIT;
+
+      // ── Helpers ────────────────────────────────────────────────────────────────────
+      function statusBadge(s) {
+        var m = {
+          healthy: '<span class="badge badge-green">✓ Healthy</span>',
+          degraded: '<span class="badge badge-warn">⚠ Degraded</span>',
+          legacy: '<span class="badge badge-red">✗ Legacy</span>',
+          missing: '<span class="badge badge-red">✗ Missing</span>',
+          minimal: '<span class="badge badge-gray">— Minimal</span>',
+        };
+        return m[s] || '';
+      }
+
+      // ── Tabs ───────────────────────────────────────────────────────────────────────
+      function showTab(name, btn) {
+        document.querySelectorAll('.panel').forEach(function (p) {
+          p.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(function (b) {
+          b.classList.remove('active');
+        });
+        document.getElementById('panel-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+      }
+
+      // ── Overview: folder breakdown ─────────────────────────────────────────────────
+      function renderFolderBreakdown(auditObj) {
+        var folders = {};
+        auditObj.results.forEach(function (r) {
+          var parts = r.file.split('/');
+          var folder = parts.length > 1 ? parts[0] + '/' : '/ (root)';
+          folders[folder] = (folders[folder] || 0) + 1;
+        });
+        var max = Math.max.apply(null, Object.values(folders));
+        var html = '';
+        Object.keys(folders)
+          .sort()
+          .forEach(function (f) {
+            var n = folders[f];
+            var pct = Math.round((n / max) * 100);
+            html +=
+              '<div class="folder-row">' +
+              '<div class="folder-name">' +
+              f +
+              '</div>' +
+              '<div class="folder-bar-wrap"><div class="folder-bar" style="width:' +
+              pct +
+              '%"></div></div>' +
+              '<div class="folder-count">' +
+              n +
+              ' pages</div>' +
+              '</div>';
+          });
+        document.getElementById('folder-breakdown').innerHTML = html;
+      }
+      renderFolderBreakdown(CURRENT_AUDIT);
+
+      // ── Pages table ────────────────────────────────────────────────────────────────
+      var CURRENT_PAGE_FILTER = 'all';
+      function renderPagesTable(filter) {
+        CURRENT_PAGE_FILTER = filter;
+        var rows = CURRENT_AUDIT.results.filter(function (r) {
+          return filter === 'all' || r.status === filter;
+        });
+        var html = rows
+          .map(function (r) {
+            var parts = r.file.split('/');
+            var fname = parts.pop();
+            var fdir = parts.length ? parts.join('/') + '/' : '';
+            var errs = r.issues.filter(function (i) {
+              return i.sev === 'error';
+            }).length;
+            var warns = r.issues.filter(function (i) {
+              return i.sev === 'warn';
+            }).length;
+            var issueCount =
+              errs > 0
+                ? '<span class="badge badge-red">' +
+                  errs +
+                  ' error' +
+                  (errs > 1 ? 's' : '') +
+                  '</span>'
+                : warns > 0
+                  ? '<span class="badge badge-warn">' +
+                    warns +
+                    ' warning' +
+                    (warns > 1 ? 's' : '') +
+                    '</span>'
+                  : '<span style="color:var(--text-muted);font-size:.8125rem">—</span>';
+            var details = r.issues.length
+              ? '<div class="issue-list">' +
+                r.issues
+                  .map(function (i) {
+                    return (
+                      '<div class="issue-item"><div class="issue-dot ' +
+                      i.sev +
+                      '"></div><span>' +
+                      i.msg +
+                      '</span></div>'
+                    );
+                  })
+                  .join('') +
+                '</div>'
+              : '';
+            return (
+              '<tr data-status="' +
+              r.status +
+              '">' +
+              '<td><span class="file-path"><span class="file-dir">' +
+              fdir +
+              '</span>' +
+              fname +
+              '</span></td>' +
+              '<td>' +
+              statusBadge(r.status) +
+              '</td>' +
+              '<td style="color:var(--text-faint)">' +
+              r.lines +
+              '</td>' +
+              '<td style="color:var(--text-faint)">' +
+              r.size_kb +
+              'kb</td>' +
+              '<td>' +
+              issueCount +
+              '</td>' +
+              '<td>' +
+              details +
+              '</td>' +
+              '</tr>'
+            );
+          })
+          .join('');
+        document.getElementById('pages-tbody').innerHTML = html;
+      }
+
+      var FILTER_LABELS = {
+        all: 'All',
+        healthy: '✓ Healthy',
+        degraded: '⚠ Degraded',
+        legacy: '✗ Legacy',
+        missing: '✗ Missing',
+        minimal: '— Minimal',
+      };
+      var FILTER_ORDER = ['all', 'healthy', 'degraded', 'legacy', 'missing', 'minimal'];
+
+      function renderFilterBar(auditObj) {
+        var counts = { all: auditObj.results.length };
+        auditObj.results.forEach(function (r) {
+          counts[r.status] = (counts[r.status] || 0) + 1;
+        });
+        var html = FILTER_ORDER.filter(function (f) {
+          return f === 'all' || counts[f] > 0;
+        })
+          .map(function (f, idx) {
+            return (
+              '<button class="filter-btn' +
+              (idx === 0 ? ' active' : '') +
+              '" onclick="filterPages(\'' +
+              f +
+              '\', this)">' +
+              FILTER_LABELS[f] +
+              ' (' +
+              (counts[f] || 0) +
+              ')</button>'
+            );
+          })
+          .join('');
+        document.getElementById('filter-bar').innerHTML = html;
+      }
+
+      function filterPages(f, btn) {
+        document.querySelectorAll('.filter-btn').forEach(function (b) {
+          b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        renderPagesTable(f);
+      }
+
+      renderFilterBar(CURRENT_AUDIT);
+      renderPagesTable('all');
+
+      // ── Issues panel ───────────────────────────────────────────────────────────────
+      function renderIssuesPanel(auditObj) {
+        var html = '';
+        var problemPages = auditObj.results.filter(function (r) {
+          return r.issues.length > 0;
+        });
+        var healthyCount = auditObj.results.filter(function (r) {
+          return r.status === 'healthy';
+        }).length;
+        if (!problemPages.length) {
+          html =
+            '<div class="card" style="text-align:center;padding:48px"><div style="font-size:3rem;margin-bottom:12px">✅</div><div style="font-size:1.125rem;font-weight:700">No issues found</div><div style="color:var(--text-sub);margin-top:8px">All ' +
+            auditObj.results.length +
+            ' pages pass structure, asset, and link checks.</div></div>';
+        } else {
+          html +=
+            '<div class="card" style="padding:12px 20px;margin-bottom:20px;background:var(--danger-dim);border-color:rgba(239,68,68,.3)">' +
+            '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.25rem">⚠️</span>' +
+            '<div><div style="font-weight:700;color:var(--text)">' +
+            problemPages.length +
+            ' page' +
+            (problemPages.length > 1 ? 's' : '') +
+            ' with issues</div>' +
+            '<div style="font-size:.8125rem;color:var(--text-sub)">' +
+            auditObj.results.filter(function (r) {
+              return r.status === 'legacy' || r.status === 'missing';
+            }).length +
+            ' broken/missing, ' +
+            auditObj.results.filter(function (r) {
+              return r.status === 'degraded';
+            }).length +
+            ' degraded. ' +
+            healthyCount +
+            ' pages are healthy.</div>' +
+            '</div></div>' +
+            '</div>';
+          problemPages.forEach(function (r) {
+            var errs = r.issues.filter(function (i) {
+              return i.sev === 'error';
+            });
+            var warns = r.issues.filter(function (i) {
+              return i.sev === 'warn';
+            });
+            html +=
+              '<div class="card" style="margin-bottom:16px">' +
+              '<div class="toggle-row" onclick="toggleCard(this)">' +
+              '<div style="display:flex;align-items:center;gap:12px">' +
+              '<span class="file-path" style="font-size:.9375rem">' +
+              r.file +
+              '</span>' +
+              statusBadge(r.status) +
+              (errs.length
+                ? '<span class="badge badge-red">' +
+                  errs.length +
+                  ' error' +
+                  (errs.length > 1 ? 's' : '') +
+                  '</span>'
+                : '') +
+              (warns.length
+                ? '<span class="badge badge-warn">' +
+                  warns.length +
+                  ' warning' +
+                  (warns.length > 1 ? 's' : '') +
+                  '</span>'
+                : '') +
+              '</div>' +
+              '<span class="toggle-icon">›</span>' +
+              '</div>' +
+              '<div class="collapsible" style="margin-top:14px">' +
+              '<div class="issue-list">' +
+              r.issues
+                .map(function (i) {
+                  return (
+                    '<div class="issue-item">' +
+                    '<div class="issue-dot ' +
+                    i.sev +
+                    '"></div>' +
+                    '<div><span style="font-weight:600;color:' +
+                    (i.sev === 'error' ? 'var(--danger)' : 'var(--warn)') +
+                    '">[' +
+                    i.type +
+                    ']</span> ' +
+                    i.msg +
+                    '</div>' +
+                    '</div>'
+                  );
+                })
+                .join('') +
+              '</div>' +
+              '</div>' +
+              '</div>';
+          });
+        }
+        document.getElementById('issues-list').innerHTML = html;
+      }
+      renderIssuesPanel(CURRENT_AUDIT);
+
+      function toggleCard(el) {
+        var icon = el.querySelector('.toggle-icon');
+        var body = el.nextElementSibling;
+        body.classList.toggle('open');
+        icon.classList.toggle('open');
+      }
+
+      // ── Assets panel ───────────────────────────────────────────────────────────────
+      // auditObj.css_results / js_results / img_results (from a live scan) carry
+      // per-file pass/fail; falls back to plain name arrays (css_files/js_files/
+      // img_files) from the static snapshot, rendered as all-green.
+      function renderAssetsPanel(auditObj) {
+        function pills(list) {
+          return list
+            .map(function (item) {
+              var ok = item.ok !== false;
+              var dotStyle = ok ? '' : ' style="background:var(--danger)"';
+              return (
+                '<div class="asset-pill"' +
+                (ok ? '' : ' style="border-color:rgba(239,68,68,.35)"') +
+                '><div class="dot"' +
+                dotStyle +
+                '></div>' +
+                item.path +
+                (ok ? '' : ' <span style="color:var(--danger)">(unreachable)</span>') +
+                '</div>'
+              );
+            })
+            .join('');
+        }
+        function toItems(resultsArr, fallbackNames) {
+          if (resultsArr) {
+            return resultsArr.map(function (r) {
+              return { path: r.path, ok: r.found && r.assessment.ok !== false };
+            });
+          }
+          return (fallbackNames || []).map(function (f) {
+            return { path: f, ok: true };
+          });
+        }
+
+        var cssItems = toItems(auditObj.css_results, auditObj.css_files);
+        var jsItems = toItems(auditObj.js_results, auditObj.js_files);
+        var imgItems = toItems(auditObj.img_results, auditObj.img_files);
+
+        document.getElementById('css-assets').innerHTML = pills(cssItems);
+        document.getElementById('js-assets').innerHTML = pills(jsItems);
+        document.getElementById('img-assets').innerHTML = pills(imgItems);
+
+        var cssBadge = document.getElementById('css-badge');
+        if (cssBadge)
+          cssBadge.textContent = cssItems.length + ' file' + (cssItems.length === 1 ? '' : 's');
+        var jsBadge = document.getElementById('js-badge');
+        if (jsBadge)
+          jsBadge.textContent = jsItems.length + ' file' + (jsItems.length === 1 ? '' : 's');
+        var imgBadge = document.getElementById('img-badge');
+        if (imgBadge)
+          imgBadge.textContent = imgItems.length + ' image' + (imgItems.length === 1 ? '' : 's');
+
+        // Size chart
+        var sorted = auditObj.results
+          .slice()
+          .sort(function (a, b) {
+            return b.size_kb - a.size_kb;
+          })
+          .slice(0, 12);
+        if (!sorted.length) {
+          document.getElementById('size-chart').innerHTML =
+            '<div style="color:var(--text-sub);font-size:.875rem">No data yet.</div>';
+          return;
+        }
+        var maxKb = sorted[0].size_kb || 1;
+        var html = sorted
+          .map(function (r) {
+            var pct = Math.round((r.size_kb / maxKb) * 100);
+            var color =
+              r.size_kb > 80 ? 'var(--warn)' : r.size_kb > 30 ? 'var(--cyan)' : 'var(--primary)';
+            return (
+              '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">' +
+              '<div style="min-width:220px;font-family:monospace;font-size:.75rem;color:var(--text-sub)">' +
+              r.file +
+              '</div>' +
+              '<div style="flex:1;height:14px;background:var(--bg-muted);border-radius:7px;overflow:hidden">' +
+              '<div style="height:100%;width:' +
+              pct +
+              '%;background:' +
+              color +
+              ';border-radius:7px"></div>' +
+              '</div>' +
+              '<div style="min-width:54px;font-size:.8125rem;color:var(--text-muted);text-align:right">' +
+              r.size_kb +
+              'kb</div>' +
+              '</div>'
+            );
+          })
+          .join('');
+        document.getElementById('size-chart').innerHTML = html;
+      }
+      renderAssetsPanel(CURRENT_AUDIT);
+
+      // ── Recommendations ────────────────────────────────────────────────────────────
+      var STATIC_RECS = [
+        {
+          priority: 'high',
+          icon: '🔗',
+          title: 'Build missing SI module pages referenced in content.html',
+          desc: "content.html links to 6 SI module pages that don't exist yet: 04-reflections.html, 05-crosstalk.html, 07-differential-signaling.html, 08-eye-diagrams.html, 09-jitter.html, 10-via-modeling.html. Until these are built the links are dead.",
+        },
+        {
+          priority: 'medium',
+          icon: '🗂️',
+          title: 'Archive or delete stub files (hello.html, pages/test.html)',
+          desc: "hello.html and pages/test.html are both 1-line empty stubs. They don't belong in a production deployment. Delete them or move to a /dev/ directory.",
+        },
+        {
+          priority: 'medium',
+          icon: '🖼️',
+          title: 'Add favicon.ico',
+          desc: "No favicon.ico exists in the site root. Browsers request a favicon on every page load (404 if missing). Add a 32x32 favicon.ico to the site root and reference it in core.js's buildNavHTML().",
+        },
+        {
+          priority: 'low',
+          icon: '🚿',
+          title: 'Remove deprecated root-level user pages',
+          desc: 'dashboard.html, profile.html, my-learning.html, training-admin.html, and resources-admin.html still exist in the root alongside their /User/ and /Admin/ counterparts. They work fine but create ambiguity. Consider redirecting them to the new locations.',
+        },
+        {
+          priority: 'low',
+          icon: '🔒',
+          title: 'Add auth guard to legacy root dashboard.html',
+          desc: 'The root dashboard.html does not redirect unauthenticated users to login.html the way User/dashboard.html does. If users navigate directly to it they bypass the auth guard.',
+        },
+      ];
+
+      var priorityBadge = {
+        critical: '<span class="badge badge-red rec-priority">Critical</span>',
+        high: '<span class="badge badge-warn rec-priority">High</span>',
+        medium: '<span class="badge badge-blue rec-priority">Medium</span>',
+        low: '<span class="badge badge-gray rec-priority">Low</span>',
+      };
+
+      function renderRecsList(recs) {
+        var html = recs
+          .map(function (r) {
+            return (
+              '<div class="rec-card">' +
+              '<div class="rec-icon" style="background:rgba(0,0,0,.2);font-size:1.4rem">' +
+              r.icon +
+              '</div>' +
+              '<div class="rec-body">' +
+              '<div class="rec-title">' +
+              r.title +
+              priorityBadge[r.priority] +
+              '</div>' +
+              '<div class="rec-desc">' +
+              r.desc +
+              '</div>' +
+              '</div>' +
+              '</div>'
+            );
+          })
+          .join('');
+        document.getElementById('recs-list').innerHTML = html;
+      }
+      renderRecsList(STATIC_RECS);
+
+      // Builds recommendations from a live scan's actual issues rather than
+      // the hand-written STATIC_RECS list, so they stay accurate as pages change.
+      function buildLiveRecs(liveAudit) {
+        var recs = [];
+        var brokenLinkPages = liveAudit.results.filter(function (r) {
+          return r.issues.some(function (i) {
+            return i.type === 'broken_link';
+          });
+        });
+        if (brokenLinkPages.length) {
+          recs.push({
+            priority: 'high',
+            icon: '🔗',
+            title: brokenLinkPages.length + ' page(s) have broken internal links',
+            desc:
+              brokenLinkPages
+                .slice(0, 8)
+                .map(function (r) {
+                  return r.file;
+                })
+                .join(', ') +
+              (brokenLinkPages.length > 8 ? ', …' : '') +
+              '. See the Issues tab for details.',
+          });
+        }
+        var missingPages = liveAudit.results.filter(function (r) {
+          return r.status === 'missing';
+        });
+        if (missingPages.length) {
+          recs.push({
+            priority: 'high',
+            icon: '🚫',
+            title: missingPages.length + ' discovered file(s) failed to load',
+            desc: missingPages
+              .slice(0, 8)
+              .map(function (r) {
+                return r.file;
+              })
+              .join(', '),
+          });
+        }
+        var brokenAssets = (liveAudit.css_results || [])
+          .concat(liveAudit.js_results || [])
+          .filter(function (r) {
+            return !r.found || r.assessment.ok === false;
+          });
+        if (brokenAssets.length) {
+          recs.push({
+            priority: 'medium',
+            icon: '🧩',
+            title: brokenAssets.length + ' CSS/JS asset(s) unreachable or broken',
+            desc: brokenAssets
+              .slice(0, 8)
+              .map(function (r) {
+                return r.path;
+              })
+              .join(', '),
+          });
+        }
+        var stubPages = liveAudit.results.filter(function (r) {
+          return r.lines > 0 && r.lines < 10;
+        });
+        if (stubPages.length) {
+          recs.push({
+            priority: 'low',
+            icon: '🗂️',
+            title: stubPages.length + ' very short / stub page(s) found',
+            desc: stubPages
+              .map(function (r) {
+                return r.file;
+              })
+              .join(', '),
+          });
+        }
+        if (!recs.length) {
+          recs.push({
+            priority: 'low',
+            icon: '✅',
+            title: 'No issues found across the full site scan',
+            desc:
+              'All ' +
+              liveAudit.results.length +
+              ' pages plus every discovered CSS, JS, and image file passed their checks.',
+          });
+        }
+        return recs;
+      }
+
+      // Update gen time
+      document.getElementById('gen-time').textContent =
+        'Generated: ' +
+        new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      /* ── Live Audit (Run Audit button) ───────────────────────────────── */
+      /* Dynamically loads audit.js from Admin/site-health/audit.js        */
+      function startLiveAudit() {
+        var btn = document.getElementById('run-audit-btn');
+        var statusEl = document.getElementById('run-audit-status');
+        var barEl = document.getElementById('audit-prog-bar');
+        var fillEl = document.getElementById('audit-prog-fill');
+        var textEl = document.getElementById('audit-prog-text');
+
+        btn.disabled = true;
+        btn.textContent = 'Running…';
+        statusEl.style.display = 'inline';
+        statusEl.textContent = '';
+        barEl.style.display = 'block';
+        fillEl.style.width = '0%';
+
+        // Maps the live per-file assessment status (from audit.js: healthy/
+        // warning/error, or found:false → missing) onto the status keys the
+        // existing renderers (statusBadge, filter bar, etc.) already know.
+        var LIVE_STATUS_MAP = { healthy: 'healthy', warning: 'degraded', error: 'legacy' };
+
+        function buildLiveAuditObject(results) {
+          var pageResults = results.pages.map(function (p) {
+            var status = p.found ? LIVE_STATUS_MAP[p.assessment.status] || 'legacy' : 'missing';
+            var issues = [];
+            (p.assessment.issues || []).forEach(function (m) {
+              issues.push({
+                sev: 'error',
+                type: /broken link/i.test(m) ? 'broken_link' : 'issue',
+                msg: m,
+              });
+            });
+            (p.assessment.warnings || []).forEach(function (m) {
+              issues.push({ sev: 'warn', type: 'issue', msg: m });
+            });
+            return {
+              file: p.path,
+              lines: (p.assessment && p.assessment.lines) || 0,
+              size_kb: (p.assessment && p.assessment.sizeKb) || 0,
+              status: status,
+              issues: issues,
+            };
+          });
+          return {
+            generated: new Date().toISOString().slice(0, 10),
+            results: pageResults,
+            css_files: results.css.map(function (r) {
+              return r.path;
+            }),
+            js_files: results.js.map(function (r) {
+              return r.path;
+            }),
+            img_files: results.images.map(function (r) {
+              return r.path;
+            }),
+            css_results: results.css,
+            js_results: results.js,
+            img_results: results.images,
+          };
+        }
+
+        function refreshAllPanels(liveAudit) {
+          CURRENT_AUDIT = liveAudit;
+          renderFolderBreakdown(liveAudit);
+          renderFilterBar(liveAudit);
+          renderPagesTable('all');
+          renderIssuesPanel(liveAudit);
+          renderAssetsPanel(liveAudit);
+          renderRecsList(buildLiveRecs(liveAudit));
+        }
+
+        function runWithEngine() {
+          SiteAudit.onProgress(function (done, total) {
+            var pct = Math.round((done / total) * 100);
+            fillEl.style.width = pct + '%';
+            textEl.textContent = 'Checked ' + done + ' / ' + total + ' files…';
+          });
+
+          SiteAudit.onComplete(function (results) {
+            var liveAudit = buildLiveAuditObject(results);
+
+            var healthy = liveAudit.results.filter(function (r) {
+              return r.status === 'healthy';
+            }).length;
+            var degraded = liveAudit.results.filter(function (r) {
+              return r.status === 'degraded';
+            }).length;
+            var broken = liveAudit.results.filter(function (r) {
+              return r.status === 'legacy' || r.status === 'missing';
+            }).length;
+            var total = liveAudit.results.length;
+            var assetTotal = results.css.length + results.js.length + results.images.length;
+            var assetBroken = results.css.concat(results.js, results.images).filter(function (r) {
+              return !r.found || r.assessment.ok === false;
+            }).length;
+            var passable = healthy + degraded;
+            var score = total ? Math.round((passable / total) * 85 + (healthy / total) * 15) : 0;
+            if (assetTotal) {
+              score = Math.round(score * 0.85 + ((assetTotal - assetBroken) / assetTotal) * 15);
+            }
+            var passRate = total ? Math.round((passable / total) * 100) : 0;
+
+            /* update score ring */
+            var rings = document.querySelectorAll('.score-ring circle');
+            rings.forEach(function (c) {
+              if (c.getAttribute('stroke-dasharray')) {
+                var circumference = parseFloat(c.getAttribute('stroke-dasharray'));
+                var offset = Math.round(circumference * (1 - score / 100));
+                c.setAttribute('stroke-dashoffset', offset);
+                c.setAttribute(
+                  'stroke',
+                  score >= 85 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444'
+                );
+              }
+            });
+            document.querySelector('.score-ring-text').textContent = score;
+
+            /* update header stats — now covers pages + all discovered assets */
+            var statVals = document.querySelectorAll('.hstat-val');
+            if (statVals[0]) statVals[0].textContent = healthy;
+            if (statVals[1]) statVals[1].textContent = degraded;
+            if (statVals[2]) statVals[2].textContent = broken;
+            if (statVals[3]) statVals[3].textContent = total + assetTotal;
+            if (statVals[4]) statVals[4].textContent = passRate + '%';
+            var statLbls = document.querySelectorAll('.hstat-lbl');
+            if (statLbls[2]) statLbls[2].textContent = 'Broken / Missing';
+
+            refreshAllPanels(liveAudit);
+
+            textEl.textContent =
+              'Done! ' +
+              total +
+              ' pages + ' +
+              assetTotal +
+              ' assets scanned — score: ' +
+              score +
+              '/100';
+            statusEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+            btn.disabled = false;
+            btn.innerHTML =
+              '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Run Audit';
+            document.getElementById('gen-time').textContent =
+              'Live scan: ' +
+              new Date().toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+          });
+
+          /* File is in Admin/site-health/ — root is ../../ (same as audit.js default) */
+          SiteAudit._rootOverride = '../../';
+          SiteAudit.run();
+        }
+
+        if (window.SiteAudit) {
+          runWithEngine();
+        } else {
+          /* lazy-load audit.js */
+          var s = document.createElement('script');
+          s.src = 'audit.js';
+          s.onload = function () {
+            /* Patch ROOT for root-level context */
+            runWithEngine();
+          };
+          s.onerror = function () {
+            textEl.textContent =
+              'Could not load audit engine. Ensure the site is served via HTTP (not file://).';
+            btn.disabled = false;
+          };
+          document.head.appendChild(s);
+        }
+      }
+    </script>
+  </body>
+</html>

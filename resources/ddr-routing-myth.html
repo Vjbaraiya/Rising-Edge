@@ -1,0 +1,2938 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="DDR routing is only about length matching — myth busted. Impedance control, return path integrity, and topology are equally critical to reliable DDR4/DDR5 designs."
+    />
+    <title>DDR Routing Myth — Length Matching Alone Isn't Enough | Rising Edge</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/resources/ddr-routing-myth.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/ddr-routing-myth.css" />
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <!-- ══════════════════════════════════════════════════════════ HERO -->
+    <section class="ddr-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span> <a href="resources.html">Resources</a
+          ><span>/</span>
+          <span>SI Myths</span>
+        </nav>
+
+        <div class="ddr-hero-badge">
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Engineering Myth #41 — Signal Integrity / DDR
+        </div>
+
+        <h1 class="ddr-hero-title">
+          DDR Routing Is Only About<br />
+          <span class="ddr-hero-accent">Length Matching</span>
+        </h1>
+        <p class="ddr-hero-sub">
+          Reality: Length matching controls skew — but impedance mismatch, broken return paths, and
+          wrong topology each independently cause eye closure, data corruption, and certification
+          failures in DDR3/4/5 designs.
+        </p>
+
+        <div class="ddr-hero-meta">
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M2 12h20M12 2a10 10 0 0 1 0 20" />
+            </svg>
+            SI · DDR · PCB Layout</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            30 min</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Intermediate–Advanced</span
+          >
+          <span class="chip chip-outline">Prerequisites: Transmission lines, PCB stackup</span>
+        </div>
+
+        <div class="ddr-hero-actions">
+          <a href="#learning-objectives" class="btn btn-primary">Start Learning</a>
+          <a href="#quiz" class="btn btn-secondary">Take Quiz</a>
+          <button class="btn btn-ghost" id="bookmarkBtn" onclick="toggleBookmark()">
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Bookmark
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ LEARNING OBJECTIVES -->
+    <section class="section" id="learning-objectives">
+      <div class="container">
+        <div class="section-label">Learning Objectives</div>
+        <h2 class="section-title">After this lesson you will understand</h2>
+        <div class="ddr-objectives-grid">
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">📏</span>
+            <div>
+              <strong>Length matching scope</strong>
+              <p>
+                The three levels of DDR length matching — clock-to-DQS group, byte-group bit-level,
+                and address/command — and the actual skew budgets in DDR4/5 specs
+              </p>
+            </div>
+          </div>
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">⚡</span>
+            <div>
+              <strong>Impedance control</strong>
+              <p>
+                Why DDR4 specifies 40 Ω ±10% single-ended and 80 Ω differential (DQS), how to
+                calculate trace width for a given stackup, and what happens when impedance is wrong
+              </p>
+            </div>
+          </div>
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">🔄</span>
+            <div>
+              <strong>Return path integrity</strong>
+              <p>
+                How return current flows at high frequency, why reference plane splits and via
+                transitions without stitching capacitors destroy signal quality, and how to measure
+                return path inductance
+              </p>
+            </div>
+          </div>
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">🔀</span>
+            <div>
+              <strong>Topology trade-offs</strong>
+              <p>
+                Fly-by vs T-branch vs point-to-point topology, why fly-by is required for multi-drop
+                DDR4/5 DIMM designs (but not for LPDDR4/5 point-to-point), how write levelling
+                compensates for fly-by skew, and stub length limits for T-branch
+              </p>
+            </div>
+          </div>
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">📡</span>
+            <div>
+              <strong>Crosstalk budgeting</strong>
+              <p>
+                NEXT and FEXT mechanisms in DDR byte lanes, the 3W rule and its limits, how parallel
+                run length caps are derived, and which signals must be isolated
+              </p>
+            </div>
+          </div>
+          <div class="ddr-obj-card">
+            <span class="ddr-obj-icon">👁️</span>
+            <div>
+              <strong>Eye diagram interpretation</strong>
+              <p>
+                How to map impedance mismatch, return path inductance, topology stubs, and crosstalk
+                onto eye diagram degradation — and the margin requirements in JEDEC specs
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ TOPIC OVERVIEW -->
+    <section class="section ddr-bg-alt" id="overview">
+      <div class="container">
+        <div class="section-label">Overview</div>
+        <h2 class="section-title">The Four Pillars of DDR Signal Integrity</h2>
+
+        <div class="ddr-overview-grid">
+          <div>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              Length matching is taught first because it is the most visual rule in DDR routing —
+              the meandering serpentine traces are unmistakable on any DDR layout. So engineers
+              anchor on it. But skew from length mismatch is just one of four independent paths to
+              DDR eye closure.
+            </p>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              A DDR4 signal running at 3200 MT/s has a UI (unit interval) of 312 ps. DDR5 at 6400
+              MT/s has a UI of 156 ps. Impedance mismatch adds reflections that take multiple UI to
+              settle. A plane split under a clock trace can add several nanohenries of inductance
+              depending on gap width and dielectric height — equivalent to significant additional
+              delay. A T-topology stub tuned for DDR3 rates produces a notch at DDR4 Nyquist.
+            </p>
+            <div class="alert alert-warning" style="margin-bottom: var(--sp-4)">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <strong>Common failure pattern:</strong> Designer lengths-match all DDR traces to
+              within 2 mm. Product passes at 2133 MT/s but fails eye margin at 3200 MT/s. Root
+              cause: 20% impedance mismatch on one byte lane — not a length issue at all.
+            </div>
+            <div class="alert alert-info">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <strong>JEDEC spec note:</strong> JESD79-4C (DDR4) and JESD79-5B (DDR5) specify both
+              skew budgets AND characteristic impedance requirements — impedance is a normative
+              requirement, not a recommendation.
+            </div>
+          </div>
+
+          <!-- Four pillar diagram -->
+          <div
+            class="ddr-svg-container"
+            role="img"
+            aria-label="Four pillars of DDR signal integrity"
+          >
+            <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- Central eye -->
+              <ellipse
+                cx="210"
+                cy="140"
+                rx="40"
+                ry="24"
+                fill="none"
+                stroke="var(--ddr-accent)"
+                stroke-width="2"
+              />
+              <text
+                x="210"
+                y="137"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                DDR
+              </text>
+              <text
+                x="210"
+                y="148"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Eye
+              </text>
+
+              <!-- Pillar 1: Length matching -->
+              <rect
+                x="15"
+                y="50"
+                width="95"
+                height="70"
+                rx="6"
+                fill="var(--bg-card)"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <text
+                x="63"
+                y="72"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LENGTH MATCH
+              </text>
+              <text x="63" y="84" font-size="7" fill="var(--text-faint)" text-anchor="middle">
+                Skew control
+              </text>
+              <text x="63" y="94" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                DDR4: ±2 ps bit
+              </text>
+              <text x="63" y="104" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                ±5 ps byte
+              </text>
+              <line
+                x1="110"
+                y1="85"
+                x2="170"
+                y2="125"
+                stroke="var(--ddr-accent)"
+                stroke-width="1"
+                stroke-dasharray="4,3"
+                opacity="0.6"
+              />
+
+              <!-- Pillar 2: Impedance -->
+              <rect
+                x="310"
+                y="50"
+                width="95"
+                height="70"
+                rx="6"
+                fill="var(--bg-card)"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <text
+                x="358"
+                y="72"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                IMPEDANCE
+              </text>
+              <text x="358" y="84" font-size="7" fill="var(--text-faint)" text-anchor="middle">
+                Reflection control
+              </text>
+              <text x="358" y="94" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                40 Ω ±10% SE
+              </text>
+              <text x="358" y="104" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                80 Ω ±10% diff
+              </text>
+              <line
+                x1="310"
+                y1="85"
+                x2="250"
+                y2="125"
+                stroke="var(--ddr-accent)"
+                stroke-width="1"
+                stroke-dasharray="4,3"
+                opacity="0.6"
+              />
+
+              <!-- Pillar 3: Return path -->
+              <rect
+                x="15"
+                y="165"
+                width="95"
+                height="70"
+                rx="6"
+                fill="var(--bg-card)"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <text
+                x="63"
+                y="187"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                RETURN PATH
+              </text>
+              <text x="63" y="199" font-size="7" fill="var(--text-faint)" text-anchor="middle">
+                Ground continuity
+              </text>
+              <text x="63" y="209" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                No plane splits
+              </text>
+              <text x="63" y="219" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                Via stitching caps
+              </text>
+              <line
+                x1="110"
+                y1="200"
+                x2="170"
+                y2="160"
+                stroke="var(--ddr-accent)"
+                stroke-width="1"
+                stroke-dasharray="4,3"
+                opacity="0.6"
+              />
+
+              <!-- Pillar 4: Topology -->
+              <rect
+                x="310"
+                y="165"
+                width="95"
+                height="70"
+                rx="6"
+                fill="var(--bg-card)"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <text
+                x="358"
+                y="187"
+                font-size="8"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                TOPOLOGY
+              </text>
+              <text x="358" y="199" font-size="7" fill="var(--text-faint)" text-anchor="middle">
+                Signal distribution
+              </text>
+              <text x="358" y="209" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                Fly-by for DDR4/5
+              </text>
+              <text x="358" y="219" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                Stub &lt; λ/6 @ Nyq
+              </text>
+              <line
+                x1="310"
+                y1="200"
+                x2="250"
+                y2="160"
+                stroke="var(--ddr-accent)"
+                stroke-width="1"
+                stroke-dasharray="4,3"
+                opacity="0.6"
+              />
+
+              <!-- DDR generation bar -->
+              <rect
+                x="100"
+                y="250"
+                width="220"
+                height="18"
+                rx="4"
+                fill="var(--bg-base)"
+                stroke="var(--border)"
+                stroke-width="1"
+              />
+              <rect
+                x="100"
+                y="250"
+                width="55"
+                height="18"
+                rx="4"
+                fill="color-mix(in srgb,var(--ddr-accent) 15%,transparent)"
+              />
+              <rect
+                x="155"
+                y="250"
+                width="55"
+                height="18"
+                fill="color-mix(in srgb,var(--ddr-accent) 25%,transparent)"
+              />
+              <rect
+                x="210"
+                y="250"
+                width="55"
+                height="18"
+                fill="color-mix(in srgb,var(--ddr-accent) 40%,transparent)"
+              />
+              <rect
+                x="265"
+                y="250"
+                width="55"
+                height="18"
+                rx="4"
+                fill="color-mix(in srgb,var(--ddr-accent) 60%,transparent)"
+              />
+              <text x="128" y="262" font-size="6.5" fill="var(--text-faint)" text-anchor="middle">
+                DDR3
+              </text>
+              <text x="183" y="262" font-size="6.5" fill="var(--text-sub)" text-anchor="middle">
+                DDR4
+              </text>
+              <text x="238" y="262" font-size="6.5" fill="var(--text-head)" text-anchor="middle">
+                DDR5
+              </text>
+              <text
+                x="293"
+                y="262"
+                font-size="6.5"
+                fill="var(--ddr-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LPDDR5
+              </text>
+              <text x="320" y="243" font-size="6.5" fill="var(--text-faint)" text-anchor="middle">
+                ↑ SI criticality
+              </text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ CONCEPT EXPLORER -->
+    <section class="section" id="concepts">
+      <div class="container">
+        <div class="section-label">Interactive Concept Explorer</div>
+        <h2 class="section-title">Beyond Length Matching — The Four Pillars</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Click each card to expand the engineering detail.
+        </p>
+
+        <div class="ddr-concept-grid">
+          <!-- Card 1: Length matching (what it actually is) -->
+          <div
+            class="ddr-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="ddr-concept-header">
+              <div class="ddr-concept-num">01</div>
+              <div>
+                <h3>Length Matching — What It Actually Means</h3>
+                <p class="ddr-concept-tagline">
+                  Three distinct matching requirements with different tolerances — not one single
+                  rule
+                </p>
+              </div>
+              <svg
+                class="ddr-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="ddr-concept-body">
+              <div class="ddr-two-col">
+                <div>
+                  <h4>The three matching levels</h4>
+                  <div class="ddr-mu-table">
+                    <div class="ddr-mu-row ddr-mu-header">
+                      <span>Match type</span><span>DDR4 budget</span><span>DDR5 budget</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>Clock-to-DQS (per group)</span><span>±5 ps</span><span>±2 ps</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>Bit-level (within byte lane)</span><span>±2 ps</span
+                      ><span>±0.9 ps</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>Address/command group</span><span>±10 ps</span><span>±5 ps</span>
+                    </div>
+                    <div class="ddr-mu-row ddr-mu-total">
+                      <span>Length ≈ 150 ps/in (microstrip)</span><span>±0.033 in</span
+                      ><span>±0.006 in</span>
+                    </div>
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Skew-to-length conversion</h4>
+                  <div class="ddr-formula">
+                    ΔL = Δt / T_PD<br />
+                    T_PD(microstrip) ≈ 150 ps/inch on FR4<br />
+                    T_PD(stripline) ≈ 180 ps/inch on FR4
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    DDR5 bit-level budget: 0.9 ps → ΔL ≤ 0.005 inch (0.13 mm) — tighter than PCB
+                    process capability for many fabs
+                  </p>
+                </div>
+                <div>
+                  <h4>What matching does NOT fix</h4>
+                  <ul class="ddr-list">
+                    <li>
+                      Impedance mismatch between traces — they can be the same length but different
+                      widths
+                    </li>
+                    <li>
+                      Via stubs on high-frequency signals — adds stub resonance independent of
+                      length
+                    </li>
+                    <li>
+                      Common-mode noise from unbalanced differential pairs — length matches both but
+                      skews their ground reference
+                    </li>
+                    <li>
+                      ISI (inter-symbol interference) from bandwidth limitation — a property of
+                      losses and reflections, not length
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Write levelling (DDR4/5)</h4>
+                  <p>
+                    Fly-by topology intentionally creates different trace lengths to each DIMM.
+                    Write levelling calibration in the memory controller compensates for this — the
+                    DRAM trains per-byte DQS delay to align it with CK. This means fly-by length
+                    <em>mismatch</em> is acceptable and expected; it is compensated in firmware, not
+                    layout.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Impedance -->
+          <div
+            class="ddr-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="ddr-concept-header">
+              <div class="ddr-concept-num">02</div>
+              <div>
+                <h3>Impedance Control — The Most-Overlooked Requirement</h3>
+                <p class="ddr-concept-tagline">
+                  DDR4 targets 40 Ω ±10% SE (varies by controller, stackup, and ODT); LPDDR4/5
+                  targets 50 Ω — a 4 Ω miss causes a Γ = 0.05 reflection that rings for multiple UI
+                </p>
+              </div>
+              <svg
+                class="ddr-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="ddr-concept-body">
+              <div class="ddr-two-col">
+                <div>
+                  <h4>DDR impedance specifications</h4>
+                  <div class="ddr-mu-table">
+                    <div class="ddr-mu-row ddr-mu-header">
+                      <span>Signal</span><span>Target</span><span>Tolerance</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>DQ, DM (single-ended)</span><span>40–50 Ω†</span><span>±10%</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>DQS, DQS# (differential)</span><span>80–100 Ω†</span><span>±10%</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>CK, CK# (differential)</span><span>80–100 Ω†</span><span>±10%</span>
+                    </div>
+                    <div class="ddr-mu-row">
+                      <span>CA (command/address)</span><span>40–50 Ω†</span><span>±10%</span>
+                    </div>
+                    <div class="ddr-mu-row ddr-mu-total">
+                      <span>LPDDR4/5 (all SE)</span><span>50 Ω</span><span>±10%</span>
+                    </div>
+                  </div>
+                  <p
+                    style="
+                      font-size: var(--text-xs);
+                      color: var(--text-muted);
+                      margin-top: var(--sp-2);
+                    "
+                  >
+                    † Actual target depends on controller vendor layout guide, stackup, and ODT
+                    settings. DDR4 is commonly 40 Ω in DIMM designs; embedded/LPDDR designs may
+                    specify 50 Ω. Always consult the SoC/memory controller PCB design guide
+                    alongside JEDEC.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Reflection coefficient</h4>
+                  <div class="ddr-formula">
+                    Γ = (Z_L − Z₀) / (Z_L + Z₀)<br /><br />
+                    Z₀ = 40 Ω, Z_L = 44 Ω (10% high):<br />
+                    Γ = (44 − 40) / (44 + 40) = 0.048<br /><br />
+                    V_reflected = 0.048 × V_incident
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    A 10% impedance error produces ~5% amplitude reflection. At DDR4-3200 this
+                    reflection travels 0.5 inch in one UI — it superimposes on the next bit.
+                  </p>
+                </div>
+                <div>
+                  <h4>Microstrip impedance formula</h4>
+                  <div class="ddr-formula">Z₀ ≈ 87/√(εᵣ+1.41) × ln(5.98×H / (0.8×W+T))</div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    H = dielectric height (mil), W = trace width (mil), T = trace thickness (mil),
+                    εᵣ = dielectric constant
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Stackup sensitivity</h4>
+                  <p>In a typical 6-layer stackup with 4 mil dielectric and εᵣ = 4.2:</p>
+                  <ul class="ddr-list">
+                    <li>W = 7 mil → Z₀ ≈ 50 Ω</li>
+                    <li>W = 4 mil → Z₀ ≈ 40 Ω (DDR4 target)</li>
+                    <li>W = 3 mil → Z₀ ≈ 46 Ω (8% high — borderline pass)</li>
+                    <li>W = 5.5 mil → Z₀ ≈ 44 Ω (10% high — fail)</li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Manufacturing tolerance</h4>
+                  <p>
+                    PCB manufacturers achieve ±10% impedance with process control. This means a 40 Ω
+                    design target could deliver 36–44 Ω in production — already at the JEDEC
+                    tolerance edge. Specify 40 Ω ±10% with controlled impedance test coupon on every
+                    panel.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Return path -->
+          <div
+            class="ddr-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="ddr-concept-header">
+              <div class="ddr-concept-num">03</div>
+              <div>
+                <h3>Return Path Integrity</h3>
+                <p class="ddr-concept-tagline">
+                  At DDR4/5 rates, return current follows the path of minimum impedance — directly
+                  under the signal trace; a plane split forces a return-path detour adding
+                  inductance
+                </p>
+              </div>
+              <svg
+                class="ddr-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="ddr-concept-body">
+              <div class="ddr-two-col">
+                <div>
+                  <h4>The skin effect and return current</h4>
+                  <p>
+                    At DC, return current spreads across the entire reference plane. Above the skin
+                    effect frequency, return current concentrates in the path of minimum impedance
+                    (dominated by minimum inductance at DDR4/5 rates) — directly below the signal
+                    trace, in a band approximately 3× the trace width.
+                  </p>
+                  <div class="ddr-formula">
+                    f_skin = ρ / (π × μ × δ²)<br />
+                    δ = √(ρ / (π × f × μ))<br /><br />
+                    For copper at 100 MHz: δ ≈ 6.6 μm<br />
+                    Return current width ≈ 3W above ~1 MHz
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Plane split inductance</h4>
+                  <p>
+                    When a DDR signal crosses a gap or split in the reference plane, return current
+                    must detour around the gap. This detour adds inductance:
+                  </p>
+                  <div class="ddr-formula">
+                    L_gap ≈ 0.2 × g × [ln(4h/g) − 1] nH<br /><br />
+                    g = gap width (mm), h = dielectric height (mm)<br />
+                    Example: g = 1 mm, h = 0.15 mm → L_gap ≈ 3.5 nH
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    3.5 nH at DDR4-3200 produces a voltage spike V = L × dI/dt ≈ 3.5e-9 ×
+                    40e-3/312e-12 ≈ 0.45 V — severe eye closure
+                  </p>
+                </div>
+                <div>
+                  <h4>Via transition through a reference change</h4>
+                  <p>
+                    When a DDR trace changes layers via a via, the return current must also change
+                    reference planes. Without a nearby stitching capacitor (or stitching via), the
+                    return must travel through the power distribution network — adding inductance.
+                  </p>
+                  <ul class="ddr-list">
+                    <li>
+                      <strong>Same reference (e.g., GND → GND):</strong> Add stitching GND vias
+                      within 1× via-to-via pitch of the signal via
+                    </li>
+                    <li>
+                      <strong>Different reference (GND → PWR):</strong> Add 100 nF stitching
+                      capacitor between GND and PWR adjacent to the via — provides AC return path
+                    </li>
+                    <li>
+                      <strong>Via anti-pad size:</strong> Keep anti-pads &lt; 2× drill diameter —
+                      large anti-pads interrupt the reference plane unnecessarily
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">DDR layout rules for return paths</h4>
+                  <ul class="ddr-list ddr-list-success">
+                    <li>Never route DDR signals across a power/ground split</li>
+                    <li>Place stitching vias within 100 mil of every DDR layer change</li>
+                    <li>
+                      Use a continuous GND reference layer directly adjacent to the DDR routing
+                      layer
+                    </li>
+                    <li>Minimise anti-pad size; use back-drilled vias on DDR5 boards ≥3200 MT/s</li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">VREF and power integrity</h4>
+                  <p>
+                    <strong>VREF</strong> (reference voltage for single-ended DQ sampling) must be
+                    decoupled close to each DRAM with 100 nF + 10 µF and routed as a low-noise power
+                    trace — not a signal trace. VREF noise directly degrades read margins.
+                    <strong>VDDQ</strong> (DDR I/O supply) and <strong>VREFCA</strong> (command/
+                    address reference) each require their own decoupling hierarchy: 100 nF X7R per
+                    power pin, plus bulk 10–47 µF within 5 mm of each DRAM. VDDQ ripple couples
+                    directly into the data eye; a noisy VDDQ can cause bit errors even when all
+                    layout rules are met. Treat DDR power integrity as a separate design discipline.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Topology -->
+          <div
+            class="ddr-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="ddr-concept-header">
+              <div class="ddr-concept-num">04</div>
+              <div>
+                <h3>Topology — Fly-By vs T-Branch vs Point-to-Point</h3>
+                <p class="ddr-concept-tagline">
+                  Fly-by is required for multi-drop DDR4/5 DIMM designs — T-branch stubs resonate at
+                  DDR4 Nyquist; point-to-point is used for LPDDR4/5 (no fly-by needed)
+                </p>
+              </div>
+              <svg
+                class="ddr-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="ddr-concept-body">
+              <div class="ddr-two-col">
+                <div>
+                  <h4>Topology comparison</h4>
+                  <div class="ddr-env-grid">
+                    <div class="ddr-env-card">
+                      <strong>Fly-By / Daisy-Chain</strong>
+                      <span>DDR4/5 required for multi-drop/DIMM</span>
+                      <p>
+                        Controller → DIMM1 → DIMM2. Each DIMM is a load in series. Write levelling
+                        compensates for variable length. Termination at far end only. Best for 1–4
+                        DIMMs.
+                      </p>
+                    </div>
+                    <div class="ddr-env-card">
+                      <strong>T-Branch</strong>
+                      <span>DDR3, limited DDR4</span>
+                      <p>
+                        Controller → split → DIMM1 and DIMM2. Stubs at each branch end. Stub
+                        resonance f_stub = c/(4L_stub√εr). At DDR4-3200 Nyquist (1.6 GHz), stubs
+                        &gt;30 mm resonate.
+                      </p>
+                    </div>
+                    <div class="ddr-env-card">
+                      <strong>Point-to-Point</strong>
+                      <span>LPDDR4, LPDDR5</span>
+                      <p>
+                        Controller directly to DRAM package — no DIMMs. Shortest stub possible.
+                        Termination integrated in DRAM. Best SI; used in mobile/embedded where DRAM
+                        is on PCB.
+                      </p>
+                    </div>
+                    <div class="ddr-env-card">
+                      <strong>Star Topology</strong>
+                      <span>Legacy DDR2/3 only</span>
+                      <p>
+                        Controller → equal-length branches to each DIMM. Requires perfect
+                        equal-length trace fanning. Impedance discontinuity at star point. Not
+                        recommended for DDR4+.
+                      </p>
+                    </div>
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Stub resonance formula</h4>
+                  <div class="ddr-formula">
+                    f_stub = c / (4 × L_stub × √εᵣ_eff)<br /><br />
+                    L_stub = 30 mm, εᵣ_eff = 4.0:<br />
+                    f_stub = 3e8 / (4 × 0.030 × 2.0) = 1.25 GHz<br /><br />
+                    DDR4-3200 Nyquist = 1.6 GHz → stub resonance at 1.25 GHz is in-band → notch
+                  </div>
+                </div>
+                <div>
+                  <h4>Write levelling and read training</h4>
+                  <p>
+                    In a 2-DIMM fly-by design, DIMM2 is ~150 mm further from the controller than
+                    DIMM1 — CK arrives ~90 ps later. <strong>Write levelling</strong> trains each
+                    DIMM's DQS to align with its local CK edge; the controller adjusts DQS launch
+                    time per DIMM. <strong>Read gate training (read levelling)</strong> performs the
+                    complementary calibration for the read path — the controller adjusts its DQS
+                    capture window per byte lane. Both run at boot. A layout that prevents either
+                    from converging (excessive jitter, impedance mismatches) causes hard boot
+                    failures that appear unrelated to length matching.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">On-Die Termination (ODT)</h4>
+                  <p>
+                    DDR4/5 DQ signals use ODT — termination resistors integrated in the DRAM die,
+                    switched dynamically by the controller. ODT value (34 Ω, 40 Ω, or 60 Ω,
+                    register-selectable) must match PCB trace impedance and controller R_out. ODT
+                    mismatch causes write failures independently of layout — check ODT register
+                    settings alongside impedance measurements.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Termination placement</h4>
+                  <ul class="ddr-list">
+                    <li>
+                      <strong>CK / DQS:</strong> Thevenin termination (2× 120 Ω to VTT = VDDQ/2) at
+                      far end of fly-by chain
+                    </li>
+                    <li>
+                      <strong>CA / CS:</strong> Series termination at controller output — value =
+                      Z_line − R_out
+                    </li>
+                    <li>
+                      <strong>DQ:</strong> ODT built into DRAM — enabled dynamically; no external
+                      resistors needed
+                    </li>
+                    <li>
+                      <strong>Avoid:</strong> Termination resistors mid fly-by chain — creates
+                      reflections from the unterminated stub
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Back-drilling (DDR5)</h4>
+                  <p>
+                    DDR5 vias that punch all the way through a 6-layer board have stubs of 60–100
+                    mils. At 3.2 GHz (DDR5-6400 Nyquist), a 60 mil stub resonates at ~8 GHz — but
+                    its harmonics degrade eye margin. Back-drill removes the unused via stub after
+                    board fabrication. Required for DDR5-4800+.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Crosstalk -->
+          <div
+            class="ddr-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="ddr-concept-header">
+              <div class="ddr-concept-num">05</div>
+              <div>
+                <h3>Crosstalk and the 3W Rule</h3>
+                <p class="ddr-concept-tagline">
+                  DDR byte lanes packed too tightly couple noise between bits — the 3W rule sets
+                  minimum spacing
+                </p>
+              </div>
+              <svg
+                class="ddr-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="ddr-concept-body">
+              <div class="ddr-two-col">
+                <div>
+                  <h4>NEXT and FEXT mechanisms</h4>
+                  <p>
+                    Crosstalk in DDR routing has two components. <strong>NEXT</strong> (Near-End
+                    Crosstalk) travels back towards the transmitter and adds to the driven signal's
+                    noise. <strong>FEXT</strong> (Far-End Crosstalk) travels forward to the receiver
+                    and superimposes on the received bit.
+                  </p>
+                  <div class="ddr-formula">
+                    NEXT ≈ (C_m/C + L_m/L) × V / 4<br />
+                    FEXT ≈ (C_m/C − L_m/L) × (T_D/T_r) × V / 2<br /><br />
+                    C_m = mutual capacitance, L_m = mutual inductance<br />
+                    T_D = coupled length delay, T_r = edge rate
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">3W rule</h4>
+                  <div class="ddr-formula">
+                    S_min = 3 × W (centre-to-centre)<br />
+                    where W = trace width<br /><br />
+                    W = 4 mil → S_min = 12 mil (3 mil gap)
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    3W provides approximately −20 dB of crosstalk reduction vs 1W spacing. It is an
+                    initial layout guideline — DDR5 BGA escape density often makes strict 3W
+                    unachievable, and SI simulation determines the acceptable spacing in those
+                    cases.
+                  </p>
+                </div>
+                <div>
+                  <h4>When the 3W rule breaks down</h4>
+                  <ul class="ddr-list">
+                    <li>
+                      <strong>Long parallel runs:</strong> 3W limits coupling coefficient, but long
+                      coupled length still accumulates FEXT. Cap parallel runs to &lt;500 mil for DQ
+                      signals in DDR5.
+                    </li>
+                    <li>
+                      <strong>DQS to DQ proximity:</strong> DQS is differential and switches at the
+                      same rate as DQ. Keep DQS pair &gt;3W from adjacent DQ bits — DQS noise
+                      couples directly into DQ during sampling.
+                    </li>
+                    <li>
+                      <strong>Byte group mixing:</strong> Bits from different byte groups must not
+                      run parallel — there is no write levelling to compensate for inter-group
+                      crosstalk-induced skew.
+                    </li>
+                    <li>
+                      <strong>CK to CA coupling:</strong> CK differential pair must maintain &gt;5×
+                      trace width clearance from CA bus — CA is single-ended and more susceptible.
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Guard traces</h4>
+                  <p>
+                    Guard traces (grounded traces on both sides of a critical signal) reduce
+                    crosstalk but complicate length matching. In DDR routing, guard traces are
+                    generally not used in DQ buses — instead, 3W spacing and limited parallel run
+                    length are the controls. Guard traces may be used for CK pairs adjacent to noisy
+                    power domains.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ IMPEDANCE SIMULATOR -->
+    <section class="section ddr-bg-alt" id="simulator">
+      <div class="container">
+        <div class="section-label">Interactive Simulation</div>
+        <h2 class="section-title">Microstrip Impedance & Eye Impact Calculator</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Adjust the stackup parameters to see how trace geometry affects impedance — and what
+          reflection amplitude that produces at DDR4/5 rates.
+        </p>
+
+        <div class="ddr-sim-layout">
+          <div class="card ddr-sim-controls">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-5)">
+              Stackup Parameters
+            </h3>
+
+            <label class="ddr-label">Trace width W: <strong id="wVal">4.0</strong> mil</label>
+            <input
+              type="range"
+              id="slW"
+              min="2"
+              max="10"
+              value="4.0"
+              step="0.1"
+              class="ddr-slider"
+              oninput="updateImp()"
+              aria-label="Trace width"
+            />
+
+            <label class="ddr-label" style="margin-top: var(--sp-3)"
+              >Dielectric height H: <strong id="hVal">4.0</strong> mil</label
+            >
+            <input
+              type="range"
+              id="slH"
+              min="2"
+              max="10"
+              value="4.0"
+              step="0.1"
+              class="ddr-slider"
+              oninput="updateImp()"
+              aria-label="Dielectric height"
+            />
+
+            <label class="ddr-label" style="margin-top: var(--sp-3)"
+              >Trace thickness T: <strong id="tVal">1.4</strong> mil</label
+            >
+            <input
+              type="range"
+              id="slT"
+              min="0.5"
+              max="3.0"
+              value="1.4"
+              step="0.1"
+              class="ddr-slider"
+              oninput="updateImp()"
+              aria-label="Trace thickness"
+            />
+
+            <label class="ddr-label" style="margin-top: var(--sp-3)"
+              >Dielectric constant εᵣ: <strong id="erVal">4.2</strong></label
+            >
+            <input
+              type="range"
+              id="slEr"
+              min="3.0"
+              max="5.5"
+              value="4.2"
+              step="0.05"
+              class="ddr-slider"
+              oninput="updateImp()"
+              aria-label="Dielectric constant"
+            />
+
+            <div class="ddr-sim-results">
+              <div class="ddr-result-row">
+                <span>Calculated Z₀</span>
+                <strong id="resZ0" class="ddr-res-val">—</strong>
+              </div>
+              <div class="ddr-result-row">
+                <span>DDR4 typical target (40 Ω ±10%)</span>
+                <strong id="resSpec" class="ddr-res-val">—</strong>
+              </div>
+              <div class="ddr-result-row">
+                <span>Reflection coeff. Γ</span>
+                <strong id="resGamma" class="ddr-res-val">—</strong>
+              </div>
+              <div class="ddr-result-row">
+                <span>Reflected amplitude</span>
+                <strong id="resRefl" class="ddr-res-val">—</strong>
+              </div>
+              <div class="ddr-result-row">
+                <span>T_PD (propagation delay)</span>
+                <strong id="resTpd" class="ddr-res-val">—</strong>
+              </div>
+            </div>
+
+            <div class="ddr-preset-row" style="margin-top: var(--sp-4)">
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('ddr4')">DDR4 target</button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('lpddr5')">
+                LPDDR5 (50Ω)
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('fat')">Fat trace (⚠)</button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('narrow')">Narrow (⚠)</button>
+            </div>
+          </div>
+
+          <div class="ddr-chart-wrap">
+            <div id="simChart" style="width: 100%; height: 400px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ DESIGN REVIEW -->
+    <section class="section" id="design-review">
+      <div class="container">
+        <div class="section-label">Design Review</div>
+        <h2 class="section-title">DDR4 Layout: Four Failure Modes vs Good Practice</h2>
+
+        <div class="ddr-compare-grid">
+          <!-- Bad -->
+          <div class="card ddr-compare-card ddr-compare-bad">
+            <div class="ddr-compare-badge ddr-badge-fail">✗ Poor DDR4 Layout</div>
+            <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" class="ddr-review-svg">
+              <!-- Background -->
+              <rect x="0" y="0" width="320" height="220" fill="var(--bg-base)" rx="4" />
+              <!-- Bad: plane split under traces -->
+              <rect
+                x="20"
+                y="60"
+                width="130"
+                height="8"
+                rx="0"
+                fill="color-mix(in srgb,var(--success) 30%,transparent)"
+                stroke="none"
+              />
+              <rect
+                x="170"
+                y="60"
+                width="130"
+                height="8"
+                rx="0"
+                fill="color-mix(in srgb,var(--primary-400) 30%,transparent)"
+                stroke="none"
+              />
+              <text x="160" y="57" font-size="7" fill="var(--error)" text-anchor="middle">
+                PLANE SPLIT
+              </text>
+              <line x1="152" y1="60" x2="168" y2="60" stroke="var(--error)" stroke-width="2" />
+              <line x1="152" y1="68" x2="168" y2="68" stroke="var(--error)" stroke-width="2" />
+              <!-- Traces crossing split -->
+              <line
+                x1="40"
+                y1="40"
+                x2="280"
+                y2="40"
+                stroke="var(--error)"
+                stroke-width="2"
+                opacity="0.8"
+              />
+              <text x="160" y="37" font-size="6.5" fill="var(--error)" text-anchor="middle">
+                DQ signal crosses split — return path broken
+              </text>
+              <!-- Different width traces (impedance mismatch) -->
+              <line
+                x1="40"
+                y1="80"
+                x2="140"
+                y2="80"
+                stroke="var(--warning)"
+                stroke-width="5"
+                opacity="0.8"
+              />
+              <line
+                x1="140"
+                y1="80"
+                x2="280"
+                y2="80"
+                stroke="var(--warning)"
+                stroke-width="2"
+                opacity="0.8"
+              />
+              <text x="140" y="97" font-size="7" fill="var(--warning)" text-anchor="middle">
+                Width change → Z mismatch
+              </text>
+              <!-- T-topology stub -->
+              <line
+                x1="80"
+                y1="120"
+                x2="220"
+                y2="120"
+                stroke="var(--text-sub)"
+                stroke-width="1.5"
+              />
+              <line
+                x1="150"
+                y1="120"
+                x2="150"
+                y2="165"
+                stroke="var(--error)"
+                stroke-width="1.5"
+                stroke-dasharray="4,3"
+              />
+              <rect
+                x="130"
+                y="165"
+                width="40"
+                height="18"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="150" y="178" font-size="6.5" fill="var(--error)" text-anchor="middle">
+                DIMM2 stub
+              </text>
+              <text x="150" y="110" font-size="7" fill="var(--error)" text-anchor="middle">
+                T-branch → stub resonance
+              </text>
+              <!-- No stitching caps -->
+              <circle cx="230" cy="140" r="5" fill="var(--error)" opacity="0.7" />
+              <text x="243" y="144" font-size="7" fill="var(--error)">via: no stitch cap</text>
+              <!-- Tight spacing -->
+              <line
+                x1="40"
+                y1="190"
+                x2="280"
+                y2="190"
+                stroke="var(--cyan-400)"
+                stroke-width="1.5"
+              />
+              <line
+                x1="40"
+                y1="194"
+                x2="280"
+                y2="194"
+                stroke="var(--cyan-400)"
+                stroke-width="1.5"
+              />
+              <line
+                x1="40"
+                y1="198"
+                x2="280"
+                y2="198"
+                stroke="var(--cyan-400)"
+                stroke-width="1.5"
+              />
+              <text x="160" y="213" font-size="7" fill="var(--cyan-400)" text-anchor="middle">
+                1W spacing → coupling
+              </text>
+            </svg>
+            <div class="ddr-compare-issues">
+              <div class="ddr-issue-item">
+                DQ signal crosses GND/PWR plane split — return path broken
+              </div>
+              <div class="ddr-issue-item">
+                Trace width changes mid-route — impedance mismatch reflection
+              </div>
+              <div class="ddr-issue-item">T-branch topology — stub resonance at DDR4 Nyquist</div>
+              <div class="ddr-issue-item">Layer change via without stitching capacitor</div>
+              <div class="ddr-issue-item">1W trace spacing — excessive DQ-to-DQ crosstalk</div>
+            </div>
+          </div>
+
+          <!-- Good -->
+          <div class="card ddr-compare-card ddr-compare-good">
+            <div class="ddr-compare-badge ddr-badge-pass">✓ Correct DDR4 Layout</div>
+            <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" class="ddr-review-svg">
+              <rect x="0" y="0" width="320" height="220" fill="var(--bg-base)" rx="4" />
+              <!-- Continuous reference plane -->
+              <rect
+                x="20"
+                y="55"
+                width="280"
+                height="10"
+                rx="0"
+                fill="color-mix(in srgb,var(--success) 30%,transparent)"
+                stroke="none"
+              />
+              <text x="160" y="52" font-size="7" fill="var(--success)" text-anchor="middle">
+                Continuous GND reference plane
+              </text>
+              <!-- Uniform-width traces -->
+              <line x1="40" y1="40" x2="280" y2="40" stroke="var(--success)" stroke-width="2" />
+              <text x="160" y="36" font-size="6.5" fill="var(--success)" text-anchor="middle">
+                Uniform 4 mil trace = 40 Ω throughout
+              </text>
+              <!-- Fly-by topology -->
+              <line x1="40" y1="80" x2="280" y2="80" stroke="var(--success)" stroke-width="1.5" />
+              <rect
+                x="100"
+                y="71"
+                width="40"
+                height="18"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="120" y="83" font-size="6.5" fill="var(--success)" text-anchor="middle">
+                DIMM1
+              </text>
+              <rect
+                x="210"
+                y="71"
+                width="40"
+                height="18"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="230" y="83" font-size="6.5" fill="var(--success)" text-anchor="middle">
+                DIMM2
+              </text>
+              <text x="160" y="75" font-size="7" fill="var(--success)" text-anchor="middle">
+                Fly-by daisy chain
+              </text>
+              <!-- Stitching cap -->
+              <circle cx="200" cy="120" r="5" fill="var(--success)" opacity="0.7" />
+              <rect
+                x="205"
+                y="115"
+                width="18"
+                height="10"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="214" y="122" font-size="5.5" fill="var(--success)" text-anchor="middle">
+                100n
+              </text>
+              <text x="200" y="140" font-size="7" fill="var(--success)" text-anchor="middle">
+                stitch cap at via
+              </text>
+              <!-- 3W spacing -->
+              <line
+                x1="40"
+                y1="170"
+                x2="280"
+                y2="170"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <line
+                x1="40"
+                y1="182"
+                x2="280"
+                y2="182"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <line
+                x1="40"
+                y1="194"
+                x2="280"
+                y2="194"
+                stroke="var(--ddr-accent)"
+                stroke-width="1.5"
+              />
+              <text x="160" y="212" font-size="7" fill="var(--ddr-accent)" text-anchor="middle">
+                3W spacing between DQ bits
+              </text>
+              <!-- Termination -->
+              <rect
+                x="265"
+                y="73"
+                width="18"
+                height="14"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="274" y="82" font-size="5.5" fill="var(--success)" text-anchor="middle">
+                R_T
+              </text>
+            </svg>
+            <div class="ddr-compare-issues ddr-compare-ok">
+              <div class="ddr-ok-item">Continuous GND plane under all DDR signals — no splits</div>
+              <div class="ddr-ok-item">
+                Uniform trace width throughout byte group — constant impedance
+              </div>
+              <div class="ddr-ok-item">
+                Fly-by daisy chain — write levelling compensates clock skew
+              </div>
+              <div class="ddr-ok-item">
+                Stitching cap (100 nF) at layer-change vias crossing different reference planes
+                (GND→PWR); GND→GND transitions use stitching GND vias only
+              </div>
+              <div class="ddr-ok-item">3W centre-to-centre spacing — &lt;−20 dB crosstalk</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Industry failure examples -->
+        <h3 style="margin-top: var(--sp-12); margin-bottom: var(--sp-6)">
+          Real-World DDR Failures Beyond Length Mismatch
+        </h3>
+        <div class="cards-grid" style="--grid-min: 220px">
+          <div class="card" style="border-top: 3px solid var(--primary-400)">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">
+              Server Motherboard
+            </div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              DDR4-2666 intermittent ECC errors at thermal soak
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Length matching within 1 mm. Root cause: impedance was qualified at 1 MHz (standard
+              PCB test), at which FR4 εᵣ ≈ 4.5 and traces measured 40 Ω. At DDR4-2666 operating
+              frequency (~1.3 GHz), FR4 εᵣ drops to ~3.9 — and lower εᵣ raises Z₀ (Z₀ ∝ 1/√εᵣ).
+              Actual operating impedance was 43–44 Ω. At 85°C, VTT drift compounded the mismatch. Γ
+              ≈ 0.047 — reflections corrupted write data. Fixed by qualifying impedance at operating
+              frequency and switching to Megtron 6 (low Df, stable εᵣ vs frequency).
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--warning)">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">GPU Card</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              GDDR6 bit errors at high memory clock
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              GDDR6 (based on DDR4 topology but 16 Gbit/s) traces were length-matched but routed
+              over a 2 mm split between VDDQ and GND planes. Return current detour added 4 nH — a
+              480 mV spike at 16 Gbps. Ground pours were added post-prototype to bridge the split.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--cyan-400)">
+            <div class="badge badge-cyan" style="margin-bottom: var(--sp-3)">Consumer SoC</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              LPDDR4 failing write levelling calibration
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Write levelling could not converge on one byte lane. Investigation: that byte lane's
+              DQS pair was routed through a congested region with 1W spacing from a CK pair for 25
+              mm. Crosstalk-induced edge jitter on DQS prevented the levelling state machine from
+              locking. Re-routed with 3W clearance — immediate fix.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--success)">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">Embedded SBC</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              DDR3 boot failures on rev A boards only
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Rev A used a T-branch topology with 40 mm stubs. At DDR3-1600 (800 MHz Nyquist) the
+              stubs resonated at 800 MHz — exactly Nyquist. Signal suffered a −18 dB notch at 800
+              MHz. Rev B converted to fly-by with 8 mm stubs; no further boot failures.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ ENGINEERING CALCULATOR -->
+    <section class="section ddr-bg-alt" id="calculator">
+      <div class="container">
+        <div class="section-label">Engineering Calculator</div>
+        <h2 class="section-title">DDR Layout Rule Calculators</h2>
+
+        <div class="ddr-calc-layout">
+          <!-- Calc 1: Skew to length -->
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Skew Budget → Length Tolerance
+            </h3>
+            <div class="ddr-calc-grid">
+              <div class="ddr-calc-field">
+                <label>Skew budget (ps)</label>
+                <input
+                  type="number"
+                  id="calcSkew"
+                  value="2"
+                  min="0.5"
+                  max="50"
+                  step="0.5"
+                  class="input"
+                  oninput="calcSkewLen()"
+                />
+              </div>
+              <div class="ddr-calc-field">
+                <label>Routing layer</label>
+                <select id="calcLayer" class="input" onchange="calcSkewLen()">
+                  <option value="150">Microstrip (FR4) — 150 ps/in</option>
+                  <option value="175">Microstrip (Rogers) — 140 ps/in</option>
+                  <option value="180">Stripline (FR4) — 180 ps/in</option>
+                  <option value="160">Embedded MS (FR4) — 160 ps/in</option>
+                </select>
+              </div>
+            </div>
+            <div class="ddr-calc-formula">ΔL_max = Δt_skew / T_PD</div>
+            <div class="ddr-calc-result">
+              <div class="ddr-calc-out"><span>T_PD</span><strong id="calcTpd">—</strong></div>
+              <div class="ddr-calc-out">
+                <span>Max length difference</span><strong id="calcDL">—</strong>
+              </div>
+              <div class="ddr-calc-out"><span>In mm</span><strong id="calcDLmm">—</strong></div>
+            </div>
+          </div>
+
+          <!-- Calc 2: Stub resonance -->
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              T-Branch Stub Resonance Frequency
+            </h3>
+            <div class="ddr-calc-grid">
+              <div class="ddr-calc-field">
+                <label>Stub length (mm)</label>
+                <input
+                  type="number"
+                  id="calcStub"
+                  value="30"
+                  min="1"
+                  max="150"
+                  step="1"
+                  class="input"
+                  oninput="calcStubRes()"
+                />
+              </div>
+              <div class="ddr-calc-field">
+                <label>εᵣ_eff</label>
+                <input
+                  type="number"
+                  id="calcStubEr"
+                  value="3.8"
+                  min="2.0"
+                  max="5.5"
+                  step="0.1"
+                  class="input"
+                  oninput="calcStubRes()"
+                />
+              </div>
+            </div>
+            <div class="ddr-calc-formula">f_stub = c / (4 × L_stub × √εᵣ_eff)</div>
+            <div class="ddr-calc-result">
+              <div class="ddr-calc-out">
+                <span>Stub resonance</span><strong id="calcFstub">—</strong>
+              </div>
+              <div class="ddr-calc-out">
+                <span>DDR4-3200 Nyquist (1.6 GHz)</span><strong id="calcFddr4">—</strong>
+              </div>
+              <div class="ddr-calc-out">
+                <span>DDR5-6400 Nyquist (3.2 GHz)</span><strong id="calcFddr5">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calc 3: Return path inductance -->
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Plane Gap Return Path Inductance
+            </h3>
+            <div class="ddr-calc-grid">
+              <div class="ddr-calc-field">
+                <label>Gap width g (mm)</label>
+                <input
+                  type="number"
+                  id="calcGap"
+                  value="1.0"
+                  min="0.1"
+                  max="5"
+                  step="0.1"
+                  class="input"
+                  oninput="calcGapL()"
+                />
+              </div>
+              <div class="ddr-calc-field">
+                <label>Dielectric height h (mm)</label>
+                <input
+                  type="number"
+                  id="calcGapH"
+                  value="0.15"
+                  min="0.05"
+                  max="0.5"
+                  step="0.01"
+                  class="input"
+                  oninput="calcGapL()"
+                />
+              </div>
+              <div class="ddr-calc-field">
+                <label>Current slew rate dI/dt (mA/ps)</label>
+                <input
+                  type="number"
+                  id="calcDI"
+                  value="40"
+                  min="5"
+                  max="200"
+                  step="5"
+                  class="input"
+                  oninput="calcGapL()"
+                />
+              </div>
+            </div>
+            <div class="ddr-calc-formula">
+              L_gap ≈ 0.2 × g × [ln(4h/g) − 1] nH&nbsp;&nbsp;·&nbsp;&nbsp;V = L × dI/dt
+            </div>
+            <div class="ddr-calc-result">
+              <div class="ddr-calc-out">
+                <span>Gap inductance</span><strong id="calcLgap">—</strong>
+              </div>
+              <div class="ddr-calc-out">
+                <span>Voltage spike</span><strong id="calcVspike">—</strong>
+              </div>
+              <div class="ddr-calc-out">
+                <span>DDR4-3200 UI = 312 ps</span><strong id="calcUIratio">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ COMMON MISTAKES -->
+    <section class="section" id="mistakes">
+      <div class="container">
+        <div class="section-label">Common Mistakes</div>
+        <h2 class="section-title">Five Ways DDR Designs Fail Beyond Length</h2>
+        <div class="ddr-mistakes-grid">
+          <div class="card ddr-mistake-card">
+            <div class="ddr-mistake-num">M1</div>
+            <h4>Routing DDR over a power/ground boundary</h4>
+            <p class="ddr-mistake-symptom">
+              Symptom: Intermittent ECC errors or boot failures that correlate with power supply
+              state
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              The most common return path failure. Engineers forget that the layer directly below
+              the DDR routing layer must be a solid, unbroken reference. Splits between VDD33 and
+              GND, or between VDDQ and 1.8V domains, directly beneath DDR traces break the return
+              current path.
+            </p>
+            <div class="ddr-mistake-fix">
+              Fix: Assign DDR routing to layers that have a dedicated GND reference layer
+              immediately adjacent. Never allow DDR signals to cross a polygon boundary — verify in
+              DRC with a keep-out region over all plane splits.
+            </div>
+          </div>
+
+          <div class="card ddr-mistake-card">
+            <div class="ddr-mistake-num">M2</div>
+            <h4>Mismatched trace width within a byte group</h4>
+            <p class="ddr-mistake-symptom">
+              Symptom: One byte lane fails memory test; adjacent lanes pass — no correlation to
+              length
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Under neck-down constraints (BGA escaping, connector pin pitch), designers sometimes
+              reduce trace width for a few traces in a byte group to clear pads. This creates a
+              local impedance discontinuity — even if the total length is matched, the reflection
+              from the width change adds ISI.
+            </p>
+            <div class="ddr-mistake-fix">
+              Fix: Maintain consistent trace width throughout the byte group. If neck-down is
+              unavoidable, keep it as short as possible and always verify with SI simulation that
+              the resulting reflection settles within one UI — there is no universal safe length
+              limit; it depends on impedance ratio and data rate.
+            </div>
+          </div>
+
+          <div class="card ddr-mistake-card">
+            <div class="ddr-mistake-num">M3</div>
+            <h4>Using T-topology at DDR4 rates</h4>
+            <p class="ddr-mistake-symptom">
+              Symptom: Memory fails at rated speed but passes at 2133 MT/s with same layout
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              T-topology was standard for DDR3. For DDR4, the stub length limit is approximately 15
+              mm at 3200 MT/s — most T-branch stubs in 2-DIMM designs are 30–60 mm. The resulting
+              quarter-wave resonance falls squarely in the DDR4 data rate band.
+            </p>
+            <div class="ddr-mistake-fix">
+              Fix: Use fly-by (daisy-chain) topology for all DDR4 designs with more than one load.
+              Enable write levelling in the memory controller. Terminate the far end of the fly-by
+              chain with Thevenin 120 Ω to VTT.
+            </div>
+          </div>
+
+          <div class="card ddr-mistake-card">
+            <div class="ddr-mistake-num">M4</div>
+            <h4>Layer-change vias without stitching capacitors</h4>
+            <p class="ddr-mistake-symptom">
+              Symptom: All DQ byte lanes pass except the one that required a layer change near the
+              controller
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              When a DDR signal changes from a GND-referenced layer to a VDDQ-referenced layer, the
+              return current has no direct path — it must navigate through the power delivery
+              network. PDN inductance at DDR frequencies (800 MHz–3.2 GHz) can be 5–20 nH — adding
+              hundreds of millivolts of noise.
+            </p>
+            <div class="ddr-mistake-fix">
+              Fix: Place 100 nF X7R capacitors within 1 mm of every DDR via transition between
+              different reference planes. For same-reference transitions (GND → GND), place
+              stitching GND vias within the via anti-pad radius.
+            </div>
+          </div>
+
+          <div class="card ddr-mistake-card">
+            <div class="ddr-mistake-num">M5</div>
+            <h4>Ignoring dielectric variation with temperature and frequency</h4>
+            <p class="ddr-mistake-symptom">
+              Symptom: Memory passes qualification at room temperature, fails thermal burn-in
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              FR4 εᵣ exhibits two opposing shifts: it increases slightly with temperature (~4.2 at
+              25°C → ~4.5 at 85°C), which <em>lowers</em> Z₀ (Z₀ ∝ 1/√εᵣ); and it decreases with
+              frequency (~4.3 at 100 MHz → ~3.9 at 3 GHz), which <em>raises</em> Z₀. PCB
+              manufacturers typically qualify impedance at 1 MHz. At DDR4 operating frequencies
+              (0.8–1.6 GHz), the frequency-dependent εᵣ reduction means actual Z₀ can be 3–8% higher
+              than the 1 MHz test value — potentially outside JEDEC tolerance.
+            </p>
+            <div class="ddr-mistake-fix">
+              Fix: Specify controlled-impedance material with low Δεᵣ/Δf and low Df (e.g., Isola
+              IS410, Megtron 6). Request impedance test coupons measured at DDR4 operating frequency
+              (≥1 GHz), not only at DC/1 MHz. Verify at both temperature extremes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ DECISION TREE -->
+    <section class="section ddr-bg-alt" id="decision">
+      <div class="container">
+        <div class="section-label">Interactive Decision Tree</div>
+        <h2 class="section-title">What DDR Signal Integrity Issue Do I Have?</h2>
+
+        <div class="ddr-tree" id="decisionTree">
+          <div class="ddr-tree-node" id="node-root">
+            <p>How does the DDR failure manifest?</p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeStep('q-byteerr')">
+                Specific byte lane(s) fail — other lanes pass
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-tempfail')">
+                Failures correlate with temperature or voltage
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-speedfail')">
+                Works at 2133 MT/s, fails at 3200+ MT/s
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeStep('q-bootfail')">
+                Random boot failures, intermittent ECC errors
+              </button>
+            </div>
+          </div>
+
+          <div class="ddr-tree-node" id="node-q-byteerr" hidden>
+            <p>
+              Does the failing byte lane include a layer-change via or route near a plane boundary?
+            </p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-returnpath')">
+                Yes — via transition or near plane edge
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-bytextal')">
+                No — the lane runs clean but still fails
+              </button>
+            </div>
+          </div>
+
+          <div class="ddr-tree-node" id="node-q-bytextal" hidden>
+            <p>Is the failing lane's DQS pair routed within 1W–2W of CK or another byte's DQS?</p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-crosstalk')">
+                Yes — DQS is in a congested region
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-impedance')">
+                No — lane looks well-isolated
+              </button>
+            </div>
+          </div>
+
+          <div class="ddr-tree-node" id="node-q-tempfail" hidden>
+            <p>Does impedance measurement on the board shift by &gt;5% between cold and hot?</p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-dielectric')">
+                Yes — or I haven't measured
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-termtemp')">
+                No — impedance is stable
+              </button>
+            </div>
+          </div>
+
+          <div class="ddr-tree-node" id="node-q-speedfail" hidden>
+            <p>What topology is used on the failing interface?</p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-topology')">
+                T-branch or star topology
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-flyby-imp')">
+                Fly-by topology
+              </button>
+            </div>
+          </div>
+
+          <div class="ddr-tree-node" id="node-q-bootfail" hidden>
+            <p>Do failures concentrate on writes or reads?</p>
+            <div class="ddr-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-wrlev')">
+                Writes fail more — reads sometimes pass
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-returnpath')">
+                Equal write/read failures — seems random
+              </button>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-returnpath" hidden>
+            <strong>→ Return path discontinuity</strong>
+            <p>
+              Add stitching capacitors (100 nF X7R) at every DDR via transition between different
+              reference planes. Add stitching GND vias within 100 mil of every DDR signal via.
+              Verify that no DDR signal crosses a plane split — add DRC rule if the tool supports
+              it.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-crosstalk" hidden>
+            <strong>→ DQS-to-DQ or DQS-to-CK crosstalk</strong>
+            <p>
+              Re-route the DQS pair with ≥3W clearance from CK and from adjacent byte group DQS.
+              Limit parallel run with CK to &lt;300 mil. Check write levelling calibration —
+              crosstalk-induced jitter may be preventing DLL lock. Rerouting 3–5 cm of trace is
+              almost always the fastest fix.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-impedance" hidden>
+            <strong>→ Impedance discontinuity in one byte lane</strong>
+            <p>
+              Measure TDR on the failing lane vs a passing lane. Look for a step in the TDR trace
+              that corresponds to a trace width change, a via, or a connector pad. Check if the
+              failing lane was neck-downed to escape a BGA. Correct the width or simulate the
+              discontinuity with EM tools.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-dielectric" hidden>
+            <strong>→ Dielectric temperature coefficient shifting impedance</strong>
+            <p>
+              Measure trace impedance at 25°C and 85°C with a TDR. If Δ &gt; 5%, switch to a
+              low-Df/low-Δεᵣ laminate (Megtron 6 or equivalent). Redesign trace width to target the
+              midpoint of the temperature range. Specify impedance test at both temperatures on the
+              fab drawing.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-termtemp" hidden>
+            <strong>→ Termination resistor or VTT power supply temperature drift</strong>
+            <p>
+              Check that VTT = VDDQ/2 within ±2%. Termination resistors with high TCC (±200 ppm/°C
+              cheap resistors) can shift termination impedance by 5–8% across temperature. Specify
+              1% tolerance ±100 ppm/°C resistors for DDR termination. Verify VTT regulation at
+              thermal extremes.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-topology" hidden>
+            <strong>→ T-branch stub resonance at DDR4 Nyquist</strong>
+            <p>
+              T-branch topology is incompatible with DDR4 at 3200 MT/s for stubs &gt;15 mm. Convert
+              to fly-by daisy chain. If board redesign is not possible in the short term: reduce the
+              data rate to the point where the stub resonance is above Nyquist, and enable write
+              levelling calibration in firmware.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-ok" id="node-r-flyby-imp" hidden>
+            <strong>→ Impedance or via stub degrading eye at high rate</strong>
+            <p>
+              Fly-by topology is correct for DDR4. The remaining culprit is impedance (check trace
+              width uniformity across all layers) or via stubs (consider back-drilling if board is
+              &gt;1.6 mm and vias are through-hole). Run IBIS-AMI simulation of the specific
+              problematic byte lane to identify the dominant mechanism.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="ddr-tree-result ddr-result-warn" id="node-r-wrlev" hidden>
+            <strong>→ Write levelling calibration failing</strong>
+            <p>
+              Write-dominant failures in fly-by DDR4/5 indicate the write levelling DLL cannot
+              converge. Most common causes: (1) excessive DQS jitter from crosstalk or impedance
+              mismatch preventing DLL lock, or (2) write levelling register ODT not matching board
+              termination. Capture DQS waveform during levelling and measure jitter vs pass/fail
+              threshold from JEDEC spec.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ QUIZ -->
+    <section class="section" id="quiz">
+      <div class="container">
+        <div class="section-label">Interactive Quiz</div>
+        <h2 class="section-title">Test Your DDR SI Knowledge</h2>
+        <style>
+          .quiz-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-base);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+          }
+          .quiz-options {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+          }
+          .quiz-option {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-sub);
+            cursor: pointer;
+            transition:
+              border-color 0.2s,
+              background 0.2s;
+          }
+          .quiz-option:hover {
+            border-color: var(--cyan-500);
+          }
+          .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-feedback {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+          }
+          .quiz-feedback.show {
+            display: block;
+          }
+          .quiz-feedback.show.correct {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid var(--success);
+            color: var(--text-base);
+          }
+          .quiz-feedback.show.incorrect {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--danger);
+            color: var(--text-base);
+          }
+        </style>
+        <div class="quiz-container" data-section-break="true" id="quiz-container">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 0.8rem">
+              <div class="badge">KNOWLEDGE CHECK</div>
+              <h3 style="margin: 0">DDR Routing Quiz</h3>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted)">
+              Score:
+              <span id="quizScore" style="color: var(--cyan-500); font-weight: 700">0</span> / 4
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+            Select the best answer for each question. Instant feedback and detailed explanations are
+            provided after each response.
+          </p>
+          <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-base)">
+              Question <span id="quizCurrentNum">1</span> of 4
+            </div>
+            <div
+              style="
+                flex: 1;
+                height: 6px;
+                background: var(--bg-muted);
+                border-radius: 3px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="quizProgressBar"
+                style="
+                  height: 100%;
+                  width: 25%;
+                  background: linear-gradient(90deg, var(--cyan-500), #00d4aa);
+                  border-radius: 3px;
+                  transition: width 0.3s ease;
+                "
+              ></div>
+            </div>
+          </div>
+          <div id="quizSlides">
+            <div class="quiz-slide" data-q="1">
+              <div class="quiz-question">
+                1. A DDR4-3200 design has all byte lanes length-matched to within 0.5 mm. One byte
+                lane intermittently fails at 3200 MT/s but passes at 2133 MT/s. What is the most
+                likely root cause?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="0.5 mm is approximately 3 ps skew — well within DDR4's ±5 ps byte-group budget. Speed-dependent failures (passes at 2133, fails at 3200) strongly indicate an impedance discontinuity or stub resonance whose reflection penalty exceeds the tighter eye margin at higher rates. Length mismatch produces a constant skew offset, independent of speed."
+                id="quiz1"
+              >
+                <li class="quiz-option" data-idx="0">
+                  The 0.5 mm length mismatch is too large for DDR4-3200 — needs further matching
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  An impedance discontinuity, plane split, or stub resonance on that specific byte
+                  lane
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  DDR4-3200 requires DDR5 topology — fly-by is insufficient at 3200 MT/s
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  Write levelling has not been enabled — only needs to be enabled at 3200 MT/s
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+            <div class="quiz-slide" data-q="2" style="display: none">
+              <div class="quiz-question">
+                2. In fly-by DDR4 topology with two DIMMs, DIMM2's CK arrives approximately 80 ps
+                later than DIMM1's CK due to the longer trace. How is this handled?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="2"
+                data-explain="Write levelling is a DDR4/DDR5 training procedure during memory initialization. Each DIMM's DRAM reports back the DQS-to-CK offset seen at its pins. The memory controller then adjusts the DQS write launch time per DIMM to compensate. The layout skew is intentional and expected — fly-by is chosen to eliminate stub resonances, with firmware correcting the resulting skew."
+                id="quiz2"
+              >
+                <li class="quiz-option" data-idx="0">
+                  The designer must equalise the trace length to DIMM2 using serpentine meanders
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  The DRAM on DIMM2 has a faster oscillator to compensate
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  Write levelling calibration in the memory controller adjusts DQS launch timing per
+                  DIMM
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  An external clock buffer distributes equal-length CK to each DIMM
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+            <div class="quiz-slide" data-q="3" style="display: none">
+              <div class="quiz-question">
+                3. A DDR4 DQ signal is routed on a microstrip layer whose reference plane changes
+                from GND to VDDQ at mid-board due to a power polygon split. What is the primary SI
+                consequence?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="At DDR4/5 frequencies, return current follows the path of minimum inductance — directly under the signal trace. When the reference plane changes from GND to VDDQ at a polygon boundary, the return current must detour around the gap. This detour adds inductance (typically 2–5 nH), producing a voltage spike V = L × dI/dt. GND and VDDQ are NOT AC-equivalent — they are in different voltage domains and have finite impedance between them, especially at RF frequencies."
+                id="quiz3"
+              >
+                <li class="quiz-option" data-idx="0">
+                  The signal frequency will shift, causing timing violations
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  Return current must detour around the split, adding inductance and a voltage spike
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  The signal impedance will drop to near zero at the split boundary
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  No consequence — GND and VDDQ are AC-equivalent, so the reference is unchanged
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback3"></div>
+            </div>
+            <div class="quiz-slide" data-q="4" style="display: none">
+              <div class="quiz-question">
+                4. JEDEC JESD79-4C specifies DDR4 DQ characteristic impedance as 40 Ω ±10%. A PCB
+                manufacturing process achieves ±10% impedance tolerance. What is the worst-case
+                impedance range on a 40 Ω design target?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="The JEDEC 40 Ω ±10% spec is a system-level requirement measured at the PCB. The PCB manufacturing process has its own ±10% tolerance on the fabricated trace. If the design targets exactly 40 Ω but the fab achieves ±10%, the actual range is 36–44 Ω. Add another ±10% for the JEDEC spec applied to that range, and the worst case is 36×0.9 = 32.4 Ω to 44×1.1 = 48.4 Ω — already near the JEDEC boundary. Designers should target the 40 Ω nominal tightly so manufacturing variation does not push outside the spec."
+                id="quiz4"
+              >
+                <li class="quiz-option" data-idx="0">
+                  38 Ω to 42 Ω — the two ±10% values add linearly
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  32.4 Ω to 48.4 Ω — design tolerance stacks with manufacturing tolerance
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  36 Ω to 44 Ω — the manufacturing tolerance is within the JEDEC tolerance
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  36 Ω to 44 Ω for the design target; manufacturing variation is separate and
+                  independently acceptable
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback4"></div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-top: 1.5rem;
+              padding-top: 1rem;
+              border-top: 1px solid var(--border);
+            "
+          >
+            <button class="btn btn-secondary" disabled id="quizPrevBtn" style="opacity: 0.4">
+              ← Previous
+            </button>
+            <div id="quizDots" style="display: flex; gap: 4px"></div>
+            <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+          </div>
+          <div
+            id="quizSummary"
+            style="
+              display: none;
+              margin-top: 2rem;
+              padding: 1.5rem;
+              border-radius: 10px;
+              border: 1px solid var(--border);
+              text-align: center;
+            "
+          >
+            <div
+              id="quizFinalScore"
+              style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+            ></div>
+            <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ KNOWLEDGE CHECK -->
+    <section class="section ddr-bg-alt" id="knowledge">
+      <div class="container">
+        <div class="section-label">Knowledge Check</div>
+        <h2 class="section-title">Engineering Calculation Exercise</h2>
+        <div class="card ddr-kc-card">
+          <h3 style="font-size: var(--text-base); margin-bottom: var(--sp-4)">
+            Scenario — DDR4-3200 Design Review
+          </h3>
+          <p style="font-size: var(--text-sm); color: var(--text-sub); margin-bottom: var(--sp-4)">
+            A 6-layer PCB has DDR4-3200 (1.6 GHz Nyquist) routing. The stackup is: microstrip on
+            layer 1, with layer 2 as GND reference, 4 mil dielectric, εᵣ = 4.2. A trace width of 5
+            mil is used throughout the byte group. A 35 mm T-branch stub connects to DIMM2.
+          </p>
+          <ul class="ddr-list-plain" style="margin-bottom: var(--sp-6)">
+            <li>1. Calculate the microstrip characteristic impedance Z₀ (use T = 1.4 mil)</li>
+            <li>2. Calculate the reflection coefficient Γ into a 40 Ω DDR4 termination</li>
+            <li>3. Calculate the T-branch stub resonance frequency</li>
+            <li>4. Is the stub resonance in-band for DDR4-3200? What is the consequence?</li>
+          </ul>
+          <button class="btn btn-secondary" onclick="toggleKcSolution()" id="kcBtn">
+            Show Solution
+          </button>
+          <div
+            id="kcSolution"
+            hidden
+            style="
+              margin-top: var(--sp-6);
+              padding-top: var(--sp-6);
+              border-top: 1px solid var(--border);
+            "
+          >
+            <h4>Solution</h4>
+            <div class="ddr-solution-step">
+              <strong>1. Microstrip impedance (W=5, H=4, T=1.4 mil, εᵣ=4.2):</strong><br /><br />
+              Z₀ ≈ 87/√(εᵣ+1.41) × ln(5.98×H / (0.8×W+T))<br />
+              = 87/√(4.2+1.41) × ln(5.98×4 / (0.8×5+1.4))<br />
+              = 87/√5.61 × ln(23.92 / 5.4)<br />
+              = 87/2.369 × ln(4.43)<br />
+              = 36.7 × 1.488<br />
+              <strong>Z₀ ≈ 54.6 Ω</strong>
+            </div>
+            <div class="ddr-solution-step" style="margin-top: var(--sp-4)">
+              <strong>2. Reflection coefficient into 40 Ω termination:</strong><br /><br />
+              Γ = (Z_L − Z₀) / (Z_L + Z₀) = (40 − 54.6) / (40 + 54.6)<br />
+              = −14.6 / 94.6<br />
+              <strong>Γ = −0.154 (15% reflection) — FAIL</strong><br />
+              V_reflected = 0.154 × 1.0 V = <strong>154 mV</strong> reflected back toward
+              controller<br />
+              This is 30% of VDDQ/2 — severe eye closure
+            </div>
+            <div class="ddr-solution-step" style="margin-top: var(--sp-4)">
+              <strong>3. T-branch stub resonance (L_stub=35 mm, εᵣ_eff≈3.8 for microstrip):</strong
+              ><br /><br />
+              f_stub = c / (4 × L_stub × √εᵣ_eff)<br />
+              = 3×10⁸ / (4 × 0.035 × √3.8)<br />
+              = 3×10⁸ / (0.140 × 1.949)<br />
+              = 3×10⁸ / 0.2729<br />
+              <strong>f_stub ≈ 1.099 GHz</strong>
+            </div>
+            <div class="ddr-solution-step" style="margin-top: var(--sp-4)">
+              <strong>4. Is 1.099 GHz in-band for DDR4-3200?</strong><br /><br />
+              DDR4-3200 Nyquist = 1.6 GHz. The stub resonance at 1.099 GHz is below Nyquist — it is
+              IN-BAND.<br />
+              At 1.099 GHz the stub presents a quarter-wavelength open stub → short circuit at the
+              T-junction.<br />
+              <strong>Consequence:</strong> A −∞ dB notch in the signal path at 1.099 GHz. Any data
+              pattern containing this frequency component is completely suppressed. Manifests as
+              solid write failures at 3200 MT/s but may work at 2133 MT/s (Nyquist 1.067 GHz —
+              barely above the notch).
+            </div>
+            <div class="alert alert-warning" style="margin-top: var(--sp-4)">
+              Both the impedance mismatch (54.6 vs 40 Ω = 37% high) AND the stub resonance are
+              independently failing. The correct fix: (1) reduce trace width to ~3.5 mil to reach 40
+              Ω; (2) convert to fly-by topology and eliminate the 35 mm stub.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ STANDARDS -->
+    <section class="section" id="standards">
+      <div class="container">
+        <div class="section-label">Engineering Standards</div>
+        <h2 class="section-title">Relevant JEDEC & Industry Standards</h2>
+        <div class="ddr-standards-table-wrap">
+          <table class="ddr-standards-table">
+            <thead>
+              <tr>
+                <th>Standard</th>
+                <th>Scope</th>
+                <th>Key DDR routing requirement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>JESD79-4C</strong></td>
+                <td>DDR4 SDRAM specification</td>
+                <td>
+                  Table 100: 40 Ω ±10% DQ/CA, 80 Ω ±10% DQS/CK. Table 102: skew budgets per byte
+                  group. Fly-by topology normative for &gt;1 load.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JESD79-5B</strong></td>
+                <td>DDR5 SDRAM specification</td>
+                <td>
+                  Tightened skew budgets (±0.9 ps bit-level). Sub-channel architecture. CA
+                  termination now on DRAM die. Back-drill required for &gt;4800 MT/s.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JESD209-4C</strong></td>
+                <td>LPDDR4/4X specification</td>
+                <td>
+                  50 Ω ±10% for all signals. Point-to-point topology (DRAM on PCB). On-die
+                  termination (CA-ODT, DQ-ODT). No external termination resistors.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JESD209-5C</strong></td>
+                <td>LPDDR5/5X specification</td>
+                <td>
+                  50 Ω ±10%. 8533 MT/s max. WCK (write clock) is a new differential signal running
+                  at 2× DQ rate — requires differential 100 Ω routing.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IPC-2141</strong></td>
+                <td>PCB controlled impedance design</td>
+                <td>
+                  Specifies design and test methodology for controlled-impedance PCBs. Requires
+                  impedance test coupons on each manufacturing panel.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IBIS BIRD 158</strong></td>
+                <td>AMI model for DDR channel simulation</td>
+                <td>
+                  Defines IBIS-AMI model format for DDR4/5 channel simulation. Controllers provide
+                  IBIS-AMI transmitter models; DRAMs provide receiver models. Run both write and
+                  read paths through IBIS-AMI before tapeout — static rules do not catch all
+                  reflection and ISI interactions.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Intel DDR Design Guide</strong></td>
+                <td>Platform-specific DDR layout guidelines</td>
+                <td>
+                  Per-platform (e.g., Raptor Lake, Alder Lake) PCB design guides specify exact trace
+                  impedance targets, ODT settings, fly-by routing rules, and back-drilling
+                  requirements for Intel-based DDR designs. Supersedes generic JEDEC numbers.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>AMD PCB Design Guide</strong></td>
+                <td>AMD Ryzen / EPYC DDR layout reference</td>
+                <td>
+                  AMD platform-specific DDR4/5 routing rules including impedance targets, topology
+                  requirements, and BIOS training parameters. Essential alongside JEDEC for AMD SoC
+                  designs.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>TI / NXP DDR Layout Guides</strong></td>
+                <td>Embedded SoC DDR layout references</td>
+                <td>
+                  TI Sitara (SPRABI2) and NXP i.MX (AN5325) application notes cover LPDDR4/5 and
+                  DDR4 routing for embedded SoCs including impedance, via placement, and power
+                  integrity requirements specific to point-to-point (non-DIMM) DDR architectures.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ FURTHER READING -->
+    <section class="section ddr-bg-alt" id="references">
+      <div class="container">
+        <div class="section-label">Further Reading</div>
+        <h2 class="section-title">References & Resources</h2>
+        <div class="ddr-refs-grid">
+          <div class="card ddr-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">Signal and Power Integrity — Simplified</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Eric Bogatin — Chapters 10–13 cover DDR routing rules, transmission line effects, and
+              return path engineering with worked examples
+            </p>
+          </div>
+          <div class="card ddr-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">High Speed Digital Design</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Johnson & Graham — Foundational reference for transmission line theory applied to PCB
+              routing, return currents, and crosstalk mechanisms
+            </p>
+          </div>
+          <div class="card ddr-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">Micron DDR4 PCB Layout Guide</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              TN-40-07: Practical stackup, spacing, and topology recommendations for DDR4 designs —
+              directly references JEDEC normative requirements
+            </p>
+          </div>
+          <div class="card ddr-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">Intel DDR5 Layout Guidelines</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Platform design guides covering back-drilling requirements, stitching capacitor
+              placement, and IBIS-AMI simulation methodology for DDR5 platforms
+            </p>
+          </div>
+          <div class="card ddr-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Standard</div>
+            <h4 style="font-size: var(--text-sm)">JESD79-4C — DDR4 SDRAM Standard</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              The normative JEDEC specification defining impedance, topology, skew, and electrical
+              requirements for DDR4. The definitive reference for layout rule derivation.
+            </p>
+          </div>
+          <div class="card ddr-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Tool</div>
+            <h4 style="font-size: var(--text-sm)">Polar Instruments Si9000e / Speedstack</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Industry-standard PCB impedance and stackup design tools — used to calculate
+              controlled-impedance trace widths and verify compliance with DDR fab specs
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      /* ─────────────────────────── Concept cards ─────────────────────────── */
+      function toggleConcept(card) {
+        const isOpen = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', !isOpen);
+        card.querySelector('.ddr-concept-body').hidden = isOpen;
+        card.querySelector('.ddr-chevron').style.transform = isOpen ? '' : 'rotate(180deg)';
+      }
+      document.querySelectorAll('.ddr-concept-body').forEach(b => (b.hidden = true));
+
+      /* ─────────────────────────── Bookmark ──────────────────────────────── */
+      function toggleBookmark() {
+        const key = 'bookmark_ddr_routing_myth';
+        const saved = localStorage.getItem(key);
+        const btn = document.getElementById('bookmarkBtn');
+        if (saved) {
+          localStorage.removeItem(key);
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmark';
+        } else {
+          localStorage.setItem(key, '1');
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+        }
+      }
+      if (localStorage.getItem('bookmark_ddr_routing_myth')) {
+        const btn = document.getElementById('bookmarkBtn');
+        if (btn)
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+      }
+
+      /* ─────────────────────────── Impedance Simulator ─────────────────────── */
+      function msImpedance(W, H, T, er) {
+        // IPC-2141A microstrip approximation
+        return (87 / Math.sqrt(er + 1.41)) * Math.log((5.98 * H) / (0.8 * W + T));
+      }
+
+      function updateImp() {
+        const W = parseFloat(document.getElementById('slW').value);
+        const H = parseFloat(document.getElementById('slH').value);
+        const T = parseFloat(document.getElementById('slT').value);
+        const er = parseFloat(document.getElementById('slEr').value);
+
+        document.getElementById('wVal').textContent = W.toFixed(1);
+        document.getElementById('hVal').textContent = H.toFixed(1);
+        document.getElementById('tVal').textContent = T.toFixed(1);
+        document.getElementById('erVal').textContent = er.toFixed(2);
+
+        const Z0 = msImpedance(W, H, T, er);
+        const ZT = 40; // DDR4 target
+        const gamma = (ZT - Z0) / (ZT + Z0);
+        const reflPct = Math.abs(gamma) * 100;
+        const erEff = (er + 1) / 2 + (er - 1) / 2 / Math.sqrt(1 + (12 * H) / W);
+        const tpd = (Math.sqrt(erEff) / 3e8) * 1e12 * 25.4; // ps/inch in mil units → convert
+
+        const inSpec = Z0 >= 36 && Z0 <= 44;
+        document.getElementById('resZ0').textContent = Z0.toFixed(1) + ' Ω';
+        document.getElementById('resZ0').style.color = inSpec ? 'var(--success)' : 'var(--error)';
+        document.getElementById('resSpec').textContent = inSpec ? '✓ In spec' : '✗ Out of spec';
+        document.getElementById('resSpec').style.color = inSpec ? 'var(--success)' : 'var(--error)';
+        document.getElementById('resGamma').textContent = gamma.toFixed(3);
+        document.getElementById('resGamma').style.color =
+          reflPct < 5 ? 'var(--success)' : reflPct < 12 ? 'var(--warning)' : 'var(--error)';
+        document.getElementById('resRefl').textContent = reflPct.toFixed(1) + '% reflected';
+        document.getElementById('resTpd').textContent =
+          ((Math.sqrt(erEff) * 85) / 1000).toFixed(3) +
+          ' ps/mil ≈ ' +
+          (Math.sqrt(erEff) * 85).toFixed(0) +
+          ' ps/in';
+
+        drawImpChart(W, H, T, er, Z0);
+      }
+
+      function drawImpChart(W, H, T, er, Z0curr) {
+        const isDark = document.documentElement.dataset.theme !== 'light';
+        const paper = isDark ? '#161b22' : '#ffffff';
+        const textCol = isDark ? '#8b949e' : '#6b7280';
+        const grid = isDark ? '#30363d' : '#e5e7eb';
+
+        // Sweep width from 1 to 12 mil, compute Z0 vs W
+        const widths = [],
+          zDDR4 = [],
+          zLPDDR5 = [];
+        for (let w = 1; w <= 12; w += 0.25) {
+          widths.push(w);
+          zDDR4.push(msImpedance(w, H, T, er));
+          zLPDDR5.push(msImpedance(w, H * 1.1, T, er)); // slightly different stackup for LPDDR5
+        }
+
+        const traces = [
+          {
+            x: widths,
+            y: zDDR4,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Z₀ (this stackup)',
+            line: { color: 'var(--ddr-accent-plot)', width: 2 },
+          },
+          {
+            x: [W],
+            y: [Z0curr],
+            type: 'scatter',
+            mode: 'markers',
+            name: 'Current design',
+            marker: {
+              size: 10,
+              color: Z0curr >= 36 && Z0curr <= 44 ? '#22c55e' : '#ef4444',
+              symbol: 'circle',
+            },
+          },
+        ];
+
+        const layout = {
+          paper_bgcolor: paper,
+          plot_bgcolor: paper,
+          margin: { l: 54, r: 20, t: 40, b: 54 },
+          title: {
+            text: 'Impedance vs Trace Width (H=' + H + ' mil, εᵣ=' + er + ')',
+            font: { size: 11, color: textCol },
+          },
+          xaxis: { title: 'Trace width W (mil)', color: textCol, gridcolor: grid, range: [1, 12] },
+          yaxis: { title: 'Z₀ (Ω)', color: textCol, gridcolor: grid, range: [20, 120] },
+          shapes: [
+            {
+              type: 'rect',
+              x0: 1,
+              x1: 12,
+              y0: 36,
+              y1: 44,
+              fillcolor: 'rgba(34,197,94,0.08)',
+              line: { width: 0 },
+            },
+            {
+              type: 'line',
+              x0: 1,
+              x1: 12,
+              y0: 40,
+              y1: 40,
+              line: { color: '#22c55e', width: 1, dash: 'dash' },
+            },
+            {
+              type: 'line',
+              x0: 1,
+              x1: 12,
+              y0: 36,
+              y1: 36,
+              line: { color: '#22c55e', width: 1, dash: 'dot' },
+            },
+            {
+              type: 'line',
+              x0: 1,
+              x1: 12,
+              y0: 44,
+              y1: 44,
+              line: { color: '#22c55e', width: 1, dash: 'dot' },
+            },
+            {
+              type: 'line',
+              x0: 1,
+              x1: 12,
+              y0: 50,
+              y1: 50,
+              line: { color: '#06b6d4', width: 1, dash: 'dash' },
+            },
+          ],
+          annotations: [
+            {
+              x: 11,
+              y: 40.8,
+              xref: 'x',
+              yref: 'y',
+              text: 'DDR4 target',
+              showarrow: false,
+              font: { size: 9, color: '#22c55e' },
+            },
+            {
+              x: 11,
+              y: 50.8,
+              xref: 'x',
+              yref: 'y',
+              text: 'LPDDR5 target',
+              showarrow: false,
+              font: { size: 9, color: '#06b6d4' },
+            },
+          ],
+          legend: { x: 0.02, y: 0.98, font: { color: textCol, size: 10 } },
+          font: { family: 'Inter, sans-serif', size: 11 },
+        };
+
+        Plotly.react('simChart', traces, layout, { responsive: true, displaylogo: false });
+      }
+
+      function setPreset(type) {
+        const presets = {
+          ddr4: [4.0, 4.0, 1.4, 4.2],
+          lpddr5: [5.5, 4.0, 1.4, 4.2],
+          fat: [7.0, 4.0, 1.4, 4.2],
+          narrow: [2.5, 4.0, 1.4, 4.2],
+        };
+        const ids = ['slW', 'slH', 'slT', 'slEr'];
+        const vals = presets[type];
+        ids.forEach((id, i) => {
+          document.getElementById(id).value = vals[i];
+        });
+        updateImp();
+      }
+
+      /* ─────────────────────────── Calculators ────────────────────────────── */
+      function calcSkewLen() {
+        const skew = parseFloat(document.getElementById('calcSkew').value);
+        const tpd = parseFloat(document.getElementById('calcLayer').value);
+        const dL_in = skew / tpd;
+        const dL_mm = dL_in * 25.4;
+        document.getElementById('calcTpd').textContent = tpd + ' ps/in';
+        document.getElementById('calcDL').textContent = dL_in.toFixed(4) + ' in';
+        document.getElementById('calcDLmm').textContent = dL_mm.toFixed(3) + ' mm';
+      }
+
+      function calcStubRes() {
+        const L = parseFloat(document.getElementById('calcStub').value) / 1000; // m
+        const er = parseFloat(document.getElementById('calcStubEr').value);
+        const f = 3e8 / (4 * L * Math.sqrt(er));
+        const fGHz = f / 1e9;
+        document.getElementById('calcFstub').textContent = fGHz.toFixed(3) + ' GHz';
+        const ddr4ok =
+          fGHz > 1.6 ? '✓ Above Nyquist' : '✗ IN-BAND — notch at ' + fGHz.toFixed(2) + ' GHz';
+        const ddr5ok =
+          fGHz > 3.2 ? '✓ Above Nyquist' : '✗ IN-BAND — notch at ' + fGHz.toFixed(2) + ' GHz';
+        document.getElementById('calcFddr4').textContent = ddr4ok;
+        document.getElementById('calcFddr4').style.color =
+          fGHz > 1.6 ? 'var(--success)' : 'var(--error)';
+        document.getElementById('calcFddr5').textContent = ddr5ok;
+        document.getElementById('calcFddr5').style.color =
+          fGHz > 3.2 ? 'var(--success)' : 'var(--error)';
+      }
+
+      function calcGapL() {
+        const g = parseFloat(document.getElementById('calcGap').value);
+        const h = parseFloat(document.getElementById('calcGapH').value);
+        const dI_dt = (parseFloat(document.getElementById('calcDI').value) * 1e-3) / 1e-12; // A/s
+        const arg = (4 * h) / g;
+        const L_nH = arg > 1 ? 0.2 * g * (Math.log(arg) - 1) : 0.01;
+        const V = L_nH * 1e-9 * dI_dt;
+        const UI_DDR4 = 312e-12; // seconds
+        const UIcount = (L_nH * 1e-9) / (1 / dI_dt) / UI_DDR4;
+        document.getElementById('calcLgap').textContent = L_nH.toFixed(2) + ' nH';
+        document.getElementById('calcVspike').textContent = (V * 1000).toFixed(0) + ' mV';
+        document.getElementById('calcVspike').style.color =
+          V > 0.2 ? 'var(--error)' : V > 0.1 ? 'var(--warning)' : 'var(--success)';
+        document.getElementById('calcUIratio').textContent =
+          V > 0.2
+            ? '⚠ Spike > 200 mV — severe eye closure'
+            : V > 0.1
+              ? '⚠ Spike 100–200 mV — marginal'
+              : '✓ Spike < 100 mV — acceptable';
+        document.getElementById('calcUIratio').style.color =
+          V > 0.2 ? 'var(--error)' : V > 0.1 ? 'var(--warning)' : 'var(--success)';
+      }
+
+      /* ─────────────────────────── Decision tree ─────────────────────────── */
+      function treeStep(nodeId) {
+        document
+          .querySelectorAll('#decisionTree .ddr-tree-node, #decisionTree .ddr-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-' + nodeId).hidden = false;
+      }
+      function treeResult(nodeId) {
+        treeStep(nodeId);
+      }
+      function resetTree() {
+        document
+          .querySelectorAll('#decisionTree .ddr-tree-node, #decisionTree .ddr-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-root').hidden = false;
+      }
+      document
+        .querySelectorAll('#decisionTree .ddr-tree-node, #decisionTree .ddr-tree-result')
+        .forEach(n => {
+          n.hidden = true;
+        });
+      document.getElementById('node-root').hidden = false;
+
+      /* ─────────────────────────── Quiz ──────────────────────────────────── */
+      (function () {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-muted);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan-500)';
+              dot.style.borderColor = 'var(--cyan-500)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-muted)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var explain = quiz.getAttribute('data-explain') || '';
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '<strong>Correct!</strong> ' + explain;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '<strong>Incorrect.</strong> ' + explain;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score === totalQuestions) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(16,185,129,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Perfect score! Remember: DDR SI is impedance + return path + topology + length — not just length.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(239,68,68,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'Review the material above and try again. Remember: DDR SI is impedance + return path + topology + length — not just length.';
+            }
+          }
+        }
+
+        showSlide(0);
+      })();
+
+      /* ─────────────────────────── Knowledge check ─────────────────────────────── */
+      function toggleKcSolution() {
+        const sol = document.getElementById('kcSolution');
+        const btn = document.getElementById('kcBtn');
+        sol.hidden = !sol.hidden;
+        btn.textContent = sol.hidden ? 'Show Solution' : 'Hide Solution';
+      }
+
+      /* ─────────────────────────── Init ──────────────────────────────────────────── */
+      document.addEventListener('DOMContentLoaded', function () {
+        updateImp();
+        calcSkewLen();
+        calcStubRes();
+        calcGapL();
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

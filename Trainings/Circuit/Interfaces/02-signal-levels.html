@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 2: Signal levels, voltage and duplex modes for RS232, RS485 and RS422 — driver/receiver thresholds, mark/space, noise margin, common-mode range, and full vs half duplex."
+    />
+    <title>02 · Signal Levels &amp; Duplex | Serial Interfaces | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/02-signal-levels.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .cmp-232 {
+        color: #fb923c;
+        font-weight: 700;
+      }
+      .cmp-485 {
+        color: #22d3ee;
+        font-weight: 700;
+      }
+      .cmp-422 {
+        color: #a78bfa;
+        font-weight: 700;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .level-card {
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--cyan);
+        border-radius: var(--radius-lg);
+        background: var(--bg-muted);
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .level-card.o232 {
+        border-left-color: #fb923c;
+      }
+      .level-card.o485 {
+        border-left-color: #22d3ee;
+      }
+      .level-card h4 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin: 0 0 0.35rem;
+      }
+      .level-card p {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Serial Interfaces (RS232 / RS485 / RS422)</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item active"
+            >02. Signal Levels &amp; Duplex</a
+          >
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Serial Interfaces</a><span>/</span>
+            <span>02. Signal Levels &amp; Duplex</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Module 02</span>
+                <span class="badge badge-gray">~45 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Signal Levels, Voltage &amp; Duplex Modes</h1>
+              <p class="subtitle">
+                A "1" and a "0" are just voltages — but each interface defines them very
+                differently. This module makes those voltage bands visible, shows why a differential
+                pair has far more noise margin than it looks, explains the receiver common-mode
+                limit that quietly corrupts data, and contrasts full- and half-duplex wiring.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <!-- SECTION 1 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>⚡ &nbsp;1. What Defines a "1" and a "0"</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    Serial standards inherit the historic terms <strong>mark</strong> (logic 1, the
+                    idle state) and <strong>space</strong> (logic 0). What differs is the
+                    <em>voltage</em> that represents each — and, crucially, whether it's measured
+                    against ground (single-ended) or between two wires (differential).
+                  </p>
+                  <div class="level-card o232">
+                    <h4><span class="cmp-232">RS232</span> — single-ended, inverted logic</h4>
+                    <p>
+                      Driver output swings <strong>+5 V to +15 V for a space (0)</strong> and
+                      <strong>&minus;5 V to &minus;15 V for a mark (1)</strong>. Receivers guarantee
+                      the correct state for inputs beyond &plusmn;3 V. The &minus;3 V to +3 V band
+                      is an undefined "dead zone." Note the inverted convention: a negative voltage
+                      is a logic 1.
+                    </p>
+                  </div>
+                  <div class="level-card o485">
+                    <h4><span class="cmp-485">RS485 / RS422</span> — differential</h4>
+                    <p>
+                      The signal is the
+                      <strong>difference V<sub>A</sub> &minus; V<sub>B</sub></strong
+                      >. A driver produces at least &plusmn;1.5 V differential (typically 2&ndash;5
+                      V); a receiver only needs <strong>&plusmn;200 mV</strong> to decide the bit.
+                      That huge gap between what's sent and what's needed is the noise margin that
+                      buys distance.
+                    </p>
+                  </div>
+                  <div class="info-box">
+                    <strong>Why the ±200 mV receiver threshold matters:</strong> a signal can lose
+                    volts of amplitude to cable attenuation and still be read correctly, as long as
+                    the difference stays above 200 mV. RS232, needing a full &plusmn;3 V at the
+                    receiver, has nowhere near that headroom.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: VOLTAGE BAND VISUALIZER -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>📊 &nbsp;2. Voltage Bands — Side by Side</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    This chart plots the guaranteed logic regions for each interface on one voltage
+                    axis. Notice RS232's wide swing but large dead zone versus the tight,
+                    low-voltage differential decision bands.
+                  </p>
+                  <div id="bandChart" style="width: 100%; height: 380px"></div>
+                  <div class="tip-box">
+                    <strong>Takeaway:</strong> RS232 needs big voltages because it fights ground
+                    noise directly. Differential interfaces work with small voltages because the
+                    receiver rejects whatever is common to both wires — the actual decision only
+                    depends on the tiny difference between A and B.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: COMMON-MODE -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🌊 &nbsp;3. Common-Mode Range — The Silent Killer</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    A differential receiver subtracts A from B — but it can only do that correctly
+                    if
+                    <em>both</em> voltages stay inside its input window. RS485 receivers are
+                    specified for a <strong>common-mode range of &minus;7 V to +12 V</strong>. If
+                    ground potential differences or noise push both wires outside that window, the
+                    receiver saturates and the data is corrupted
+                    <em>even though the differential voltage is perfect</em>.
+                  </p>
+                  <div class="sim-controls">
+                    <div class="slider-group" style="min-width: 260px">
+                      <div class="slider-label">
+                        <span>Ground offset between nodes</span
+                        ><span class="slider-value" id="cmVal">0 V</span>
+                      </div>
+                      <input type="range" id="cmSlider" min="-14" max="18" value="0" step="0.5" />
+                    </div>
+                  </div>
+                  <div class="diagram-box">
+                    <canvas id="cmCanvas" width="880" height="220"></canvas>
+                    <div class="diagram-cap" id="cmCaption">
+                      Both wires sit inside the &minus;7 V to +12 V window — receiver reads the bit
+                      correctly.
+                    </div>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Design fix:</strong> when nodes can't share a solid ground (long runs,
+                    separate buildings, motor grounds), use an <em>isolated</em> transceiver so the
+                    bus reference floats with the signal. Covered in Module 8.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: DUPLEX -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>🔁 &nbsp;4. Full-Duplex vs Half-Duplex</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">
+                    <strong>Duplex</strong> is about how many directions of traffic the wiring
+                    supports at once. This determines wire count, transceiver type, and whether you
+                    need direction control in firmware.
+                  </p>
+                  <div class="two-col">
+                    <div class="diagram-box">
+                      <canvas id="fdCanvas" width="440" height="180"></canvas>
+                      <div class="diagram-cap">
+                        <strong style="color: #a78bfa">Full-duplex (RS232, RS422)</strong> —
+                        separate TX and RX paths. Both directions transmit simultaneously; no
+                        turnaround.
+                      </div>
+                    </div>
+                    <div class="diagram-box">
+                      <canvas id="hdCanvas" width="440" height="180"></canvas>
+                      <div class="diagram-cap">
+                        <strong style="color: #22d3ee">Half-duplex (typical RS485)</strong> — one
+                        shared pair. Only one node drives at a time; DE/RE flips direction between
+                        transmit and receive.
+                      </div>
+                    </div>
+                  </div>
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Interface</th>
+                        <th>Typical duplex</th>
+                        <th>Wires (data)</th>
+                        <th>Direction control</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="cmp-232">RS232</td>
+                        <td>Full</td>
+                        <td>TX + RX + GND</td>
+                        <td>None</td>
+                      </tr>
+                      <tr>
+                        <td class="cmp-485">RS485</td>
+                        <td>Half (2-wire) / Full (4-wire)</td>
+                        <td>1 pair / 2 pairs</td>
+                        <td>DE/RE (half-duplex)</td>
+                      </tr>
+                      <tr>
+                        <td class="cmp-422">RS422</td>
+                        <td>Full</td>
+                        <td>2 pairs (TX, RX)</td>
+                        <td>None</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- QUIZ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-toggle>
+                  <span>✅ &nbsp;5. Knowledge Check</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body">
+                  <p class="lead">Answer to reveal instant feedback.</p>
+                  <div id="quiz"></div>
+                  <div
+                    id="quizScore"
+                    style="margin-top: 1rem; font-weight: 700; color: var(--cyan); display: none"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 1rem;
+                  margin-top: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <a class="btn btn-secondary" href="01-introduction.html"
+                  >← Introduction &amp; Comparison</a
+                >
+                <a class="btn btn-primary" href="03-connectors-pinouts.html"
+                  >Next: Connectors &amp; Pinouts →</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      // Collapsible + progress
+      document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var body = btn.nextElementSibling;
+          var collapsed = btn.classList.toggle('collapsed');
+          body.style.display = collapsed ? 'none' : 'block';
+          updateProgress();
+        });
+      });
+      function updateProgress() {
+        var total = document.querySelectorAll('[data-toggle]').length;
+        var open = 0;
+        document.querySelectorAll('[data-toggle]').forEach(function (b) {
+          if (!b.classList.contains('collapsed')) {
+            open++;
+          }
+        });
+        var pct = Math.round((open / total) * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+      }
+      updateProgress();
+
+      function css(name, fb) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return v ? v.trim() : fb;
+      }
+
+      // Plotly voltage-band chart
+      (function () {
+        if (!window.Plotly) {
+          return;
+        }
+        var isLight = document.documentElement.dataset.theme === 'light';
+        var fontCol = isLight ? '#334155' : '#cbd5e1';
+        var gridCol = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+        // Each interface gets two bars: logic 1 region and logic 0 region
+        var data = [
+          {
+            x: ['RS232', 'RS485/422'],
+            y: [12, 4.8],
+            base: [3, 0.2],
+            name: 'Logic 0 / Space (positive)',
+            type: 'bar',
+            marker: { color: '#22d3ee' },
+            hovertemplate: '%{x}<br>+ region: %{base}–%{y} V<extra></extra>',
+          },
+          {
+            x: ['RS232', 'RS485/422'],
+            y: [-12, -4.8],
+            base: [-3, -0.2],
+            name: 'Logic 1 / Mark (negative)',
+            type: 'bar',
+            marker: { color: '#fb923c' },
+            hovertemplate: '%{x}<br>− region: %{base}–%{y} V<extra></extra>',
+          },
+        ];
+        var layout = {
+          barmode: 'overlay',
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: fontCol, family: 'Inter, sans-serif', size: 12 },
+          margin: { l: 60, r: 20, t: 10, b: 40 },
+          yaxis: {
+            title: 'Voltage (V)',
+            gridcolor: gridCol,
+            zeroline: true,
+            zerolinecolor: gridCol,
+          },
+          xaxis: { gridcolor: gridCol },
+          legend: { orientation: 'h', y: 1.15, x: 0 },
+          shapes: [
+            {
+              type: 'rect',
+              xref: 'paper',
+              x0: 0,
+              x1: 1,
+              y0: -3,
+              y1: 3,
+              fillcolor: 'rgba(148,163,184,0.15)',
+              line: { width: 0 },
+            },
+          ],
+          annotations: [
+            {
+              xref: 'paper',
+              x: 0.5,
+              y: 0,
+              text: 'Dead zone (RS232 ±3 V)',
+              showarrow: false,
+              font: { size: 10, color: fontCol },
+            },
+          ],
+        };
+        Plotly.newPlot('bandChart', data, layout, { displayModeBar: false, responsive: true });
+      })();
+
+      // Common-mode canvas
+      (function () {
+        var c = document.getElementById('cmCanvas');
+        var ctx = c.getContext('2d');
+        var slider = document.getElementById('cmSlider');
+        var valEl = document.getElementById('cmVal');
+        var capEl = document.getElementById('cmCaption');
+        var LO = -7,
+          HI = 12;
+
+        function draw() {
+          var off = parseFloat(slider.value);
+          valEl.textContent = (off > 0 ? '+' : '') + off.toFixed(1) + ' V';
+          var W = c.width,
+            H = c.height;
+          ctx.clearRect(0, 0, W, H);
+          var padL = 60,
+            padR = 20;
+          var plotW = W - padL - padR;
+          var vMin = -16,
+            vMax = 20;
+          function vy(v) {
+            return H - 30 - ((v - vMin) / (vMax - vMin)) * (H - 60);
+          }
+          // window band
+          ctx.fillStyle = 'rgba(34,211,238,0.10)';
+          ctx.fillRect(padL, vy(HI), plotW, vy(LO) - vy(HI));
+          ctx.strokeStyle = 'rgba(34,211,238,0.5)';
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(padL, vy(HI));
+          ctx.lineTo(padL + plotW, vy(HI));
+          ctx.moveTo(padL, vy(LO));
+          ctx.lineTo(padL + plotW, vy(LO));
+          ctx.stroke();
+          ctx.setLineDash([]);
+          // axis labels
+          ctx.fillStyle = css('--text-muted', '#94a3b8');
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText('+12 V', 8, vy(HI) + 4);
+          ctx.fillText('−7 V', 12, vy(LO) + 4);
+          ctx.fillText('Common-mode window', padL + 6, vy(HI) - 6);
+          // the two wires: differential ±1.5 around the common-mode offset
+          var vA = off + 1.5;
+          var vB = off - 1.5;
+          var inWindow = vA <= HI && vB >= LO;
+          var x1 = padL + plotW * 0.35;
+          var x2 = padL + plotW * 0.65;
+          // A
+          ctx.strokeStyle = inWindow ? '#22d3ee' : '#f87171';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(x1, vy(vA));
+          ctx.lineTo(x2, vy(vA));
+          ctx.stroke();
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.fillText('A = ' + vA.toFixed(1) + ' V', x2 + 8, vy(vA) + 4);
+          // B
+          ctx.strokeStyle = inWindow ? '#a78bfa' : '#f87171';
+          ctx.beginPath();
+          ctx.moveTo(x1, vy(vB));
+          ctx.lineTo(x2, vy(vB));
+          ctx.stroke();
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.fillText('B = ' + vB.toFixed(1) + ' V', x2 + 8, vy(vB) + 4);
+
+          if (inWindow) {
+            capEl.innerHTML =
+              'Both wires sit inside the −7 V to +12 V window — receiver reads the bit correctly. (Differential still ' +
+              '3 V.)';
+            capEl.style.color = css('--text-muted', '#94a3b8');
+          } else {
+            capEl.innerHTML =
+              '⚠ A wire is <strong>outside</strong> the common-mode window — the receiver saturates and data is corrupted, even though A−B is still a valid 3 V.';
+            capEl.style.color = '#f87171';
+          }
+        }
+        slider.addEventListener('input', draw);
+        draw();
+      })();
+
+      // Duplex animations
+      (function () {
+        function css2(n, f) {
+          return css(n, f);
+        }
+        var fd = document.getElementById('fdCanvas');
+        var hd = document.getElementById('hdCanvas');
+        var fdc = fd.getContext('2d');
+        var hdc = hd.getContext('2d');
+        var t = 0;
+
+        function node(ctx, x, y, label) {
+          ctx.fillStyle = 'rgba(148,163,184,0.15)';
+          ctx.strokeStyle = css('--text-muted', '#94a3b8');
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(x - 26, y - 18, 52, 36, 6);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = css('--text-base', '#e2e8f0');
+          ctx.font = '11px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, x, y + 4);
+          ctx.textAlign = 'left';
+        }
+        function packet(ctx, x1, x2, y, phase, color, dir) {
+          ctx.strokeStyle = 'rgba(148,163,184,0.3)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x1, y);
+          ctx.lineTo(x2, y);
+          ctx.stroke();
+          var p = phase % 1;
+          var px = dir > 0 ? x1 + (x2 - x1) * p : x2 - (x2 - x1) * p;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(px, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        function drawFD() {
+          var W = fd.width,
+            H = fd.height;
+          fdc.clearRect(0, 0, W, H);
+          node(fdc, 55, H / 2, 'Node A');
+          node(fdc, W - 55, H / 2, 'Node B');
+          packet(fdc, 81, W - 81, H / 2 - 28, t / 60, '#a78bfa', 1);
+          packet(fdc, 81, W - 81, H / 2 + 28, t / 60 + 0.5, '#22d3ee', -1);
+          fdc.fillStyle = css('--text-muted', '#94a3b8');
+          fdc.font = '10px Inter, sans-serif';
+          fdc.fillText('TX →', W / 2 - 14, H / 2 - 34);
+          fdc.fillText('← RX', W / 2 - 14, H / 2 + 44);
+        }
+        function drawHD() {
+          var W = hd.width,
+            H = hd.height;
+          hdc.clearRect(0, 0, W, H);
+          node(hdc, 55, H / 2, 'Node A');
+          node(hdc, W - 55, H / 2, 'Node B');
+          // alternate direction every cycle
+          var cycle = Math.floor(t / 120) % 2;
+          var color = cycle === 0 ? '#22d3ee' : '#fb923c';
+          packet(hdc, 81, W - 81, H / 2, (t % 120) / 120, color, cycle === 0 ? 1 : -1);
+          hdc.fillStyle = css('--text-muted', '#94a3b8');
+          hdc.font = '10px Inter, sans-serif';
+          hdc.fillText(cycle === 0 ? 'A drives →' : '← B drives', W / 2 - 24, H / 2 - 14);
+        }
+        function loop() {
+          t += 1;
+          drawFD();
+          drawHD();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
+
+      // Quiz engine
+      (function () {
+        var QUESTIONS = [
+          {
+            q: 'In RS232, what voltage range represents a logic 1 (mark) at the driver?',
+            options: ['+5 V to +15 V', '−5 V to −15 V', '0 V to +3.3 V', '−200 mV to +200 mV'],
+            correct: 1,
+            fb: 'RS232 uses inverted logic: a mark (logic 1) is a negative voltage, −5 V to −15 V at the driver.',
+          },
+          {
+            q: 'What differential voltage does an RS485 receiver need to reliably decide a bit?',
+            options: ['±3 V', '±1.5 V', '±200 mV', '±12 V'],
+            correct: 2,
+            fb: 'Only ±200 mV. That large margin between the driven level and the required level is what lets the signal survive long cables.',
+          },
+          {
+            q: 'An RS485 link has a perfect 3 V differential, but ground potentials differ by 20 V between nodes. What happens?',
+            options: [
+              'Nothing — differential voltage is all that matters',
+              'The receiver may saturate because common-mode range (−7 to +12 V) is exceeded',
+              'The baud rate automatically drops',
+              'The TVS diodes fix it',
+            ],
+            correct: 1,
+            fb: 'Exceeding the common-mode input range corrupts data even with a valid differential. Isolation is the fix.',
+          },
+          {
+            q: 'Which interface is inherently full-duplex with separate TX and RX pairs?',
+            options: ['2-wire RS485', 'RS422', 'RS232 with no ground', 'None'],
+            correct: 1,
+            fb: 'RS422 uses separate TX and RX differential pairs, so it transmits both directions simultaneously.',
+          },
+          {
+            q: 'In half-duplex RS485, what controls which node is allowed to drive the bus?',
+            options: [
+              'The 120 Ω terminators',
+              'The DE/RE (driver/receiver enable) pins',
+              'The charge pump',
+              'The cable shield',
+            ],
+            correct: 1,
+            fb: 'DE/RE enables flip each transceiver between driving and listening so only one node transmits at a time.',
+          },
+        ];
+        var answered = 0,
+          correctCount = 0;
+        var wrap = document.getElementById('quiz');
+        QUESTIONS.forEach(function (item, qi) {
+          var card = document.createElement('div');
+          card.className = 'question-card';
+          var h = document.createElement('div');
+          h.className = 'quiz-question';
+          h.textContent = qi + 1 + '. ' + item.q;
+          card.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'quiz-options';
+          item.options.forEach(function (opt, oi) {
+            var li = document.createElement('li');
+            li.className = 'quiz-option';
+            li.textContent = opt;
+            li.addEventListener('click', function () {
+              if (card.dataset.done) {
+                return;
+              }
+              card.dataset.done = '1';
+              answered++;
+              var correct = oi === item.correct;
+              if (correct) {
+                correctCount++;
+                li.classList.add('correct');
+              } else {
+                li.classList.add('incorrect');
+                ul.children[item.correct].classList.add('correct');
+              }
+              var fb = document.createElement('div');
+              fb.className = 'quiz-feedback show ' + (correct ? 'correct' : 'incorrect');
+              fb.textContent = (correct ? '✓ Correct. ' : '✗ Not quite. ') + item.fb;
+              card.appendChild(fb);
+              if (answered === QUESTIONS.length) {
+                var s = document.getElementById('quizScore');
+                s.style.display = 'block';
+                s.textContent = 'You scored ' + correctCount + ' / ' + QUESTIONS.length + '.';
+              }
+            });
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrap.appendChild(card);
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

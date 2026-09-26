@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="What I2C is: two-wire open-drain bus, wired-AND behavior, speed classes from 100 kHz to 3.4 MHz, and how I2C compares with SPI and UART."
+    />
+    <title>What is I2C | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/01-what-is-i2c.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item active">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item">07. Robustness &amp; Debug</a>
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>What is I2C</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 01</span>
+              <h1>What is I2C?</h1>
+              <p class="subtitle">
+                Two wires, dozens of devices, one elegant trick: open-drain drivers pulling against
+                shared resistors. Understand this and everything else about I2C — pull-up sizing,
+                arbitration, bus hangs — follows naturally.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- 1. Definition -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The two-wire bus</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  I<sup>2</sup>C (<em>Inter-Integrated Circuit</em>, "I-squared-C") is a
+                  <strong>two-wire, synchronous, half-duplex, multi-drop</strong> serial bus
+                  invented by Philips (now NXP) in 1982. Every device shares the same two lines:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>SDA</strong> — Serial Data. Carries address and data bits, both
+                    directions.
+                  </li>
+                  <li>
+                    <strong>SCL</strong> — Serial Clock. Generated by the controller (master);
+                    targets (slaves) can hold it low to slow things down.
+                  </li>
+                </ul>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  One <strong>controller</strong> initiates every transfer and addresses one of up
+                  to ~112 usable <strong>targets</strong>. Sensors, EEPROMs, RTCs, PMICs, GPIO
+                  expanders, touch controllers — if it's a low-speed peripheral, it probably speaks
+                  I2C.
+                </p>
+                <div class="info-box">
+                  <strong>Terminology:</strong> the specification now uses
+                  <em>controller/target</em> in place of the older <em>master/slave</em>. This
+                  course uses both interchangeably — datasheets you'll read use both too.
+                </div>
+              </div>
+
+              <!-- 2. Open drain -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Open-drain drivers &amp; the wired-AND bus</h3>
+                  <span class="badge badge-cyan">Animated</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  No I2C device ever drives a line high. Each pin is an
+                  <strong>open-drain</strong> transistor that can only pull the line <em>low</em> or
+                  release it. The shared <strong>pull-up resistor</strong> is the only thing that
+                  ever creates a logic 1 — which is why pull-up sizing (Module 03) matters so much.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 640 240"
+                    xmlns="http://www.w3.org/2000/svg"
+                    role="img"
+                    aria-label="Open-drain equivalent circuit: VCC through pull-up resistor to the SDA line; three devices each with an NMOS transistor to ground. Animation shows any single transistor pulling the shared line low."
+                    style="width: 100%"
+                  >
+                    <!-- VCC rail + pullup -->
+                    <text x="60" y="18" fill="var(--text-base)" font-size="12" font-weight="700">
+                      VCC
+                    </text>
+                    <line
+                      x1="80"
+                      y1="14"
+                      x2="110"
+                      y2="14"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="104"
+                      y="24"
+                      width="12"
+                      height="34"
+                      fill="none"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="124"
+                      y="45"
+                      fill="var(--warning,#fb923c)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      Rp
+                    </text>
+                    <line
+                      x1="110"
+                      y1="14"
+                      x2="110"
+                      y2="24"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <line
+                      x1="110"
+                      y1="58"
+                      x2="110"
+                      y2="90"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <!-- bus line -->
+                    <line
+                      x1="110"
+                      y1="90"
+                      x2="620"
+                      y2="90"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="3"
+                    >
+                      <animate
+                        attributeName="stroke"
+                        values="var(--cyan,#22d3ee);var(--cyan,#22d3ee);#475569;#475569;var(--cyan,#22d3ee)"
+                        keyTimes="0;0.32;0.36;0.62;0.68"
+                        dur="4s"
+                        repeatCount="indefinite"
+                      />
+                    </line>
+                    <text
+                      x="590"
+                      y="80"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="11"
+                      font-weight="700"
+                    >
+                      SDA
+                    </text>
+                    <!-- bus state label -->
+                    <text
+                      x="330"
+                      y="76"
+                      text-anchor="middle"
+                      font-size="11"
+                      font-weight="800"
+                      fill="var(--cyan,#22d3ee)"
+                    >
+                      <animate
+                        attributeName="fill"
+                        values="var(--cyan,#22d3ee);var(--cyan,#22d3ee);#94a3b8;#94a3b8;var(--cyan,#22d3ee)"
+                        keyTimes="0;0.32;0.36;0.62;0.68"
+                        dur="4s"
+                        repeatCount="indefinite"
+                      />
+                      HIGH (released) → LOW (pulled) → HIGH
+                    </text>
+                    <!-- three transistors -->
+                    <g font-size="10">
+                      <g>
+                        <line
+                          x1="200"
+                          y1="90"
+                          x2="200"
+                          y2="130"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                        <rect
+                          x="180"
+                          y="130"
+                          width="40"
+                          height="46"
+                          rx="6"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="200" y="150" text-anchor="middle" fill="var(--text-sub)">
+                          Dev A
+                        </text>
+                        <text
+                          x="200"
+                          y="166"
+                          text-anchor="middle"
+                          fill="var(--text-muted)"
+                          font-size="8"
+                        >
+                          releases
+                        </text>
+                        <line
+                          x1="200"
+                          y1="176"
+                          x2="200"
+                          y2="204"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                      </g>
+                      <g>
+                        <line
+                          x1="360"
+                          y1="90"
+                          x2="360"
+                          y2="130"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                        <rect
+                          x="340"
+                          y="130"
+                          width="40"
+                          height="46"
+                          rx="6"
+                          fill="var(--bg-muted)"
+                          stroke="var(--danger,#f87171)"
+                        >
+                          <animate
+                            attributeName="stroke"
+                            values="var(--border);var(--border);var(--danger,#f87171);var(--danger,#f87171);var(--border)"
+                            keyTimes="0;0.32;0.36;0.62;0.68"
+                            dur="4s"
+                            repeatCount="indefinite"
+                          />
+                        </rect>
+                        <text x="360" y="150" text-anchor="middle" fill="var(--text-sub)">
+                          Dev B
+                        </text>
+                        <text
+                          x="360"
+                          y="166"
+                          text-anchor="middle"
+                          fill="var(--danger,#f87171)"
+                          font-size="8"
+                        >
+                          <animate
+                            attributeName="fill"
+                            values="var(--text-muted);var(--text-muted);var(--danger,#f87171);var(--danger,#f87171);var(--text-muted)"
+                            keyTimes="0;0.32;0.36;0.62;0.68"
+                            dur="4s"
+                            repeatCount="indefinite"
+                          />
+                          pulls LOW
+                        </text>
+                        <line
+                          x1="360"
+                          y1="176"
+                          x2="360"
+                          y2="204"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                      </g>
+                      <g>
+                        <line
+                          x1="520"
+                          y1="90"
+                          x2="520"
+                          y2="130"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                        <rect
+                          x="500"
+                          y="130"
+                          width="40"
+                          height="46"
+                          rx="6"
+                          fill="var(--bg-muted)"
+                          stroke="var(--border)"
+                        />
+                        <text x="520" y="150" text-anchor="middle" fill="var(--text-sub)">
+                          Dev C
+                        </text>
+                        <text
+                          x="520"
+                          y="166"
+                          text-anchor="middle"
+                          fill="var(--text-muted)"
+                          font-size="8"
+                        >
+                          releases
+                        </text>
+                        <line
+                          x1="520"
+                          y1="176"
+                          x2="520"
+                          y2="204"
+                          stroke="var(--text-muted)"
+                          stroke-width="2"
+                        />
+                      </g>
+                    </g>
+                    <!-- ground -->
+                    <line
+                      x1="160"
+                      y1="204"
+                      x2="560"
+                      y2="204"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                    <g stroke="var(--text-muted)" stroke-width="2">
+                      <line x1="350" y1="212" x2="370" y2="212" />
+                      <line x1="354" y1="218" x2="366" y2="218" />
+                      <line x1="358" y1="224" x2="362" y2="224" />
+                    </g>
+                    <line
+                      x1="360"
+                      y1="204"
+                      x2="360"
+                      y2="212"
+                      stroke="var(--text-muted)"
+                      stroke-width="2"
+                    />
+                  </svg>
+                  <p class="diagram-caption">
+                    Open-drain bus: the pull-up creates the HIGH; <em>any</em> device can create a
+                    LOW. Watch Dev B periodically pull the whole line down.
+                  </p>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Because a low always wins, the bus behaves as a
+                  <strong>wired-AND</strong>: the line is high only if <em>every</em> device
+                  releases it. This one property enables three signature I2C features —
+                  <strong>ACK</strong> (target pulls SDA low to say "got it"),
+                  <strong>clock stretching</strong> (target holds SCL low to say "wait"), and
+                  <strong>multi-master arbitration</strong> (Module 05).
+                </p>
+              </div>
+
+              <!-- 3. Speed classes -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Speed classes</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Mode</th>
+                        <th>Max SCL</th>
+                        <th>Max rise time t<sub>r</sub></th>
+                        <th>Typical use</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Standard (Sm)</td>
+                        <td>100 kHz</td>
+                        <td>1000 ns</td>
+                        <td>Default. Fine for config registers, RTCs, slow sensors.</td>
+                      </tr>
+                      <tr>
+                        <td>Fast (Fm)</td>
+                        <td>400 kHz</td>
+                        <td>300 ns</td>
+                        <td>The real-world workhorse — most modern designs run here.</td>
+                      </tr>
+                      <tr>
+                        <td>Fast+ (Fm+)</td>
+                        <td>1 MHz</td>
+                        <td>120 ns</td>
+                        <td>Higher-bandwidth sensors; needs strong pull-ups (~1 kΩ).</td>
+                      </tr>
+                      <tr>
+                        <td>High-Speed (Hs)</td>
+                        <td>3.4 MHz</td>
+                        <td>(current-source assisted)</td>
+                        <td>Rare; special signaling, limited device support.</td>
+                      </tr>
+                      <tr>
+                        <td>Ultra-Fast (UFm)</td>
+                        <td>5 MHz</td>
+                        <td>push-pull, write-only</td>
+                        <td>Unidirectional variant (LED controllers); not a shared bus.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  <strong>Rule of thumb:</strong> design for Fast-mode (400 kHz) unless a device
+                  forces you slower. The speed limit in practice is almost never the silicon — it is
+                  the RC rise time of your bus (Module 03).
+                </div>
+              </div>
+
+              <!-- 4. Comparison -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>I2C vs SPI vs UART</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>I2C</th>
+                        <th>SPI</th>
+                        <th>UART</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Wires</strong></td>
+                        <td>2 (shared by all)</td>
+                        <td>3 + 1 CS per device</td>
+                        <td>2 per link (TX/RX)</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Topology</strong></td>
+                        <td>True multi-drop, multi-master capable</td>
+                        <td>Star (CS per target)</td>
+                        <td>Point-to-point</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Speed</strong></td>
+                        <td>0.1–3.4 MHz (usually ≤1 MHz)</td>
+                        <td>10–100+ MHz</td>
+                        <td>Usually ≤ 3 Mbaud</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Addressing</strong></td>
+                        <td>In-band (7/10-bit)</td>
+                        <td>Hardware CS lines</td>
+                        <td>None</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Flow control</strong></td>
+                        <td>ACK + clock stretching</td>
+                        <td>None built in</td>
+                        <td>Optional RTS/CTS</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Weak spot</strong></td>
+                        <td>Speed, bus hangs, capacitance limit</td>
+                        <td>Pin count, no ACK</td>
+                        <td>Only two endpoints</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Choose when…</strong></td>
+                        <td>Many slow peripherals, few pins</td>
+                        <td>Fast streaming (ADCs, flash, displays)</td>
+                        <td>Two boards / debug console</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- takeaways -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    I2C = two shared wires (SDA, SCL), one controller talking to many targets.
+                  </li>
+                  <li>
+                    Nothing drives high — pull-up resistors create every logic 1. The bus is a
+                    wired-AND.
+                  </li>
+                  <li>
+                    ACK, clock stretching, and arbitration all fall out of the open-drain trick.
+                  </li>
+                  <li>
+                    400 kHz Fast-mode is the practical default; RC rise time is the real speed
+                    limit.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="index.html">← Course Home</a>
+                <a class="btn btn-primary" href="02-protocol-essentials.html"
+                  >Next: Protocol Essentials →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

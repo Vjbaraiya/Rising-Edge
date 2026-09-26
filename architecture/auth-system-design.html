@@ -1,0 +1,2583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <title>Rising Edge — Auth & Subscription System Architecture</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/architecture/auth-system-design.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-d: #1d4ed8;
+        --cyan: #06b6d4;
+        --dark: #060d1a;
+        --card: #0d1726;
+        --card2: #111f35;
+        --border: #1e2d45;
+        --text: #f1f5f9;
+        --text-sub: #cbd5e1;
+        --text-muted: #94a3b8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --purple: #a855f7;
+        --orange: #f97316;
+        --sidebar: 240px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: var(--dark);
+        color: var(--text);
+        line-height: 1.65;
+        font-size: 15px;
+        display: flex;
+      }
+      a {
+        color: var(--cyan);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        font-family: 'Cascadia Code', 'Fira Code', monospace;
+        font-size: 0.85em;
+      }
+
+      /* ── SIDEBAR ─────────────────────── */
+      .sidebar {
+        width: var(--sidebar);
+        min-width: var(--sidebar);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--card);
+        border-right: 1px solid var(--border);
+        padding: 24px 16px;
+        flex-shrink: 0;
+      }
+      .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sidebar-logo span {
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: var(--cyan);
+        letter-spacing: 0.05em;
+      }
+      .sidebar h3 {
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        margin: 16px 0 6px;
+      }
+      .sidebar a {
+        display: block;
+        padding: 5px 8px;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+        color: var(--text-sub);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .sidebar a:hover {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--text);
+        text-decoration: none;
+      }
+      .sidebar .sub {
+        padding-left: 16px;
+        font-size: 0.75rem;
+      }
+
+      /* ── MAIN ────────────────────────── */
+      main {
+        flex: 1;
+        min-width: 0;
+        padding: 40px 48px;
+        max-width: 960px;
+      }
+      @media (max-width: 900px) {
+        main {
+          padding: 24px 20px;
+        }
+        body {
+          flex-direction: column;
+        }
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: static;
+        }
+      }
+
+      /* ── TYPOGRAPHY ──────────────────── */
+      .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg, var(--text), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .page-sub {
+        color: var(--text-muted);
+        margin-bottom: 40px;
+        font-size: 0.9375rem;
+      }
+      h2 {
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin: 48px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+      }
+      h2 .num {
+        color: var(--cyan);
+        margin-right: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 24px 0 8px;
+        color: var(--text-sub);
+      }
+      h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 16px 0 6px;
+        color: var(--text-muted);
+      }
+      p {
+        margin-bottom: 12px;
+        color: var(--text-sub);
+      }
+      ul,
+      ol {
+        margin: 8px 0 12px 20px;
+        color: var(--text-sub);
+      }
+      li {
+        margin-bottom: 4px;
+      }
+
+      /* ── SECTION CARD ────────────────── */
+      .section {
+        margin-bottom: 12px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .card2 {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+
+      /* ── BADGES ──────────────────────── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin: 2px;
+      }
+      .b-blue {
+        background: rgba(37, 99, 235, 0.18);
+        color: #93c5fd;
+      }
+      .b-cyan {
+        background: rgba(6, 182, 212, 0.15);
+        color: #67e8f9;
+      }
+      .b-green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+      }
+      .b-orange {
+        background: rgba(249, 115, 22, 0.15);
+        color: #fdba74;
+      }
+      .b-purple {
+        background: rgba(168, 85, 247, 0.15);
+        color: #d8b4fe;
+      }
+      .b-red {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+      }
+      .b-gray {
+        background: rgba(148, 163, 184, 0.1);
+        color: #94a3b8;
+      }
+
+      /* ── TABLES ──────────────────────── */
+      .table-wrap {
+        overflow-x: auto;
+        margin-bottom: 16px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+      }
+      th {
+        background: var(--card2);
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.7rem;
+        padding: 10px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 9px 14px;
+        border-bottom: 1px solid rgba(30, 45, 69, 0.6);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: rgba(37, 99, 235, 0.04);
+      }
+
+      /* ── CODE ────────────────────────── */
+      pre {
+        background: #0d1117;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        margin: 12px 0;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: inherit;
+      }
+      .hljs {
+        background: transparent;
+      }
+      .code-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+
+      /* ── MERMAID ─────────────────────── */
+      .mermaid {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        overflow-x: auto;
+        margin: 12px 0;
+        text-align: center;
+      }
+
+      /* ── GRID ────────────────────────── */
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .grid2,
+        .grid3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── PLAN CARDS ──────────────────── */
+      .plan-card {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px;
+      }
+      .plan-card .plan-name {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .plan-card .plan-price {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+      .plan-card ul {
+        margin: 0 0 0 16px;
+      }
+      .plan-card li {
+        font-size: 0.8rem;
+        color: var(--text-sub);
+        margin-bottom: 2px;
+      }
+      .plan-free .plan-name {
+        color: var(--text-sub);
+      }
+      .plan-adv .plan-name {
+        color: var(--primary);
+      }
+      .plan-prem .plan-name {
+        color: var(--cyan);
+      }
+
+      /* ── WIREFRAME ───────────────────── */
+      .wireframe {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        white-space: pre;
+        overflow-x: auto;
+        line-height: 1.5;
+      }
+
+      /* ── FLOW STEP ───────────────────── */
+      .flow {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .flow-step {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 10px 0;
+      }
+      .flow-step:not(:last-child) {
+        border-bottom: 1px solid rgba(30, 45, 69, 0.5);
+      }
+      .step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: rgba(37, 99, 235, 0.2);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .step-body strong {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+      .step-body span {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+      }
+
+      /* ── DIVIDER ─────────────────────── */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 32px 0;
+      }
+
+      /* ── INFO BOX ────────────────────── */
+      .info {
+        background: rgba(37, 99, 235, 0.08);
+        border-left: 3px solid var(--primary);
+        border-radius: 0 6px 6px 0;
+        padding: 12px 16px;
+        margin: 12px 0;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+      }
+      .warn {
+        background: rgba(245, 158, 11, 0.08);
+        border-left: 3px solid var(--warning);
+        border-radius: 0 6px 6px 0;
+        padding: 12px 16px;
+        margin: 12px 0;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════════ -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <svg
+          width="22"
+          height="22"
+          fill="none"
+          stroke="#06b6d4"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        <span>Rising Edge Auth</span>
+      </div>
+      <h3>Deliverables</h3>
+      <a href="#s1">1. Architecture</a>
+      <a href="#s2">2. Database Schema</a>
+      <a href="#s3">3. API Endpoints</a>
+      <a href="#s4">4. Middleware</a>
+      <a href="#s5">5. Route Protection</a>
+      <a href="#s6">6. Folder Structure</a>
+      <a href="#s7">7. UI Wireframes</a>
+      <a href="#s8">8. Dashboard Navigation</a>
+      <a href="#s9">9. Subscription Logic</a>
+      <a href="#s10">10. Sequence Diagrams</a>
+      <a href="#s11">11. Tech Stack</a>
+      <a href="#s12">12. Sample Code</a>
+      <h3 style="margin-top: 20px">Code Files</h3>
+      <a href="code/schema.prisma" class="sub">schema.prisma</a>
+      <a href="code/auth.middleware.js" class="sub">auth.middleware.js</a>
+      <a href="code/auth.controller.js" class="sub">auth.controller.js</a>
+      <a href="code/auth.routes.js" class="sub">auth.routes.js</a>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════ -->
+    <main>
+      <p class="page-title">Auth & Subscription System</p>
+      <p class="page-sub">
+        Rising Edge Technologies — Production-Ready Architecture Specification<br />
+        Role-Based Access Control + Subscription-Based Feature Gating
+      </p>
+
+      <!-- ─────────────────────────────────────────────────
+     §1  AUTHENTICATION ARCHITECTURE
+───────────────────────────────────────────────── -->
+      <h2 id="s1"><span class="num">01</span>Authentication Architecture</h2>
+
+      <h3>System Layers</h3>
+      <div class="mermaid">
+        graph TB subgraph Client["Client Layer"] B[Browser / Mobile App] end subgraph Edge["Edge /
+        CDN"] RL[Rate Limiter] CSRF[CSRF Guard] end subgraph API["API Layer — Node.js / Express"]
+        AUT[Auth Middleware<br />verifyToken] ROLE[RBAC Middleware<br />requireRole]
+        SUB[Subscription Middleware<br />requireSubscription] ENRL[Enrollment Guard] end subgraph
+        Services["Business Services"] AS[Auth Service] US[User Service] TS[Training Service]
+        PS[Payment Service] ES[Email Service] end subgraph Data["Data Layer"] PG[(PostgreSQL /
+        Neon)] RD[(Redis — token cache)] S3[(S3 / R2 — files)] end
+        B-->RL-->CSRF-->AUT-->ROLE-->SUB-->ENRL ENRL-->AS & US & TS & PS AS & US & TS & PS --> PG &
+        RD & S3 PS-->CF[Cashfree Gateway]
+      </div>
+
+      <h3>Authentication Flow Overview</h3>
+      <div class="card">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Registration</strong
+              ><span
+                >User submits email + password → bcrypt hash → email verification token sent →
+                record created with status PENDING_VERIFICATION</span
+              >
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Email Verification</strong
+              ><span
+                >User clicks link → token validated → status → ACTIVE → Basic subscription
+                auto-provisioned</span
+              >
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Login</strong
+              ><span
+                >Credentials validated → JWT access token (15 min) + refresh token (7 days, httpOnly
+                cookie) → device fingerprint logged</span
+              >
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Token Refresh</strong
+              ><span
+                >Access token expires → client calls /auth/refresh → refresh token rotated → new
+                pair issued → old token blacklisted in Redis</span
+              >
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Authorization</strong
+              ><span
+                >Every protected request: verify JWT → load user+subscription → check role → check
+                subscription → check enrollment (content routes)</span
+              >
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Logout</strong
+              ><span
+                >Refresh token deleted from DB + blacklisted in Redis → access token
+                stateless-expires naturally</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Token Strategy</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Token</th>
+            <th>Storage</th>
+            <th>TTL</th>
+            <th>Rotation</th>
+            <th>Revocation</th>
+          </tr>
+          <tr>
+            <td>Access JWT</td>
+            <td>Memory / Authorization header</td>
+            <td>15 minutes</td>
+            <td>On every refresh</td>
+            <td>Via Redis blacklist</td>
+          </tr>
+          <tr>
+            <td>Refresh Token</td>
+            <td>httpOnly secure cookie + DB</td>
+            <td>7 days</td>
+            <td>Every use (rotation)</td>
+            <td>Delete from DB</td>
+          </tr>
+          <tr>
+            <td>Email Verify</td>
+            <td>DB column</td>
+            <td>24 hours</td>
+            <td>—</td>
+            <td>Nulled on use</td>
+          </tr>
+          <tr>
+            <td>Password Reset</td>
+            <td>DB column + hash</td>
+            <td>1 hour</td>
+            <td>—</td>
+            <td>Nulled on use</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Security Controls</h3>
+      <div class="grid2">
+        <div class="card2">
+          <h4>Input & Transport</h4>
+          <ul>
+            <li>Helmet.js — security headers</li>
+            <li>express-validator — all inputs</li>
+            <li>DOMPurify (client-side XSS)</li>
+            <li>Parameterized queries via Prisma (SQLi)</li>
+            <li>HTTPS-only, Secure + SameSite=Strict cookies</li>
+            <li>CORS whitelist</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Rate Limiting</h4>
+          <ul>
+            <li><code>/auth/login</code> → 5 req/15 min per IP</li>
+            <li><code>/auth/register</code> → 3 req/hour per IP</li>
+            <li><code>/auth/forgot-password</code> → 3 req/hour</li>
+            <li>Global API → 100 req/min per user</li>
+            <li>Implemented via express-rate-limit + Redis</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Password Policy</h4>
+          <ul>
+            <li>Minimum 8 characters</li>
+            <li>At least 1 uppercase, 1 number, 1 symbol</li>
+            <li>bcrypt cost factor 12 (≈300ms hash time)</li>
+            <li>HaveIBeenPwned API check on registration</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Audit & Monitoring</h4>
+          <ul>
+            <li>Every auth event → audit_logs table</li>
+            <li>Device + IP fingerprint on login</li>
+            <li>Suspicious login alert emails</li>
+            <li>Failed login counter → temp lockout at 5</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §2  DATABASE SCHEMA & ER DIAGRAM
+───────────────────────────────────────────────── -->
+      <h2 id="s2"><span class="num">02</span>Database Schema &amp; ER Diagram</h2>
+
+      <div class="mermaid">
+        erDiagram USERS { cuid id PK string full_name string email UK string password_hash enum role
+        "USER|ADMIN|SUPER_ADMIN" enum status "ACTIVE|SUSPENDED|PENDING_VERIFICATION" boolean
+        email_verified string email_verify_token string password_reset_token datetime
+        password_reset_expiry boolean mfa_enabled string mfa_secret string avatar_url datetime
+        created_at datetime updated_at } USER_SUBSCRIPTIONS { cuid id PK string user_id FK enum plan
+        "BASIC|ADVANCED|PREMIUM" enum status "ACTIVE|EXPIRED|CANCELLED|TRIAL" datetime start_date
+        datetime end_date boolean auto_renew string payment_id FK } SUBSCRIPTION_PLAN_CONFIGS { cuid
+        id PK enum name UK string display_name decimal price string billing_cycle json features int
+        max_downloads int ai_usage_limit } TRAININGS { cuid id PK string title string slug UK string
+        description enum level "BEGINNER|INTERMEDIATE|ADVANCED" string category decimal price string
+        thumbnail_url boolean published enum required_plan } MODULES { cuid id PK string training_id
+        FK string title int order } LESSONS { cuid id PK string module_id FK string title enum type
+        "VIDEO|PDF|QUIZ|ASSIGNMENT" string content_url int duration int order boolean is_free }
+        ENROLLMENTS { cuid id PK string user_id FK string training_id FK string payment_id FK
+        datetime enrolled_at datetime expires_at datetime completed_at } PAYMENTS { cuid id PK
+        string user_id FK decimal amount string currency string gateway string order_id UK string
+        transaction_id enum status "PENDING|SUCCESS|FAILED|REFUNDED" datetime paid_at } CERTIFICATES
+        { cuid id PK string user_id FK string training_id FK string certificate_url datetime
+        issued_at } PROGRESS { cuid id PK string user_id FK string lesson_id FK boolean completed
+        float quiz_score int time_spent datetime last_viewed } REFRESH_TOKENS { cuid id PK string
+        user_id FK string token UK string device_info string ip_address datetime expires_at }
+        LOGIN_HISTORY { cuid id PK string user_id FK string ip_address string user_agent string
+        device boolean success datetime created_at } AUDIT_LOGS { cuid id PK string user_id FK
+        string action string resource string resource_id json old_values json new_values string
+        ip_address datetime created_at } USERS ||--o| USER_SUBSCRIPTIONS : "has one" USERS ||--o{
+        ENROLLMENTS : "enrolls" USERS ||--o{ PAYMENTS : "makes" USERS ||--o{ CERTIFICATES : "earns"
+        USERS ||--o{ PROGRESS : "tracks" USERS ||--o{ REFRESH_TOKENS : "holds" USERS ||--o{
+        LOGIN_HISTORY : "logs" USERS ||--o{ AUDIT_LOGS : "generates" TRAININGS ||--o{ MODULES :
+        "contains" MODULES ||--o{ LESSONS : "contains" LESSONS ||--o{ PROGRESS : "tracked in"
+        TRAININGS ||--o{ ENROLLMENTS : "has" TRAININGS ||--o{ CERTIFICATES : "issues" PAYMENTS
+        ||--o{ ENROLLMENTS : "enables" PAYMENTS ||--o| USER_SUBSCRIPTIONS : "funds"
+      </div>
+
+      <h3>Key Constraints &amp; Indexes</h3>
+      <div class="code-label">PostgreSQL indexes</div>
+      <pre><code class="language-sql">-- Unique constraints
+ALTER TABLE users ADD CONSTRAINT uq_users_email UNIQUE (email);
+ALTER TABLE trainings ADD CONSTRAINT uq_trainings_slug UNIQUE (slug);
+ALTER TABLE enrollments ADD CONSTRAINT uq_enrollments UNIQUE (user_id, training_id);
+ALTER TABLE refresh_tokens ADD CONSTRAINT uq_refresh_token UNIQUE (token);
+
+-- Performance indexes
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_enrollments_user ON enrollments(user_id);
+CREATE INDEX idx_enrollments_training ON enrollments(training_id);
+CREATE INDEX idx_progress_user_lesson ON progress(user_id, lesson_id);
+CREATE INDEX idx_payments_user ON payments(user_id);
+CREATE INDEX idx_payments_status ON payments(status);
+CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_created ON audit_logs(created_at DESC);
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);</code></pre>
+
+      <!-- ─────────────────────────────────────────────────
+     §3  API ENDPOINTS
+───────────────────────────────────────────────── -->
+      <h2 id="s3"><span class="num">03</span>API Endpoints</h2>
+
+      <h3>Authentication</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Auth</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/register</code></td>
+            <td>Public</td>
+            <td>Register new user account</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/login</code></td>
+            <td>Public</td>
+            <td>Login, returns JWT + refresh cookie</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/refresh</code></td>
+            <td>Cookie</td>
+            <td>Rotate refresh token, issue new access token</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/logout</code></td>
+            <td>JWT</td>
+            <td>Revoke refresh token</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/verify-email</code></td>
+            <td>Public</td>
+            <td>Verify email with token</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/resend-verification</code></td>
+            <td>Public</td>
+            <td>Resend email verification</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/forgot-password</code></td>
+            <td>Public</td>
+            <td>Send password reset link</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/reset-password</code></td>
+            <td>Public</td>
+            <td>Reset password using token</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/change-password</code></td>
+            <td>JWT</td>
+            <td>Change password (authenticated)</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/mfa/enable</code></td>
+            <td>JWT</td>
+            <td>Enable MFA, returns TOTP QR code</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/auth/mfa/verify</code></td>
+            <td>JWT</td>
+            <td>Verify MFA code</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>User</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Auth</th>
+            <th>Subscription</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Get own profile + subscription</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-orange">PUT</span></td>
+            <td><code>/api/users/me</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Update profile</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/subscription</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Current subscription details</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/payments</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Payment history</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/enrollments</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Enrolled trainings</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/progress</code></td>
+            <td>JWT</td>
+            <td>Advanced+</td>
+            <td>Overall learning analytics</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/certificates</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Earned certificates</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/users/me/login-history</code></td>
+            <td>JWT</td>
+            <td>Any</td>
+            <td>Device login history</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Trainings</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Auth</th>
+            <th>Subscription</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/trainings</code></td>
+            <td>Public</td>
+            <td>—</td>
+            <td>List published trainings (paginated)</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/trainings/:id</code></td>
+            <td>Public</td>
+            <td>—</td>
+            <td>Training detail + free preview</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/trainings/:id/content</code></td>
+            <td>JWT + Enrolled</td>
+            <td>Required Plan</td>
+            <td>Full course content</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/trainings/:id/lessons/:lid</code></td>
+            <td>JWT + Enrolled</td>
+            <td>Required Plan</td>
+            <td>Single lesson content</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/trainings</code></td>
+            <td>Admin</td>
+            <td>—</td>
+            <td>Create training</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-orange">PUT</span></td>
+            <td><code>/api/trainings/:id</code></td>
+            <td>Admin</td>
+            <td>—</td>
+            <td>Update training</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/trainings/:id/publish</code></td>
+            <td>Admin</td>
+            <td>—</td>
+            <td>Publish / unpublish</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-red">DELETE</span></td>
+            <td><code>/api/trainings/:id</code></td>
+            <td>Admin</td>
+            <td>—</td>
+            <td>Archive training</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Enrollment &amp; Payments</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Auth</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/payments/initiate</code></td>
+            <td>JWT</td>
+            <td>Create Cashfree order, return paymentSessionId</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/payments/verify</code></td>
+            <td>JWT</td>
+            <td>Verify Cashfree callback, create enrollment</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/payments/webhook</code></td>
+            <td>Cashfree Sig</td>
+            <td>Server-side webhook for payment events</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/subscriptions/upgrade</code></td>
+            <td>JWT</td>
+            <td>Initiate subscription plan upgrade payment</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/subscriptions/cancel</code></td>
+            <td>JWT</td>
+            <td>Cancel subscription auto-renewal</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Progress</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/progress/lesson/:lessonId/complete</code></td>
+            <td>Mark lesson complete</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/progress/lesson/:lessonId/quiz</code></td>
+            <td>Submit quiz score</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/progress/training/:trainingId</code></td>
+            <td>Progress for a specific training</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/certificates/claim/:trainingId</code></td>
+            <td>Generate and issue certificate (100% complete)</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Admin Endpoints</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Role</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/users</code></td>
+            <td>Admin+</td>
+            <td>List all users with search/filter</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/users/:id</code></td>
+            <td>Admin+</td>
+            <td>User details + enrollment + progress</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-orange">PUT</span></td>
+            <td><code>/api/admin/users/:id/status</code></td>
+            <td>Admin+</td>
+            <td>Suspend / activate user</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-orange">PUT</span></td>
+            <td><code>/api/admin/users/:id/role</code></td>
+            <td>SuperAdmin</td>
+            <td>Change user role</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/payments</code></td>
+            <td>Admin+</td>
+            <td>All payments with filter</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/admin/payments/:id/refund</code></td>
+            <td>SuperAdmin</td>
+            <td>Initiate refund via Cashfree</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/reports/revenue</code></td>
+            <td>Admin+</td>
+            <td>Revenue over time</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/reports/enrollments</code></td>
+            <td>Admin+</td>
+            <td>Enrollment statistics</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/audit-logs</code></td>
+            <td>SuperAdmin</td>
+            <td>System audit trail</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/api/admin/subscriptions</code></td>
+            <td>SuperAdmin</td>
+            <td>Manage subscription plan configs</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-orange">PUT</span></td>
+            <td><code>/api/admin/subscriptions/:plan</code></td>
+            <td>SuperAdmin</td>
+            <td>Update plan pricing / features</td>
+          </tr>
+          <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/api/admin/admins</code></td>
+            <td>SuperAdmin</td>
+            <td>Create new Admin account</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §4  MIDDLEWARE STRUCTURE
+───────────────────────────────────────────────── -->
+      <h2 id="s4"><span class="num">04</span>Middleware Structure</h2>
+
+      <div class="mermaid">
+        graph LR REQ[Incoming Request] --> H[Helmet<br />Security Headers] H --> C[CORS] C -->
+        RL[Rate Limiter<br />express-rate-limit] RL --> CS[CSRF Guard<br />csurf] CS --> VB[Body
+        Validator<br />express-validator] VB --> VT[verifyToken<br />JWT check] VT -->
+        RR[requireRole<br />RBAC check] RR --> RS[requireSubscription<br />plan check] RS -->
+        RE[requireEnrollment<br />content guard] RE --> CTRL[Controller / Handler] CTRL --> AL[Audit
+        Logger] AL --> RES[Response]
+      </div>
+
+      <div class="grid2">
+        <div>
+          <h3>Global Middleware (all routes)</h3>
+          <pre><code class="language-javascript">// server.js — applied globally
+app.use(helmet());                    // security headers
+app.use(cors(corsOptions));           // origin whitelist
+app.use(cookieParser());              // parse httpOnly cookies
+app.use(express.json({ limit:'10kb' })); // body size guard
+app.use(generalRateLimit);            // 100 req/min
+app.use(requestLogger);               // morgan + trace ID
+app.use(sanitizeInputs);              // strip HTML/script tags</code></pre>
+        </div>
+        <div>
+          <h3>Route-Level Middleware</h3>
+          <pre><code class="language-javascript">// Applied per-route as needed
+router.post('/login',
+  authRateLimit,          // 5 req/15min per IP
+  validateLoginInput,     // express-validator chain
+  authController.login
+);
+
+router.get('/trainings/:id/content',
+  verifyToken,            // JWT required
+  requireSubscription('ADVANCED','PREMIUM'),
+  requireEnrollment,      // must be enrolled
+  trainingController.getContent
+);</code></pre>
+        </div>
+      </div>
+
+      <h3>Middleware Execution Order</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Middleware</th>
+            <th>Applies To</th>
+            <th>Purpose</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>helmet</td>
+            <td>All</td>
+            <td>X-Frame-Options, CSP, HSTS, etc.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>cors</td>
+            <td>All</td>
+            <td>Whitelist allowed origins</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>rateLimiter</td>
+            <td>All (custom on auth)</td>
+            <td>Prevent brute force / DDoS</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>sanitizeInputs</td>
+            <td>All POST/PUT</td>
+            <td>Strip XSS payloads from body</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>validateInput</td>
+            <td>Per-route</td>
+            <td>Schema validation, type coercion</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>verifyToken</td>
+            <td>Protected routes</td>
+            <td>Decode + validate JWT</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>requireRole</td>
+            <td>Role-gated routes</td>
+            <td>RBAC enforcement</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>requireSubscription</td>
+            <td>Feature-gated routes</td>
+            <td>Plan level enforcement</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>requireEnrollment</td>
+            <td>Course content routes</td>
+            <td>Paid enrollment check</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>auditLogger</td>
+            <td>Write operations</td>
+            <td>Record action to audit_logs</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §5  ROUTE PROTECTION LOGIC
+───────────────────────────────────────────────── -->
+      <h2 id="s5"><span class="num">05</span>Route Protection Logic</h2>
+
+      <div class="grid2">
+        <div class="card2">
+          <h4>Public Routes (no auth)</h4>
+          <ul>
+            <li><code>GET /trainings</code> — list</li>
+            <li><code>GET /trainings/:id</code> — detail</li>
+            <li><code>POST /auth/login</code></li>
+            <li><code>POST /auth/register</code></li>
+            <li><code>POST /auth/forgot-password</code></li>
+            <li><code>POST /auth/reset-password</code></li>
+            <li><code>POST /auth/verify-email</code></li>
+            <li><code>POST /payments/webhook</code> (Cashfree sig)</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Authenticated (any verified user)</h4>
+          <ul>
+            <li><code>GET /users/me</code></li>
+            <li><code>PUT /users/me</code></li>
+            <li><code>GET /users/me/enrollments</code></li>
+            <li><code>POST /payments/initiate</code></li>
+            <li><code>POST /payments/verify</code></li>
+            <li><code>POST /auth/logout</code></li>
+            <li><code>POST /auth/change-password</code></li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Advanced or Premium subscription</h4>
+          <ul>
+            <li><code>GET /trainings/:id/content</code></li>
+            <li><code>GET /users/me/progress</code></li>
+            <li>Paid training content</li>
+            <li>Assessment features</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Premium subscription only</h4>
+          <ul>
+            <li>PCB Design Review Tool</li>
+            <li>AI Design Assistant</li>
+            <li>Schematic Review Tool</li>
+            <li>Unlimited downloads</li>
+            <li>Premium certificates</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Admin role</h4>
+          <ul>
+            <li><code>/admin/users</code></li>
+            <li><code>/admin/payments</code></li>
+            <li><code>/admin/reports</code></li>
+            <li>Training CRUD</li>
+            <li>Content management</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4>Super Admin only</h4>
+          <ul>
+            <li><code>/admin/audit-logs</code></li>
+            <li><code>/admin/subscriptions</code></li>
+            <li><code>/admin/admins</code> (create)</li>
+            <li>Role changes</li>
+            <li>Platform settings</li>
+            <li>Refunds</li>
+          </ul>
+        </div>
+      </div>
+
+      <pre><code class="language-javascript">// Route file example — showing all protection patterns
+const r = express.Router();
+const { verifyToken, requireRole, requireSubscription, requireEnrollment } = require('../middleware/auth');
+
+// ── PUBLIC ────────────────────────────────────────────────
+r.get('/trainings',          trainingCtrl.list);
+r.get('/trainings/:id',      trainingCtrl.detail);
+
+// ── ANY LOGGED-IN USER ────────────────────────────────────
+r.get('/users/me',           verifyToken, userCtrl.getMe);
+r.put('/users/me',           verifyToken, validate('updateProfile'), userCtrl.updateMe);
+
+// ── ADVANCED OR PREMIUM + ENROLLED ────────────────────────
+r.get('/trainings/:id/content',
+  verifyToken,
+  requireSubscription('ADVANCED', 'PREMIUM'),
+  requireEnrollment,
+  trainingCtrl.getContent
+);
+
+// ── PREMIUM ONLY ──────────────────────────────────────────
+r.get('/tools/pcb-review',
+  verifyToken,
+  requireSubscription('PREMIUM'),
+  toolCtrl.pcbReview
+);
+
+// ── ADMIN ONLY ────────────────────────────────────────────
+r.get('/admin/users',
+  verifyToken,
+  requireRole('ADMIN', 'SUPER_ADMIN'),
+  adminCtrl.listUsers
+);
+
+// ── SUPER ADMIN ONLY ──────────────────────────────────────
+r.post('/admin/admins',
+  verifyToken,
+  requireRole('SUPER_ADMIN'),
+  adminCtrl.createAdmin
+);
+
+r.get('/admin/audit-logs',
+  verifyToken,
+  requireRole('SUPER_ADMIN'),
+  adminCtrl.auditLogs
+);</code></pre>
+
+      <!-- ─────────────────────────────────────────────────
+     §6  FOLDER STRUCTURE
+───────────────────────────────────────────────── -->
+      <h2 id="s6"><span class="num">06</span>Folder Structure</h2>
+
+      <div class="grid2">
+        <div>
+          <div class="code-label">Backend — Node.js / Express</div>
+          <pre><code>backend/
+├── prisma/
+│   ├── schema.prisma          ← DB schema (see §2)
+│   ├── seed.ts                ← default admin + plans
+│   └── migrations/
+├── src/
+│   ├── config/
+│   │   ├── database.ts        ← Prisma client singleton
+│   │   ├── redis.ts           ← Redis connection
+│   │   ├── cors.ts
+│   │   └── cashfree.ts
+│   ├── middleware/
+│   │   ├── auth.middleware.ts  ← verifyToken, requireRole
+│   │   ├── subscription.ts    ← requireSubscription
+│   │   ├── enrollment.ts      ← requireEnrollment
+│   │   ├── rateLimiter.ts
+│   │   ├── validate.ts        ← express-validator
+│   │   ├── sanitize.ts        ← XSS protection
+│   │   └── audit.ts           ← audit log writer
+│   ├── controllers/
+│   │   ├── auth.controller.ts
+│   │   ├── user.controller.ts
+│   │   ├── training.controller.ts
+│   │   ├── payment.controller.ts
+│   │   ├── progress.controller.ts
+│   │   └── admin.controller.ts
+│   ├── services/
+│   │   ├── auth.service.ts    ← business logic
+│   │   ├── token.service.ts   ← JWT / refresh tokens
+│   │   ├── email.service.ts   ← Resend / nodemailer
+│   │   ├── payment.service.ts ← Cashfree integration
+│   │   ├── cert.service.ts    ← PDF cert generation
+│   │   └── subscription.service.ts
+│   ├── routes/
+│   │   ├── auth.routes.ts
+│   │   ├── user.routes.ts
+│   │   ├── training.routes.ts
+│   │   ├── payment.routes.ts
+│   │   ├── progress.routes.ts
+│   │   └── admin.routes.ts
+│   ├── validators/
+│   │   ├── auth.validators.ts
+│   │   └── training.validators.ts
+│   ├── utils/
+│   │   ├── apiResponse.ts     ← standard { success, data, error }
+│   │   ├── catchAsync.ts      ← async error wrapper
+│   │   ├── logger.ts          ← winston
+│   │   └── crypto.ts          ← token generators
+│   ├── types/
+│   │   └── express.d.ts       ← augment req.user
+│   └── server.ts              ← app bootstrap
+└── package.json</code></pre>
+        </div>
+        <div>
+          <div class="code-label">Frontend — Next.js 14 (App Router)</div>
+          <pre><code>frontend/
+├── app/
+│   ├── (public)/              ← no auth required
+│   │   ├── page.tsx           ← home / landing
+│   │   ├── trainings/
+│   │   └── about/
+│   ├── (auth)/                ← auth pages (redirect if logged in)
+│   │   ├── login/
+│   │   ├── register/
+│   │   ├── forgot-password/
+│   │   ├── reset-password/
+│   │   └── verify-email/
+│   ├── (user)/                ← requireAuth layout
+│   │   ├── dashboard/
+│   │   ├── my-learning/
+│   │   ├── progress/
+│   │   ├── certificates/
+│   │   ├── subscription/
+│   │   ├── payments/
+│   │   └── profile/
+│   ├── (premium)/             ← requireSubscription('PREMIUM')
+│   │   └── tools/
+│   │       ├── pcb-review/
+│   │       ├── schematic/
+│   │       └── ai-assistant/
+│   ├── (admin)/               ← requireRole('ADMIN','SUPER_ADMIN')
+│   │   └── admin/
+│   │       ├── trainings/
+│   │       ├── users/
+│   │       ├── payments/
+│   │       └── reports/
+│   ├── (superadmin)/          ← requireRole('SUPER_ADMIN')
+│   │   └── system/
+│   │       ├── users/
+│   │       ├── subscriptions/
+│   │       ├── settings/
+│   │       └── audit-logs/
+│   ├── layout.tsx             ← root layout + AuthProvider
+│   └── not-found.tsx
+├── components/
+│   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   ├── RegisterForm.tsx
+│   │   └── AuthGuard.tsx      ← client-side route guard
+│   ├── layout/
+│   │   ├── DashboardNav.tsx   ← role-aware navigation
+│   │   └── Sidebar.tsx
+│   └── ui/                    ← shadcn/ui components
+├── hooks/
+│   ├── useAuth.ts             ← useContext(AuthContext)
+│   ├── useSubscription.ts
+│   └── useProgress.ts
+├── lib/
+│   ├── api.ts                 ← axios instance + interceptors
+│   ├── auth.ts                ← token helpers
+│   └── constants.ts           ← plan hierarchy, role list
+├── middleware.ts               ← Next.js edge middleware (route guard)
+└── next.config.js</code></pre>
+        </div>
+      </div>
+
+      <div class="code-label">Next.js Edge Middleware — middleware.ts</div>
+      <pre><code class="language-typescript">import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
+
+const PUBLIC = ['/', '/trainings', '/about', '/login', '/register', '/forgot-password'];
+const ADMIN_PATHS = ['/admin'];
+const SUPERADMIN_PATHS = ['/system'];
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  if (PUBLIC.some(p => pathname.startsWith(p))) return NextResponse.next();
+
+  const token = req.cookies.get('accessToken')?.value;
+  if (!token) return NextResponse.redirect(new URL('/login', req.url));
+
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
+    const role = payload.role as string;
+
+    if (SUPERADMIN_PATHS.some(p => pathname.startsWith(p)) && role !== 'SUPER_ADMIN')
+      return NextResponse.redirect(new URL('/403', req.url));
+
+    if (ADMIN_PATHS.some(p => pathname.startsWith(p)) && !['ADMIN','SUPER_ADMIN'].includes(role))
+      return NextResponse.redirect(new URL('/403', req.url));
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+}</code></pre>
+
+      <!-- ─────────────────────────────────────────────────
+     §7  UI WIREFRAMES
+───────────────────────────────────────────────── -->
+      <h2 id="s7"><span class="num">07</span>UI Wireframes</h2>
+
+      <div class="grid2">
+        <div>
+          <h3>Login Page</h3>
+          <div class="wireframe">
+            ┌──────────────────────────────────┐ │ [RE Logo] │ │ │ │ Welcome back │ │ Sign in to
+            your account │ │ │ │ ┌──────────────────────────┐ │ │ │ 📧 Email address │ │ │
+            └──────────────────────────┘ │ │ ┌──────────────────────────┐ │ │ │ 🔒 Password 👁 │ │ │
+            └──────────────────────────┘ │ │ │ │ ☐ Remember me Forgot pwd? → │ │ │ │ [ Sign In ]
+            (primary btn) │ │ │ │ ────────── or ────────── │ │ [ Google ] [ GitHub ] │ │ │ │ No
+            account? Register → │ └──────────────────────────────────┘
+          </div>
+        </div>
+        <div>
+          <h3>Register Page</h3>
+          <div class="wireframe">
+            ┌──────────────────────────────────┐ │ [RE Logo] │ │ │ │ Create your account │ │ │ │
+            ┌──────────────────────────┐ │ │ │ 👤 Full name │ │ │ └──────────────────────────┘ │ │
+            ┌──────────────────────────┐ │ │ │ 📧 Email address │ │ │ └──────────────────────────┘ │
+            │ ┌──────────────────────────┐ │ │ │ 🔒 Password 👁 │ │ │ └──────────────────────────┘ │
+            │ ┌──────────────────────────┐ │ │ │ 🔒 Confirm Password 👁 │ │ │
+            └──────────────────────────┘ │ │ │ │ ☐ Agree to Terms of Service │ │ │ │ [ Create
+            Account ] │ │ │ │ Already have an account? → │ └──────────────────────────────────┘
+          </div>
+        </div>
+        <div>
+          <h3>Forgot Password</h3>
+          <div class="wireframe">
+            ┌──────────────────────────────────┐ │ [RE Logo] │ │ │ │ Reset your password │ │ Enter
+            your email and we'll │ │ send a reset link. │ │ │ │ ┌──────────────────────────┐ │ │ │
+            📧 Email address │ │ │ └──────────────────────────┘ │ │ │ │ [ Send Reset Link ] │ │ │ │
+            ← Back to Login │ └──────────────────────────────────┘ ↓ After submit
+            ┌──────────────────────────────────┐ │ ✅ Check your inbox! │ │ Reset link sent to │ │
+            user@example.com │ │ │ │ Didn't receive it? │ │ [ Resend ] │
+            └──────────────────────────────────┘
+          </div>
+        </div>
+        <div>
+          <h3>Email Verification</h3>
+          <div class="wireframe">
+            ┌──────────────────────────────────┐ │ [RE Logo] │ │ │ │ Verify Your Email │ │ │ │ 📧 │
+            │ │ │ We've sent a verification │ │ link to: │ │ user@example.com │ │ │ │ Click the link
+            in the email │ │ to activate your account. │ │ │ │ The link expires in 24 hours. │ │ │ │
+            [ Resend Email ] │ │ ← Back to Login │ │ │ └──────────────────────────────────┘ ↓ Token
+            page (/verify-email?token=…) ┌──────────────────────────────────┐ │ ✅ Email Verified! │
+            │ Your account is active. │ │ [ Go to Dashboard ] │ └──────────────────────────────────┘
+          </div>
+        </div>
+      </div>
+
+      <h3>User Dashboard</h3>
+      <div class="wireframe">
+        ┌─────────────────────────────────────────────────────────────────┐ │ [RE Logo] Home
+        Trainings Resources Tools [Avatar ▾] │
+        ├──────────┬──────────────────────────────────────────────────────┤ │ MY LEARN │ Welcome
+        back, Vijay! 👋 │ │ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ │ Dashboard│ │ 2
+        Courses │ │ 47% Avg │ │ 0 Certs │ │ │ Progress │ │ Enrolled │ │ Progress │ │ Earned │ │ │
+        Certs │ └─────────────┘ └─────────────┘ └─────────────┘ │ │ Subscr. │ │ │ Payments │ ──
+        Continue Learning ────────────────────────────── │ │ Profile │
+        ┌──────────────────────────────────────────────┐ │ │ │ │ Signal Integrity Academy [Continue
+        →]│ │ │ │ │ ████████████░░░░░░░░ 62% Module 12/18 │ │ │ │
+        └──────────────────────────────────────────────┘ │ │ │ ── Subscription: BASIC ────────
+        [Upgrade →] │ │ │ ┌────────────┐ ┌────────────┐ ┌────────────┐ │ │ │ │ BASIC │ │ ADVANCED │
+        │ PREMIUM │ │ │ │ │ (current) │ │ ₹999/mo │ │ ₹1999/mo │ │ │ │ └────────────┘ └────────────┘
+        └────────────┘ │ └──────────┴──────────────────────────────────────────────────────┘
+      </div>
+
+      <h3>Admin Dashboard</h3>
+      <div class="wireframe">
+        ┌─────────────────────────────────────────────────────────────────┐ │ [RE] Admin Panel
+        Admin: Vijay [▾] │ ├───────────┬─────────────────────────────────────────────────────┤ │
+        ADMIN │ Dashboard │ │ │ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ │ │ Dashboard │ │
+        1,204 │ │ 87 │ │ ₹4,23,000│ │ 92% │ │ │ Trainings │ │ Users │ │ Courses │ │ Revenue │ │
+        Compl. │ │ │ Users │ └──────────┘ └──────────┘ └──────────┘ └────────┘ │ │ Payments │ │ │
+        Reports │ ── Recent Enrollments ──────────── [View All →] │ │ Resources │
+        ┌────────────────────────────────────────────────┐ │ │ │ │ Name Course Date Status │ │ │ │ │
+        Rajan K. SI Academy Jun 20 2026 ✅ Active │ │ │ │ │ Priya S. PCB Design Jun 19 2026 ✅
+        Active │ │ │ │ └────────────────────────────────────────────────┘ │
+        └───────────┴─────────────────────────────────────────────────────┘
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §8  DASHBOARD NAVIGATION BY ROLE
+───────────────────────────────────────────────── -->
+      <h2 id="s8"><span class="num">08</span>Dashboard Navigation by Role</h2>
+
+      <div class="grid3">
+        <div class="card2">
+          <h4><span class="badge b-gray">USER</span> Navigation</h4>
+          <ul>
+            <li>🏠 Home / Trainings</li>
+            <li>📚 My Learning</li>
+            <li>📊 Progress</li>
+            <li>🏆 Certificates</li>
+            <li>💳 Subscription</li>
+            <li>🧾 Payment History</li>
+            <li>👤 Profile</li>
+            <li>🔐 Security Settings</li>
+            <li>⭐ (Premium) PCB Tools</li>
+            <li>⭐ (Premium) AI Assistant</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4><span class="badge b-blue">ADMIN</span> Navigation</h4>
+          <ul>
+            <li>📊 Dashboard Overview</li>
+            <li>🎓 Training Management</li>
+            <li>👥 User Management</li>
+            <li>📦 Enrollment Viewer</li>
+            <li>💰 Payments</li>
+            <li>📝 Content (Blog, Resources)</li>
+            <li>📈 Reports</li>
+            <li>🏅 Certificates (Issue)</li>
+            <li>— (no platform settings)</li>
+            <li>— (no role assignment)</li>
+          </ul>
+        </div>
+        <div class="card2">
+          <h4><span class="badge b-purple">SUPER ADMIN</span> Navigation</h4>
+          <ul>
+            <li>📊 Platform Analytics</li>
+            <li>👤 User Management + Roles</li>
+            <li>🔑 Admin Management</li>
+            <li>💎 Subscription Plans</li>
+            <li>⚙️ Platform Settings</li>
+            <li>💰 Financial + Refunds</li>
+            <li>🔌 Integrations</li>
+            <li>📋 Audit Logs</li>
+            <li>💾 Backup / Restore</li>
+            <li>🚩 Feature Flags</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Login Redirect by Role</h3>
+      <pre><code class="language-javascript">// After successful authentication
+function redirectByRole(role) {
+  const REDIRECT_MAP = {
+    USER:        '/dashboard',          // My Learning Dashboard
+    ADMIN:       '/admin',              // Admin Overview
+    SUPER_ADMIN: '/system',             // Platform Dashboard
+  };
+  return REDIRECT_MAP[role] || '/dashboard';
+}</code></pre>
+
+      <!-- ─────────────────────────────────────────────────
+     §9  SUBSCRIPTION ENFORCEMENT LOGIC
+───────────────────────────────────────────────── -->
+      <h2 id="s9"><span class="num">09</span>Subscription Enforcement Logic</h2>
+
+      <h3>Plan Hierarchy</h3>
+      <div class="grid3">
+        <div class="plan-card plan-free">
+          <div class="plan-name">BASIC</div>
+          <div class="plan-price">Free</div>
+          <ul>
+            <li>Free trainings only</li>
+            <li>Beginner materials</li>
+            <li>Community access</li>
+            <li>Limited AI (10/mo)</li>
+            <li>Basic dashboard</li>
+            <li>5 downloads/mo</li>
+          </ul>
+        </div>
+        <div class="plan-card plan-adv">
+          <div class="plan-name">ADVANCED</div>
+          <div class="plan-price">₹999 / month</div>
+          <ul>
+            <li>Everything in Basic</li>
+            <li>Paid trainings</li>
+            <li>Intermediate content</li>
+            <li>Assessments &amp; quizzes</li>
+            <li>Progress analytics</li>
+            <li>More AI (100/mo)</li>
+            <li>50 downloads/mo</li>
+            <li>Priority email support</li>
+          </ul>
+        </div>
+        <div class="plan-card plan-prem">
+          <div class="plan-name">PREMIUM</div>
+          <div class="plan-price">₹1,999 / month</div>
+          <ul>
+            <li>Everything in Advanced</li>
+            <li>Unlimited training access</li>
+            <li>PCB Design Review Tool</li>
+            <li>Schematic Review Tool</li>
+            <li>AI Design Assistant</li>
+            <li>Unlimited AI</li>
+            <li>Unlimited downloads</li>
+            <li>Premium certificates</li>
+            <li>Consultancy discounts</li>
+            <li>Early access</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Plan Hierarchy in Code</h3>
+      <pre><code class="language-javascript">// Numeric hierarchy — higher = more access
+const PLAN_LEVEL = { BASIC: 1, ADVANCED: 2, PREMIUM: 3 };
+
+// A user with PREMIUM can access routes requiring BASIC or ADVANCED too
+// requireSubscription('ADVANCED','PREMIUM') = minimum level 2
+// requireSubscription('PREMIUM') = minimum level 3
+
+function hasMinPlan(userPlan, ...requiredPlans) {
+  const minRequired = Math.min(...requiredPlans.map(p => PLAN_LEVEL[p]));
+  return (PLAN_LEVEL[userPlan] || 0) >= minRequired;
+}
+
+// Examples
+hasMinPlan('PREMIUM', 'ADVANCED')  // true  ✓
+hasMinPlan('BASIC',   'ADVANCED')  // false ✗
+hasMinPlan('ADVANCED','PREMIUM')   // false ✗
+hasMinPlan('PREMIUM', 'PREMIUM')   // true  ✓</code></pre>
+
+      <div class="mermaid">
+        flowchart TD REQ[API Request] --> AT{Access Token Valid?} AT -- No --> E401[401
+        Unauthorized] AT -- Yes --> AS{Account Active?} AS -- No --> E403S[403 Suspended] AS -- Yes
+        --> RR{Role Required?} RR -- Yes --> RC{Role Match?} RC -- No --> E403R[403 Forbidden -
+        Wrong Role] RC -- Yes --> SP{Subscription Required?} RR -- No --> SP SP -- No -->
+        CONT[Continue to Handler] SP -- Yes --> SC{Plan Active?} SC -- Expired --> E403P[403
+        Subscription Expired] SC -- Active --> SL{Plan Level Sufficient?} SL -- No --> E403U[403
+        Upgrade Required] SL -- Yes --> EN{Enrollment Required?} EN -- No --> CONT EN -- Yes -->
+        EC{Enrolled & Not Expired?} EC -- No --> E403E[403 Not Enrolled] EC -- Yes --> CONT
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §10  SEQUENCE DIAGRAMS
+───────────────────────────────────────────────── -->
+      <h2 id="s10"><span class="num">10</span>Sequence Diagrams</h2>
+
+      <h3>Login Flow</h3>
+      <div class="mermaid">
+        sequenceDiagram actor User participant FE as Frontend participant API as API Server
+        participant DB as Database participant RD as Redis participant EM as Email Service
+        User->>FE: Enter email + password FE->>API: POST /auth/login { email, password } API->>API:
+        Rate limit check (5/15min) API->>DB: SELECT user WHERE email = ? DB-->>API: User record
+        API->>API: bcrypt.compare(password, hash) alt Wrong password API->>DB: Increment
+        failed_attempts API-->>FE: 401 Invalid credentials end API->>API: Check email_verified =
+        true alt Not verified API-->>FE: 401 Please verify your email end API->>API: Check status =
+        ACTIVE alt Suspended API-->>FE: 403 Account suspended end API->>DB: Load subscription plan
+        API->>API: Generate access JWT (15min) API->>API: Generate refresh token (7 days) API->>DB:
+        INSERT refresh_tokens record API->>DB: INSERT login_history record API->>DB: Reset
+        failed_attempts = 0 API-->>FE: 200 { accessToken, user: { id, role, plan } } + Set-Cookie:
+        refreshToken FE->>FE: Store accessToken in memory FE->>FE: Redirect → role-based dashboard
+      </div>
+
+      <h3>Registration Flow</h3>
+      <div class="mermaid">
+        sequenceDiagram actor User participant FE as Frontend participant API as API Server
+        participant DB as Database participant EM as Email User->>FE: Fill registration form
+        FE->>API: POST /auth/register { fullName, email, password } API->>API: Validate inputs
+        API->>DB: Check email uniqueness alt Email taken API-->>FE: 409 Email already registered end
+        API->>API: bcrypt.hash(password, 12) API->>API: Generate emailVerifyToken API->>DB: INSERT
+        user (status=PENDING_VERIFICATION) API->>DB: INSERT user_subscription (plan=BASIC) API->>EM:
+        Send verification email EM-->>User: Email with verify link API-->>FE: 201 Created — check
+        your email User->>FE: Click verify link FE->>API: POST /auth/verify-email { token }
+        API->>DB: Find user WHERE email_verify_token = ? API->>API: Check token not expired (24h)
+        API->>DB: UPDATE user SET email_verified=true, status=ACTIVE API->>DB: Nullify
+        email_verify_token API-->>FE: 200 Email verified — proceed to login
+      </div>
+
+      <h3>Training Enrollment &amp; Payment Flow</h3>
+      <div class="mermaid">
+        sequenceDiagram actor User participant FE as Frontend participant API as API Server
+        participant CF as Cashfree participant DB as Database participant EM as Email User->>FE:
+        Click "Enroll Now" on training FE->>API: POST /payments/initiate { trainingId } API->>API:
+        verifyToken + check subscription API->>DB: Check not already enrolled API->>DB: INSERT
+        payment (status=PENDING) API->>CF: Create order { amount, orderId, customer } CF-->>API: {
+        orderId, paymentSessionId } API-->>FE: { paymentSessionId, orderId } FE->>CF: Load Cashfree
+        checkout SDK User->>CF: Enter payment details CF->>CF: Process payment CF-->>FE: onSuccess
+        callback { orderId } FE->>API: POST /payments/verify { orderId } API->>CF: GET
+        /orders/:orderId (verify server-side) CF-->>API: Order status = PAID API->>DB: UPDATE
+        payment SET status=SUCCESS, paid_at=now() API->>DB: INSERT enrollment { userId, trainingId,
+        paymentId } API->>EM: Send enrollment confirmation EM-->>User: Enrollment confirmation email
+        API-->>FE: 200 { enrolled: true, enrollmentId } FE->>FE: Redirect to course content Note
+        over CF,API: Webhook /payments/webhook also fires (backup verification)
+      </div>
+
+      <h3>Token Refresh Flow</h3>
+      <div class="mermaid">
+        sequenceDiagram participant FE as Frontend (Axios interceptor) participant API as API Server
+        participant DB as Database participant RD as Redis FE->>API: GET /protected-route (expired
+        access token) API-->>FE: 401 { code: "TOKEN_EXPIRED" } FE->>API: POST /auth/refresh (sends
+        httpOnly cookie) API->>API: Extract refresh token from cookie API->>DB: Find refresh token
+        record alt Token not found / expired API-->>FE: 401 Session expired — login again FE->>FE:
+        Redirect to /login end API->>RD: Check token not blacklisted alt Blacklisted (replay attack)
+        API->>DB: DELETE all refresh tokens for user API-->>FE: 401 Security event — re-login
+        required end API->>API: Generate new access JWT (15 min) API->>API: Generate new refresh
+        token API->>DB: UPDATE refresh_tokens (rotate token) API->>RD: Blacklist old refresh token
+        (TTL=7d) API-->>FE: 200 { accessToken } + Set-Cookie: new refreshToken FE->>API: Retry
+        original request with new accessToken API-->>FE: 200 Protected resource
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §11  TECH STACK
+───────────────────────────────────────────────── -->
+      <h2 id="s11"><span class="num">11</span>Recommended Technology Stack</h2>
+
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>Why</th>
+          </tr>
+          <tr>
+            <td>Frontend Framework</td>
+            <td>Next.js 14 (App Router) + TypeScript</td>
+            <td>SSR for SEO, server actions, edge middleware for route guarding, excellent DX</td>
+          </tr>
+          <tr>
+            <td>UI Components</td>
+            <td>Tailwind CSS + shadcn/ui</td>
+            <td>Zero-runtime CSS, accessible component primitives, dark mode built-in</td>
+          </tr>
+          <tr>
+            <td>Backend Runtime</td>
+            <td>Node.js 20 LTS</td>
+            <td>Mature ecosystem, async I/O, extensive package support for auth</td>
+          </tr>
+          <tr>
+            <td>Backend Framework</td>
+            <td>Express.js 5 + TypeScript</td>
+            <td>Minimal, composable middleware chain; easy to layer auth + subscription guards</td>
+          </tr>
+          <tr>
+            <td>ORM</td>
+            <td>Prisma 5</td>
+            <td>
+              Type-safe queries, auto-migrations, excellent PostgreSQL support, prevents SQL
+              injection by design
+            </td>
+          </tr>
+          <tr>
+            <td>Database</td>
+            <td>PostgreSQL via Neon (serverless)</td>
+            <td>ACID, relational integrity for RBAC + subscriptions, Neon scales to zero in dev</td>
+          </tr>
+          <tr>
+            <td>Cache / Sessions</td>
+            <td>Redis (Upstash serverless)</td>
+            <td>Refresh token blacklist, rate limiting storage, session cache</td>
+          </tr>
+          <tr>
+            <td>Authentication</td>
+            <td>jsonwebtoken + bcrypt</td>
+            <td>Industry-standard JWT; bcrypt cost 12 is ideal balance of security and speed</td>
+          </tr>
+          <tr>
+            <td>Password Hashing</td>
+            <td>bcrypt (cost 12) or Argon2id</td>
+            <td>
+              bcrypt: widely supported; Argon2id: winner of Password Hashing Competition,
+              memory-hard
+            </td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>Resend + React Email</td>
+            <td>Reliable delivery, beautiful templates in React, 3000 free emails/month</td>
+          </tr>
+          <tr>
+            <td>Payments</td>
+            <td>Cashfree Payments</td>
+            <td>
+              India-first payment gateway, supports UPI, cards, netbanking; webhook verification
+            </td>
+          </tr>
+          <tr>
+            <td>File Storage</td>
+            <td>Cloudflare R2 (via AWS S3 SDK)</td>
+            <td>Zero egress fees, S3-compatible, global CDN for videos &amp; PDFs</td>
+          </tr>
+          <tr>
+            <td>Certificate Generation</td>
+            <td>@react-pdf/renderer or Puppeteer</td>
+            <td>Programmatic PDF cert generation with custom template</td>
+          </tr>
+          <tr>
+            <td>Rate Limiting</td>
+            <td>express-rate-limit + rate-limit-redis</td>
+            <td>Distributed rate limiting across multiple API instances</td>
+          </tr>
+          <tr>
+            <td>Input Validation</td>
+            <td>express-validator + Zod</td>
+            <td>Zod: frontend + backend schema sharing; express-validator: route-level</td>
+          </tr>
+          <tr>
+            <td>Security Headers</td>
+            <td>Helmet.js</td>
+            <td>One line for 12 security headers including CSP, HSTS, XSS protection</td>
+          </tr>
+          <tr>
+            <td>Logging</td>
+            <td>Winston + Morgan</td>
+            <td>Structured JSON logs, log levels, file rotation</td>
+          </tr>
+          <tr>
+            <td>Testing</td>
+            <td>Vitest + Supertest + Playwright</td>
+            <td>Unit + integration + E2E coverage</td>
+          </tr>
+          <tr>
+            <td>Deployment</td>
+            <td>Vercel (frontend) + Railway (backend)</td>
+            <td>
+              Vercel: Next.js native; Railway: Node.js + PostgreSQL addon; both auto-deploy from Git
+            </td>
+          </tr>
+          <tr>
+            <td>CI/CD</td>
+            <td>GitHub Actions</td>
+            <td>Free, native git integration, matrix testing</td>
+          </tr>
+          <tr>
+            <td>Monitoring</td>
+            <td>Sentry (errors) + Axiom (logs)</td>
+            <td>Real-time error tracking with stack traces; Axiom: cheap structured log storage</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+     §12  SAMPLE CODE
+───────────────────────────────────────────────── -->
+      <h2 id="s12"><span class="num">12</span>Sample Code</h2>
+
+      <h3>auth.middleware.js — Complete Middleware Suite</h3>
+      <pre><code class="language-javascript">// src/middleware/auth.middleware.js
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const redis = require('../config/redis');
+
+const prisma = new PrismaClient();
+const PLAN_LEVEL = { BASIC: 1, ADVANCED: 2, PREMIUM: 3 };
+
+/* ── verifyToken ─────────────────────────────────────────
+   Validates JWT from Authorization header or cookie.
+   Attaches req.user (with subscription) on success.
+──────────────────────────────────────────────────────── */
+async function verifyToken(req, res, next) {
+  try {
+    const token =
+      req.cookies?.accessToken ||
+      req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ success:false, error:'Access token required' });
+    }
+
+    // Check blacklist (logged-out tokens)
+    const blacklisted = await redis.get(`bl:${token}`);
+    if (blacklisted) {
+      return res.status(401).json({ success:false, error:'Token has been revoked' });
+    }
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      include: { subscription: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ success:false, error:'User not found' });
+    }
+    if (user.status === 'SUSPENDED') {
+      return res.status(403).json({ success:false, error:'Account suspended' });
+    }
+    if (user.status === 'PENDING_VERIFICATION') {
+      return res.status(403).json({ success:false, error:'Please verify your email' });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success:false, error:'Token expired', code:'TOKEN_EXPIRED' });
+    }
+    return res.status(401).json({ success:false, error:'Invalid token' });
+  }
+}
+
+/* ── requireRole ─────────────────────────────────────────
+   Usage: requireRole('ADMIN', 'SUPER_ADMIN')
+──────────────────────────────────────────────────────── */
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ success:false, error:'Unauthorized' });
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Insufficient permissions',
+        required: roles,
+        current: req.user.role,
+      });
+    }
+    next();
+  };
+}
+
+/* ── requireSubscription ─────────────────────────────────
+   Usage: requireSubscription('ADVANCED', 'PREMIUM')
+   User needs ANY of the listed plans (or higher tier).
+──────────────────────────────────────────────────────── */
+function requireSubscription(...requiredPlans) {
+  const minLevel = Math.min(...requiredPlans.map(p => PLAN_LEVEL[p] || 99));
+
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ success:false, error:'Unauthorized' });
+
+    const sub = req.user.subscription;
+    const plan = sub?.plan || 'BASIC';
+    const status = sub?.status || 'ACTIVE';
+
+    if (status === 'EXPIRED' || status === 'CANCELLED') {
+      return res.status(403).json({
+        success: false,
+        error: 'Subscription expired or cancelled',
+        code: 'SUBSCRIPTION_EXPIRED',
+      });
+    }
+
+    if ((PLAN_LEVEL[plan] || 0) < minLevel) {
+      return res.status(403).json({
+        success: false,
+        error: 'Upgrade required to access this feature',
+        code: 'UPGRADE_REQUIRED',
+        currentPlan: plan,
+        requiredPlans,
+      });
+    }
+
+    next();
+  };
+}
+
+/* ── requireEnrollment ───────────────────────────────────
+   Checks user is enrolled in req.params.trainingId
+──────────────────────────────────────────────────────── */
+async function requireEnrollment(req, res, next) {
+  try {
+    const trainingId = req.params.trainingId || req.params.id;
+    const userId = req.user.id;
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { userId_trainingId: { userId, trainingId } },
+    });
+
+    if (!enrollment) {
+      return res.status(403).json({
+        success: false,
+        error: 'You are not enrolled in this training',
+        code: 'NOT_ENROLLED',
+      });
+    }
+
+    if (enrollment.expiresAt && enrollment.expiresAt < new Date()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Your enrollment has expired',
+        code: 'ENROLLMENT_EXPIRED',
+      });
+    }
+
+    req.enrollment = enrollment;
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { verifyToken, requireRole, requireSubscription, requireEnrollment };</code></pre>
+
+      <h3>auth.controller.js — Register, Login, Refresh, Logout</h3>
+      <pre><code class="language-javascript">// src/controllers/auth.controller.js
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { PrismaClient } = require('@prisma/client');
+const redis = require('../config/redis');
+const emailService = require('../services/email.service');
+
+const prisma = new PrismaClient();
+const BCRYPT_ROUNDS = 12;
+const ACCESS_TTL  = '15m';
+const REFRESH_TTL = '7d';
+const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function generateTokens(userId, role) {
+  const accessToken = jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: ACCESS_TTL }
+  );
+  const refreshToken = crypto.randomBytes(64).toString('hex');
+  return { accessToken, refreshToken };
+}
+
+function setRefreshCookie(res, token) {
+  res.cookie('refreshToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: REFRESH_TTL_MS,
+    path: '/api/auth',
+  });
+}
+
+/* ── REGISTER ──────────────────────────────────────────── */
+exports.register = async (req, res) => {
+  const { fullName, email, password } = req.body;
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    return res.status(409).json({ success:false, error:'Email already registered' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const emailVerifyToken = crypto.randomBytes(32).toString('hex');
+
+  const user = await prisma.user.create({
+    data: {
+      fullName, email, passwordHash,
+      emailVerifyToken,
+      role: 'USER',
+      status: 'PENDING_VERIFICATION',
+      subscription: { create: { plan:'BASIC', status:'ACTIVE' } },
+    },
+  });
+
+  await emailService.sendVerification(email, emailVerifyToken);
+
+  res.status(201).json({
+    success: true,
+    message: 'Registration successful. Please verify your email.',
+  });
+};
+
+/* ── LOGIN ─────────────────────────────────────────────── */
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  const ip = req.ip;
+  const ua = req.headers['user-agent'] || '';
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { subscription: true },
+  });
+
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    if (user) {
+      await prisma.loginHistory.create({
+        data: { userId: user.id, ipAddress: ip, userAgent: ua, success: false },
+      });
+    }
+    return res.status(401).json({ success:false, error:'Invalid email or password' });
+  }
+
+  if (!user.emailVerified) {
+    return res.status(401).json({ success:false, error:'Please verify your email first' });
+  }
+  if (user.status !== 'ACTIVE') {
+    return res.status(403).json({ success:false, error:'Account is suspended. Contact support.' });
+  }
+
+  const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id, token: refreshToken,
+      ipAddress: ip, userAgent: ua,
+      expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
+    },
+  });
+
+  await prisma.loginHistory.create({
+    data: { userId: user.id, ipAddress: ip, userAgent: ua, success: true },
+  });
+
+  setRefreshCookie(res, refreshToken);
+
+  res.json({
+    success: true,
+    accessToken,
+    user: {
+      id: user.id, fullName: user.fullName, email: user.email,
+      role: user.role,
+      plan: user.subscription?.plan || 'BASIC',
+      avatarUrl: user.avatarUrl,
+    },
+  });
+};
+
+/* ── REFRESH TOKEN ─────────────────────────────────────── */
+exports.refresh = async (req, res) => {
+  const token = req.cookies?.refreshToken;
+  if (!token) return res.status(401).json({ success:false, error:'No refresh token' });
+
+  // Check blacklist
+  const blacklisted = await redis.get(`bl_rt:${token}`);
+  if (blacklisted) {
+    // Possible token replay — revoke all user tokens
+    const record = await prisma.refreshToken.findUnique({ where: { token } });
+    if (record) await prisma.refreshToken.deleteMany({ where: { userId: record.userId } });
+    return res.status(401).json({ success:false, error:'Security event. Please log in again.' });
+  }
+
+  const record = await prisma.refreshToken.findUnique({
+    where: { token },
+    include: { user: { include: { subscription: true } } },
+  });
+
+  if (!record || record.expiresAt < new Date()) {
+    return res.status(401).json({ success:false, error:'Session expired. Please log in again.' });
+  }
+
+  const user = record.user;
+  const { accessToken, refreshToken: newRefresh } = generateTokens(user.id, user.role);
+
+  // Rotate: delete old, create new
+  await prisma.refreshToken.delete({ where: { token } });
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id, token: newRefresh,
+      ipAddress: req.ip, userAgent: req.headers['user-agent'] || '',
+      expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
+    },
+  });
+
+  // Blacklist old refresh token
+  await redis.setEx(`bl_rt:${token}`, 7 * 24 * 60 * 60, '1');
+
+  setRefreshCookie(res, newRefresh);
+  res.json({ success: true, accessToken });
+};
+
+/* ── LOGOUT ────────────────────────────────────────────── */
+exports.logout = async (req, res) => {
+  const token = req.cookies?.refreshToken;
+  if (token) {
+    await prisma.refreshToken.deleteMany({ where: { token } });
+    await redis.setEx(`bl_rt:${token}`, 7 * 24 * 60 * 60, '1');
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+  }
+  res.json({ success: true, message: 'Logged out successfully' });
+};
+
+/* ── FORGOT PASSWORD ───────────────────────────────────── */
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // Always return 200 to prevent email enumeration
+  if (!user) return res.json({ success:true, message:'If that email exists, a reset link has been sent.' });
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordResetToken: token, passwordResetExpiry: expiry },
+  });
+
+  await emailService.sendPasswordReset(email, token);
+  res.json({ success:true, message:'If that email exists, a reset link has been sent.' });
+};
+
+/* ── RESET PASSWORD ────────────────────────────────────── */
+exports.resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  const user = await prisma.user.findFirst({
+    where: {
+      passwordResetToken: token,
+      passwordResetExpiry: { gt: new Date() },
+    },
+  });
+
+  if (!user) {
+    return res.status(400).json({ success:false, error:'Invalid or expired reset token' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash,
+      passwordResetToken: null,
+      passwordResetExpiry: null,
+    },
+  });
+
+  // Revoke all refresh tokens (force re-login on all devices)
+  await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
+
+  res.json({ success:true, message:'Password reset successfully. Please log in.' });
+};</code></pre>
+
+      <h3>subscription.service.js — Enforcement Helpers</h3>
+      <pre><code class="language-javascript">// src/services/subscription.service.js
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+const PLAN_LEVEL = { BASIC: 1, ADVANCED: 2, PREMIUM: 3 };
+
+const PLAN_FEATURES = {
+  BASIC: {
+    maxDownloads: 5,
+    aiUsageLimit: 10,
+    canAccessPaidTrainings: false,
+    canUsePCBTool: false,
+    canUseAIAssistant: false,
+    canDownloadCertificates: false,
+  },
+  ADVANCED: {
+    maxDownloads: 50,
+    aiUsageLimit: 100,
+    canAccessPaidTrainings: true,
+    canUsePCBTool: false,
+    canUseAIAssistant: false,
+    canDownloadCertificates: true,
+  },
+  PREMIUM: {
+    maxDownloads: Infinity,
+    aiUsageLimit: Infinity,
+    canAccessPaidTrainings: true,
+    canUsePCBTool: true,
+    canUseAIAssistant: true,
+    canDownloadCertificates: true,
+  },
+};
+
+/**
+ * Returns the features available for a given plan (or the user's current plan).
+ */
+function getPlanFeatures(plan) {
+  return PLAN_FEATURES[plan] || PLAN_FEATURES.BASIC;
+}
+
+/**
+ * Returns true if userPlan satisfies the minimum required plan.
+ */
+function hasAccess(userPlan, requiredPlan) {
+  return (PLAN_LEVEL[userPlan] || 0) >= (PLAN_LEVEL[requiredPlan] || 0);
+}
+
+/**
+ * Upgrades a user's subscription after successful payment.
+ */
+async function upgradeSubscription(userId, newPlan, paymentId) {
+  return prisma.userSubscription.upsert({
+    where: { userId },
+    update: {
+      plan: newPlan,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      paymentId,
+    },
+    create: {
+      userId,
+      plan: newPlan,
+      status: 'ACTIVE',
+      paymentId,
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+}
+
+/**
+ * Checks and expires overdue subscriptions (run as cron job).
+ */
+async function expireSubscriptions() {
+  const expired = await prisma.userSubscription.updateMany({
+    where: {
+      status: 'ACTIVE',
+      endDate: { lt: new Date() },
+      plan: { not: 'BASIC' }, // BASIC never expires
+    },
+    data: { status: 'EXPIRED' },
+  });
+  return expired.count;
+}
+
+module.exports = { getPlanFeatures, hasAccess, upgradeSubscription, expireSubscriptions };</code></pre>
+
+      <h3>Frontend — AuthContext + useAuth Hook</h3>
+      <pre><code class="language-typescript">// lib/AuthContext.tsx
+'use client';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { api } from './api';
+
+interface User {
+  id: string; fullName: string; email: string;
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  plan: 'BASIC' | 'ADVANCED' | 'PREMIUM';
+  avatarUrl?: string;
+}
+
+interface AuthCtx {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise&lt;void&gt;;
+  logout: () => Promise&lt;void&gt;;
+  hasRole: (...roles: string[]) => boolean;
+  hasPlan: (...plans: string[]) => boolean;
+}
+
+const PLAN_LEVEL: Record&lt;string, number&gt; = { BASIC:1, ADVANCED:2, PREMIUM:3 };
+const AuthContext = createContext&lt;AuthCtx&gt;({} as AuthCtx);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState&lt;User | null&gt;(null);
+  const [loading, setLoading] = useState(true);
+
+  // On mount, try to load the session
+  useEffect(() => {
+    api.get('/users/me')
+      .then(r => setUser(r.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { data } = await api.post('/auth/login', { email, password });
+    api.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
+    setUser(data.user);
+  };
+
+  const logout = async () => {
+    await api.post('/auth/logout');
+    delete api.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
+
+  const hasRole = useCallback((...roles: string[]) =>
+    !!user && roles.includes(user.role), [user]);
+
+  const hasPlan = useCallback((...plans: string[]) => {
+    if (!user) return false;
+    const minRequired = Math.min(...plans.map(p => PLAN_LEVEL[p] || 99));
+    return (PLAN_LEVEL[user.plan] || 0) >= minRequired;
+  }, [user]);
+
+  return (
+    &lt;AuthContext.Provider value={{ user, loading, login, logout, hasRole, hasPlan }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+
+export const useAuth = () => useContext(AuthContext);</code></pre>
+
+      <h3>Frontend — Axios Instance with Token Refresh Interceptor</h3>
+      <pre><code class="language-typescript">// lib/api.ts
+import axios from 'axios';
+
+export const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api',
+  withCredentials: true, // send httpOnly cookies
+});
+
+let isRefreshing = false;
+let queue: Array&lt;(token: string) => void&gt; = [];
+
+api.interceptors.response.use(
+  r => r,
+  async err => {
+    const original = err.config;
+
+    if (err.response?.status === 401 &&
+        err.response?.data?.code === 'TOKEN_EXPIRED' &&
+        !original._retry) {
+      original._retry = true;
+
+      if (isRefreshing) {
+        // Queue other requests while refreshing
+        return new Promise(resolve => {
+          queue.push(token => {
+            original.headers['Authorization'] = `Bearer ${token}`;
+            resolve(api(original));
+          });
+        });
+      }
+
+      isRefreshing = true;
+      try {
+        const { data } = await axios.post(
+          `${api.defaults.baseURL}/auth/refresh`,
+          {}, { withCredentials: true }
+        );
+        const { accessToken } = data;
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        queue.forEach(cb => cb(accessToken));
+        queue = [];
+        original.headers['Authorization'] = `Bearer ${accessToken}`;
+        return api(original);
+      } catch {
+        window.location.href = '/login';
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(err);
+  }
+);</code></pre>
+
+      <hr class="divider" />
+      <div
+        style="text-align: center; padding: 24px 0; color: var(--text-muted); font-size: 0.8125rem"
+      >
+        Rising Edge Technologies — Auth System Architecture v1.0 &nbsp;|&nbsp; See
+        <code>architecture/code/</code> for standalone code files
+      </div>
+    </main>
+
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+          primaryColor: '#2563eb',
+          primaryTextColor: '#f1f5f9',
+          primaryBorderColor: '#1e2d45',
+          lineColor: '#475569',
+          secondaryColor: '#0d1726',
+          tertiaryColor: '#111f35',
+          background: '#060d1a',
+          mainBkg: '#0d1726',
+          nodeBorder: '#1e2d45',
+          clusterBkg: '#0d1726',
+          edgeLabelBackground: '#0d1726',
+          fontFamily: 'Segoe UI, system-ui, sans-serif',
+        },
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        hljs.highlightAll();
+        // Active sidebar link on scroll
+        const sections = document.querySelectorAll('h2[id]');
+        const links = document.querySelectorAll('.sidebar a[href^="#"]');
+        const obs = new IntersectionObserver(
+          entries => {
+            entries.forEach(e => {
+              if (e.isIntersecting) {
+                links.forEach(l => (l.style.background = ''));
+                const a = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+                if (a) a.style.background = 'rgba(37,99,235,.2)';
+              }
+            });
+          },
+          { rootMargin: '-30% 0px -60% 0px' }
+        );
+        sections.forEach(s => obs.observe(s));
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

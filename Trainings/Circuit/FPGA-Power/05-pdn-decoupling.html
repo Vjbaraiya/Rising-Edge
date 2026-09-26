@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="FPGA PDN and decoupling design: target impedance from tolerance and transient current, capacitor network design with an interactive Plotly impedance-vs-frequency calculator, anti-resonance, and placement rules."
+    />
+    <title>PDN &amp; Decoupling | FPGA Power Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/05-pdn-decoupling.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .formula-card {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: var(--radius-lg);
+        padding: 16px 18px;
+        margin: 14px 0;
+        font-size: 0.95rem;
+        color: var(--text-base);
+        overflow-x: auto;
+      }
+      .plot-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 8px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin: 6px 0 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item active">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>PDN &amp; Decoupling</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 05</span>
+              <span class="badge badge-purple">Plotly</span>
+              <span class="badge badge-green">Calculator</span>
+              <h1>PDN &amp; Decoupling</h1>
+              <p class="subtitle">
+                The regulator handles milliseconds; everything faster is the capacitor network's
+                job. Design it to an impedance target and the "how many caps?" argument answers
+                itself.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- target Z -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Target impedance: the one number that sizes everything</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  If the fabric can step \( \Delta I \) of current and the rail may droop at most
+                  its tolerance share \( \Delta V \), then at every frequency where that step has
+                  energy the supply must look like less than:
+                </p>
+                <div class="formula-card">
+                  \( Z_{target} = \dfrac{\Delta V}{\Delta I} = \dfrac{V_{rail} \cdot
+                  tol_{transient}}{\Delta I_{step}} \)
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Example: VCCINT = 0.85 V, transient budget 1.5 % (12.75 mV), worst step 3 A →
+                  <strong>Z<sub>target</sub> ≈ 4.25 mΩ</strong> from ~1 kHz to ~100 MHz. Above that,
+                  on-package and on-die capacitance take over; below, the regulator loop holds the
+                  rail.
+                </p>
+                <div class="tip-box">
+                  Shortcut for typical designs: the FPGA vendor's PCB design guide publishes a
+                  <strong>per-rail decoupling table</strong> (so many 100 nF, 4.7 µF, 100 µF per
+                  device). Use it as the floor; compute Z<sub>target</sub> yourself when your
+                  transient is unusual (heavy DSP bursts, big clock gating) or you're trimming BOM.
+                </div>
+              </div>
+
+              <!-- interactive -->
+              <div class="widget-container" id="pdncalc">
+                <div class="widget-header">
+                  <h3>Interactive: build your capacitor network</h3>
+                  <span class="badge badge-purple">Plotly</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.6">
+                  Adjust quantities and watch |Z(f)|. Each capacitor is modeled as series R-L-C
+                  (realistic ESR/ESL); parallel groups create the valleys — and the
+                  <strong>anti-resonance peaks</strong> between them.
+                </p>
+                <div class="s-settings-row">
+                  <div class="slider-group">
+                    <div class="slider-label">
+                      <span>Bulk 330 µF polymer (12 mΩ, 5 nH)</span>
+                      <span class="slider-value" id="nBulkV">1</span>
+                    </div>
+                    <input type="range" id="nBulk" min="0" max="4" value="1" />
+                  </div>
+                  <div class="slider-group">
+                    <div class="slider-label">
+                      <span>22 µF 0805 MLCC (4 mΩ, 1.2 nH)</span>
+                      <span class="slider-value" id="nMidV">4</span>
+                    </div>
+                    <input type="range" id="nMid" min="0" max="20" value="4" />
+                  </div>
+                  <div class="slider-group">
+                    <div class="slider-label">
+                      <span>100 nF 0402 MLCC (10 mΩ, 0.6 nH)</span>
+                      <span class="slider-value" id="nHfV">10</span>
+                    </div>
+                    <input type="range" id="nHf" min="0" max="40" value="10" />
+                  </div>
+                  <div class="slider-group">
+                    <div class="slider-label">
+                      <span>Z<sub>target</sub> (mΩ)</span>
+                      <span class="slider-value" id="ztV">5</span>
+                    </div>
+                    <input type="range" id="zt" min="1" max="50" value="5" />
+                  </div>
+                </div>
+                <div class="plot-box">
+                  <div id="pdnPlot" style="width: 100%; height: 380px"></div>
+                  <p class="diagram-caption">
+                    |Z| vs frequency (log–log). Red dashed line = Z<sub>target</sub>. Regulator (mΩ
+                    + µH behavior) dominates the left edge; spreading/plane inductance limits the
+                    right. <span id="pdnVerdict" style="font-weight: 700"></span>
+                  </p>
+                </div>
+                <div class="warning-box">
+                  <strong>Anti-resonance:</strong> where one group's inductive rise crosses the next
+                  group's capacitive fall, their parallel combination peaks. Fixes: overlap the
+                  groups (more intermediate values), add controlled-ESR parts for damping, or accept
+                  the peak if it stays under Z<sub>target</sub>. Watch the peak move as you drag the
+                  sliders.
+                </div>
+              </div>
+
+              <!-- placement -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Placement &amp; mounting: inductance is the enemy</h3>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>100 nF HF caps:</strong> as close to the BGA power balls as
+                    manufacturing allows — backside directly under the ball field is best; every mm
+                    of trace ≈ 1 nH that blunts the cap.
+                  </li>
+                  <li>
+                    <strong>Via discipline:</strong> two vias per pad (or via-in-pad) for HF caps; a
+                    single long thermal-relief trace can double mounted inductance.
+                  </li>
+                  <li><strong>22 µF mid caps:</strong> ring around the BGA within ~1–2 cm.</li>
+                  <li>
+                    <strong>Bulk:</strong> anywhere on the rail near the regulator — its job is
+                    charge storage, not speed.
+                  </li>
+                  <li>
+                    <strong>Planes:</strong> a solid power pocket/plane per major rail with a tight
+                    ground plane above/below makes the interconnect itself a low-ESL capacitor —
+                    this is what actually delivers current above ~50 MHz.
+                  </li>
+                  <li>
+                    Follow the vendor's per-pin vs per-region guidance — modern large BGAs are
+                    per-region (the plane does per-pin's old job).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>Z<sub>target</sub> = ΔV/ΔI — one formula sizes the entire network.</li>
+                  <li>Mix decades of capacitor values; overlap groups to tame anti-resonance.</li>
+                  <li>Use DC-bias-derated capacitance (Module 02) in every calculation.</li>
+                  <li>
+                    Mounted inductance (pads + vias + trace) matters more than the cap's own ESL —
+                    placement is design.
+                  </li>
+                </ul>
+                <div class="info-box">
+                  The full theory — spreading inductance, plane resonances, VRM models — lives in
+                  the
+                  <a href="../../SI/06-power-integrity.html">SI Academy's Power Integrity module</a
+                  >.
+                </div>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="04-sequencing.html">← Power Sequencing</a>
+                <a class="btn btn-primary" href="06-layout-thermal.html"
+                  >Next: Layout &amp; Thermal →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        /* capacitor models: [C farads, ESR ohms, ESL henries] */
+        var CAPS = {
+          bulk: [330e-6, 0.012, 5e-9],
+          mid: [22e-6 * 0.6 /* DC-bias derated */, 0.004, 1.2e-9],
+          hf: [100e-9, 0.01, 0.6e-9],
+        };
+        var VRM = { R: 0.001, L: 30e-9 }; /* regulator effective output */
+        var SPREAD_L = 0.15e-9; /* plane spreading inductance */
+
+        function zCap(model, n, w) {
+          if (n <= 0) return null;
+          var re = model[1] / n;
+          var im = (w * model[2] - 1 / (w * model[0])) / n;
+          return [re, im];
+        }
+        function zPar(list) {
+          /* parallel of complex impedances via admittance sum */
+          var gr = 0,
+            gi = 0;
+          for (var i = 0; i < list.length; i++) {
+            var z = list[i];
+            if (!z) continue;
+            var d = z[0] * z[0] + z[1] * z[1];
+            gr += z[0] / d;
+            gi += -z[1] / d;
+          }
+          if (gr === 0 && gi === 0) return [1e9, 0];
+          var d2 = gr * gr + gi * gi;
+          return [gr / d2, -gi / d2];
+        }
+
+        function compute(nb, nm, nh) {
+          var xs = [];
+          var ys = [];
+          for (var e = 2; e <= 8.7; e += 0.02) {
+            var f = Math.pow(10, e);
+            var w = 2 * Math.PI * f;
+            var zv = [VRM.R, w * VRM.L];
+            var z = zPar([zv, zCap(CAPS.bulk, nb, w), zCap(CAPS.mid, nm, w), zCap(CAPS.hf, nh, w)]);
+            /* add spreading inductance in series */
+            var re = z[0];
+            var im = z[1] + w * SPREAD_L;
+            xs.push(f);
+            ys.push(Math.sqrt(re * re + im * im) * 1000); /* mΩ */
+          }
+          return { xs: xs, ys: ys };
+        }
+
+        function draw() {
+          var nb = parseInt(document.getElementById('nBulk').value, 10);
+          var nm = parseInt(document.getElementById('nMid').value, 10);
+          var nh = parseInt(document.getElementById('nHf').value, 10);
+          var zt = parseInt(document.getElementById('zt').value, 10);
+          document.getElementById('nBulkV').textContent = nb;
+          document.getElementById('nMidV').textContent = nm;
+          document.getElementById('nHfV').textContent = nh;
+          document.getElementById('ztV').textContent = zt;
+
+          var d = compute(nb, nm, nh);
+          var cs = getComputedStyle(document.documentElement);
+          var text = (cs.getPropertyValue('--text-sub') || '#94a3b8').trim();
+          var grid = 'rgba(128,140,160,0.18)';
+
+          /* verdict: check violation between 1kHz and 100MHz */
+          var viol = false;
+          for (var i = 0; i < d.xs.length; i++) {
+            if (d.xs[i] >= 1e3 && d.xs[i] <= 1e8 && d.ys[i] > zt) {
+              viol = true;
+              break;
+            }
+          }
+          var verdictEl = document.getElementById('pdnVerdict');
+          verdictEl.textContent = viol
+            ? '✗ Z exceeds target in band — add/redistribute caps.'
+            : '✓ Meets target from 1 kHz to 100 MHz.';
+          verdictEl.style.color = viol ? '#f87171' : '#34d399';
+
+          var traces = [
+            {
+              x: d.xs,
+              y: d.ys,
+              mode: 'lines',
+              name: '|Z| network',
+              line: { color: '#22d3ee', width: 2.5 },
+            },
+            {
+              x: [100, 5e8],
+              y: [zt, zt],
+              mode: 'lines',
+              name: 'Z_target',
+              line: { color: '#f87171', width: 2, dash: 'dash' },
+            },
+          ];
+          var layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: text, family: 'Inter, sans-serif', size: 11 },
+            margin: { l: 60, r: 20, t: 10, b: 45 },
+            xaxis: {
+              title: { text: 'frequency (Hz)' },
+              type: 'log',
+              gridcolor: grid,
+              range: [2, 8.7],
+            },
+            yaxis: {
+              title: { text: '|Z| (mΩ)' },
+              type: 'log',
+              gridcolor: grid,
+              range: [-0.5, 3],
+            },
+            legend: { orientation: 'h', y: -0.22 },
+          };
+          Plotly.react('pdnPlot', traces, layout, { displayModeBar: false, responsive: true });
+        }
+
+        ['nBulk', 'nMid', 'nHf', 'zt'].forEach(function (id) {
+          document.getElementById(id).addEventListener('input', draw);
+        });
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', draw);
+        } else {
+          draw();
+        }
+      })();
+    </script>
+  </body>
+</html>

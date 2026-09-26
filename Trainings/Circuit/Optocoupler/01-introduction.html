@@ -1,0 +1,3070 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="What an optocoupler is, why galvanic isolation matters, internal anatomy, Current Transfer Ratio (CTR), isolation voltage, and comparison with digital, capacitive, and magnetic isolators — with animations, calculators, and a full knowledge check."
+    />
+    <title>
+      Introduction to Optocouplers | Optocoupler Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/Optocoupler/01-introduction.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <style>
+      /* -- Module 1 local components -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Optocouplers (Opto-Isolators)
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item active"
+            >01. Introduction to Optocouplers</a
+          >
+          <a href="02-why-optocouplers.html" class="module-item">02. Why Optocouplers are Used</a>
+          <a href="03-construction.html" class="module-item">03. Optocoupler Construction</a>
+          <a href="04-working-principle.html" class="module-item">04. Working Principle</a>
+          <a href="05-types.html" class="module-item">05. Different Types of Optocouplers</a>
+          <a href="06-parameters.html" class="module-item">06. Optocoupler Parameters</a>
+          <a href="07-datasheet.html" class="module-item">07. Reading the Datasheet</a>
+          <a href="08-selection-criteria.html" class="module-item"
+            >08. Component Selection Criteria</a
+          >
+          <a href="09-derating.html" class="module-item">09. Optocoupler Derating</a>
+          <a href="10-design-examples.html" class="module-item">10. Design Examples</a>
+          <a href="11-pcb-guidelines.html" class="module-item">11. PCB Design Guidelines</a>
+          <a href="12-failure-mechanisms.html" class="module-item">12. Failure Mechanisms</a>
+          <a href="13-testing-validation.html" class="module-item">13. Testing and Validation</a>
+          <a href="14-applications.html" class="module-item">14. Applications</a>
+          <a href="15-vs-modern-isolation.html" class="module-item"
+            >15. Optocouplers vs Modern Isolation</a
+          >
+          <a href="16-standards.html" class="module-item">16. Standards &amp; Certifications</a>
+          <a href="17-labs-case-studies.html" class="module-item"
+            >17. Interactive Labs &amp; Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Optocouplers (Opto-Isolators)</a><span>/</span>
+            <span>Introduction to Optocouplers</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 1/17</span><span>6%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 6%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 01 &mdash; FOUNDATION</div>
+              <h1 style="font-size: 2.2rem">Introduction to Optocouplers</h1>
+              <p class="subtitle">
+                An optocoupler moves a signal between two circuits that share no electrical
+                connection at all &mdash; the signal crosses the gap as light. That one trick makes
+                it possible to let a 3.3&nbsp;V microcontroller safely command a 400&nbsp;V motor
+                drive, to close the feedback loop of an offline power supply across the mains
+                barrier, and to keep a patient-connected sensor galvanically separated from
+                mains-powered equipment. This module builds the foundation: what an optocoupler is,
+                what is inside it, how Current Transfer Ratio and isolation voltage are defined, and
+                where it stands against modern digital isolators.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Learning Objectives -->
+              <div class="widget-container" style="margin-bottom: 2rem">
+                <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
+                <div class="metrics-grid">
+                  <div class="metric-card">Define an optocoupler and its purpose</div>
+                  <div class="metric-card">Explain galvanic isolation</div>
+                  <div class="metric-card">Describe signal transfer using light</div>
+                  <div class="metric-card">Identify internal components</div>
+                  <div class="metric-card">Calculate Current Transfer Ratio (CTR)</div>
+                  <div class="metric-card">Interpret isolation voltage ratings</div>
+                  <div class="metric-card">Compare isolation technologies</div>
+                  <div class="metric-card">Recognize advantages and limitations</div>
+                </div>
+              </div>
+
+              <!-- Animated signal chain -->
+              <div class="widget-container">
+                <h3 style="margin-bottom: 0.75rem">Signal Transfer Across the Barrier</h3>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
+                  Watch the signal change domains: an electrical current drives an infrared LED,
+                  photons cross the transparent isolation barrier, and a photodetector converts the
+                  light back into an electrical current on the other side. At no point does a
+                  conductor bridge the two sides &mdash; the only thing crossing the gap is light.
+                </p>
+                <div class="plot-area" style="height: 260px; background: var(--bg-alt)">
+                  <canvas id="chainCanvas"></canvas>
+                </div>
+                <div class="flow-strip" aria-hidden="true">
+                  <div class="flow-step">Electrical Signal</div>
+                  <div class="flow-arrow">&rarr;</div>
+                  <div class="flow-step hot">LED</div>
+                  <div class="flow-arrow">&rarr;</div>
+                  <div class="flow-step hot">Light</div>
+                  <div class="flow-arrow">&rarr;</div>
+                  <div class="flow-step hot">Photodetector</div>
+                  <div class="flow-arrow">&rarr;</div>
+                  <div class="flow-step">Electrical Signal</div>
+                </div>
+              </div>
+
+              <!-- Section 1 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Section 1: What is an Optocoupler?</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    An <strong>optocoupler</strong> &mdash; also called an <em>optoisolator</em> or
+                    <em>optical isolator</em> &mdash; is a component that transfers an electrical
+                    signal between two isolated circuits by using light as the intermediate carrier.
+                    Inside a single package, an infrared
+                    <span
+                      class="gloss"
+                      data-def="Light Emitting Diode — a diode that emits photons when forward-biased. In optocouplers it is usually a GaAs infrared LED emitting at 850–940 nm."
+                      >LED</span
+                    >
+                    faces a
+                    <span
+                      class="gloss"
+                      data-def="A semiconductor device (photodiode, phototransistor, photo-TRIAC, etc.) that converts incident photons back into an electrical current."
+                      >photodetector</span
+                    >
+                    across a transparent insulating barrier. When current flows through the LED, it
+                    emits infrared light; the detector absorbs that light and produces a
+                    proportional output current.
+                  </p>
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    The purpose is
+                    <span
+                      class="gloss"
+                      data-def="Complete electrical separation between two circuits — no conductive path for current (including fault and leakage currents) exists between them."
+                      >galvanic isolation</span
+                    >: the input and output share no conductive path, no common ground, and no
+                    direct capacitive or magnetic coupling worth mentioning. The two sides can sit
+                    at potentials thousands of volts apart, and the signal still gets through
+                    &mdash; because photons do not care about the voltage difference between the
+                    circuits they connect.
+                  </p>
+                  <div class="info-box" style="margin-bottom: 1rem">
+                    <strong>Definition.</strong> An optocoupler is a four-or-more terminal device
+                    that couples a signal from an input LED to an output photodetector through an
+                    optical path, while maintaining galvanic isolation between input and output
+                    circuits, typically rated for 2.5&ndash;5&nbsp;kVrms.
+                  </div>
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Basic operation in one sentence:
+                    <em>input current in &rarr; light across the gap &rarr; output current out</em>.
+                    The input side behaves like a normal LED (forward voltage ~1.1&ndash;1.5&nbsp;V
+                    for infrared devices, driven at 1&ndash;20&nbsp;mA), and the output side behaves
+                    like the chosen detector device &mdash; most commonly a phototransistor whose
+                    collector current is controlled by the light it receives instead of by a base
+                    current.
+                  </p>
+                  <div class="tip-box">
+                    <strong>Isolation vs level shifting.</strong> A level shifter translates a
+                    signal between voltage domains that <em>share a common ground</em> (e.g.,
+                    1.8&nbsp;V logic to 3.3&nbsp;V logic). An optocoupler provides
+                    <em>galvanic isolation</em>: the domains share nothing. Every optocoupler can
+                    level-shift, but no plain level shifter can isolate. Section 8 shows both
+                    circuits side by side.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body">
+                  <span>Section 2: Why Use Optical Isolation?</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Isolation is rarely optional. It is demanded either by safety standards (a human
+                    must never form a path to mains), by signal integrity (two grounds that disagree
+                    by a few volts will corrupt any ground-referenced signal), or by the physics of
+                    power conversion (the feedback signal of an offline SMPS must cross the
+                    primary&ndash;secondary barrier somehow). The main reasons engineers reach for
+                    an optocoupler:
+                  </p>
+                  <div class="adv-grid" style="margin-bottom: 1rem">
+                    <div class="adv-card">
+                      <h5>Safety</h5>
+                      <p>
+                        Prevents hazardous voltage from reaching user-accessible circuits. Safety
+                        standards (IEC 62368-1, IEC 60601-1) mandate isolation barriers between
+                        mains and touchable low-voltage parts.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Ground loop elimination</h5>
+                      <p>
+                        Two chassis grounds 100 m apart can differ by volts. An optocoupler breaks
+                        the loop: signal passes, circulating ground current cannot.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Noise immunity</h5>
+                      <p>
+                        Switching transients, relay kickback, and common-mode noise on the field
+                        side stay on the field side. Only the intended signal crosses as light.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>High-voltage isolation</h5>
+                      <p>
+                        Lets logic-level circuits observe or command circuits riding on hundreds of
+                        volts — gate drivers, DC-bus monitors, AC line detection.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Protection of low-voltage electronics</h5>
+                      <p>
+                        A miswired field input or an inductive spike destroys a 20-cent optocoupler,
+                        not the microcontroller behind it.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Analog/digital domain separation</h5>
+                      <p>
+                        Keeps noisy digital switching currents out of sensitive analog measurement
+                        grounds, e.g. in instrumentation front ends.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="callout" style="margin-bottom: 0">
+                    <strong>Industrial reality check.</strong> A PLC digital input card routinely
+                    receives 24&nbsp;V signals from sensors wired across an entire factory floor.
+                    Motor contactors bang the local ground around, welders inject spikes, and the
+                    sensor ground may float volts away from the PLC ground. Every one of those
+                    inputs goes through an optocoupler precisely so that none of this chaos reaches
+                    the backplane logic.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: History -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body">
+                  <span>Section 3: History &amp; Evolution of Isolation</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Isolation predates the optocoupler by decades. Click each era to see what the
+                    dominant technology was, what problem it solved, and what pushed the industry to
+                    the next step.
+                  </p>
+                  <div class="timeline-eras" id="timelineEras" role="tablist"></div>
+                  <div class="timeline-detail" id="timelineDetail" role="tabpanel"></div>
+                </div>
+              </div>
+
+              <!-- Section 4: Anatomy -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body">
+                  <span>Section 4: Internal Anatomy &mdash; Click to Explore</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    The cross-section below shows a classic 4-pin DIP phototransistor optocoupler.
+                    Click any labelled part of the diagram to read what it does. The same anatomy
+                    applies to all output variants &mdash; only the detector die changes
+                    (photodiode, Darlington pair, TRIAC, SCR, or MOSFET driver).
+                  </p>
+                  <div class="anatomy-wrap">
+                    <svg
+                      viewBox="0 0 460 300"
+                      xmlns="http://www.w3.org/2000/svg"
+                      role="img"
+                      aria-label="Optocoupler cross-section with clickable parts"
+                      style="width: 100%; height: auto"
+                    >
+                      <!-- molding compound -->
+                      <rect
+                        class="anatomy-part"
+                        data-part="mold"
+                        x="30"
+                        y="40"
+                        width="400"
+                        height="180"
+                        rx="14"
+                        fill="#1f2430"
+                        stroke="#3a4252"
+                        stroke-width="2"
+                      />
+                      <!-- optical path / silicone -->
+                      <rect
+                        class="anatomy-part"
+                        data-part="optical"
+                        x="120"
+                        y="80"
+                        width="220"
+                        height="100"
+                        rx="10"
+                        fill="rgba(34,211,238,0.10)"
+                        stroke="rgba(34,211,238,0.45)"
+                        stroke-dasharray="5 4"
+                        stroke-width="1.5"
+                      />
+                      <!-- isolation barrier -->
+                      <rect
+                        class="anatomy-part"
+                        data-part="barrier"
+                        x="222"
+                        y="62"
+                        width="16"
+                        height="136"
+                        fill="rgba(129,140,248,0.25)"
+                        stroke="#818cf8"
+                        stroke-width="1.5"
+                      />
+                      <!-- LED die -->
+                      <g class="anatomy-part" data-part="led">
+                        <rect
+                          x="140"
+                          y="112"
+                          width="46"
+                          height="36"
+                          rx="4"
+                          fill="#7a2a2a"
+                          stroke="#ef4444"
+                          stroke-width="2"
+                        />
+                        <text
+                          x="163"
+                          y="134"
+                          text-anchor="middle"
+                          fill="#fca5a5"
+                          font-size="11"
+                          font-family="Inter,sans-serif"
+                        >
+                          LED
+                        </text>
+                      </g>
+                      <!-- detector die -->
+                      <g class="anatomy-part" data-part="detector">
+                        <rect
+                          x="272"
+                          y="106"
+                          width="52"
+                          height="48"
+                          rx="4"
+                          fill="#14532d"
+                          stroke="#22c55e"
+                          stroke-width="2"
+                        />
+                        <text
+                          x="298"
+                          y="133"
+                          text-anchor="middle"
+                          fill="#86efac"
+                          font-size="10"
+                          font-family="Inter,sans-serif"
+                        >
+                          Detector
+                        </text>
+                      </g>
+                      <!-- photons -->
+                      <g id="anatomyPhotons">
+                        <circle cx="196" cy="120" r="3" fill="#f59e0b" />
+                        <circle cx="210" cy="132" r="3" fill="#f59e0b" />
+                        <circle cx="200" cy="146" r="3" fill="#f59e0b" />
+                        <path
+                          d="M192 120 h12 M204 132 h12 M196 146 h12"
+                          stroke="#f59e0b"
+                          stroke-width="1"
+                          opacity="0.6"
+                        />
+                      </g>
+                      <!-- lead frame left -->
+                      <g class="anatomy-part" data-part="leadframe">
+                        <rect x="0" y="120" width="140" height="10" fill="#8b93a5" />
+                        <rect x="0" y="170" width="120" height="10" fill="#8b93a5" />
+                        <rect x="320" y="120" width="140" height="10" fill="#8b93a5" />
+                        <rect x="340" y="170" width="120" height="10" fill="#8b93a5" />
+                      </g>
+                      <!-- pin labels -->
+                      <text
+                        x="6"
+                        y="115"
+                        fill="#9aa3b5"
+                        font-size="10"
+                        font-family="Inter,sans-serif"
+                      >
+                        1 Anode
+                      </text>
+                      <text
+                        x="6"
+                        y="196"
+                        fill="#9aa3b5"
+                        font-size="10"
+                        font-family="Inter,sans-serif"
+                      >
+                        2 Cathode
+                      </text>
+                      <text
+                        x="400"
+                        y="115"
+                        fill="#9aa3b5"
+                        font-size="10"
+                        font-family="Inter,sans-serif"
+                      >
+                        4 C
+                      </text>
+                      <text
+                        x="400"
+                        y="196"
+                        fill="#9aa3b5"
+                        font-size="10"
+                        font-family="Inter,sans-serif"
+                      >
+                        3 E
+                      </text>
+                      <text
+                        x="230"
+                        y="250"
+                        text-anchor="middle"
+                        fill="#7b8496"
+                        font-size="10.5"
+                        font-family="Inter,sans-serif"
+                      >
+                        Click: molding &middot; optical path &middot; barrier &middot; LED &middot;
+                        detector &middot; lead frame
+                      </text>
+                    </svg>
+                    <div class="anatomy-info" id="anatomyInfo">
+                      <h5>Select a component</h5>
+                      <p>
+                        Click any part of the cross-section to learn its function &mdash; the
+                        infrared LED, the photodetector die, the transparent optical path, the
+                        insulating barrier, the lead frame, or the molding compound.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="info-box" style="margin-top: 1rem">
+                    <strong>Output-stage family.</strong> The detector die defines the device
+                    family: <em>phototransistor</em> (general purpose, e.g. PC817),
+                    <em>photodiode + amplifier</em> (high speed, e.g. 6N137),
+                    <em>photo-Darlington</em> (high gain, slow), <em>photo-TRIAC</em> (AC load
+                    switching, e.g. MOC3021), <em>photo-SCR</em> (latching DC/AC control), and
+                    <em>MOSFET gate driver</em> (solid-state relays, e.g. TLP3906).
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 5: Operating principle -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body">
+                  <span>Section 5: Basic Operating Principle</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Six things happen, in order, every time an optocoupler transfers a bit or an
+                    analog level:
+                  </p>
+                  <div class="flow-strip" style="justify-content: flex-start">
+                    <div class="flow-step">1. LED forward bias</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">2. Photon generation</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">3. Optical transmission</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">4. Photodetection</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">5. Output transistor conducts</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">6. Electrical output</div>
+                  </div>
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin: 1rem 0;
+                    "
+                  >
+                    When the input current \(I_F\) forward-biases the LED, electron&ndash;hole
+                    recombination in the GaAs junction releases energy as infrared photons
+                    (typically 850&ndash;940&nbsp;nm). The photons travel through the transparent
+                    silicone optical path and the insulating film, and are absorbed in the
+                    detector's base&ndash;collector region, generating a photocurrent. In a
+                    phototransistor output, that photocurrent acts exactly like a base current and
+                    is amplified by the transistor's gain \(h_{FE}\), producing the collector
+                    current \(I_C\). Remove \(I_F\), and the photon flux &mdash; and therefore
+                    \(I_C\) &mdash; collapses.
+                  </p>
+                  <div class="plot-area" style="height: 240px; background: var(--bg-alt)">
+                    <canvas id="photonCanvas"></canvas>
+                  </div>
+                  <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 8px">
+                    Animation: photons (amber) generated at the LED junction cross the isolation
+                    barrier (violet) and strike the detector, releasing collector current (green
+                    electrons) into the output circuit.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Section 6: CTR -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body">
+                  <span>Section 6: Current Transfer Ratio (CTR)</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    CTR is the single most important optocoupler parameter. It is the "current gain"
+                    of the whole optical chain &mdash; how much collector current you get out for
+                    the LED current you put in:
+                  </p>
+                  <p style="text-align: center; font-size: 1rem; margin-bottom: 1rem">
+                    \[ CTR = \frac{I_C}{I_F} \times 100\% \]
+                  </p>
+                  <div class="table-scroll" style="margin-bottom: 1rem">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Output type</th>
+                          <th>Typical CTR</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Photodiode</td>
+                          <td>0.1&ndash;0.2%</td>
+                          <td>Fast, needs external amplification</td>
+                        </tr>
+                        <tr>
+                          <td>Phototransistor (e.g. PC817)</td>
+                          <td>50&ndash;600%</td>
+                          <td>Sorted into CTR bins/ranks (A/B/C/D)</td>
+                        </tr>
+                        <tr>
+                          <td>Photo-Darlington</td>
+                          <td>100&ndash;5000%</td>
+                          <td>Very high gain, slow (&asymp;100&nbsp;&mu;s)</td>
+                        </tr>
+                        <tr>
+                          <td>Logic-output (e.g. 6N137)</td>
+                          <td>n/a (specified as thresholds)</td>
+                          <td>Internal amplifier, CTR concept replaced by I<sub>F(on)</sub></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    CTR is not a constant. It varies with LED current (peaks around
+                    1&ndash;10&nbsp;mA and falls at both extremes), drops with temperature (roughly
+                    &minus;0.5%/&deg;C for phototransistor types), spreads 3:1 or more between
+                    manufacturing lots (hence the letter-coded
+                    <span
+                      class="gloss"
+                      data-def="Manufacturers sort finished parts into CTR ranges (bins or ranks). Example: PC817A = 80–160%, PC817B = 130–260%, PC817C = 200–400%, PC817D = 300–600%."
+                      >CTR bins</span
+                    >), and &mdash; critically &mdash;
+                    <strong>degrades over the life of the part</strong> as the LED ages. Design
+                    rules of thumb: assume CTR can fall to 50% of its initial minimum by end of
+                    life, and always design around the <em>minimum</em> binned value, never the
+                    typical.
+                  </p>
+                  <div class="warning-box" style="margin-bottom: 1.25rem">
+                    <strong>Aging.</strong> LED light output decays with accumulated operating hours
+                    and current density &mdash; faster at high I<sub>F</sub> and high temperature. A
+                    circuit that "just barely" saturates its output transistor on day one will fail
+                    in the field years later when CTR has quietly halved. This is the #1 long-term
+                    optocoupler failure mode.
+                  </div>
+
+                  <!-- CTR calculator -->
+                  <div class="widget-container" style="margin-bottom: 0">
+                    <h3 style="margin-bottom: 0.4rem">Interactive CTR Calculator</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">
+                      Set the LED current, CTR bin, temperature, and aging assumption. The
+                      calculator shows the collector current you can actually count on &mdash; and
+                      whether it saturates a typical 10&nbsp;k&Omega;-pull-up logic input.
+                    </p>
+                    <div class="calc-grid">
+                      <div class="calc-inputs">
+                        <div class="slider-group">
+                          <div class="slider-label">
+                            <span>LED forward current I<sub>F</sub></span>
+                            <span class="slider-value" id="ctrIfVal">5 mA</span>
+                          </div>
+                          <input type="range" id="ctrIf" min="1" max="20" value="5" step="0.5" />
+                        </div>
+                        <div class="calc-field">
+                          <label for="ctrBin"
+                            >CTR bin (minimum at I<sub>F</sub>=5 mA, 25 &deg;C)</label
+                          >
+                          <select id="ctrBin">
+                            <option value="80">Rank A &mdash; min 80%</option>
+                            <option value="130" selected>Rank B &mdash; min 130%</option>
+                            <option value="200">Rank C &mdash; min 200%</option>
+                            <option value="300">Rank D &mdash; min 300%</option>
+                          </select>
+                        </div>
+                        <div class="slider-group">
+                          <div class="slider-label">
+                            <span>Ambient temperature</span>
+                            <span class="slider-value" id="ctrTempVal">25 &deg;C</span>
+                          </div>
+                          <input
+                            type="range"
+                            id="ctrTemp"
+                            min="-40"
+                            max="100"
+                            value="25"
+                            step="5"
+                          />
+                        </div>
+                        <div class="calc-field">
+                          <label for="ctrAging">End-of-life CTR derating</label>
+                          <select id="ctrAging">
+                            <option value="1">None (new part)</option>
+                            <option value="0.7">&minus;30% (10-year moderate use)</option>
+                            <option value="0.5" selected>&minus;50% (conservative EOL)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="calc-results">
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">Effective CTR</div>
+                          <div class="calc-result-value" id="ctrEff">&mdash;</div>
+                        </div>
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">Collector current I<sub>C</sub></div>
+                          <div class="calc-result-value" id="ctrIc">&mdash;</div>
+                        </div>
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">
+                            Saturation check (needs &ge; 0.5 mA for 10 k&Omega; @ 5 V)
+                          </div>
+                          <div class="calc-result-value" id="ctrVerdict">&mdash;</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 7: Isolation voltage -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body">
+                  <span>Section 7: Isolation Voltage &amp; Safety Insulation</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    "5&nbsp;kV isolation" on a datasheet does <em>not</em> mean you may operate the
+                    part with 5&nbsp;kV across it continuously. Several distinct voltage ratings
+                    describe the barrier, and confusing them is a classic safety-review failure:
+                  </p>
+                  <div class="table-scroll" style="margin-bottom: 1rem">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Rating</th>
+                          <th>Symbol</th>
+                          <th>Meaning</th>
+                          <th>Typical value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Isolation (withstand) voltage</td>
+                          <td>V<sub>ISO</sub></td>
+                          <td>
+                            Survives this AC rms for 60 s in a Hi-Pot test — a test rating, not an
+                            operating rating
+                          </td>
+                          <td>2.5 / 3.75 / 5 kVrms</td>
+                        </tr>
+                        <tr>
+                          <td>Working voltage</td>
+                          <td>V<sub>IORM</sub></td>
+                          <td>
+                            Maximum repetitive peak voltage allowed across the barrier continuously,
+                            for life
+                          </td>
+                          <td>560&ndash;1414 V<sub>peak</sub></td>
+                        </tr>
+                        <tr>
+                          <td>Surge / impulse voltage</td>
+                          <td>V<sub>IOSM</sub> / V<sub>IOTM</sub></td>
+                          <td>
+                            Survivable 1.2/50 &mu;s lightning-type impulse or transient overvoltage
+                          </td>
+                          <td>6&ndash;10 kV<sub>peak</sub></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Safety standards additionally classify the barrier's <em>quality</em>:
+                    <span
+                      class="gloss"
+                      data-def="Insulation sufficient to protect against shock on its own — but a single failure removes all protection, so it must be paired with another protective measure (e.g., protective earth)."
+                      >basic insulation</span
+                    >
+                    provides one level of protection, while
+                    <span
+                      class="gloss"
+                      data-def="A single insulation system equivalent to two independent basic barriers — permitted as the sole protection between hazardous voltage and user-accessible circuits."
+                      >reinforced insulation</span
+                    >
+                    is equivalent to two independent barriers and is what medical (IEC 60601-1) and
+                    most consumer (IEC 62368-1) applications require between mains and touchable
+                    circuits. Certification marks to look for: UL 1577 (component recognition, the
+                    Hi-Pot rating), IEC 60747-17 / VDE 0884-17 (working voltage, partial discharge,
+                    surge — the rating that legally supports reinforced insulation claims).
+                  </p>
+                  <!-- Isolation calculator -->
+                  <div class="widget-container" style="margin-bottom: 0">
+                    <h3 style="margin-bottom: 0.4rem">Isolation Requirement Checker</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">
+                      Enter your system's working voltage and required insulation class; the checker
+                      suggests the minimum optocoupler ratings to specify.
+                    </p>
+                    <div class="calc-grid">
+                      <div class="calc-inputs">
+                        <div class="slider-group">
+                          <div class="slider-label">
+                            <span>System working voltage (AC rms across barrier)</span>
+                            <span class="slider-value" id="isoVwVal">230 V</span>
+                          </div>
+                          <input type="range" id="isoVw" min="12" max="1000" value="230" step="1" />
+                        </div>
+                        <div class="calc-field">
+                          <label for="isoClass">Required insulation class</label>
+                          <select id="isoClass">
+                            <option value="basic">Basic / supplementary</option>
+                            <option value="reinforced" selected>Reinforced</option>
+                          </select>
+                        </div>
+                        <div class="calc-field">
+                          <label for="isoOv">Overvoltage category</label>
+                          <select id="isoOv">
+                            <option value="2" selected>OV II (appliance / SMPS input)</option>
+                            <option value="3">OV III (fixed installation / industrial)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="calc-results">
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">
+                            Min. V<sub>IORM</sub> (repetitive peak)
+                          </div>
+                          <div class="calc-result-value" id="isoViorm">&mdash;</div>
+                        </div>
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">
+                            Suggested V<sub>ISO</sub> (UL 1577 test)
+                          </div>
+                          <div class="calc-result-value" id="isoViso">&mdash;</div>
+                        </div>
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">
+                            Min. impulse withstand V<sub>IOTM</sub>
+                          </div>
+                          <div class="calc-result-value" id="isoVimp">&mdash;</div>
+                        </div>
+                        <div class="calc-result-item">
+                          <div class="calc-result-label">Guidance</div>
+                          <div
+                            class="calc-result-value"
+                            id="isoNote"
+                            style="font-size: 0.8rem; line-height: 1.5"
+                          >
+                            &mdash;
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.72rem; margin-top: 10px">
+                      Educational estimate based on typical IEC 62368-1 / IEC 60747-17 practice.
+                      Always verify against the applicable end-product standard and the device's
+                      VDE/UL certificates.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 8: Light transmission + level shifting -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body">
+                  <span
+                    >Section 8: Signal Transmission Using Light &amp; Isolation vs Level
+                    Shifting</span
+                  >
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    The optical link itself sets several of the optocoupler's personality traits.
+                    The LED emits in the near-infrared (850&ndash;940&nbsp;nm), where GaAs emitters
+                    are efficient and silicon detectors respond well. Only a fraction of emitted
+                    photons reach the detector &mdash; the
+                    <span
+                      class="gloss"
+                      data-def="Ratio of photons collected by the detector to photons emitted by the LED. Losses come from geometry, reflection at interfaces, and absorption in the optical path."
+                      >coupling efficiency</span
+                    >
+                    &mdash; which is why CTR depends so strongly on package geometry. Response time
+                    is limited by LED turn-on/turn-off and, dominantly for phototransistors, by the
+                    collector-base capacitance being charged through a high-impedance photocurrent:
+                    hence the classic 3&ndash;4&nbsp;&mu;s rise/fall of a PC817 versus
+                    20&ndash;50&nbsp;ns for a photodiode + amplifier device.
+                  </p>
+                  <div class="metrics-grid" style="margin-bottom: 1.25rem">
+                    <div class="metric-card">
+                      <div class="metric-value">850&ndash;940 nm</div>
+                      <div class="metric-label">IR wavelength</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value">&lt; 1 pF</div>
+                      <div class="metric-label">Barrier capacitance</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value">3&ndash;18 &mu;s</div>
+                      <div class="metric-label">Phototransistor switching</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value">&le; 50 ns</div>
+                      <div class="metric-label">Logic-output switching</div>
+                    </div>
+                  </div>
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">
+                    Isolation vs level shifting &mdash; two different jobs
+                  </h4>
+                  <div class="dd-wrap" style="margin-bottom: 1rem">
+                    <div class="card" style="padding: 14px">
+                      <h5 style="font-size: 0.8rem; font-weight: 800; margin-bottom: 6px">
+                        Level shifter (shared ground)
+                      </h5>
+                      <svg
+                        viewBox="0 0 220 110"
+                        style="width: 100%; height: auto"
+                        aria-label="Level shifter circuit sharing a common ground"
+                      >
+                        <rect
+                          x="10"
+                          y="20"
+                          width="70"
+                          height="40"
+                          rx="6"
+                          fill="none"
+                          stroke="#22d3ee"
+                          stroke-width="1.5"
+                        />
+                        <text x="45" y="44" text-anchor="middle" fill="#9aa3b5" font-size="9">
+                          1.8 V MCU
+                        </text>
+                        <rect
+                          x="140"
+                          y="20"
+                          width="70"
+                          height="40"
+                          rx="6"
+                          fill="none"
+                          stroke="#22d3ee"
+                          stroke-width="1.5"
+                        />
+                        <text x="175" y="44" text-anchor="middle" fill="#9aa3b5" font-size="9">
+                          3.3 V logic
+                        </text>
+                        <path d="M80 40 h60" stroke="#f59e0b" stroke-width="1.5" />
+                        <path d="M10 90 h200" stroke="#8b93a5" stroke-width="2" />
+                        <path d="M45 60 v30 M175 60 v30" stroke="#8b93a5" stroke-width="1.5" />
+                        <text x="110" y="104" text-anchor="middle" fill="#8b93a5" font-size="9">
+                          COMMON GROUND
+                        </text>
+                      </svg>
+                      <p style="font-size: 0.75rem; color: var(--text-sub); margin: 6px 0 0">
+                        Translates logic levels; ground current and noise pass freely.
+                      </p>
+                    </div>
+                    <div class="card" style="padding: 14px">
+                      <h5 style="font-size: 0.8rem; font-weight: 800; margin-bottom: 6px">
+                        Optocoupler (no shared anything)
+                      </h5>
+                      <svg
+                        viewBox="0 0 220 110"
+                        style="width: 100%; height: auto"
+                        aria-label="Optocoupler circuit with two separate grounds"
+                      >
+                        <rect
+                          x="10"
+                          y="20"
+                          width="60"
+                          height="40"
+                          rx="6"
+                          fill="none"
+                          stroke="#22d3ee"
+                          stroke-width="1.5"
+                        />
+                        <text x="40" y="44" text-anchor="middle" fill="#9aa3b5" font-size="9">
+                          Field 24 V
+                        </text>
+                        <rect
+                          x="150"
+                          y="20"
+                          width="60"
+                          height="40"
+                          rx="6"
+                          fill="none"
+                          stroke="#22d3ee"
+                          stroke-width="1.5"
+                        />
+                        <text x="180" y="44" text-anchor="middle" fill="#9aa3b5" font-size="9">
+                          MCU 3.3 V
+                        </text>
+                        <rect
+                          x="95"
+                          y="15"
+                          width="30"
+                          height="55"
+                          rx="4"
+                          fill="rgba(129,140,248,0.15)"
+                          stroke="#818cf8"
+                          stroke-width="1.5"
+                        />
+                        <path d="M70 40 h25 M125 40 h25" stroke="#f59e0b" stroke-width="1.5" />
+                        <path d="M10 90 h75" stroke="#8b93a5" stroke-width="2" />
+                        <path d="M135 90 h75" stroke="#8b93a5" stroke-width="2" />
+                        <text x="48" y="104" text-anchor="middle" fill="#8b93a5" font-size="9">
+                          GND A
+                        </text>
+                        <text x="172" y="104" text-anchor="middle" fill="#8b93a5" font-size="9">
+                          GND B
+                        </text>
+                        <text x="110" y="104" text-anchor="middle" fill="#818cf8" font-size="10">
+                          &#9889; gap
+                        </text>
+                      </svg>
+                      <p style="font-size: 0.75rem; color: var(--text-sub); margin: 6px 0 0">
+                        Two independent grounds; only the optical signal crosses.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 9: Advantages / limitations / comparison -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body">
+                  <span>Section 9: Advantages, Limitations &amp; Technology Comparison</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">Advantages</h4>
+                  <div class="adv-grid" style="margin-bottom: 1.25rem">
+                    <div class="adv-card">
+                      <h5>True galvanic isolation</h5>
+                      <p>
+                        No conductive path at all; barrier capacitance under 1 pF gives excellent
+                        common-mode noise rejection.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Inherent noise immunity</h5>
+                      <p>
+                        Photons are unaffected by electric or magnetic interference in the gap —
+                        unlike capacitive or magnetic isolators.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>No power needed to stay off</h5>
+                      <p>
+                        An unpowered optocoupler passes nothing — a fail-safe default that digital
+                        isolators must engineer in.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Low cost &amp; simplicity</h5>
+                      <p>
+                        A PC817 costs cents, needs one resistor to run, and works from DC to its
+                        bandwidth limit — no encoding, no clock.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Compact, standardized packages</h5>
+                      <p>
+                        4-pin DIP/SMD packages with decades of second-source compatibility across
+                        vendors.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Analog capable</h5>
+                      <p>
+                        Linear optocouplers (e.g. IL300, HCNR201) pass analog signals across the
+                        barrier; TRIAC/SCR types switch AC directly.
+                      </p>
+                    </div>
+                  </div>
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">Limitations</h4>
+                  <div class="adv-grid" style="margin-bottom: 1.25rem">
+                    <div class="adv-card limit">
+                      <h5>CTR aging</h5>
+                      <p>
+                        LED output decays over years of operation; designs must include 50%
+                        end-of-life CTR margin.
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Temperature sensitivity</h5>
+                      <p>
+                        CTR falls ~0.5%/&deg;C; high ambient plus self-heating can halve available
+                        gain at 85–100 &deg;C.
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Bandwidth &amp; delay</h5>
+                      <p>
+                        Phototransistor types manage ~10–100 kHz; even fast logic types trail modern
+                        digital isolators (150 Mbps vs 600 Mbps+).
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Input power draw</h5>
+                      <p>
+                        The LED needs milliamps continuously — significant for battery devices and
+                        dense multi-channel I/O.
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Limited output current</h5>
+                      <p>
+                        Milliamps only; driving anything substantial requires a buffer stage or a
+                        gate-driver variant.
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Wide parameter spread</h5>
+                      <p>
+                        3:1 CTR spread per bin plus aging plus temperature makes worst-case design
+                        mandatory, not optional.
+                      </p>
+                    </div>
+                  </div>
+
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">
+                    Interactive comparison &mdash; isolation technologies
+                  </h4>
+                  <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                    Click a criterion to highlight the strongest technology in each row.
+                  </p>
+                  <div class="cmp-controls" id="cmpControls">
+                    <button class="cmp-btn active" data-col="all">Show all</button>
+                    <button class="cmp-btn" data-col="1">Speed</button>
+                    <button class="cmp-btn" data-col="2">Isolation</button>
+                    <button class="cmp-btn" data-col="3">Power</button>
+                    <button class="cmp-btn" data-col="4">Cost</button>
+                    <button class="cmp-btn" data-col="5">EMI</button>
+                    <button class="cmp-btn" data-col="6">Lifetime/Aging</button>
+                  </div>
+                  <div class="table-scroll">
+                    <table class="data-table" id="cmpTable">
+                      <thead>
+                        <tr>
+                          <th>Technology</th>
+                          <th>Speed</th>
+                          <th>Isolation</th>
+                          <th>Power</th>
+                          <th>Cost</th>
+                          <th>EMI emitted</th>
+                          <th>Lifetime / aging</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Optocoupler</td>
+                          <td data-score="2">DC&ndash;150 Mbps (type-dependent)</td>
+                          <td data-score="4">Up to 5 kVrms, reinforced</td>
+                          <td data-score="2">mA-level LED drive</td>
+                          <td data-score="5">Lowest (cents)</td>
+                          <td data-score="5">Essentially none</td>
+                          <td data-score="2">CTR degrades with age</td>
+                        </tr>
+                        <tr>
+                          <td>Digital isolator (capacitive)</td>
+                          <td data-score="5">Up to 600 Mbps+</td>
+                          <td data-score="4">Up to 5 kVrms, reinforced</td>
+                          <td data-score="4">Low, scales with data rate</td>
+                          <td data-score="3">Moderate</td>
+                          <td data-score="2">Carrier/edge emissions</td>
+                          <td data-score="5">No wear-out mechanism</td>
+                        </tr>
+                        <tr>
+                          <td>Digital isolator (magnetic)</td>
+                          <td data-score="5">Up to 150&ndash;600 Mbps</td>
+                          <td data-score="4">Up to 5 kVrms</td>
+                          <td data-score="4">Low&ndash;moderate</td>
+                          <td data-score="3">Moderate</td>
+                          <td data-score="2">Susceptible to/emits magnetic fields</td>
+                          <td data-score="5">No wear-out mechanism</td>
+                        </tr>
+                        <tr>
+                          <td>Isolation transformer</td>
+                          <td data-score="3">AC only; bandwidth-limited</td>
+                          <td data-score="5">Very high (tens of kV possible)</td>
+                          <td data-score="3">Passive but lossy</td>
+                          <td data-score="2">High; bulky</td>
+                          <td data-score="3">Stray field leakage</td>
+                          <td data-score="4">Very long life</td>
+                        </tr>
+                        <tr>
+                          <td>Fiber-optic link</td>
+                          <td data-score="5">Gbps over km distances</td>
+                          <td data-score="5">Effectively unlimited</td>
+                          <td data-score="2">Transceivers at both ends</td>
+                          <td data-score="1">Highest</td>
+                          <td data-score="5">Zero</td>
+                          <td data-score="3">Transmitter LED/laser ages</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p style="color: var(--text-muted); font-size: 0.72rem; margin-top: 8px">
+                    Scores are qualitative engineering judgment for typical devices in each class;
+                    Module 15 treats this comparison quantitatively.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Section 10: Engineering examples -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body">
+                  <span>Section 10: Real-World Engineering Examples</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+                  <div class="adv-grid">
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>PLC digital input</h5>
+                      <p>
+                        24 V field signal &rarr; series resistor &rarr; optocoupler LED &rarr;
+                        backplane logic. Isolates kilometres of factory wiring, contact bounce, and
+                        ground offsets from the CPU. Typically PC817-class parts, one per channel.
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>SMPS feedback loop</h5>
+                      <p>
+                        The classic TL431 + PC817 pair: the secondary-side error amplifier drives
+                        the LED, and the phototransistor adjusts the primary-side PWM controller —
+                        regulation information crosses the mains barrier optically.
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>MCU &rarr; high-power actuator</h5>
+                      <p>
+                        A 3.3 V GPIO fires an optocoupler whose output drives a relay or contactor
+                        coil supply. A shorted coil driver can never reach the microcontroller.
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>Motor drive gate isolation</h5>
+                      <p>
+                        Gate-driver optocouplers (HCPL-3120 class) sit between the PWM controller
+                        and IGBT/SiC gates riding on a switching DC bus — surviving 50&ndash;100
+                        kV/&mu;s common-mode transients (CMTI).
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>Medical patient interface</h5>
+                      <p>
+                        IEC 60601-1 demands reinforced isolation and microamp leakage limits between
+                        patient-applied parts and mains equipment; optocouplers carry sensor data
+                        across the patient-isolation barrier.
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>Solar inverter sensing</h5>
+                      <p>
+                        String voltages of 600&ndash;1500 V DC must be monitored by grounded control
+                        electronics; isolated feedback and trip signals commonly use optocouplers
+                        rated for reinforced insulation.
+                      </p>
+                    </div>
+                    <div class="adv-card" style="border-left-color: var(--cyan, #22d3ee)">
+                      <h5>AC zero-cross detection</h5>
+                      <p>
+                        A back-to-back-LED optocoupler across the (resistor-fed) AC line produces a
+                        logic pulse at each mains zero crossing — the timing reference for TRIAC
+                        dimmers and soft-start circuits.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 11: Common mistakes -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body">
+                  <span>Section 11: Common Design Mistakes</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+                  <div class="warning-box" style="margin-bottom: 10px">
+                    <strong>1. Designing to typical CTR.</strong> The datasheet "typical" is a
+                    marketing number. Use the binned <em>minimum</em>, then derate it for
+                    temperature and end-of-life aging. If the output must saturate, prove it at
+                    CTR<sub>min</sub> &times; 0.5.
+                  </div>
+                  <div class="warning-box" style="margin-bottom: 10px">
+                    <strong>2. Ignoring aging entirely.</strong> Field returns after 5&ndash;10
+                    years with "intermittent input" symptoms are textbook LED degradation. Higher
+                    LED current accelerates it — don't buy speed with I<sub>F</sub> you'll pay for
+                    in lifetime.
+                  </div>
+                  <div class="warning-box" style="margin-bottom: 10px">
+                    <strong>3. Wrong LED current.</strong> Too little (&lt;1 mA) and CTR collapses
+                    and noise margin vanishes; too much (&gt;20 mA continuous) and aging accelerates
+                    sharply. The sweet spot for most phototransistor parts is 2&ndash;10 mA.
+                  </div>
+                  <div class="warning-box" style="margin-bottom: 10px">
+                    <strong>4. Ruining the barrier on the PCB.</strong> A 5 kV optocoupler is
+                    useless if a ground pour sneaks under the package or creepage between input and
+                    output pads is 2 mm. Respect creepage/clearance; slot the board under the part
+                    if needed (Module 11).
+                  </div>
+                  <div class="warning-box" style="margin-bottom: 10px">
+                    <strong>5. Wrong package/class for the safety file.</strong> Reinforced
+                    applications need parts with the VDE 0884-17 certificate and adequate V<sub
+                      >IORM</sub
+                    >
+                    — not just any part with "5 kV" in the title. Auditors read certificates, not
+                    headlines.
+                  </div>
+                  <div class="warning-box" style="margin-bottom: 0">
+                    <strong>6. Expecting speed the family can't deliver.</strong> A photo-Darlington
+                    will not do 100 kHz; a PC817 will not do 1 Mbps. Match the output family to the
+                    bandwidth first, then optimize everything else.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 12: Summary -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec12body">
+                  <span>Section 12: Summary &amp; Quick Reference</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">Key takeaways</h4>
+                  <ul
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.85rem;
+                      line-height: 1.8;
+                      margin: 0 0 1.25rem 1.2rem;
+                    "
+                  >
+                    <li>
+                      An optocoupler transfers signals as light across a galvanic isolation barrier
+                      — input LED, optical path, photodetector output, no shared conductor.
+                    </li>
+                    <li>
+                      CTR = I<sub>C</sub>/I<sub>F</sub> &times; 100% is the device's gain; it varies
+                      with bin, current, temperature, and — irreversibly — with age.
+                    </li>
+                    <li>
+                      Isolation voltage (V<sub>ISO</sub>, a 60 s test rating) and working voltage
+                      (V<sub>IORM</sub>, a lifetime rating) are different numbers with different
+                      jobs; reinforced vs basic insulation is a certification matter, not a
+                      datasheet headline.
+                    </li>
+                    <li>
+                      Optocouplers win on cost, true optical noise immunity, and fail-safe "dark =
+                      off" behavior; digital isolators win on speed, power, and freedom from aging.
+                    </li>
+                    <li>
+                      Design worst-case: minimum binned CTR, derated for temperature, halved for end
+                      of life.
+                    </li>
+                  </ul>
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">Essential equations</h4>
+                  <div class="info-box" style="margin-bottom: 1.25rem">
+                    \( CTR = \dfrac{I_C}{I_F} \times 100\% \) &nbsp;&nbsp;&bull;&nbsp;&nbsp; \( I_F
+                    = \dfrac{V_{drive} - V_F}{R_{LED}} \) &nbsp;&nbsp;&bull;&nbsp;&nbsp; \(
+                    I_{C(min)} = I_F \times CTR_{min} \times k_{temp} \times k_{age} \)
+                  </div>
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem">Quick reference</h4>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Parameter</th>
+                          <th>Typical value</th>
+                          <th>Design note</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>LED forward voltage V<sub>F</sub></td>
+                          <td>1.1&ndash;1.5 V @ 10 mA</td>
+                          <td>Use 1.2 V for resistor sizing</td>
+                        </tr>
+                        <tr>
+                          <td>Recommended I<sub>F</sub></td>
+                          <td>2&ndash;10 mA</td>
+                          <td>Balance CTR vs aging</td>
+                        </tr>
+                        <tr>
+                          <td>CTR (PC817B)</td>
+                          <td>130&ndash;260%</td>
+                          <td>Design at 130% &times; derating</td>
+                        </tr>
+                        <tr>
+                          <td>V<sub>ISO</sub></td>
+                          <td>2.5 / 3.75 / 5 kVrms</td>
+                          <td>60 s test rating (UL 1577)</td>
+                        </tr>
+                        <tr>
+                          <td>Phototransistor t<sub>r</sub>/t<sub>f</sub></td>
+                          <td>3&ndash;18 &mu;s</td>
+                          <td>Limits practical use to &lt; ~50 kHz</td>
+                        </tr>
+                        <tr>
+                          <td>Barrier capacitance</td>
+                          <td>0.5&ndash;1 pF</td>
+                          <td>Sets common-mode immunity</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Knowledge Check -->
+              <div class="knowledge-check" style="margin-top: 2.5rem">
+                <h2 style="font-size: 1.3rem; margin-bottom: 0.4rem">Knowledge Check</h2>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">
+                  Four parts: 15 multiple-choice questions, 10 true/false statements, a matching
+                  exercise, and 3 design scenarios. Score 80% on the multiple choice to pass the
+                  module.
+                </p>
+
+                <!-- MCQ stepper -->
+                <div class="quiz-container widget-container">
+                  <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 0.75rem;
+                    "
+                  >
+                    <div style="font-size: 0.8rem; color: var(--text-sub)">
+                      Question <span id="quizCurrentNum">1</span> of
+                      <span id="quizTotalNum">15</span> &nbsp;&bull;&nbsp; Score:
+                      <span id="quizScore">0</span>/<span id="quizTotalNum2">15</span>
+                    </div>
+                    <div id="quizDots" style="display: flex; gap: 5px"></div>
+                  </div>
+                  <div class="progress-bar" style="margin-bottom: 1.25rem">
+                    <div class="progress-fill" id="quizProgressBar" style="width: 6.7%"></div>
+                  </div>
+                  <div id="quizSlides"></div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                    <button class="btn btn-secondary" id="quizPrevBtn">&larr; Prev</button>
+                    <button class="btn btn-primary" id="quizNextBtn">Next &rarr;</button>
+                  </div>
+                  <div
+                    id="quizSummary"
+                    style="
+                      display: none;
+                      margin-top: 2rem;
+                      padding: 1.5rem;
+                      border-radius: 10px;
+                      border: 1px solid var(--border);
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      id="quizFinalScore"
+                      style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                    ></div>
+                    <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                  </div>
+                </div>
+
+                <!-- True / False -->
+                <div class="widget-container">
+                  <h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3>
+                  <div id="tfList"></div>
+                  <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">
+                    Score: <span id="tfScore">0</span>/<span id="tfTotal">10</span>
+                  </div>
+                </div>
+
+                <!-- Matching -->
+                <div class="widget-container">
+                  <h3 style="margin-bottom: 0.4rem">
+                    Part C &mdash; Match Output Type to Application
+                  </h3>
+                  <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">
+                    Drag each optocoupler family onto its best-fit application (or click a chip,
+                    then click a target). Wrong drops bounce back with an explanation.
+                  </p>
+                  <div class="dd-wrap">
+                    <div id="ddChips"></div>
+                    <div id="ddTargets"></div>
+                  </div>
+                  <div
+                    id="ddStatus"
+                    style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px"
+                  >
+                    Placed: <span id="ddScore">0</span>/5
+                  </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="widget-container">
+                  <h3 style="margin-bottom: 0.75rem">Part D &mdash; Design Scenarios</h3>
+                  <div class="scenario">
+                    <div class="scenario-head">
+                      Scenario 1 &mdash; The output that stopped saturating
+                    </div>
+                    <div class="scenario-body">
+                      A 24 V PLC input uses a PC817A (CTR 80&ndash;160%) with I<sub>F</sub> = 2 mA,
+                      output pulling down a 10 k&Omega; resistor from 5 V. It works in the lab.
+                      Predict its 10-year field behavior at 60 &deg;C ambient, and fix the design.
+                      <button
+                        class="btn btn-secondary"
+                        style="display: block; margin-top: 10px"
+                        data-reveal="sol1"
+                      >
+                        Reveal solution
+                      </button>
+                      <div class="scenario-solution" id="sol1">
+                        <strong>Analysis.</strong> Required I<sub>C</sub> is 0.5 mA. At CTR<sub
+                          >min</sub
+                        >
+                        = 80%: I<sub>C</sub> = 2 mA &times; 0.8 = 1.6 mA — a 3.2&times; margin when
+                        new. Apply temperature derating (~0.85 at 60 &deg;C) and end-of-life aging
+                        (&times;0.5): 1.6 &times; 0.85 &times; 0.5 &asymp; 0.68 mA. Margin has
+                        shrunk to 1.36&times; — marginal, and any below-nominal I<sub>F</sub>
+                        (resistor tolerance, low supply) pushes it into failure.
+                        <strong>Fix:</strong> raise I<sub>F</sub> to 5 mA and/or specify the B bin
+                        (130% min): 5 mA &times; 1.3 &times; 0.85 &times; 0.5 = 2.76 mA — a healthy
+                        5.5&times; end-of-life margin.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="scenario">
+                    <div class="scenario-head">
+                      Scenario 2 &mdash; Choosing the barrier for a 230 V medical supply
+                    </div>
+                    <div class="scenario-body">
+                      An SMPS feedback path crosses the mains barrier in a 230 V AC medical device
+                      (IEC 60601-1, 2&times;MOPP required). What insulation class and certifications
+                      must the optocoupler carry?
+                      <button
+                        class="btn btn-secondary"
+                        style="display: block; margin-top: 10px"
+                        data-reveal="sol2"
+                      >
+                        Reveal solution
+                      </button>
+                      <div class="scenario-solution" id="sol2">
+                        <strong>Answer.</strong> 2&times;MOPP at 230 V requires reinforced
+                        insulation: a part certified to IEC 60747-17 / VDE 0884-17 with V<sub
+                          >IORM</sub
+                        >
+                        &ge; 354 V<sub>peak</sub> (higher in practice — parts rated 890 V<sub
+                          >peak</sub
+                        >
+                        are common), V<sub>ISO</sub> of 5 kVrms (4 kVrms is the usual 2&times;MOPP
+                        minimum at 250 V working voltage), and 8 mm creepage package (wide-body). UL
+                        1577 recognition alone is <em>not</em> sufficient for the reinforced claim —
+                        the VDE working-voltage certificate is what the 60601 safety file cites.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="scenario">
+                    <div class="scenario-head">
+                      Scenario 3 &mdash; Optocoupler or digital isolator?
+                    </div>
+                    <div class="scenario-body">
+                      You must isolate (a) a 10 Mbps SPI bus in a battery-powered meter, and (b) a
+                      fail-safe emergency-stop input that must read "stop" if the isolator loses
+                      power. Which technology fits each, and why?
+                      <button
+                        class="btn btn-secondary"
+                        style="display: block; margin-top: 10px"
+                        data-reveal="sol3"
+                      >
+                        Reveal solution
+                      </button>
+                      <div class="scenario-solution" id="sol3">
+                        <strong>Answer.</strong> (a) Digital isolator: 10 Mbps exceeds economical
+                        optocoupler speed, and &mu;A-level idle current beats milliamps of LED drive
+                        in a battery budget. (b) Optocoupler: with no LED current there is no light
+                        and the output is guaranteed off — an intrinsically fail-safe dark state.
+                        Many digital isolators power up in a defined but <em>powered</em> state;
+                        proving fail-safety through a powered device is harder in a safety case.
+                        Choose per channel, not per fashion.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional resources -->
+              <div class="widget-container" style="margin-top: 2rem">
+                <h3 style="margin-bottom: 0.75rem">Additional Resources</h3>
+                <div class="adv-grid">
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Reference datasheets</h5>
+                    <p>
+                      Sharp/&Ouml;ncora PC817 (phototransistor workhorse) &bull; Vishay 4N35 &bull;
+                      onsemi 6N137 (10 Mbps logic) &bull; Toshiba TLP785 &bull; onsemi MOC3021
+                      (TRIAC driver) &bull; Broadcom HCPL-3120 (gate driver) &bull; Vishay IL300
+                      (linear).
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Application notes</h5>
+                    <p>
+                      Vishay AN "Optocoupler CTR and Response Time" &bull; Toshiba "Optocoupler
+                      Application Notes" (basic characteristics &amp; usage) &bull; Renesas
+                      "Photocoupler Application Notes" &bull; Broadcom AV02 series on gate-drive
+                      optocouplers and CMTI.
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Standards to know</h5>
+                    <p>
+                      UL 1577 (component isolation test) &bull; IEC 60747-17 / VDE 0884-17
+                      (optocoupler safety characteristics) &bull; IEC 62368-1, IEC 61010-1, IEC
+                      60601-1 (end-product insulation requirements) — covered in Module 16.
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Keep learning</h5>
+                    <p>
+                      Module 2 deepens the "why" with fault-current analysis and regulatory context;
+                      Module 5 tours every output family; Module 10 works complete, values-included
+                      design examples.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="index.html">&larr; Course Home</a>
+                <a class="btn btn-primary" href="02-why-optocouplers.html"
+                  >Next: Why Optocouplers are Used &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+    <script>
+      // ---------- Signal chain animation ----------
+      (function () {
+        var start = null;
+        function draw(ts) {
+          var canvas = document.getElementById('chainCanvas');
+          if (!canvas) return;
+          if (start === null) start = ts;
+          var t = (ts - start) / 1000;
+          var ctx = canvas.getContext('2d');
+          var rect = canvas.parentElement.getBoundingClientRect();
+          var w = (canvas.width = rect.width);
+          var h = (canvas.height = rect.height || 260);
+          ctx.clearRect(0, 0, w, h);
+          var cy = h / 2;
+          var barrierX = w / 2;
+          var barrierW = Math.max(26, w * 0.05);
+
+          // input / output circuit boxes
+          function box(x, label, sub) {
+            ctx.strokeStyle = '#22d3ee';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x, cy - 42, 110, 84);
+            ctx.fillStyle = '#9aa3b5';
+            ctx.font = '600 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x + 55, cy - 52);
+            ctx.fillStyle = '#7b8496';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.fillText(sub, x + 55, cy + 58);
+            ctx.textAlign = 'left';
+          }
+          box(20, 'INPUT CIRCUIT', 'Ground A');
+          box(w - 130, 'OUTPUT CIRCUIT', 'Ground B');
+
+          // isolation barrier
+          ctx.fillStyle = 'rgba(129,140,248,0.18)';
+          ctx.fillRect(barrierX - barrierW / 2, cy - 70, barrierW, 140);
+          ctx.strokeStyle = '#818cf8';
+          ctx.strokeRect(barrierX - barrierW / 2, cy - 70, barrierW, 140);
+          ctx.fillStyle = '#818cf8';
+          ctx.font = '9px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('ISOLATION', barrierX, cy - 78);
+          ctx.textAlign = 'left';
+
+          // LED symbol (triangle)
+          var ledX = barrierX - barrierW / 2 - 46;
+          var pulse = 0.5 + 0.5 * Math.sin(t * 3);
+          ctx.fillStyle = 'rgba(239,68,68,' + (0.35 + 0.5 * pulse).toFixed(2) + ')';
+          ctx.beginPath();
+          ctx.moveTo(ledX, cy - 16);
+          ctx.lineTo(ledX, cy + 16);
+          ctx.lineTo(ledX + 26, cy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#ef4444';
+          ctx.stroke();
+          ctx.fillStyle = '#fca5a5';
+          ctx.font = '10px Inter, sans-serif';
+          ctx.fillText('LED', ledX - 2, cy + 32);
+
+          // detector symbol
+          var detX = barrierX + barrierW / 2 + 20;
+          ctx.fillStyle = 'rgba(34,197,94,' + (0.25 + 0.45 * pulse).toFixed(2) + ')';
+          ctx.fillRect(detX, cy - 18, 30, 36);
+          ctx.strokeStyle = '#22c55e';
+          ctx.strokeRect(detX, cy - 18, 30, 36);
+          ctx.fillStyle = '#86efac';
+          ctx.fillText('DET', detX + 4, cy + 32);
+
+          // wires
+          ctx.strokeStyle = '#8b93a5';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(130, cy);
+          ctx.lineTo(ledX, cy);
+          ctx.moveTo(detX + 30, cy);
+          ctx.lineTo(w - 130, cy);
+          ctx.stroke();
+
+          // current dots (input side)
+          for (var i = 0; i < 4; i++) {
+            var p = (t * 0.35 + i / 4) % 1;
+            var x = 130 + p * (ledX - 130);
+            ctx.beginPath();
+            ctx.arc(x, cy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#22d3ee';
+            ctx.fill();
+          }
+          // photons crossing barrier
+          for (var j = 0; j < 5; j++) {
+            var pp = (t * 0.55 + j / 5) % 1;
+            var px = ledX + 26 + pp * (detX - ledX - 26);
+            var py = cy + Math.sin(pp * Math.PI * 4 + j) * 10;
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(245,158,11,' + (1 - pp * 0.3).toFixed(2) + ')';
+            ctx.fill();
+          }
+          // current dots (output side)
+          for (var k = 0; k < 4; k++) {
+            var q = (t * 0.35 + k / 4) % 1;
+            var qx = detX + 30 + q * (w - 130 - detX - 30);
+            ctx.beginPath();
+            ctx.arc(qx, cy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#22c55e';
+            ctx.fill();
+          }
+          requestAnimationFrame(draw);
+        }
+        requestAnimationFrame(draw);
+      })();
+
+      // ---------- Photon emission animation ----------
+      (function () {
+        var start = null;
+        function draw(ts) {
+          var canvas = document.getElementById('photonCanvas');
+          if (!canvas) return;
+          if (start === null) start = ts;
+          var t = (ts - start) / 1000;
+          var ctx = canvas.getContext('2d');
+          var rect = canvas.parentElement.getBoundingClientRect();
+          var w = (canvas.width = rect.width);
+          var h = (canvas.height = rect.height || 240);
+          if (w === 0) {
+            requestAnimationFrame(draw);
+            return;
+          }
+          ctx.clearRect(0, 0, w, h);
+          var cy = h / 2;
+          var ledX = w * 0.22;
+          var detX = w * 0.72;
+          var bX = w * 0.47;
+
+          // LED die
+          ctx.fillStyle = '#7a2a2a';
+          ctx.fillRect(ledX - 30, cy - 30, 60, 60);
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(ledX - 30, cy - 30, 60, 60);
+          ctx.fillStyle = '#fca5a5';
+          ctx.font = '600 10px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('GaAs LED', ledX, cy + 48);
+
+          // junction glow
+          var glow = 0.4 + 0.35 * Math.sin(t * 4);
+          ctx.fillStyle = 'rgba(245,158,11,' + glow.toFixed(2) + ')';
+          ctx.fillRect(ledX + 22, cy - 26, 6, 52);
+
+          // barrier
+          ctx.fillStyle = 'rgba(129,140,248,0.2)';
+          ctx.fillRect(bX - 9, cy - 55, 18, 110);
+          ctx.strokeStyle = '#818cf8';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bX - 9, cy - 55, 18, 110);
+          ctx.fillStyle = '#818cf8';
+          ctx.font = '9px Inter, sans-serif';
+          ctx.fillText('barrier', bX, cy - 62);
+
+          // detector die
+          ctx.fillStyle = '#14532d';
+          ctx.fillRect(detX - 32, cy - 32, 64, 64);
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(detX - 32, cy - 32, 64, 64);
+          ctx.fillStyle = '#86efac';
+          ctx.fillText('Si detector', detX, cy + 50);
+
+          // photons
+          for (var j = 0; j < 7; j++) {
+            var pp = (t * 0.5 + j / 7) % 1;
+            var px = ledX + 28 + pp * (detX - 32 - ledX - 28);
+            var py = cy - 40 + (j % 4) * 26 + Math.sin(t * 2 + j) * 4;
+            ctx.beginPath();
+            ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fill();
+            // little wave tail
+            ctx.strokeStyle = 'rgba(245,158,11,0.45)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var s = 0; s < 12; s++) {
+              var tx = px - s;
+              var ty = py + Math.sin(s * 0.9 + t * 6) * 2.5;
+              if (s === 0) ctx.moveTo(tx, ty);
+              else ctx.lineTo(tx, ty);
+            }
+            ctx.stroke();
+          }
+          // electrons out
+          for (var k = 0; k < 4; k++) {
+            var q = (t * 0.45 + k / 4) % 1;
+            var qx = detX + 32 + q * (w - detX - 44);
+            ctx.beginPath();
+            ctx.arc(qx, cy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#22c55e';
+            ctx.fill();
+          }
+          ctx.textAlign = 'left';
+          requestAnimationFrame(draw);
+        }
+        requestAnimationFrame(draw);
+      })();
+
+      // ---------- Interactive timeline ----------
+      (function () {
+        var eras = [
+          {
+            label: '1930s–50s · Relays',
+            title: 'Electromechanical relay isolation',
+            body: 'The original isolator: a coil on one side, contacts on the other, isolation through an air gap. Robust and truly galvanic, but slow (milliseconds), power-hungry, bulky, and mechanically wearing — contacts arc, bounce, and eventually fail.',
+          },
+          {
+            label: '1950s–60s · Pulse transformers',
+            title: 'Magnetic coupling',
+            body: 'Pulse transformers isolated fast digital edges (telecom, radar trigger circuits). They cannot pass DC, need careful volt-second balancing, and grow physically large for low frequencies — but they remain unbeaten for raw surge robustness even today.',
+          },
+          {
+            label: '1963–70s · First optocouplers',
+            title: 'Light replaces iron',
+            body: 'Once GaAs infrared LEDs became practical, pairing one with a silicon phototransistor in a single package created the optocoupler: DC-capable, silent, arc-free, tiny, and cheap. The 4N25/4N35 generation standardized the 6-pin DIP; the PC817 4-pin followed as the high-volume workhorse.',
+          },
+          {
+            label: '1980s–90s · High-speed opto',
+            title: 'Photodiode + amplifier era',
+            body: 'Adding an on-chip photodiode, transimpedance amplifier, and logic output (6N137, HCPL-2601 class) pushed optocouplers to 10 Mbps and beyond, enabling isolated UART/SPI links, and gate-driver variants brought optical isolation into motor drives and inverters.',
+          },
+          {
+            label: '2000s · Digital isolators',
+            title: 'Capacitive & magnetic CMOS isolation',
+            body: 'CMOS transceivers coupling through on-chip SiO2 capacitors (TI, Silicon Labs) or micro-transformers (ADI iCoupler) reached hundreds of Mbps with microamp idle current and no aging mechanism — taking over high-speed data isolation.',
+          },
+          {
+            label: 'Today · Coexistence',
+            title: 'Choose per requirement, not per era',
+            body: 'Optocouplers still dominate where cost, fail-safe dark-off behavior, true optical immunity, AC line sensing, or TRIAC/SCR triggering matter. Digital isolators win speed, density, and lifetime. Modern designs freely mix both — Module 15 gives the selection framework.',
+          },
+        ];
+        var wrap = document.getElementById('timelineEras');
+        var detail = document.getElementById('timelineDetail');
+        if (!wrap || !detail) return;
+        eras.forEach(function (era, i) {
+          var b = document.createElement('button');
+          b.className = 'timeline-era' + (i === 0 ? ' active' : '');
+          b.textContent = era.label;
+          b.addEventListener('click', function () {
+            wrap.querySelectorAll('.timeline-era').forEach(function (x) {
+              x.classList.remove('active');
+            });
+            b.classList.add('active');
+            detail.innerHTML = '<h5>' + era.title + '</h5><p>' + era.body + '</p>';
+          });
+          wrap.appendChild(b);
+        });
+        detail.innerHTML = '<h5>' + eras[0].title + '</h5><p>' + eras[0].body + '</p>';
+      })();
+
+      // ---------- Anatomy explorer ----------
+      (function () {
+        var parts = {
+          mold: {
+            t: 'Molding compound',
+            d: 'Opaque epoxy shell that blocks ambient light, provides mechanical protection, and forms part of the external creepage path. Its quality (voids, moisture uptake) directly affects long-term isolation integrity.',
+          },
+          optical: {
+            t: 'Optical path (silicone dome)',
+            d: 'Transparent silicone encapsulating LED and detector, guiding photons across the gap. Its geometry sets coupling efficiency — and therefore a large share of the CTR value and its unit-to-unit spread.',
+          },
+          barrier: {
+            t: 'Isolation barrier',
+            d: 'The insulating film or molding layer between the two dice — the element that actually withstands V_ISO. Thickness and material (polyimide film, silicone, epoxy) determine withstand voltage, working voltage, and partial-discharge performance.',
+          },
+          led: {
+            t: 'Infrared LED (GaAs)',
+            d: 'Emits 850–940 nm photons proportional to forward current. Its gradual light-output degradation with operating hours is the dominant optocoupler aging mechanism — the origin of end-of-life CTR derating.',
+          },
+          detector: {
+            t: 'Photodetector die',
+            d: 'Converts received photons into current. Variants define the family: phototransistor (gain, slow), photodiode + amplifier (fast logic output), Darlington (highest gain), photo-TRIAC/SCR (AC power switching), or MOSFET driver stage.',
+          },
+          leadframe: {
+            t: 'Lead frame',
+            d: 'Copper frames carrying each die and forming the external pins — two fully separate frames, one per side, whose spacing inside the package supports the isolation rating and defines pin-to-pin clearance.',
+          },
+        };
+        var info = document.getElementById('anatomyInfo');
+        document.querySelectorAll('.anatomy-part').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var p = parts[el.getAttribute('data-part')];
+            if (p && info) info.innerHTML = '<h5>' + p.t + '</h5><p>' + p.d + '</p>';
+          });
+        });
+      })();
+
+      // ---------- CTR calculator ----------
+      (function () {
+        var ifEl = document.getElementById('ctrIf');
+        if (!ifEl) return;
+        var binEl = document.getElementById('ctrBin');
+        var tempEl = document.getElementById('ctrTemp');
+        var agingEl = document.getElementById('ctrAging');
+        function update() {
+          var iF = parseFloat(ifEl.value);
+          var bin = parseFloat(binEl.value);
+          var temp = parseFloat(tempEl.value);
+          var kAge = parseFloat(agingEl.value);
+          document.getElementById('ctrIfVal').textContent = iF + ' mA';
+          document.getElementById('ctrTempVal').textContent = temp + ' °C';
+          // CTR vs IF curve: normalized, peak near 5-10 mA
+          var kIf = 1 - 0.35 * Math.pow(Math.log10(iF / 6), 2);
+          if (kIf < 0.3) kIf = 0.3;
+          // temperature: ~ -0.5%/degC from 25C
+          var kTemp = 1 - 0.005 * (temp - 25);
+          if (kTemp > 1.15) kTemp = 1.15;
+          if (kTemp < 0.3) kTemp = 0.3;
+          var ctrEff = bin * kIf * kTemp * kAge;
+          var iC = (iF * ctrEff) / 100;
+          document.getElementById('ctrEff').textContent = ctrEff.toFixed(0) + ' %';
+          document.getElementById('ctrIc').textContent = iC.toFixed(2) + ' mA';
+          var v = document.getElementById('ctrVerdict');
+          if (iC >= 1.0) {
+            v.textContent = 'PASS — margin ' + (iC / 0.5).toFixed(1) + '×';
+            v.style.color = 'var(--success, #4cdf8b)';
+          } else if (iC >= 0.5) {
+            v.textContent = 'MARGINAL — ' + (iC / 0.5).toFixed(1) + '× (aim for ≥ 2×)';
+            v.style.color = '#f59e0b';
+          } else {
+            v.textContent = 'FAIL — output will not saturate';
+            v.style.color = 'var(--danger, #ff6b6b)';
+          }
+        }
+        [ifEl, binEl, tempEl, agingEl].forEach(function (el) {
+          el.addEventListener('input', update);
+          el.addEventListener('change', update);
+        });
+        update();
+      })();
+
+      // ---------- Isolation requirement checker ----------
+      (function () {
+        var vwEl = document.getElementById('isoVw');
+        if (!vwEl) return;
+        var classEl = document.getElementById('isoClass');
+        var ovEl = document.getElementById('isoOv');
+        function update() {
+          var vw = parseFloat(vwEl.value);
+          var cls = classEl.value;
+          var ov = ovEl.value;
+          document.getElementById('isoVwVal').textContent = vw + ' V';
+          var vpk = vw * Math.SQRT2;
+          var viorm = Math.ceil(vpk / 10) * 10;
+          // impulse per IEC 60664 style tiers
+          var imp;
+          if (vw <= 50) imp = ov === '3' ? 800 : 500;
+          else if (vw <= 100) imp = ov === '3' ? 1500 : 800;
+          else if (vw <= 150) imp = ov === '3' ? 2500 : 1500;
+          else if (vw <= 300) imp = ov === '3' ? 4000 : 2500;
+          else if (vw <= 600) imp = ov === '3' ? 6000 : 4000;
+          else imp = ov === '3' ? 8000 : 6000;
+          if (cls === 'reinforced') imp = imp * 1.6;
+          var viso;
+          if (cls === 'reinforced') viso = vw <= 150 ? 3750 : 5000;
+          else viso = vw <= 150 ? 2500 : 3750;
+          document.getElementById('isoViorm').textContent = '≥ ' + viorm + ' Vpk';
+          document.getElementById('isoViso').textContent = viso / 1000 + ' kVrms';
+          document.getElementById('isoVimp').textContent = '≥ ' + (imp / 1000).toFixed(1) + ' kVpk';
+          document.getElementById('isoNote').textContent =
+            cls === 'reinforced'
+              ? 'Reinforced: require IEC 60747-17 / VDE 0884-17 certificate; check 8 mm creepage (wide-body package) for mains applications.'
+              : 'Basic: UL 1577 recognition plus adequate working voltage usually suffices; pair with a second protective measure per your end-product standard.';
+        }
+        [vwEl, classEl, ovEl].forEach(function (el) {
+          el.addEventListener('input', update);
+          el.addEventListener('change', update);
+        });
+        update();
+      })();
+
+      // ---------- Comparison table highlighting ----------
+      (function () {
+        var controls = document.getElementById('cmpControls');
+        var table = document.getElementById('cmpTable');
+        if (!controls || !table) return;
+        controls.addEventListener('click', function (e) {
+          var btn = e.target.closest('.cmp-btn');
+          if (!btn) return;
+          controls.querySelectorAll('.cmp-btn').forEach(function (b) {
+            b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          var col = btn.getAttribute('data-col');
+          table.querySelectorAll('td').forEach(function (td) {
+            td.classList.remove('cmp-best');
+          });
+          if (col === 'all') return;
+          var ci = parseInt(col);
+          var best = -1;
+          var cells = [];
+          table.querySelectorAll('tbody tr').forEach(function (tr) {
+            var td = tr.children[ci];
+            var s = parseInt(td.getAttribute('data-score') || '0');
+            cells.push({ td: td, s: s });
+            if (s > best) best = s;
+          });
+          cells.forEach(function (c) {
+            if (c.s === best) c.td.classList.add('cmp-best');
+          });
+        });
+      })();
+
+      // ---------- Part A: MCQ quiz ----------
+      var quizData = [
+        {
+          q: 'What is the defining function of an optocoupler?',
+          opts: [
+            'Amplifying weak analog signals',
+            'Transferring a signal between two galvanically isolated circuits using light',
+            'Converting AC to DC',
+            'Shifting a logic signal between two voltage rails that share a ground',
+          ],
+          correct: 1,
+          exp: 'The optical path is the point: signal crosses, current cannot. Level shifting (option D) shares a ground — that is a different job.',
+        },
+        {
+          q: 'An optocoupler LED carries IF = 10 mA and the phototransistor delivers IC = 15 mA. What is the CTR?',
+          opts: ['0.67%', '15%', '150%', '1500%'],
+          correct: 2,
+          exp: 'CTR = IC/IF × 100% = 15/10 × 100% = 150%.',
+        },
+        {
+          q: 'Which internal element actually withstands the rated isolation voltage?',
+          opts: [
+            'The GaAs LED die',
+            'The insulating barrier (film/molding) between the two dice',
+            'The phototransistor collector junction',
+            'The external pins',
+          ],
+          correct: 1,
+          exp: 'The transparent insulating layer between emitter and detector is the barrier; its material and thickness set VISO and VIORM.',
+        },
+        {
+          q: 'What wavelength range do typical optocoupler LEDs emit?',
+          opts: [
+            '400–450 nm (blue, visible)',
+            '550 nm (green, visible)',
+            '850–940 nm (near infrared)',
+            '10 µm (far infrared, thermal)',
+          ],
+          correct: 2,
+          exp: 'GaAs/GaAlAs LEDs emit near-infrared at 850–940 nm, where silicon photodetectors respond efficiently.',
+        },
+        {
+          q: 'VISO = 5 kVrms on a datasheet means:',
+          opts: [
+            'The part may operate continuously with 5 kVrms across the barrier',
+            'The barrier survives a 5 kVrms, 60 s factory/qualification Hi-Pot test',
+            'The output can switch 5 kV loads',
+            'The part meets reinforced insulation at 5 kV working voltage',
+          ],
+          correct: 1,
+          exp: 'VISO is a withstand test rating (UL 1577). Continuous operation is limited by the much lower working voltage VIORM.',
+        },
+        {
+          q: 'Which parameter limits how long an optocoupler design keeps working in the field?',
+          opts: [
+            'Barrier capacitance drift',
+            'LED light-output degradation reducing CTR',
+            'Phototransistor gain increasing',
+            'Package color fading',
+          ],
+          correct: 1,
+          exp: 'LED aging is the dominant wear-out mechanism: light output decays with operating hours, current, and temperature, dragging CTR down.',
+        },
+        {
+          q: 'Why does a PC817-class phototransistor optocoupler switch in microseconds rather than nanoseconds?',
+          opts: [
+            'The LED cannot turn on faster',
+            'Photons travel slowly in silicone',
+            'Collector-base capacitance must charge/discharge through a small photocurrent (Miller effect)',
+            'The isolation barrier delays photons',
+          ],
+          correct: 2,
+          exp: 'The phototransistor’s CB capacitance, amplified by the Miller effect and fed only by microamp-scale photocurrent, dominates the 3–18 µs switching times.',
+        },
+        {
+          q: 'Which optocoupler output family is the right starting point for switching a 230 V AC load?',
+          opts: ['Phototransistor', 'Photo-Darlington', 'Photo-TRIAC', 'Photodiode'],
+          correct: 2,
+          exp: 'Photo-TRIAC couplers (MOC30xx) are built to trigger on AC and typically fire a power TRIAC; transistor outputs are DC devices.',
+        },
+        {
+          q: 'A design needs isolation with guaranteed OFF output when the isolator itself is unpowered. Which property favors the optocoupler?',
+          opts: [
+            'Its higher bandwidth',
+            'No LED current means no light means output off — an inherent fail-safe dark state',
+            'Its lower cost per channel',
+            'Its smaller package',
+          ],
+          correct: 1,
+          exp: 'Darkness is the optocoupler’s unpowered state, and dark = off. Digital isolators must implement (and you must verify) a defined fail-safe output state.',
+        },
+        {
+          q: 'What do the letter suffixes in PC817A/B/C/D indicate?',
+          opts: [
+            'Package variants',
+            'Isolation voltage classes',
+            'Factory-sorted CTR bins (rank A = 80–160%, D = 300–600%)',
+            'Operating temperature grades',
+          ],
+          correct: 2,
+          exp: 'Manufacturers sort parts into CTR ranks because raw CTR spreads ~3:1; designing to the bin minimum is standard practice.',
+        },
+        {
+          q: 'Which statement about ground loops is correct?',
+          opts: [
+            'An optocoupler passes the signal while breaking the conductive loop between two distant grounds',
+            'Ground loops only occur in AC circuits',
+            'A level shifter also breaks ground loops',
+            'Ground loops improve noise immunity',
+          ],
+          correct: 0,
+          exp: 'Because no conductor crosses the barrier, circulating current between two offset grounds has no path — while the optical signal still gets through.',
+        },
+        {
+          q: 'CTR of a phototransistor optocoupler at 85 °C, versus 25 °C, is typically:',
+          opts: [
+            'Identical — CTR is temperature-independent',
+            'Roughly 25–35% lower',
+            'Twice as high',
+            'Zero — devices stop working above 70 °C',
+          ],
+          correct: 1,
+          exp: 'CTR falls roughly 0.5%/°C above 25 °C (LED efficiency drops faster than transistor gain rises), so 60 °C of rise costs ~30%.',
+        },
+        {
+          q: 'Which combination correctly supports a reinforced-insulation claim at 230 V mains?',
+          opts: [
+            'Any part labelled “5 kV” in the title',
+            'UL 94 flammability rating',
+            'IEC 60747-17 / VDE 0884-17 certification with adequate VIORM, plus package creepage per the end-product standard',
+            'A datasheet “typical” isolation figure',
+          ],
+          correct: 2,
+          exp: 'Reinforced claims rest on the component safety certificate (working voltage, partial discharge, surge) plus creepage/clearance — not on the Hi-Pot headline alone.',
+        },
+        {
+          q: 'In the classic SMPS feedback application, what does the optocoupler carry across the barrier?',
+          opts: [
+            'The full output power',
+            'The error signal from the secondary-side regulator (e.g. TL431) to the primary-side PWM controller',
+            'The switching FET gate drive',
+            'The AC input voltage',
+          ],
+          correct: 1,
+          exp: 'Only the low-power regulation signal crosses optically; power crosses through the transformer. PC817 + TL431 is the canonical pair.',
+        },
+        {
+          q: 'Which is a real limitation of optocouplers compared with capacitive digital isolators?',
+          opts: [
+            'They radiate more EMI',
+            'They cannot provide reinforced insulation',
+            'They draw continuous LED current and their CTR ages, while digital isolators have no wear-out mechanism',
+            'They cost more per channel',
+          ],
+          correct: 2,
+          exp: 'Optocouplers actually emit essentially no EMI and reinforced-rated parts are common and cheap; the honest trade-offs are LED power, speed, and aging.',
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Module 1 Knowledge Check. Continue with the True/False, matching, and scenario exercises below, then proceed to Module 2.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = [
+          {
+            s: 'An optocoupler and an optoisolator are the same component.',
+            a: true,
+            exp: 'Both names (plus “optical isolator” and “photocoupler”) describe the same LED-plus-photodetector device.',
+          },
+          {
+            s: 'Current can flow through the isolation barrier when the LED is on.',
+            a: false,
+            exp: 'Only photons cross the barrier. The output current is generated on the output side by the detector — no charge crosses.',
+          },
+          {
+            s: 'CTR of a phototransistor optocoupler typically exceeds 100% in fresh parts.',
+            a: true,
+            exp: 'The transistor amplifies the photocurrent, so IC can exceed IF: PC817 ranks span 80–600%.',
+          },
+          {
+            s: 'A higher LED drive current always improves long-term reliability.',
+            a: false,
+            exp: 'The opposite: LED degradation accelerates with current density and temperature. High IF buys margin today at the cost of lifetime.',
+          },
+          {
+            s: 'VIORM (working voltage) is always lower than VISO (test voltage).',
+            a: true,
+            exp: 'VISO is a short-duration withstand test; VIORM is the voltage the barrier must tolerate continuously for the product’s life — necessarily much lower.',
+          },
+          {
+            s: 'Optocouplers can pass DC signal levels, unlike pulse transformers.',
+            a: true,
+            exp: 'Light conveys steady-state information; a transformer needs changing flux and cannot pass DC.',
+          },
+          {
+            s: 'A photo-Darlington output offers both the highest CTR and the fastest switching.',
+            a: false,
+            exp: 'Darlingtons trade speed for gain: CTR up to several thousand percent, but switching in the ~100 µs range.',
+          },
+          {
+            s: 'Digital capacitive isolators degrade (age) faster than optocouplers.',
+            a: false,
+            exp: 'SiO2 capacitor barriers have no known wear-out mechanism; the optocoupler’s LED is the aging element.',
+          },
+          {
+            s: 'Breaking a ground loop requires removing the conductive path between the two grounds.',
+            a: true,
+            exp: 'That is exactly what galvanic isolation does — and why a shared-ground level shifter cannot fix ground-loop noise.',
+          },
+          {
+            s: 'Reinforced insulation may serve as the sole protection between mains and user-touchable circuits.',
+            a: true,
+            exp: 'Reinforced insulation is defined as equivalent to two independent basic barriers, so standards accept it as sole protection.',
+          },
+        ];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' +
+            (i + 1) +
+            '. ' +
+            item.s +
+            '</div><div class="tf-btns"><button class="tf-btn" data-v="true">True</button><button class="tf-btn" data-v="false">False</button></div><div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = btn.getAttribute('data-v') === 'true';
+              var expEl = div.querySelector('.tf-exp');
+              if (v === item.a) {
+                score++;
+                btn.classList.add('correct');
+                expEl.innerHTML = '✓ Correct. ' + item.exp;
+              } else {
+                btn.classList.add('incorrect');
+                div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+                expEl.innerHTML = '✗ Incorrect. ' + item.exp;
+              }
+              expEl.classList.add('show');
+              document.getElementById('tfScore').textContent = score;
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: matching (drag & drop + click) ----------
+      (function () {
+        var pairs = [
+          {
+            chip: 'Phototransistor (PC817)',
+            target: 'General-purpose 24 V PLC input / SMPS feedback',
+            why: 'Cheap, moderate speed, CTR > 100% — the general-purpose choice.',
+          },
+          {
+            chip: 'Photo-Darlington',
+            target: 'Driving a small relay from a very weak input current',
+            why: 'Highest CTR (up to thousands of %), tolerates tiny LED currents; speed does not matter for a relay.',
+          },
+          {
+            chip: 'High-speed logic output (6N137)',
+            target: '10 Mbps isolated data link',
+            why: 'Photodiode + amplifier + logic gate: nanosecond-class switching for data.',
+          },
+          {
+            chip: 'Photo-TRIAC (MOC3021)',
+            target: 'Triggering a power TRIAC on a 230 V AC lamp circuit',
+            why: 'Built to conduct in both AC polarities and fire an external TRIAC.',
+          },
+          {
+            chip: 'Gate-driver optocoupler (HCPL-3120)',
+            target: 'IGBT gate in a motor inverter on a switching DC bus',
+            why: 'Amp-level peak output and high CMTI survive the bridge’s dV/dt.',
+          },
+        ];
+        var chipsEl = document.getElementById('ddChips');
+        var targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0;
+        var selectedChip = null;
+        // shuffle targets display order
+        var order = pairs
+          .map(function (_, i) {
+            return i;
+          })
+          .sort(function () {
+            return Math.random() - 0.5;
+          });
+
+        pairs.forEach(function (p, i) {
+          var chip = document.createElement('div');
+          chip.className = 'dd-chip';
+          chip.textContent = p.chip;
+          chip.draggable = true;
+          chip.setAttribute('data-i', i);
+          chip.addEventListener('dragstart', function (e) {
+            if (chip.classList.contains('placed')) {
+              e.preventDefault();
+              return;
+            }
+            e.dataTransfer.setData('text/plain', String(i));
+          });
+          chip.addEventListener('click', function () {
+            if (chip.classList.contains('placed')) return;
+            document.querySelectorAll('.dd-chip').forEach(function (c) {
+              c.classList.remove('selected');
+            });
+            selectedChip = chip;
+            chip.classList.add('selected');
+          });
+          chipsEl.appendChild(chip);
+        });
+
+        order.forEach(function (i) {
+          var p = pairs[i];
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('data-i', i);
+          t.innerHTML = '<h6>' + p.target + '</h6><div class="dd-drop"></div>';
+          function attempt(chipIdx) {
+            var drop = t.querySelector('.dd-drop');
+            if (parseInt(chipIdx) === i) {
+              var chipEl = chipsEl.querySelector('[data-i="' + chipIdx + '"]');
+              chipEl.classList.add('placed');
+              chipEl.classList.remove('selected');
+              drop.innerHTML =
+                '<span class="dd-slot ok">✓ ' +
+                pairs[chipIdx].chip +
+                '</span><div style="font-size:0.72rem;color:var(--text-sub);margin-top:4px">' +
+                pairs[i].why +
+                '</div>';
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) {
+                document.getElementById('ddStatus').innerHTML =
+                  '<span style="color:var(--success,#4cdf8b);font-weight:700">✓ All 5 matched — well done!</span>';
+              }
+            } else {
+              drop.innerHTML =
+                '<span class="dd-slot bad">✗ ' +
+                pairs[chipIdx].chip +
+                ' — not the best fit, try again</span>';
+              setTimeout(function () {
+                if (drop.querySelector('.bad')) drop.innerHTML = '';
+              }, 1600);
+            }
+            selectedChip = null;
+            document.querySelectorAll('.dd-chip').forEach(function (c) {
+              c.classList.remove('selected');
+            });
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          targetsEl.appendChild(t);
+        });
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

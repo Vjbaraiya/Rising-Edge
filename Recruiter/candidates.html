@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Recruiter candidate directory — browse all Rising Edge user profiles, their account status, current role, skills and LinkedIn profiles."
+    />
+    <title>Candidate Directory | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Recruiter/candidates.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .cand-toolbar {
+        display: flex;
+        gap: var(--sp-3);
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: var(--sp-5);
+      }
+      .cand-toolbar .input,
+      .cand-toolbar .select {
+        max-width: 260px;
+      }
+      .cand-table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        background: var(--bg-card);
+      }
+      table.cand-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+      .cand-table th {
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+        background: var(--bg-muted);
+      }
+      .cand-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: middle;
+      }
+      .cand-table tr:last-child td {
+        border-bottom: none;
+      }
+      .cand-name {
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .cand-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+      .st-ACTIVE {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--success);
+      }
+      .st-PENDING_VERIFICATION {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--warning);
+      }
+      .st-SUSPENDED,
+      .st-DEACTIVATED {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--danger);
+      }
+      .skill-chip {
+        display: inline-block;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        margin: 2px 3px 0 0;
+      }
+      .li-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--primary-400);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.8125rem;
+      }
+      .li-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="page-header">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span><span>Candidate Directory</span>
+        </nav>
+        <h1>Candidate Directory</h1>
+        <p style="color: var(--text-sub); margin-top: var(--sp-2)">
+          Browse all member profiles — status, current role, skills and LinkedIn.
+        </p>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top: 1rem">
+      <div class="container">
+        <div
+          id="gate-msg"
+          style="
+            display: none;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-5);
+            font-size: 0.9rem;
+          "
+        ></div>
+
+        <div id="cand-view" style="display: none">
+          <div class="cand-toolbar">
+            <input
+              class="input"
+              id="cand-search"
+              type="text"
+              placeholder="Search name, email, role, skill…"
+            />
+            <select class="select" id="cand-status">
+              <option value="">Any status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="PENDING_VERIFICATION">Pending verification</option>
+              <option value="SUSPENDED">Suspended</option>
+              <option value="DEACTIVATED">Deactivated</option>
+            </select>
+            <span
+              id="cand-count"
+              style="color: var(--text-muted); font-size: 0.8125rem; margin-left: auto"
+            ></span>
+          </div>
+
+          <div class="cand-table-wrap">
+            <table class="cand-table">
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Current Role</th>
+                  <th>Skills</th>
+                  <th>Status</th>
+                  <th>LinkedIn</th>
+                  <th>Last Login</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cand-body">
+                <tr>
+                  <td
+                    colspan="7"
+                    style="text-align: center; padding: 28px; color: var(--text-muted)"
+                  >
+                    Loading candidates…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      var ALL = [];
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+      }
+      function fmtDate(d) {
+        return d
+          ? new Date(d).toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })
+          : '—';
+      }
+      function prettyStatus(s) {
+        return (s || '')
+          .replace(/_/g, ' ')
+          .toLowerCase()
+          .replace(/^\w/, function (c) {
+            return c.toUpperCase();
+          });
+      }
+
+      function row(u) {
+        var roleLine = u.currentRole || u.jobTitle || '—';
+        var orgLine = [u.org, u.location].filter(Boolean).join(' · ');
+        var skills = (u.skills || [])
+          .slice(0, 5)
+          .map(function (s) {
+            return '<span class="skill-chip">' + esc(s) + '</span>';
+          })
+          .join('');
+        var li = u.linkedinUrl
+          ? '<a class="li-link" target="_blank" rel="noopener nofollow" href="' +
+            esc(u.linkedinUrl) +
+            '"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21H9z"/></svg>LinkedIn</a>'
+          : '<span style="color:var(--text-faint);font-size:0.8125rem">—</span>';
+        return (
+          '<tr>' +
+          '<td><div class="cand-name">' +
+          esc(u.fullName || '—') +
+          '</div><div class="cand-sub">' +
+          esc(u.email || '') +
+          '</div></td>' +
+          '<td><div>' +
+          esc(roleLine) +
+          '</div>' +
+          (orgLine ? '<div class="cand-sub">' + esc(orgLine) + '</div>' : '') +
+          '</td>' +
+          '<td style="min-width:180px">' +
+          (skills || '<span style="color:var(--text-faint)">—</span>') +
+          '</td>' +
+          '<td><span class="status-pill st-' +
+          esc(u.status) +
+          '">' +
+          esc(prettyStatus(u.status)) +
+          '</span></td>' +
+          '<td>' +
+          li +
+          '</td>' +
+          '<td style="color:var(--text-muted);font-size:0.8125rem;white-space:nowrap">' +
+          fmtDate(u.lastLoginAt) +
+          '</td>' +
+          '<td><a class="btn btn-outline btn-sm" href="../User/profile.html?id=' +
+          encodeURIComponent(u.id) +
+          '">Profile</a></td>' +
+          '</tr>'
+        );
+      }
+
+      function render() {
+        var q = (document.getElementById('cand-search').value || '').toLowerCase();
+        var st = document.getElementById('cand-status').value;
+        var list = ALL.filter(function (u) {
+          if (st && u.status !== st) return false;
+          if (!q) return true;
+          var hay = [
+            u.fullName,
+            u.email,
+            u.currentRole,
+            u.jobTitle,
+            u.org,
+            u.location,
+            (u.skills || []).join(' '),
+          ]
+            .join(' ')
+            .toLowerCase();
+          return hay.indexOf(q) !== -1;
+        });
+        var body = document.getElementById('cand-body');
+        document.getElementById('cand-count').textContent =
+          list.length + ' of ' + ALL.length + ' member' + (ALL.length === 1 ? '' : 's');
+        body.innerHTML = list.length
+          ? list.map(row).join('')
+          : '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">No candidates match your filters.</td></tr>';
+      }
+
+      (function () {
+        if (localStorage.getItem('re-logged-in') !== '1') {
+          window.location.href = '../login.html?redirect=' + encodeURIComponent(location.pathname);
+          return;
+        }
+        var session = (function () {
+          try {
+            return JSON.parse(localStorage.getItem('re_session') || '{}');
+          } catch (e) {
+            return {};
+          }
+        })();
+        var token = session.accessToken || session.token || '';
+        var gate = document.getElementById('gate-msg');
+        if (!token) {
+          gate.style.display = 'block';
+          gate.textContent = 'Please sign in as a recruiter to view the candidate directory.';
+          return;
+        }
+        fetch('/api/recruiter/candidates', { headers: { Authorization: 'Bearer ' + token } })
+          .then(function (r) {
+            return r.json().then(function (j) {
+              return { status: r.status, body: j };
+            });
+          })
+          .then(function (res) {
+            if (res.status === 403) {
+              gate.style.display = 'block';
+              gate.textContent =
+                'This directory is available to recruiters and administrators only.';
+              return;
+            }
+            if (!res.body.success) {
+              gate.style.display = 'block';
+              gate.textContent = res.body.error || 'Could not load candidates.';
+              return;
+            }
+            ALL = res.body.data || [];
+            document.getElementById('cand-view').style.display = 'block';
+            render();
+          })
+          .catch(function () {
+            gate.style.display = 'block';
+            gate.textContent = 'Could not connect to the server. Please try again.';
+          });
+
+        document.getElementById('cand-search').addEventListener('input', render);
+        document.getElementById('cand-status').addEventListener('change', render);
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

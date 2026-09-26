@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="LC filter design, common-mode chokes, X/Y capacitor placement, and how buck/boost/flyback/forward/LLC topologies each generate and can suppress conducted emissions."
+    />
+    <title>
+      Filtering, Power Supply &amp; Cable/Shielding | Conducted Emissions (CE) Testing Academy |
+      Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/CE/09-filtering-and-power-design.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .topo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .topo-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .topo-card:hover,
+      .topo-card.active {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      .topo-card .tname {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Conducted Emissions (CE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Is Conducted Emission</a
+          >
+          <a href="02-noise-modes.html" class="module-item"
+            >02. CE vs. RE, Noise Paths &amp; Common/Differential Mode</a
+          >
+          <a href="03-frequency-and-standards.html" class="module-item"
+            >03. Frequency Ranges &amp; CE Standards</a
+          >
+          <a href="04-product-categories.html" class="module-item"
+            >04. CE Requirements by Product Category</a
+          >
+          <a href="05-lisn-and-test-setup.html" class="module-item"
+            >05. LISN, EMI Receiver &amp; Test Setup</a
+          >
+          <a href="06-measurement-and-detectors.html" class="module-item"
+            >06. Reading CE Graphs &amp; Detector Types</a
+          >
+          <a href="07-case-studies.html" class="module-item"
+            >07. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="08-debugging-and-pcb-design.html" class="module-item"
+            >08. Debugging Workflow &amp; PCB Design</a
+          >
+          <a href="09-filtering-and-power-design.html" class="module-item active"
+            >09. Filtering, Power Supply &amp; Cable/Shielding</a
+          >
+          <a href="10-precompliance-and-summary.html" class="module-item"
+            >10. Pre-Compliance Testing &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Conducted Emissions (CE) Testing</a><span>/</span>
+            <span>Filtering, Power Supply &amp; Cable/Shielding</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 9/10</span><span>90%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 90%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 09</div>
+              <h1 style="font-size: 2.2rem">Filtering, Power Supply &amp; Cable/Shielding</h1>
+              <p class="subtitle">
+                Once a failure is diagnosed, the fix usually comes from this module's toolkit: an LC
+                filter tuned to the right corner frequency, correctly-sized common-mode and
+                differential-mode components, a topology-aware layout, and disciplined cable
+                shielding.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Section 1: LC filter designer -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="secFilter">
+                  <span>Section 1: Interactive LC Filter Designer</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="secFilter">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Drag the sliders to change the filter's inductance and capacitance and watch the
+                    insertion-loss curve (and corner frequency) update live.
+                  </p>
+                  <div class="widget-container">
+                    <div class="slider-group">
+                      <div class="slider-label">
+                        <span>Inductance (L)</span><span class="slider-value" id="lVal">10 µH</span>
+                      </div>
+                      <input type="range" id="lSlider" min="1" max="1000" value="10" />
+                    </div>
+                    <div class="slider-group">
+                      <div class="slider-label">
+                        <span>Capacitance (C)</span><span class="slider-value" id="cVal">1 µF</span>
+                      </div>
+                      <input type="range" id="cSlider" min="1" max="1000" value="100" />
+                    </div>
+                    <div id="plotlyFilter" style="width: 100%; height: 300px"></div>
+                    <div class="metrics-grid" style="margin-top: 12px">
+                      <div class="metric-card">
+                        <div class="metric-value" id="cornerFreqVal">–</div>
+                        <div class="metric-label">Corner Frequency</div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-value" id="attenAt1MHz">–</div>
+                        <div class="metric-label">Attenuation @ 1 MHz</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="info-box" style="margin-top: 1rem">
+                    A single LC stage rolls off at 40 dB/decade above its corner frequency (f<sub
+                      >c</sub
+                    >
+                    = 1 / (2π√(LC))). Placing the corner well below the lowest failing harmonic
+                    gives the most attenuation right where it's needed, but too low a corner can
+                    interact badly with the converter's control loop -- filter corner selection is
+                    always a joint decision with the power supply designer.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: CM choke / X-Y caps -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secComponents">
+                  <span>Section 2: Common-Mode Chokes &amp; X/Y Capacitor Placement</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secComponents">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    A common-mode choke is wound so that differential current through the two
+                    windings cancels in the core (little differential impedance, so wanted power
+                    current passes freely), while common-mode current in both windings adds in the
+                    core (high common-mode impedance, blocking CM noise).
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Common-Mode Choke Flux Cancellation
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 240px">
+                      <canvas
+                        id="chokeDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                  <table class="data-table" style="width: 100%; margin-top: 1.25rem">
+                    <thead>
+                      <tr>
+                        <th>Component</th>
+                        <th>Targets</th>
+                        <th>Placement Rule</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>X-capacitor</td>
+                        <td>Differential mode</td>
+                        <td>
+                          Directly across L-N, close to the noise source or the input connector
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Y-capacitor</td>
+                        <td>Common mode</td>
+                        <td>
+                          From L/N to chassis/earth -- value limited by leakage-current safety
+                          requirements
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Common-mode choke</td>
+                        <td>Common mode</td>
+                        <td>
+                          In-line on both conductors together, as close to the source of CM noise as
+                          practical
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>DM inductor</td>
+                        <td>Differential mode</td>
+                        <td>In series with each conductor individually</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Section 3: Power topology overview -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secTopo">
+                  <span>Section 3: Power Supply Topologies &amp; CE Behavior</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secTopo">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Click a topology to see its typical CE failure mode and the layout discipline
+                    that keeps it clean.
+                  </p>
+                  <div class="widget-container">
+                    <div class="topo-grid" id="topoGrid"></div>
+                    <div class="stage-detail" id="topoDetail" style="margin-top: 12px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: Cable shielding -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secShield">
+                  <span>Section 4: Cable Management &amp; Shielding</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secShield">
+                  <ul class="check-list">
+                    <li>
+                      <span class="check-icon">✓</span> Terminate shields 360° at both ends where
+                      possible -- a "pigtail" connection defeats most of the shield's benefit at
+                      conducted-relevant frequencies.
+                    </li>
+                    <li>
+                      <span class="check-icon">✓</span> Keep noisy switching cables physically
+                      separated from quiet input/mains cables inside the enclosure.
+                    </li>
+                    <li>
+                      <span class="check-icon">✓</span> Twist differential pairs to reduce loop area
+                      and improve common-mode rejection.
+                    </li>
+                    <li>
+                      <span class="check-icon">✓</span> Bond shields to chassis at the point noise
+                      enters, not just at a single "convenient" ground point.
+                    </li>
+                    <li>
+                      <span class="check-icon">✓</span> Keep cable bundle length and height above
+                      any reference/ground plane consistent with the standard's test method, since
+                      it affects repeatability.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 9 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">12</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">12</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 8.3%;
+                        background: linear-gradient(90deg, #3b82f6, #22c55e);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="08-debugging-and-pcb-design.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="10-precompliance-and-summary.html"
+                  >Next Lesson &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+    </script>
+
+    <!-- Section 1: LC filter designer -->
+    <script>
+      var lSlider = document.getElementById('lSlider');
+      var cSlider = document.getElementById('cSlider');
+      function sliderToLuH(v) {
+        return v;
+      } // 1-1000 uH
+      function sliderToCuF(v) {
+        return v / 100;
+      } // 0.01-10 uF
+      function updateFilter() {
+        var lUh = sliderToLuH(parseInt(lSlider.value));
+        var cUf = sliderToCuF(parseInt(cSlider.value));
+        document.getElementById('lVal').textContent = lUh + ' µH';
+        document.getElementById('cVal').textContent = cUf.toFixed(2) + ' µF';
+
+        var L = lUh * 1e-6,
+          C = cUf * 1e-6;
+        var fc = 1 / (2 * Math.PI * Math.sqrt(L * C));
+        document.getElementById('cornerFreqVal').textContent =
+          fc >= 1e6 ? (fc / 1e6).toFixed(2) + ' MHz' : (fc / 1e3).toFixed(1) + ' kHz';
+
+        var freqs = [];
+        for (var f = 1e3; f <= 30e6; f *= 1.05) freqs.push(f);
+        var insertionLoss = freqs.map(function (f) {
+          var ratio = f / fc;
+          if (ratio <= 1) return -2 * Math.log10(1 + ratio * ratio) * 3; // small loss below corner
+          return -40 * Math.log10(ratio);
+        });
+        var atten1MHz =
+          -1 *
+            insertionLoss[
+              Math.round(
+                freqs.findIndex(function (f) {
+                  return f >= 1e6;
+                })
+              )
+            ] || 0;
+        var idx1MHz = freqs.findIndex(function (f) {
+          return f >= 1e6;
+        });
+        document.getElementById('attenAt1MHz').textContent =
+          idx1MHz >= 0 ? Math.abs(insertionLoss[idx1MHz]).toFixed(0) + ' dB' : '–';
+
+        var el = document.getElementById('plotlyFilter');
+        if (el && window.Plotly) {
+          var layout = Object.assign({}, getPlotlyLayoutBase(), {
+            xaxis: {
+              title: 'Frequency (Hz)',
+              type: 'log',
+              gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+            },
+            yaxis: {
+              title: 'Insertion Loss (dB)',
+              gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+            },
+            shapes: [
+              {
+                type: 'line',
+                x0: 0.15e6,
+                x1: 0.15e6,
+                y0: -80,
+                y1: 5,
+                line: {
+                  color: isLightTheme() ? 'rgba(15,23,32,0.3)' : 'rgba(255,255,255,0.3)',
+                  dash: 'dot',
+                },
+              },
+            ],
+          });
+          Plotly.newPlot(
+            el,
+            [
+              {
+                x: freqs,
+                y: insertionLoss,
+                mode: 'lines',
+                line: { color: '#3b82f6', width: 2 },
+                name: 'Insertion loss',
+              },
+            ],
+            layout,
+            { displayModeBar: false, responsive: true }
+          );
+        }
+      }
+      lSlider.addEventListener('input', updateFilter);
+      cSlider.addEventListener('input', updateFilter);
+      updateFilter();
+      window.addEventListener('resize', updateFilter);
+    </script>
+
+    <!-- Section 2: CM choke animation -->
+    <script>
+      var chokeStart = null;
+      function drawChokeDiagram(ts) {
+        var canvas = document.getElementById('chokeDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawChokeDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (chokeStart === null) chokeStart = ts;
+        var elapsed = (ts - chokeStart) / 1000;
+
+        var coreX = w * 0.5,
+          coreY = h * 0.5,
+          coreR = Math.min(w, h) * 0.28;
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, coreR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        labelPlate(ctx, 'Ferrite core', coreX, coreY - coreR - 14, 'center');
+
+        var t = elapsed % 2;
+        var phase = t < 1 ? 'dm' : 'cm';
+        var localT = phase === 'dm' ? t : t - 1;
+
+        // two windings represented as arcs top and bottom
+        ctx.strokeStyle = inkColor(0.5);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(coreX - w * 0.3, coreY - 24);
+        ctx.lineTo(coreX - coreR, coreY - 24);
+        ctx.moveTo(coreX + coreR, coreY - 24);
+        ctx.lineTo(coreX + w * 0.3, coreY - 24);
+        ctx.moveTo(coreX - w * 0.3, coreY + 24);
+        ctx.lineTo(coreX - coreR, coreY + 24);
+        ctx.moveTo(coreX + coreR, coreY + 24);
+        ctx.lineTo(coreX + w * 0.3, coreY + 24);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+
+        // current dots
+        var dir1 = phase === 'dm' ? 1 : 1;
+        var dir2 = phase === 'dm' ? -1 : 1;
+        var x1 = coreX - coreR - (w * 0.3 - coreR) * (dir1 > 0 ? localT : 1 - localT);
+        var x2 = coreX - coreR - (w * 0.3 - coreR) * (dir2 > 0 ? localT : 1 - localT);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(coreX - w * 0.3 + (w * 0.3 - coreR) * localT, coreY - 24, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(coreX - w * 0.3 + (w * 0.3 - coreR) * localT, coreY + 24, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // flux indicator inside core
+        ctx.fillStyle = phase === 'dm' ? 'rgba(76,223,139,0.25)' : 'rgba(239,68,68,0.25)';
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, coreR - 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        labelPlate(
+          ctx,
+          phase === 'dm'
+            ? 'Differential current: flux cancels, low impedance (passes freely)'
+            : 'Common-mode current: flux adds, high impedance (blocked)',
+          coreX,
+          h - 10,
+          'center',
+          11
+        );
+
+        requestAnimationFrame(drawChokeDiagram);
+      }
+      requestAnimationFrame(drawChokeDiagram);
+      window.addEventListener('resize', function () {
+        chokeStart = null;
+      });
+    </script>
+
+    <!-- Section 3: Topology cards -->
+    <script>
+      var TOPOS = [
+        {
+          name: 'Buck',
+          failure:
+            'High-side switch node ringing driving harmonics across the whole conducted band.',
+          layout:
+            'Keep the input cap, high-side FET, and low-side FET in the tightest possible hot loop.',
+        },
+        {
+          name: 'Boost',
+          failure: 'Output diode reverse-recovery spikes and input inductor ripple current.',
+          layout:
+            'Minimize the loop between the switch, diode, and output capacitor; snub the diode if needed.',
+        },
+        {
+          name: 'Flyback',
+          failure:
+            'Transformer leakage inductance and interwinding capacitance driving strong common-mode noise.',
+          layout:
+            'Minimize primary loop area; place Y-cap directly across the isolation boundary; consider a snubber.',
+        },
+        {
+          name: 'Forward',
+          failure:
+            'Reset winding/clamp circuit ringing and transformer parasitics similar to flyback, but generally lower CM due to tighter coupling.',
+          layout:
+            'Keep the reset clamp circuit tight to the primary switch; manage transformer interwinding capacitance.',
+        },
+        {
+          name: 'LLC',
+          failure:
+            'Resonant tank ringing and high dV/dt at the half-bridge switch node coupling to the transformer.',
+          layout:
+            'Careful resonant tank layout; manage transformer CM coupling since LLC often runs at higher switching frequencies.',
+        },
+      ];
+      function renderTopoGrid() {
+        var grid = document.getElementById('topoGrid');
+        grid.innerHTML = '';
+        TOPOS.forEach(function (t, i) {
+          var card = document.createElement('div');
+          card.className = 'topo-card' + (i === 0 ? ' active' : '');
+          card.innerHTML = '<div class="tname">' + t.name + '</div>';
+          card.addEventListener('click', function () {
+            document.querySelectorAll('.topo-card').forEach(function (c) {
+              c.classList.remove('active');
+            });
+            card.classList.add('active');
+            renderTopoDetail(t);
+          });
+          grid.appendChild(card);
+        });
+      }
+      function renderTopoDetail(t) {
+        document.getElementById('topoDetail').innerHTML =
+          '<strong>' +
+          t.name +
+          '</strong> &mdash; <strong>Typical CE behavior:</strong> ' +
+          t.failure +
+          '<br><strong>Layout discipline:</strong> ' +
+          t.layout;
+      }
+      renderTopoGrid();
+      renderTopoDetail(TOPOS[0]);
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What is the rolloff rate of a single LC filter stage above its corner frequency?',
+          opts: ['20 dB/decade', '40 dB/decade', '6 dB/decade', 'It does not roll off'],
+          correct: 1,
+        },
+        {
+          q: 'What is the formula for the corner frequency of an LC filter?',
+          opts: ['f = 2πLC', 'f = 1 / (2π√(LC))', 'f = LC', 'f = √(L/C)'],
+          correct: 1,
+        },
+        {
+          q: "Why can't a filter corner frequency simply be set as low as possible?",
+          opts: [
+            'There is no downside to an arbitrarily low corner',
+            "Too low a corner can interact badly with the converter's control loop, so it's a joint decision with the power supply designer",
+            'Low corner frequencies are illegal under CISPR standards',
+            "Inductors don't work at low frequencies",
+          ],
+          correct: 1,
+        },
+        {
+          q: 'How is a common-mode choke wound to allow differential current to pass while blocking common-mode current?',
+          opts: [
+            'So differential current flux cancels in the core (low impedance) while common-mode flux adds (high impedance)',
+            'It has no special winding -- any winding works identically for both modes',
+            'So both modes are blocked equally',
+            'The choke only works for DC currents',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'What limits how large a Y-capacitor value can be chosen?',
+          opts: [
+            'Cost is the only limiting factor',
+            'Patient/user leakage-current safety requirements',
+            'Y-capacitors have no value limit',
+            'Y-capacitors are never used in real designs',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Where should an X-capacitor typically be placed?',
+          opts: [
+            'From line to chassis ground',
+            'Directly across L-N, close to the noise source or input connector',
+            'Only on the secondary side of an isolated supply',
+            'X-capacitors are not used in CE filtering',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the typical dominant CE mechanism in a flyback converter?',
+          opts: [
+            'Output diode reverse recovery only',
+            'Transformer leakage inductance and interwinding capacitance driving common-mode noise',
+            'LLC resonant tank ringing',
+            'It never generates conducted emissions',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is a typical CE concern specific to boost converters?',
+          opts: [
+            'Output diode reverse-recovery spikes and input inductor ripple current',
+            'Transformer isolation leakage only',
+            'LLC resonant tank behavior',
+            'Boost converters never generate switching noise',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why do LLC converters require careful attention to CM coupling despite their resonant (soft-switching) operation?',
+          opts: [
+            'They never generate any emissions',
+            'They often run at higher switching frequencies with high dV/dt at the half-bridge node, coupling through the transformer',
+            "LLC converters don't use transformers",
+            'CM coupling is irrelevant to resonant topologies',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why should shields be terminated 360° at both ends rather than with a "pigtail" connection?',
+          opts: [
+            "A pigtail connection defeats most of the shield's benefit at conducted-relevant frequencies",
+            'Pigtail connections are always better for cost reasons',
+            'Shield termination style has no effect on performance',
+            '360° termination is only relevant for radiated emissions, never conducted',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why should noisy switching cables be kept physically separated from quiet input/mains cables inside an enclosure?',
+          opts: [
+            'Cable separation has no practical effect',
+            'To reduce coupling of switching noise onto cables that carry it straight out of the enclosure',
+            'It is purely a cosmetic wiring preference',
+            'Separation is required only for aesthetic reasons',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why does twisting a differential pair help reduce common-mode pickup?',
+          opts: [
+            'Twisting has no electromagnetic effect',
+            'It reduces loop area and improves common-mode rejection along the cable length',
+            'Twisting only affects differential-mode signals, never common-mode',
+            'Twisted pairs are purely a mechanical strength feature',
+          ],
+          correct: 1,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

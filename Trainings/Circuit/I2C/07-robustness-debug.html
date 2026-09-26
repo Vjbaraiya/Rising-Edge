@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Making I2C robust: ESD/TVS protection, the 9-clock bus-unlock sequence for stuck buses, hot-plug precautions, and reading I2C failure signatures on an oscilloscope."
+    />
+    <title>Robustness &amp; Debug | I2C Hardware Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/I2C/07-robustness-debug.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >I2C Hardware Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-what-is-i2c.html" class="module-item">01. What is I2C</a>
+          <a href="02-protocol-essentials.html" class="module-item">02. Protocol Essentials</a>
+          <a href="03-pullup-resistors.html" class="module-item">03. Pull-up Resistor Design</a>
+          <a href="04-multi-slave.html" class="module-item">04. One Master, Many Slaves</a>
+          <a href="05-multi-master.html" class="module-item">05. Multi-Master Buses</a>
+          <a href="06-layout-guidelines.html" class="module-item">06. PCB Layout &amp; SI</a>
+          <a href="07-robustness-debug.html" class="module-item active"
+            >07. Robustness &amp; Debug</a
+          >
+          <a href="08-standards-checklist.html" class="module-item"
+            >08. Standards &amp; Checklist</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">I2C Academy</a><span>/</span>
+            <span>Robustness &amp; Debug</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 07</span>
+              <h1>Robustness, Protection &amp; Bring-up</h1>
+              <p class="subtitle">
+                The bus that works on the bench and hangs in the field: ESD events, stuck targets,
+                hot-plugged cables, marginal rise times. Design for recovery, then learn to read the
+                scope like a story.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- ESD -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>ESD &amp; transient protection</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Any SDA/SCL reaching a <strong>user-accessible connector</strong> gets a TVS
+                    diode array at the connector, referenced to chassis/board ground per your
+                    grounding scheme.
+                  </li>
+                  <li>
+                    Choose <strong>low-capacitance</strong> TVS parts (&lt; 10 pF/line, ideally &lt;
+                    3 pF) — protection capacitance counts against your 400 pF budget like everything
+                    else.
+                  </li>
+                  <li>
+                    Working voltage ≥ bus rail; unidirectional parts give lower clamping for a
+                    ground-referenced bus.
+                  </li>
+                  <li>
+                    Series resistors (Module 06) add a second line of defense for the IC pins behind
+                    the TVS.
+                  </li>
+                  <li>
+                    Internal-only buses on a small board generally don't need discrete ESD parts —
+                    the IC's own HBM rating covers assembly handling.
+                  </li>
+                </ul>
+                <div class="info-box">
+                  System-level ESD levels, test methods and layout for protection parts are covered
+                  in depth in the <a href="../../EMI/ESD/index.html">ESD training</a>.
+                </div>
+              </div>
+
+              <!-- lockup -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Bus lock-up and the 9-clock recovery</h3>
+                  <span class="badge badge-orange">Field failure #1</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  If the controller resets mid-read, a target can be left holding
+                  <strong>SDA low</strong>, waiting for a clock that never comes. The bus is now
+                  dead — every START attempt fails because SDA won't rise. No amount of controller
+                  resetting fixes it; the <em>target</em> has to finish its byte.
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 660 190"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Recovery sequence waveform: SDA stuck low; controller issues nine clock pulses on SCL; target releases SDA during pulse five; controller then issues a STOP."
+                  >
+                    <text
+                      x="6"
+                      y="46"
+                      fill="var(--warning,#fb923c)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      SCL
+                    </text>
+                    <text x="6" y="120" fill="var(--cyan,#22d3ee)" font-size="10" font-weight="700">
+                      SDA
+                    </text>
+                    <!-- SCL: 9 pulses -->
+                    <path
+                      d="M40 36 H70 V64 H92 V36 H114 V64 H136 V36 H158 V64 H180 V36 H202 V64 H224 V36 H246 V64 H268 V36 H290 V64 H312 V36 H334 V64 H356 V36 H400 H660"
+                      fill="none"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <!-- SDA: low until pulse 5 area, then released high, then STOP dip -->
+                    <path
+                      d="M40 138 H240 V102 H430 V138 H470 V102 H660"
+                      fill="none"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <g font-size="9" fill="var(--text-muted)" text-anchor="middle">
+                      <text x="140" y="168">stuck low — target mid-byte</text>
+                      <text x="330" y="90" fill="var(--success,#34d399)" font-weight="700">
+                        target releases ✓
+                      </text>
+                      <text x="470" y="168">controller sends STOP</text>
+                      <text x="580" y="90" fill="var(--success,#34d399)" font-weight="700">
+                        bus idle again
+                      </text>
+                    </g>
+                    <rect
+                      x="40"
+                      y="24"
+                      width="3"
+                      height="130"
+                      fill="var(--text-base)"
+                      opacity="0.5"
+                    >
+                      <animate
+                        attributeName="x"
+                        values="40;650;40"
+                        keyTimes="0;0.92;1"
+                        dur="5.5s"
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                  </svg>
+                  <p class="diagram-caption">
+                    Recovery: bit-bang up to <strong>9 SCL pulses</strong> (a full byte + ACK slot)
+                    until SDA floats high, then generate a STOP. Do this in firmware at every boot,
+                    before enabling the I2C peripheral.
+                  </p>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>Firmware:</strong> boot-time recovery routine + transaction timeouts
+                    (SMBus specifies 35 ms — a good default).
+                  </li>
+                  <li>
+                    <strong>Hardware options:</strong> route SDA/SCL to GPIO-capable pins so
+                    recovery is possible; for high-reliability systems add a bus-monitor/buffer with
+                    automatic disconnect, or power-switch the targets so you can hard-reset them.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- hot plug -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Hot-plugging</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Plugging a live module onto a live bus injects a capacitive glitch that can
+                  corrupt an in-flight transfer — or worse, power the module through its ESD diodes
+                  via SDA/SCL before its rail comes up. If modules must hot-plug, use a buffer with
+                  <strong>pre-charge and idle-detect</strong> (PCA9511-class hot-swap buffers) that
+                  only connects the segment when the bus is idle, and sequence power before signals
+                  in the connector pinout (longer power pins).
+                </p>
+              </div>
+
+              <!-- debug -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>Reading the scope: failure signatures</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>What you see</th>
+                        <th>What it means</th>
+                        <th>Fix</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Rounded, saggy rising edges</td>
+                        <td>R<sub>p</sub> too big or C<sub>bus</sub> too big</td>
+                        <td>Recalculate (Module 03); buffer or slow down</td>
+                      </tr>
+                      <tr>
+                        <td>LOW level well above 0 V (&gt; 0.4 V)</td>
+                        <td>R<sub>p</sub> too small, or duplicated pull-ups in parallel</td>
+                        <td>Audit every module for stray pull-ups</td>
+                      </tr>
+                      <tr>
+                        <td>Address sent, 9th bit high (NACK)</td>
+                        <td>Nobody home: wrong address / unpowered / wrong bus</td>
+                        <td>Check the 7-bit vs 8-bit address trap (Module 02)</td>
+                      </tr>
+                      <tr>
+                        <td>SDA permanently low</td>
+                        <td>Locked-up target (or solder bridge)</td>
+                        <td>9-clock recovery; check with bus powered down</td>
+                      </tr>
+                      <tr>
+                        <td>SCL stays low forever after ACK</td>
+                        <td>Clock stretching that never ends</td>
+                        <td>Timeout + recovery; check target errata</td>
+                      </tr>
+                      <tr>
+                        <td>Glitches on SDA aligned with SCL edges</td>
+                        <td>Crosstalk (Module 06)</td>
+                        <td>Spacing/return path; slow the edge with series R</td>
+                      </tr>
+                      <tr>
+                        <td>Works cold, fails warm (or vice versa)</td>
+                        <td>Marginal rise time drifting with temperature</td>
+                        <td>You're at the window edge — move R<sub>p</sub> toward the middle</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  <strong>Bring-up ritual:</strong> (1) scope both lines idle — must sit at
+                  V<sub>CC</sub>; (2) one address ping — check ACK and measure t<sub>r</sub> and
+                  V<sub>OL</sub> at the <em>farthest</em> device; (3) then, and only then, bring up
+                  firmware. A ₹2,000 logic analyzer decodes the rest.
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>TVS at every external connector; low-capacitance parts only.</li>
+                  <li>
+                    Bus lock-up is a <em>when</em>, not an <em>if</em> — ship the 9-clock recovery
+                    in every product.
+                  </li>
+                  <li>Hot-plug needs a purpose-built buffer, not hope.</li>
+                  <li>
+                    Three scope measurements (idle level, t<sub>r</sub>, V<sub>OL</sub> + ACK)
+                    validate the whole electrical design.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="06-layout-guidelines.html"
+                  >← PCB Layout &amp; SI</a
+                >
+                <a class="btn btn-primary" href="08-standards-checklist.html"
+                  >Next: Standards &amp; Checklist →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

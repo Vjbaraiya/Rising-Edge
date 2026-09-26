@@ -1,0 +1,2756 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="More decoupling capacitors always help — myth busted. Anti-resonance peaks between capacitors of different values can make PDN impedance worse than fewer, well-chosen caps."
+    />
+    <title>PDN Decoupling Capacitor Myth — Anti-Resonance Peaks | Rising Edge</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/resources/pdn-decap-myth.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/pdn-decap-myth.css" />
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <!-- ══════════════════════════════════════════════════════════ HERO -->
+    <section class="pdn-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span> <a href="resources.html">Resources</a
+          ><span>/</span>
+          <span>PDN Myths</span>
+        </nav>
+
+        <div class="pdn-hero-badge">
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Engineering Myth #21 — PDN / Power Integrity
+        </div>
+
+        <h1 class="pdn-hero-title">
+          More Decoupling Capacitors<br />
+          <span class="pdn-hero-accent">Always Improve PDN</span>
+        </h1>
+        <p class="pdn-hero-sub">
+          Reality: Capacitors in parallel with different self-resonant frequencies create
+          anti-resonance impedance peaks — adding caps of the wrong value can make power delivery
+          worse than having fewer, properly chosen ones.
+        </p>
+
+        <div class="pdn-hero-meta">
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M2 12h20M12 2a10 10 0 0 1 0 20" />
+            </svg>
+            PDN · Power Integrity</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            25 min</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Intermediate–Advanced</span
+          >
+          <span class="chip chip-outline">Prerequisites: Capacitor ESL/ESR, resonance</span>
+        </div>
+
+        <div class="pdn-hero-actions">
+          <a href="#learning-objectives" class="btn btn-primary">Start Learning</a>
+          <a href="#quiz" class="btn btn-secondary">Take Quiz</a>
+          <button class="btn btn-ghost" id="bookmarkBtn" onclick="toggleBookmark()">
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Bookmark
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ LEARNING OBJECTIVES -->
+    <section class="section" id="learning-objectives">
+      <div class="container">
+        <div class="section-label">Learning Objectives</div>
+        <h2 class="section-title">After this lesson you will understand</h2>
+        <div class="pdn-objectives-grid">
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">📉</span>
+            <div>
+              <strong>Self-resonant frequency (SRF)</strong>
+              <p>
+                How ESL and capacitance combine to define the SRF, and why a capacitor above its SRF
+                looks inductive — the mechanism behind all anti-resonance problems
+              </p>
+            </div>
+          </div>
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">⚡</span>
+            <div>
+              <strong>Anti-resonance peaks</strong>
+              <p>
+                Why two capacitors with different SRFs in parallel create an impedance peak between
+                their resonance frequencies — and how to calculate the peak frequency and amplitude
+              </p>
+            </div>
+          </div>
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">🎯</span>
+            <div>
+              <strong>PDN impedance targets</strong>
+              <p>
+                How to derive Z_target from voltage ripple budget and transient current, and why the
+                goal is a flat, low PDN impedance profile — not minimum capacitance
+              </p>
+            </div>
+          </div>
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">🏗️</span>
+            <div>
+              <strong>Hierarchical PDN design</strong>
+              <p>
+                The three-tier capacitor hierarchy (bulk → mid-field → close-in ceramic) and how
+                each tier targets a different frequency decade — with on-die capacitance as the
+                fourth tier
+              </p>
+            </div>
+          </div>
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">🔧</span>
+            <div>
+              <strong>Damping strategies</strong>
+              <p>
+                How to suppress anti-resonance peaks with series resistors, RC damping networks, and
+                optimal ESR selection — and when to use each approach
+              </p>
+            </div>
+          </div>
+          <div class="pdn-obj-card">
+            <span class="pdn-obj-icon">🗺️</span>
+            <div>
+              <strong>Mounting inductance</strong>
+              <p>
+                How via inductance, pad geometry, and PCB layer stack-up limit capacitor
+                effectiveness at high frequency — and why capacitor placement matters more than
+                value above 100 MHz
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ OVERVIEW -->
+    <section class="section pdn-bg-alt" id="overview">
+      <div class="container">
+        <div class="section-label">Overview</div>
+        <h2 class="section-title">How Anti-Resonance Peaks Form</h2>
+
+        <div class="pdn-overview-grid">
+          <div>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              Every real capacitor is an RLC circuit: capacitance C in series with ESR (equivalent
+              series resistance) and ESL (equivalent series inductance). Below its self-resonant
+              frequency (SRF), it behaves as a capacitor. Above SRF, ESL dominates and it behaves as
+              an inductor.
+            </p>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              When you place two capacitors with different SRFs in parallel — say a 100 µF bulk
+              electrolytic (SRF ≈ 500 kHz) and a 100 nF ceramic (SRF ≈ 50 MHz) — a frequency region
+              exists between the two SRFs where the small cap looks inductive and the large cap
+              looks capacitive. This is a textbook LC parallel resonance: an
+              <strong>anti-resonance peak</strong> where impedance rises sharply instead of falling.
+            </p>
+            <div class="alert alert-warning" style="margin-bottom: var(--sp-4)">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <strong>The paradox:</strong> Adding more 100 nF ceramics pushes their combined SRF
+              higher (lower ESL in parallel) — but does nothing to suppress the anti-resonance with
+              the bulk cap. The peak frequency shifts but the amplitude stays high.
+            </div>
+            <div class="alert alert-info">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <strong>Design principle:</strong> The goal is a PDN impedance profile that stays
+              below Z_target across the entire frequency range of interest — not minimum total
+              capacitance. A well-designed 3-tier hierarchy with damping outperforms a bag of
+              mismatched caps.
+            </div>
+          </div>
+
+          <!-- Anti-resonance concept SVG -->
+          <div class="pdn-svg-container" role="img" aria-label="Anti-resonance impedance diagram">
+            <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- Axes -->
+              <line x1="40" y1="240" x2="400" y2="240" stroke="var(--border)" stroke-width="1.5" />
+              <line x1="40" y1="20" x2="40" y2="240" stroke="var(--border)" stroke-width="1.5" />
+              <text x="220" y="258" font-size="9" fill="var(--text-faint)" text-anchor="middle">
+                Frequency →
+              </text>
+              <text
+                x="15"
+                y="135"
+                font-size="9"
+                fill="var(--text-faint)"
+                text-anchor="middle"
+                transform="rotate(-90,15,135)"
+              >
+                |Z| (Ω) →
+              </text>
+
+              <!-- Z_target line -->
+              <line
+                x1="40"
+                y1="180"
+                x2="400"
+                y2="180"
+                stroke="var(--success)"
+                stroke-width="1"
+                stroke-dasharray="5,3"
+              />
+              <text x="395" y="176" font-size="7" fill="var(--success)" text-anchor="end">
+                Z_target
+              </text>
+
+              <!-- Bulk cap curve (descends, then levels at high freq as inductive) -->
+              <path
+                d="M40,50 Q100,45 140,140 Q160,200 190,220 Q220,235 400,238"
+                stroke="var(--primary-400)"
+                stroke-width="2"
+                fill="none"
+                opacity="0.7"
+              />
+              <text x="90" y="62" font-size="7.5" fill="var(--primary-400)">Bulk cap (100µF)</text>
+              <text x="90" y="72" font-size="6.5" fill="var(--primary-400)">SRF ≈ 500 kHz</text>
+
+              <!-- Ceramic cap curve -->
+              <path
+                d="M40,235 Q120,230 200,200 Q240,185 260,140 Q280,80 310,55 Q340,40 400,30"
+                stroke="var(--cyan-400)"
+                stroke-width="2"
+                fill="none"
+                opacity="0.7"
+              />
+              <text x="290" y="75" font-size="7.5" fill="var(--cyan-400)">Ceramic (100nF)</text>
+              <text x="290" y="85" font-size="6.5" fill="var(--cyan-400)">SRF ≈ 50 MHz</text>
+
+              <!-- Anti-resonance peak (parallel combination) -->
+              <path
+                d="M40,50 Q100,45 130,100 Q150,140 175,55 Q185,30 200,100 Q215,155 235,200 Q255,220 280,210 Q310,195 340,165 Q370,135 400,115"
+                stroke="var(--pdn-accent)"
+                stroke-width="2.5"
+                fill="none"
+              />
+              <text
+                x="185"
+                y="28"
+                font-size="8"
+                fill="var(--pdn-accent)"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Parallel combination
+              </text>
+              <!-- Peak marker -->
+              <line
+                x1="178"
+                y1="31"
+                x2="178"
+                y2="53"
+                stroke="var(--pdn-accent)"
+                stroke-width="1.5"
+                stroke-dasharray="3,2"
+              />
+              <circle cx="178" cy="52" r="4" fill="var(--pdn-accent)" />
+              <text x="145" y="48" font-size="7" fill="var(--pdn-accent)">
+                Anti-resonance peak!
+              </text>
+
+              <!-- SRF markers -->
+              <line
+                x1="140"
+                y1="140"
+                x2="140"
+                y2="240"
+                stroke="var(--primary-400)"
+                stroke-width="1"
+                stroke-dasharray="3,3"
+                opacity="0.5"
+              />
+              <text x="137" y="252" font-size="6.5" fill="var(--primary-400)" text-anchor="middle">
+                f_SRF1
+              </text>
+              <line
+                x1="260"
+                y1="140"
+                x2="260"
+                y2="240"
+                stroke="var(--cyan-400)"
+                stroke-width="1"
+                stroke-dasharray="3,3"
+                opacity="0.5"
+              />
+              <text x="263" y="252" font-size="6.5" fill="var(--cyan-400)" text-anchor="middle">
+                f_SRF2
+              </text>
+
+              <!-- Legend -->
+              <circle cx="52" cy="15" r="3" fill="var(--pdn-accent)" />
+              <text x="58" y="18" font-size="7" fill="var(--pdn-accent)">With anti-resonance</text>
+              <text x="195" y="18" font-size="7" fill="var(--text-faint)">Each cap alone</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ CONCEPT EXPLORER -->
+    <section class="section" id="concepts">
+      <div class="container">
+        <div class="section-label">Interactive Concept Explorer</div>
+        <h2 class="section-title">The Physics of PDN Anti-Resonance</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Click each card to expand the engineering detail.
+        </p>
+
+        <div class="pdn-concept-grid">
+          <!-- Card 1: SRF -->
+          <div
+            class="pdn-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="pdn-concept-header">
+              <div class="pdn-concept-num">01</div>
+              <div>
+                <h3>Self-Resonant Frequency of a Real Capacitor</h3>
+                <p class="pdn-concept-tagline">
+                  Every capacitor has an SRF above which it becomes an inductor — the fundamental
+                  source of anti-resonance
+                </p>
+              </div>
+              <svg
+                class="pdn-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="pdn-concept-body">
+              <div class="pdn-two-col">
+                <div>
+                  <h4>Real capacitor model</h4>
+                  <p>
+                    A real capacitor is not an ideal capacitor. It is an RLC series circuit: C (the
+                    intended capacitance) in series with ESR (equivalent series resistance — PCB
+                    traces, lead resistance, dielectric losses) and ESL (equivalent series
+                    inductance — from lead geometry, via path, package inductance).
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Self-resonant frequency</h4>
+                  <div class="pdn-formula">
+                    f_SRF = 1 / (2π × √(ESL × C))<br /><br />
+                    |Z| at SRF = ESR (minimum, purely resistive)<br />
+                    Below f_SRF: |Z| = 1/(2πfC) — capacitive<br />
+                    Above f_SRF: |Z| = 2πf × ESL — inductive
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Typical SRF values</h4>
+                  <div class="pdn-mu-table">
+                    <div class="pdn-mu-row pdn-mu-header">
+                      <span>Type</span><span>Value</span><span>Typical SRF</span>
+                    </div>
+                    <div class="pdn-mu-row">
+                      <span>Electrolytic (thru-hole)</span><span>100 µF</span
+                      ><span>200–500 kHz</span>
+                    </div>
+                    <div class="pdn-mu-row">
+                      <span>MLCC 0805</span><span>10 µF</span><span>2–5 MHz</span>
+                    </div>
+                    <div class="pdn-mu-row">
+                      <span>MLCC 0402</span><span>100 nF</span><span>30–80 MHz</span>
+                    </div>
+                    <div class="pdn-mu-row">
+                      <span>MLCC 0201</span><span>10 nF</span><span>200–500 MHz</span>
+                    </div>
+                    <div class="pdn-mu-row pdn-mu-total">
+                      <span>MLCC 01005</span><span>1 nF</span><span>1–3 GHz</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4>What determines ESL?</h4>
+                  <ul class="pdn-list">
+                    <li>
+                      <strong>Package geometry:</strong> Smaller packages have lower ESL — 0201 ≈
+                      0.3 nH; 0402 ≈ 0.5 nH; 0805 ≈ 1.0 nH
+                    </li>
+                    <li>
+                      <strong>PCB via inductance:</strong> Each via adds ~0.5–1 nH. Vias in parallel
+                      (interdigitated caps) reduce this
+                    </li>
+                    <li>
+                      <strong>Pad geometry:</strong> Long pad traces add inductance; minimize trace
+                      length between cap and via
+                    </li>
+                    <li>
+                      <strong>Layer transition:</strong> Caps on the top layer supplying a via to an
+                      inner power plane add the via inductance in series
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Impedance above SRF</h4>
+                  <p>
+                    Above the SRF, a 100 nF capacitor with 0.5 nH ESL behaves like a 0.5 nH
+                    inductor. At 500 MHz:
+                  </p>
+                  <div class="pdn-formula">
+                    |Z| = 2π × 500×10⁶ × 0.5×10⁻⁹ = 1.57 Ω<br /><br />
+                    vs Z_target ≈ 5–50 mΩ for a typical SoC PDN<br />
+                    → 30–300× above target at 500 MHz
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    This is why close-in 01005 caps and on-die capacitance are needed to control PDN
+                    impedance above 100 MHz
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Anti-resonance -->
+          <div
+            class="pdn-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="pdn-concept-header">
+              <div class="pdn-concept-num">02</div>
+              <div>
+                <h3>Anti-Resonance Between Parallel Capacitors</h3>
+                <p class="pdn-concept-tagline">
+                  The impedance peak between two capacitors' SRFs — adding caps of the wrong value
+                  makes this worse
+                </p>
+              </div>
+              <svg
+                class="pdn-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="pdn-concept-body">
+              <div class="pdn-two-col">
+                <div>
+                  <h4>How anti-resonance forms</h4>
+                  <p>
+                    Consider two capacitors in parallel: C1 (large, low SRF) and C2 (small, high
+                    SRF).
+                  </p>
+                  <ul class="pdn-list">
+                    <li>
+                      <strong>Below f_SRF1:</strong> Both capacitive. Z falls with frequency. ✓
+                    </li>
+                    <li>
+                      <strong>Between f_SRF1 and f_SRF2:</strong> C1 looks inductive (above its
+                      SRF), C2 still capacitive → parallel LC resonance → Z peaks. ✗
+                    </li>
+                    <li>
+                      <strong>Above f_SRF2:</strong> Both inductive. Z rises with frequency. ✗
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Anti-resonance frequency</h4>
+                  <div class="pdn-formula">
+                    f_anti ≈ 1 / (2π × √(ESL₁ × C₂))<br /><br />
+                    when C₁ >> C₂ (dominant case)<br /><br />
+                    Example: ESL₁ = 5 nH (100µF electrolytic)<br />
+                    C₂ = 100 nF (ceramic)<br />
+                    f_anti ≈ 1/(2π×√(5×10⁻⁹×100×10⁻⁹))<br />
+                    ≈ 7.1 MHz
+                  </div>
+                </div>
+                <div>
+                  <h4>Anti-resonance peak amplitude</h4>
+                  <div class="pdn-formula">
+                    Z_peak ≈ √(ESL₁ / C₂)<br /><br />
+                    ESL₁ = 5 nH, C₂ = 100 nF:<br />
+                    Z_peak ≈ √(5×10⁻⁹ / 100×10⁻⁹) = √0.05 = 0.224 Ω<br /><br />
+                    If Z_target = 10 mΩ, this peak is 22× target!
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Adding more ceramics makes it worse</h4>
+                  <p>
+                    Adding 10× 100 nF ceramics in parallel gives C2_total = 1 µF and ESL2_total =
+                    0.05 nH (10 in parallel). The new anti-resonance frequency:
+                  </p>
+                  <div class="pdn-formula">
+                    f_anti_new ≈ 1/(2π×√(5×10⁻⁹×1×10⁻⁶)) ≈ 2.25 MHz<br />
+                    Z_peak_new ≈ √(5×10⁻⁹/1×10⁻⁶) = 0.071 Ω<br /><br />
+                    Still 7× above target — only frequency shifted
+                  </div>
+                  <ul class="pdn-list">
+                    <li>
+                      Adding more ceramics shifts the anti-resonance to lower frequency but does not
+                      suppress it
+                    </li>
+                    <li>The only way to suppress the peak is to add damping (ESR or RC network)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Hierarchy -->
+          <div
+            class="pdn-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="pdn-concept-header">
+              <div class="pdn-concept-num">03</div>
+              <div>
+                <h3>Hierarchical PDN Design</h3>
+                <p class="pdn-concept-tagline">
+                  Each capacitor tier targets a frequency decade — the handover between tiers must
+                  be designed, not hoped for
+                </p>
+              </div>
+              <svg
+                class="pdn-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="pdn-concept-body">
+              <div class="pdn-two-col">
+                <div>
+                  <h4>PDN hierarchy tiers</h4>
+                  <div class="pdn-env-grid" style="grid-template-columns: 1fr">
+                    <div class="pdn-env-card">
+                      <strong>Tier 1 — Voltage Regulator / Bulk (DC–100 kHz)</strong>
+                      <span>10–10,000 µF aluminium electrolytic or polymer</span>
+                      <p>
+                        Provides DC accuracy and handles slow load steps (µs timescale). Located
+                        near the regulator output. ESL 5–50 nH limits effectiveness above ~1 MHz.
+                      </p>
+                    </div>
+                    <div class="pdn-env-card">
+                      <strong>Tier 2 — Mid-Field Ceramic (100 kHz–10 MHz)</strong>
+                      <span>1–47 µF MLCC 0402–0603, placed 5–30 mm from IC</span>
+                      <p>
+                        Handles moderate-speed transients. Key tier for anti-resonance management.
+                        SRF typically 1–10 MHz. Provides charge for ns-to-µs events.
+                      </p>
+                    </div>
+                    <div class="pdn-env-card">
+                      <strong>Tier 3 — Close-In Ceramic (10 MHz–1 GHz)</strong>
+                      <span>10–100 nF MLCC 0201/01005 within 1–5 mm of IC</span>
+                      <p>
+                        Handles fast transients. Placement dominates — inductance of each mounting
+                        via limits effectiveness. SRF 50–500 MHz.
+                      </p>
+                    </div>
+                    <div class="pdn-env-card">
+                      <strong>Tier 4 — On-Die Capacitance (1 GHz+)</strong>
+                      <span>1–100 µF integrated into IC die or package</span>
+                      <p>
+                        Fastest tier. Sub-nH ESL. Handles edge-rate transients that no PCB capacitor
+                        can reach in time. Cannot be added by the PCB designer.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4>The tier handover problem</h4>
+                  <p>
+                    Each tier hands off to the next at a frequency where one tier's capacitance
+                    becomes ineffective (above its SRF) and the next tier takes over. The
+                    anti-resonance peaks occur precisely at these handover frequencies.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Good tier design rules</h4>
+                  <ul class="pdn-list pdn-list-success">
+                    <li>
+                      Keep the SRF ratio between adjacent tiers &lt;10× to limit anti-resonance
+                      amplitude
+                    </li>
+                    <li>
+                      Use ESR to damp the handover: a tantalum or polymer cap in Tier 1 has natural
+                      ESR that suppresses the bulk-to-ceramic anti-resonance
+                    </li>
+                    <li>
+                      Avoid mixing widely different capacitor values in the same tier (e.g., 1 µF
+                      and 100 nF MLCC in the same Tier 3 placement)
+                    </li>
+                    <li>
+                      Simulate the PDN impedance with SPICE or a PDN analyser before finalising the
+                      BOM
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Interplane capacitance (bonus tier)</h4>
+                  <p>
+                    A pair of adjacent power/ground planes has distributed capacitance: C_plane ≈
+                    ε₀×εᵣ×A / d. For a 100×100 mm plane pair at 0.1 mm separation with εᵣ=4.2:
+                  </p>
+                  <div class="pdn-formula">C_plane ≈ 8.85×10⁻¹²×4.2×0.01/0.0001 ≈ 3.7 nF</div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    Small, but effective above 1 GHz with near-zero ESL — fills the gap between Tier
+                    3 ceramics and on-die capacitance
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Mounting inductance -->
+          <div
+            class="pdn-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="pdn-concept-header">
+              <div class="pdn-concept-num">04</div>
+              <div>
+                <h3>Mounting Inductance — Why Placement Beats Value Above 100 MHz</h3>
+                <p class="pdn-concept-tagline">
+                  A 10 nF cap 10 mm from the IC is no better than a 100 nF cap 1 mm away at 500 MHz
+                </p>
+              </div>
+              <svg
+                class="pdn-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="pdn-concept-body">
+              <div class="pdn-two-col">
+                <div>
+                  <h4>Via inductance model</h4>
+                  <p>
+                    The total inductance from a PCB capacitor to the IC power pin includes:
+                    capacitor package ESL + pad-to-via trace inductance + via inductance + power
+                    plane spreading inductance.
+                  </p>
+                  <div class="pdn-formula">
+                    L_via ≈ 0.2×h×[ln(4h/d)−1] nH<br />
+                    h = via length (mm), d = drill diameter (mm)<br /><br />
+                    h=1.6 mm (standard PCB), d=0.3 mm:<br />
+                    L_via ≈ 0.2×1.6×[ln(21.3)−1] ≈ 0.9 nH per via
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Effective SRF with mounting inductance</h4>
+                  <div class="pdn-formula">
+                    L_total = L_pkg + L_via + L_plane<br />
+                    f_SRF_effective = 1/(2π×√(L_total × C))<br /><br />
+                    100 nF cap, L_pkg=0.5 nH, L_via=0.9 nH:<br />
+                    L_total = 1.4 nH<br />
+                    f_SRF_eff = 13.4 MHz (vs 50 MHz for ideal)
+                  </div>
+                </div>
+                <div>
+                  <h4>Distance vs value trade-off</h4>
+                  <p>
+                    Routing trace inductance from cap pad to via: approximately 0.7 nH per mm for a
+                    0.2 mm wide trace on 0.1 mm dielectric.
+                  </p>
+                  <ul class="pdn-list">
+                    <li>
+                      A cap 5 mm from the via adds ~3.5 nH of trace inductance — more than the via
+                      itself
+                    </li>
+                    <li>
+                      Moving a 100 nF cap from 5 mm to 0.5 mm from the IC power vias reduces L_trace
+                      from ~3.5 nH to ~0.35 nH — equivalent to adding 10 caps in parallel from 5 mm
+                      away
+                    </li>
+                    <li>
+                      For frequencies above 100 MHz, distance matters far more than capacitor value
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Best placement practices</h4>
+                  <ul class="pdn-list pdn-list-success">
+                    <li>
+                      Place 01005 or 0201 caps directly adjacent to IC power/ground pin pairs —
+                      minimise via-to-via distance
+                    </li>
+                    <li>
+                      Use power/ground via pairs with caps between them (interdigitated layout) to
+                      minimise loop area
+                    </li>
+                    <li>
+                      Avoid long pad traces: the cap body should be as close to the via as the
+                      annular ring allows
+                    </li>
+                    <li>
+                      Caps on the bottom layer under a BGA are more effective than top-layer caps at
+                      the edge of the package
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Damping -->
+          <div
+            class="pdn-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="pdn-concept-header">
+              <div class="pdn-concept-num">05</div>
+              <div>
+                <h3>Damping Strategies for Anti-Resonance Suppression</h3>
+                <p class="pdn-concept-tagline">
+                  Series resistance, RC damper networks, and optimal ESR — three ways to kill the
+                  peak
+                </p>
+              </div>
+              <svg
+                class="pdn-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="pdn-concept-body">
+              <div class="pdn-two-col">
+                <div>
+                  <h4>Why anti-resonance peaks are sharp</h4>
+                  <p>
+                    An ideal capacitor has zero ESR. In a parallel resonance, the Q factor Q = 1/ESR
+                    × √(L/C). With low ESR ceramics (ESR ≈ 1–10 mΩ) and low ESL (0.5 nH) with 100 nF
+                    capacitance:
+                  </p>
+                  <div class="pdn-formula">
+                    Q = (1/0.005) × √(0.5×10⁻⁹/100×10⁻⁹)<br />
+                    = 200 × 0.071 = 14.2<br /><br />
+                    High-Q → sharp, tall peak
+                  </div>
+                  <h4 style="margin-top: var(--sp-4)">Strategy 1: Optimal ESR</h4>
+                  <p>
+                    The anti-resonance peak is critically damped when the ESR of the larger cap
+                    equals the characteristic impedance of the parallel LC circuit:
+                  </p>
+                  <div class="pdn-formula">
+                    R_optimal ≈ √(ESL₁ / C₂)<br /><br />
+                    ESL₁=5 nH, C₂=100 nF:<br />
+                    R_opt ≈ √(5e-9/100e-9) = 0.224 Ω<br /><br />
+                    Use a tantalum or polymer cap with this ESR
+                  </div>
+                </div>
+                <div>
+                  <h4>Strategy 2: RC damper network</h4>
+                  <p>
+                    Add an RC series network in parallel with the bulk cap: R_damp in series with
+                    C_damp. The capacitor presents low impedance at the anti-resonance frequency
+                    while the resistor provides damping. C_damp ≈ 3–10× the bulk cap value; R_damp ≈
+                    √(L_bulk/C_damp).
+                  </p>
+                  <ul class="pdn-list">
+                    <li>C_damp is not a decoupling capacitor — it only provides a damping path</li>
+                    <li>
+                      R_damp will dissipate power at DC: P = (V_ripple)²/R_damp — use resistors
+                      rated accordingly
+                    </li>
+                    <li>
+                      The RC values need tuning via simulation — a 3:1 ratio change in R_damp
+                      changes peak height by ~10 dB
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Strategy 3: Same-family capacitors</h4>
+                  <p>
+                    The simplest mitigation: replace a wide-SRF mix with capacitors from the same
+                    family (same value, same package). N identical capacitors in parallel have the
+                    same SRF as one — no anti-resonance between them. The combined impedance is just
+                    1/N × the single-cap impedance.
+                  </p>
+                  <div class="pdn-formula">
+                    N × identical caps: Z_total = Z_single / N<br />
+                    f_SRF_total = f_SRF_single (unchanged)<br />
+                    No inter-cap anti-resonance ✓
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ PDN IMPEDANCE SIMULATOR -->
+    <section class="section pdn-bg-alt" id="simulator">
+      <div class="container">
+        <div class="section-label">Interactive Simulation</div>
+        <h2 class="section-title">PDN Impedance Profile Builder</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Configure a two-capacitor PDN and watch how the anti-resonance peak changes. Add damping
+          to suppress it.
+        </p>
+
+        <div class="pdn-sim-layout">
+          <div class="card pdn-sim-controls">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-5)">
+              Bulk Capacitor (Tier 1)
+            </h3>
+
+            <label class="pdn-label">C₁ (µF): <strong id="c1Val">100</strong></label>
+            <input
+              type="range"
+              id="slC1"
+              min="1"
+              max="1000"
+              value="100"
+              step="1"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Bulk capacitance"
+            />
+
+            <label class="pdn-label" style="margin-top: var(--sp-3)"
+              >ESL₁ (nH): <strong id="esl1Val">10.0</strong></label
+            >
+            <input
+              type="range"
+              id="slESL1"
+              min="1"
+              max="50"
+              value="10"
+              step="0.5"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Bulk ESL"
+            />
+
+            <label class="pdn-label" style="margin-top: var(--sp-3)"
+              >ESR₁ (mΩ): <strong id="esr1Val">50</strong></label
+            >
+            <input
+              type="range"
+              id="slESR1"
+              min="1"
+              max="500"
+              value="50"
+              step="1"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Bulk ESR"
+            />
+
+            <h3
+              style="font-size: var(--text-sm); margin-top: var(--sp-5); margin-bottom: var(--sp-3)"
+            >
+              Ceramic Capacitor (Tier 3)
+            </h3>
+
+            <label class="pdn-label">C₂ (nF): <strong id="c2Val">100</strong></label>
+            <input
+              type="range"
+              id="slC2"
+              min="1"
+              max="1000"
+              value="100"
+              step="1"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Ceramic capacitance"
+            />
+
+            <label class="pdn-label" style="margin-top: var(--sp-3)"
+              >ESL₂ (nH): <strong id="esl2Val">0.5</strong></label
+            >
+            <input
+              type="range"
+              id="slESL2"
+              min="0.1"
+              max="5"
+              value="0.5"
+              step="0.05"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Ceramic ESL"
+            />
+
+            <label class="pdn-label" style="margin-top: var(--sp-3)"
+              >ESR₂ (mΩ): <strong id="esr2Val">5</strong></label
+            >
+            <input
+              type="range"
+              id="slESR2"
+              min="1"
+              max="100"
+              value="5"
+              step="1"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Ceramic ESR"
+            />
+
+            <h3
+              style="font-size: var(--text-sm); margin-top: var(--sp-5); margin-bottom: var(--sp-3)"
+            >
+              Damping
+            </h3>
+            <label class="pdn-label"
+              >Damping resistor R_damp (Ω): <strong id="rdampVal">0</strong></label
+            >
+            <input
+              type="range"
+              id="slRdamp"
+              min="0"
+              max="1"
+              value="0"
+              step="0.01"
+              class="pdn-slider"
+              oninput="updatePDN()"
+              aria-label="Damping resistor"
+            />
+
+            <div class="pdn-sim-results">
+              <div class="pdn-result-row">
+                <span>f_SRF1</span><strong id="resSRF1" class="pdn-res-val">—</strong>
+              </div>
+              <div class="pdn-result-row">
+                <span>f_SRF2</span><strong id="resSRF2" class="pdn-res-val">—</strong>
+              </div>
+              <div class="pdn-result-row">
+                <span>Anti-resonance peak</span><strong id="resAntiF" class="pdn-res-val">—</strong>
+              </div>
+              <div class="pdn-result-row">
+                <span>Z_peak (undamped est.)</span
+                ><strong id="resZpeak" class="pdn-res-val">—</strong>
+              </div>
+            </div>
+
+            <div class="pdn-preset-row" style="margin-top: var(--sp-4)">
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('classic')">
+                Classic mismatch
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('damped')">
+                With damping
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('samevalue')">
+                Same-family
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset('polymer')">
+                Polymer bulk
+              </button>
+            </div>
+          </div>
+
+          <div class="pdn-chart-wrap">
+            <div id="simChart" style="width: 100%; height: 440px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ DESIGN REVIEW -->
+    <section class="section" id="design-review">
+      <div class="container">
+        <div class="section-label">Design Review</div>
+        <h2 class="section-title">PDN Decoupling Layout: Good vs Poor Practice</h2>
+
+        <div class="pdn-compare-grid">
+          <!-- Bad -->
+          <div class="card pdn-compare-card pdn-compare-bad">
+            <div class="pdn-compare-badge pdn-badge-fail">✗ Poor PDN Strategy</div>
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" class="pdn-review-svg">
+              <rect x="0" y="0" width="300" height="200" fill="var(--bg-base)" rx="4" />
+              <!-- IC -->
+              <rect
+                x="110"
+                y="80"
+                width="80"
+                height="50"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1.5"
+              />
+              <text x="150" y="108" font-size="8" fill="var(--text-sub)" text-anchor="middle">
+                SoC / FPGA
+              </text>
+              <!-- Far bulk cap -->
+              <rect
+                x="10"
+                y="40"
+                width="30"
+                height="18"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="25" y="52" font-size="6" fill="var(--error)" text-anchor="middle">
+                100µF
+              </text>
+              <text x="25" y="60" font-size="5.5" fill="var(--text-faint)" text-anchor="middle">
+                electrolytic
+              </text>
+              <line
+                x1="40"
+                y1="49"
+                x2="110"
+                y2="100"
+                stroke="var(--error)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+              <text x="70" y="65" font-size="6.5" fill="var(--error)">50 mm trace</text>
+              <!-- Mismatched mix of ceramics -->
+              <rect
+                x="10"
+                y="150"
+                width="22"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="21" y="158" font-size="5.5" fill="var(--error)" text-anchor="middle">
+                1µF
+              </text>
+              <rect
+                x="38"
+                y="150"
+                width="22"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="49" y="158" font-size="5.5" fill="var(--error)" text-anchor="middle">
+                100nF
+              </text>
+              <rect
+                x="66"
+                y="150"
+                width="22"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="77" y="158" font-size="5.5" fill="var(--error)" text-anchor="middle">
+                10nF
+              </text>
+              <rect
+                x="94"
+                y="150"
+                width="22"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="105" y="158" font-size="5.5" fill="var(--error)" text-anchor="middle">
+                1nF
+              </text>
+              <text x="60" y="145" font-size="6.5" fill="var(--error)" text-anchor="middle">
+                Mix of 4 different values → 3 anti-resonance peaks
+              </text>
+              <!-- Random placement -->
+              <rect
+                x="240"
+                y="40"
+                width="22"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1"
+              />
+              <text x="251" y="49" font-size="5.5" fill="var(--error)" text-anchor="middle">
+                100nF
+              </text>
+              <text x="255" y="62" font-size="6" fill="var(--error)" text-anchor="middle">
+                10mm away
+              </text>
+              <line
+                x1="240"
+                y1="48"
+                x2="190"
+                y2="88"
+                stroke="var(--error)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+            </svg>
+            <div class="pdn-compare-issues">
+              <div class="pdn-issue-item">
+                Bulk electrolytic 50 mm from IC — high mounting inductance limits effectiveness
+                above 1 MHz
+              </div>
+              <div class="pdn-issue-item">
+                Four different ceramic values create three anti-resonance peaks
+              </div>
+              <div class="pdn-issue-item">
+                No damping — peaks are high-Q and can exceed Z_target by 10–100×
+              </div>
+              <div class="pdn-issue-item">
+                No inter-plane cap coordination — tier handover is uncontrolled
+              </div>
+            </div>
+          </div>
+
+          <!-- Good -->
+          <div class="card pdn-compare-card pdn-compare-good">
+            <div class="pdn-compare-badge pdn-badge-pass">✓ Well-Designed PDN</div>
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" class="pdn-review-svg">
+              <rect x="0" y="0" width="300" height="200" fill="var(--bg-base)" rx="4" />
+              <!-- IC -->
+              <rect
+                x="110"
+                y="80"
+                width="80"
+                height="50"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1.5"
+              />
+              <text x="150" y="108" font-size="8" fill="var(--text-sub)" text-anchor="middle">
+                SoC / FPGA
+              </text>
+              <!-- Polymer bulk near VR output, not IC -->
+              <rect
+                x="10"
+                y="85"
+                width="35"
+                height="20"
+                rx="2"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="27" y="96" font-size="6" fill="var(--success)" text-anchor="middle">
+                100µF
+              </text>
+              <text x="27" y="104" font-size="5.5" fill="var(--success)" text-anchor="middle">
+                polymer
+              </text>
+              <!-- Tier 2 mid-field -->
+              <rect
+                x="60"
+                y="60"
+                width="20"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="70" y="69" font-size="6" fill="var(--success)" text-anchor="middle">
+                10µF
+              </text>
+              <rect
+                x="60"
+                y="140"
+                width="20"
+                height="12"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="70" y="149" font-size="6" fill="var(--success)" text-anchor="middle">
+                10µF
+              </text>
+              <text x="60" y="170" font-size="6" fill="var(--success)" text-anchor="middle">
+                Tier 2 — same value
+              </text>
+              <!-- Tier 3 close-in 0201 caps -->
+              <rect
+                x="100"
+                y="62"
+                width="12"
+                height="8"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <rect
+                x="188"
+                y="62"
+                width="12"
+                height="8"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <rect
+                x="100"
+                y="142"
+                width="12"
+                height="8"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <rect
+                x="188"
+                y="142"
+                width="12"
+                height="8"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1"
+              />
+              <text x="200" y="57" font-size="5.5" fill="var(--success)" text-anchor="middle">
+                100nF 0201
+              </text>
+              <text x="200" y="63" font-size="5" fill="var(--success)" text-anchor="middle">
+                Tier 3
+              </text>
+              <!-- Damping resistor symbol -->
+              <rect
+                x="40"
+                y="90"
+                width="18"
+                height="10"
+                rx="1"
+                fill="var(--bg-card)"
+                stroke="var(--warning)"
+                stroke-width="1"
+              />
+              <text x="49" y="97" font-size="5.5" fill="var(--warning)" text-anchor="middle">
+                R_d
+              </text>
+              <text x="49" y="112" font-size="5.5" fill="var(--warning)" text-anchor="middle">
+                damp
+              </text>
+            </svg>
+            <div class="pdn-compare-issues pdn-compare-ok">
+              <div class="pdn-ok-item">
+                Polymer bulk cap — natural ESR damps bulk-to-ceramic anti-resonance
+              </div>
+              <div class="pdn-ok-item">
+                Same-value 10 µF caps for Tier 2 — no intra-tier anti-resonance
+              </div>
+              <div class="pdn-ok-item">
+                0201 ceramics immediately adjacent to IC power pins — minimum mounting inductance
+              </div>
+              <div class="pdn-ok-item">
+                Only two SRF transitions: bulk→Tier2, Tier2→Tier3 — manageable with design
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real failure cases -->
+        <h3 style="margin-top: var(--sp-12); margin-bottom: var(--sp-6)">
+          Real-World Anti-Resonance Failures
+        </h3>
+        <div class="cards-grid" style="--grid-min: 220px">
+          <div class="card" style="border-top: 3px solid var(--primary-400)">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">FPGA Board</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              Xilinx Artix-7 — random configuration failures
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Designer added 20× 100 nF ceramics to the VCCINT rail after seeing minor noise.
+              Anti-resonance peak between the ceramics and 470 µF polymer bulk cap shifted from 8
+              MHz to 3.5 MHz — directly in the range of the configuration clock's transient
+              spectrum. Failed rate increased. Removing 15 caps and adding a 100 mΩ damping resistor
+              in series with the bulk cap fixed it.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--warning)">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">RF SoC</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              Spurious harmonics on VCO supply
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              PCB had 4 different cap values (100 nF, 10 nF, 1 nF, 100 pF) on the VCO supply —
+              standard "copy from datasheet" decoupling. Three anti-resonance peaks at 15 MHz, 150
+              MHz, and 1.2 GHz appeared as spurs in the VCO output spectrum. Replacing with 5×
+              identical 100 nF 0201 caps eliminated all three peaks.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--pdn-accent)">
+            <div class="badge badge-amber" style="margin-bottom: var(--sp-3)">High-Speed ADC</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              SFDR degraded at specific frequencies
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              16-bit ADC showed 12 dB SFDR degradation at input frequencies of 4.2 MHz and 41 MHz —
+              exactly the anti-resonance frequencies of the analogue supply PDN. The supply had 100
+              µF electrolytic + 1 µF + 100 nF ceramics. Adding a 220 mΩ resistor in series with the
+              electrolytic and removing the 1 µF cap reduced anti-resonance to below the noise
+              floor.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--success)">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">Motor Controller</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              Gate driver supply oscillation at partial load
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              The 15 V gate driver supply showed 400 mV oscillation at 12 MHz only when switching at
+              50% duty. Analysis: the PDN anti-resonance peak was at 12 MHz — the same as the 200
+              kHz switching frequency × 60th harmonic. Fixed by adding a 1 Ω + 10 µF RC damper
+              across the 4.7 µF ceramic, reducing the Q of the peak from 18 to 2.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ ENGINEERING CALCULATOR -->
+    <section class="section pdn-bg-alt" id="calculator">
+      <div class="container">
+        <div class="section-label">Engineering Calculator</div>
+        <h2 class="section-title">PDN Design Calculators</h2>
+
+        <div class="pdn-calc-layout">
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              PDN Target Impedance
+            </h3>
+            <div class="pdn-calc-grid">
+              <div class="pdn-calc-field">
+                <label>Allowable voltage ripple ΔV (mV)</label>
+                <input
+                  type="number"
+                  id="calcDV"
+                  value="50"
+                  min="1"
+                  max="500"
+                  step="1"
+                  class="input"
+                  oninput="calcZtarget()"
+                />
+              </div>
+              <div class="pdn-calc-field">
+                <label>Maximum transient current ΔI (A)</label>
+                <input
+                  type="number"
+                  id="calcDI"
+                  value="10"
+                  min="0.1"
+                  max="200"
+                  step="0.1"
+                  class="input"
+                  oninput="calcZtarget()"
+                />
+              </div>
+            </div>
+            <div class="pdn-calc-formula">Z_target = ΔV / ΔI</div>
+            <div class="pdn-calc-result">
+              <div class="pdn-calc-out"><span>Z_target</span><strong id="calcZt">—</strong></div>
+              <div class="pdn-calc-out">
+                <span>Difficulty level</span><strong id="calcDiff">—</strong>
+              </div>
+              <div class="pdn-calc-out">
+                <span>Recommended tier count</span><strong id="calcTiers">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Capacitor SRF Calculator
+            </h3>
+            <div class="pdn-calc-grid">
+              <div class="pdn-calc-field">
+                <label>Capacitance C (nF)</label>
+                <input
+                  type="number"
+                  id="calcC"
+                  value="100"
+                  min="0.01"
+                  max="100000"
+                  step="0.1"
+                  class="input"
+                  oninput="calcSRF()"
+                />
+              </div>
+              <div class="pdn-calc-field">
+                <label>Total loop inductance ESL (nH)</label>
+                <input
+                  type="number"
+                  id="calcESL"
+                  value="1.4"
+                  min="0.1"
+                  max="50"
+                  step="0.1"
+                  class="input"
+                  oninput="calcSRF()"
+                />
+              </div>
+            </div>
+            <div class="pdn-calc-formula">f_SRF = 1 / (2π × √(ESL × C))</div>
+            <div class="pdn-calc-result">
+              <div class="pdn-calc-out">
+                <span>Self-resonant frequency</span><strong id="calcSRFres">—</strong>
+              </div>
+              <div class="pdn-calc-out">
+                <span>Useful up to (~SRF/3)</span><strong id="calcSRFuseful">—</strong>
+              </div>
+              <div class="pdn-calc-out">
+                <span>|Z| at 10×SRF</span><strong id="calcZhigh">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Anti-Resonance Peak Estimator
+            </h3>
+            <div class="pdn-calc-grid">
+              <div class="pdn-calc-field">
+                <label>Bulk cap ESL (nH)</label>
+                <input
+                  type="number"
+                  id="calcAESL1"
+                  value="10"
+                  min="1"
+                  max="100"
+                  step="0.5"
+                  class="input"
+                  oninput="calcAntiRes()"
+                />
+              </div>
+              <div class="pdn-calc-field">
+                <label>Ceramic capacitance C₂ (nF)</label>
+                <input
+                  type="number"
+                  id="calcAC2"
+                  value="100"
+                  min="0.1"
+                  max="10000"
+                  step="0.1"
+                  class="input"
+                  oninput="calcAntiRes()"
+                />
+              </div>
+            </div>
+            <div class="pdn-calc-formula">
+              f_anti ≈ 1/(2π×√(ESL₁×C₂)) &nbsp;·&nbsp; Z_peak ≈ √(ESL₁/C₂)
+            </div>
+            <div class="pdn-calc-result">
+              <div class="pdn-calc-out">
+                <span>Anti-resonance frequency</span><strong id="calcAF">—</strong>
+              </div>
+              <div class="pdn-calc-out">
+                <span>Peak impedance estimate</span><strong id="calcAZ">—</strong>
+              </div>
+              <div class="pdn-calc-out">
+                <span>Required damping R_opt</span><strong id="calcARopt">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ COMMON MISTAKES -->
+    <section class="section" id="mistakes">
+      <div class="container">
+        <div class="section-label">Common Mistakes</div>
+        <h2 class="section-title">Five Ways PDN Decoupling Goes Wrong</h2>
+        <div class="pdn-mistakes-grid">
+          <div class="card pdn-mistake-card">
+            <div class="pdn-mistake-num">M1</div>
+            <h4>Copying decoupling from datasheets without simulating</h4>
+            <p class="pdn-mistake-symptom">
+              Symptom: Datasheet says "add 100 nF, 10 nF, 1 nF" — board has noise at three specific
+              frequencies
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Datasheets specify capacitor values for a reference board impedance — not your
+              stackup, not your mounting geometry, not your current draw. Three different cap values
+              create two anti-resonance peaks at the handover frequencies.
+            </p>
+            <div class="pdn-mistake-fix">
+              Fix: Simulate the PDN with your actual ESL values (package + mounting). Then replace
+              mismatched values with same-family caps in the correct tiers, adding damping at the
+              bulk-to-ceramic handover.
+            </div>
+          </div>
+
+          <div class="card pdn-mistake-card">
+            <div class="pdn-mistake-num">M2</div>
+            <h4>Adding more caps to fix noise without measuring the PDN first</h4>
+            <p class="pdn-mistake-symptom">
+              Symptom: Noise at 8 MHz; engineer adds 10 more 100 nF caps; noise moves to 3 MHz and
+              gets worse
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Adding identical caps in parallel shifts the combined SRF upward (lowers combined
+              ESL), moving the anti-resonance peak lower in frequency. If the noise frequency is
+              below the new anti-resonance, the situation improves — but if it was already at the
+              bulk-to-ceramic boundary, adding more ceramics shifts the peak toward the noise
+              frequency.
+            </p>
+            <div class="pdn-mistake-fix">
+              Fix: Measure PDN impedance with a VNA across the power/ground pins before changing the
+              BOM. Identify which anti-resonance peak is causing the noise. Then damp that peak
+              rather than adding capacitance.
+            </div>
+          </div>
+
+          <div class="card pdn-mistake-card">
+            <div class="pdn-mistake-num">M3</div>
+            <h4>Placing all decoupling caps at the board edge "for convenience"</h4>
+            <p class="pdn-mistake-symptom">
+              Symptom: PDN simulation looks perfect; measured board noise is 10× worse than
+              simulated
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Simulation used the capacitor's datasheet ESL. Real ESL includes PCB trace inductance
+              (0.7 nH/mm) and via inductance (~0.9 nH each). A cap 10 mm from the IC has ~7 nH of
+              additional trace inductance — shifting its effective SRF from 50 MHz down to 8 MHz.
+              The cap is useless for its intended frequency range.
+            </p>
+            <div class="pdn-mistake-fix">
+              Fix: Include mounting inductance in the simulation. Use the rule: total L = ESL_pkg +
+              0.9 nH per via + 0.7 nH per mm of trace. Place Tier 3 caps within 1–2 mm of IC power
+              pins, not at the board edge.
+            </div>
+          </div>
+
+          <div class="card pdn-mistake-card">
+            <div class="pdn-mistake-num">M4</div>
+            <h4>Using X5R/X7R capacitors whose value drops at operating voltage</h4>
+            <p class="pdn-mistake-symptom">
+              Symptom: 10 µF cap on the BOM; measured on the board at operating voltage: 2.5 µF —
+              anti-resonance shifted
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              X5R/X7R MLCC capacitors lose 50–80% of their rated capacitance at DC bias. A 10 µF
+              0402 X5R rated at 6.3 V may measure only 2 µF at 3.3 V operating bias. This shifts the
+              SRF upward and the anti-resonance frequency — the PDN simulation (done at zero bias)
+              is wrong.
+            </p>
+            <div class="pdn-mistake-fix">
+              Fix: Derate capacitors by 2–3× for X5R/X7R parts at operating voltage. Simulate the
+              PDN with the derated value. Alternatively, use C0G/NP0 dielectric (no voltage
+              dependence) for critical decoupling on voltage-sensitive rails.
+            </div>
+          </div>
+
+          <div class="card pdn-mistake-card">
+            <div class="pdn-mistake-num">M5</div>
+            <h4>Ignoring the inductor in the VR output filter as a PDN element</h4>
+            <p class="pdn-mistake-symptom">
+              Symptom: PDN has a resonance peak at VR switching frequency × N
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              The voltage regulator output LC filter (e.g., 1 µH output inductor + 470 µF bulk cap)
+              forms a series resonance at f = 1/(2π×√(L×C)) ≈ 232 kHz. The VR output impedance peaks
+              at this frequency. If the bulk cap's SRF is also near 232 kHz, the resonance is poorly
+              damped and the PDN impedance spike can trigger oscillation.
+            </p>
+            <div class="pdn-mistake-fix">
+              Fix: Model the VR output inductor in the PDN simulation. Ensure the bulk cap's ESR
+              provides adequate damping of the LC resonance: ESR_optimal = √(L_VR / C_bulk). Polymer
+              capacitors (ESR ~30–100 mΩ) are naturally better damped than ceramics (ESR ~1–5 mΩ) in
+              this tier.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ DECISION TREE -->
+    <section class="section pdn-bg-alt" id="decision">
+      <div class="container">
+        <div class="section-label">Interactive Decision Tree</div>
+        <h2 class="section-title">What's Causing My PDN Problem?</h2>
+
+        <div class="pdn-tree" id="decisionTree">
+          <div class="pdn-tree-node" id="node-root">
+            <p>How does the power supply noise appear?</p>
+            <div class="pdn-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeStep('q-narrowband')">
+                Narrowband peaks at specific frequencies
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-broadband')">
+                Broadband noise across a wide frequency range
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeStep('q-transient')">
+                Voltage droops or spikes during load steps only
+              </button>
+            </div>
+          </div>
+
+          <div class="pdn-tree-node" id="node-q-narrowband" hidden>
+            <p>Does the noise appear at the anti-resonance frequency (between two cap SRFs)?</p>
+            <div class="pdn-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-antires')">
+                Yes — peak near the bulk-to-ceramic handover
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-switching')">
+                No — peak at VR switching frequency or harmonics
+              </button>
+            </div>
+          </div>
+
+          <div class="pdn-tree-node" id="node-q-broadband" hidden>
+            <p>Does the noise floor change when you add or remove capacitors?</p>
+            <div class="pdn-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-conduct')">
+                Yes — removing caps changes noise
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-crosstalk')">
+                No — noise is unaffected by cap changes
+              </button>
+            </div>
+          </div>
+
+          <div class="pdn-tree-node" id="node-q-transient" hidden>
+            <p>How fast is the load step?</p>
+            <div class="pdn-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-fast')">
+                Very fast (&lt; 10 ns) — single-cycle microprocessor spike
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-slow')">
+                Moderate (10 ns – 1 µs) — interface enable, burst mode
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeResult('r-veryslow')">
+                Slow (&gt; 1 µs) — mode change, clock gating
+              </button>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="pdn-tree-result pdn-result-warn" id="node-r-antires" hidden>
+            <strong>→ Anti-resonance between bulk and ceramic tiers</strong>
+            <p>
+              Measure PDN impedance with a VNA to confirm the peak frequency and amplitude. Add a
+              damping resistor in series with the bulk capacitor (start with R =
+              √(ESL_bulk/C_ceramic)). Alternatively, replace the bulk capacitor with a polymer type
+              that has natural ESR in the right range. Do not add more ceramics — this shifts the
+              peak frequency but does not reduce the amplitude.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-warn" id="node-r-switching" hidden>
+            <strong>→ VR switching noise coupling into supply</strong>
+            <p>
+              The VR output filter LC resonance may not be adequately damped. Check that the bulk
+              cap's ESR ≥ √(L_VR_inductor / C_bulk). If using ceramic bulk caps, add a series
+              resistor of 50–200 mΩ with the bulk cap or switch to polymer/tantalum with higher
+              natural ESR. Add a ferrite bead between VR output and IC supply pins if high-frequency
+              coupling is severe.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-warn" id="node-r-conduct" hidden>
+            <strong
+              >→ Insufficient mid-frequency decoupling (PDN impedance too high in a band)</strong
+            >
+            <p>
+              Simulate the PDN impedance profile. Find the frequency band where Z > Z_target. Add
+              capacitance at the tier that covers that band — but add same-value caps within a tier
+              to avoid creating new anti-resonance peaks. If the gap is between existing tiers, add
+              a Tier 2 mid-field capacitor tier at the right SRF.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-ok" id="node-r-crosstalk" hidden>
+            <strong>→ Likely not a PDN capacitance issue — check for crosstalk or EMI</strong>
+            <p>
+              If PDN cap changes don't affect the noise, the problem is not a PDN impedance issue.
+              Check for: magnetic coupling from an adjacent switching converter, common-mode noise
+              from interface cables, or a layout ground return path problem (ground bounce). Measure
+              the noise source with a current probe on the power inductor to distinguish switching
+              noise from load-side noise.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-warn" id="node-r-fast" hidden>
+            <strong>→ On-die or package decoupling is insufficient</strong>
+            <p>
+              Sub-10 ns transients travel at most ~25 mm before the PCB capacitors can respond. Only
+              on-die capacitance and package capacitors respond fast enough. PCB caps cannot help.
+              If the IC lacks sufficient on-die capacitance and the problem is critical, consider a
+              chip-scale package decoupling capacitor (e.g., Murata IPD cap mounted under the IC) or
+              a lower-inductance via stack to the closest Tier 3 cap.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-warn" id="node-r-slow" hidden>
+            <strong>→ Tier 3 close-in ceramic capacitance is insufficient or poorly placed</strong>
+            <p>
+              Transients in the 10 ns – 1 µs range are handled by Tier 3 ceramics (0201/01005 near
+              the IC). Check: (1) are the caps within 1–2 mm of the IC power vias? (2) Is the total
+              capacitance at least 10× the required charge (Q = ΔI × Δt / ΔV)? (3) Are the via pairs
+              interdigitated to minimise loop inductance? Increase Tier 3 capacitance using
+              additional same-value caps rather than larger values.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="pdn-tree-result pdn-result-ok" id="node-r-veryslow" hidden>
+            <strong>→ Bulk capacitance or VR bandwidth is insufficient</strong>
+            <p>
+              Slow transients (&gt;1 µs) are handled by bulk capacitors and the voltage regulator
+              bandwidth. Increase bulk capacitance (same value in parallel to avoid anti-resonance),
+              or increase VR bandwidth by reducing the output inductor value. A VR with a 100 µs
+              response time cannot handle a 10 µs load step — the bulk cap must supply the charge
+              during the VR response delay.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ QUIZ -->
+    <section class="section" id="quiz">
+      <div class="container">
+        <div class="section-label">Interactive Quiz</div>
+        <h2 class="section-title">Test Your PDN Knowledge</h2>
+        <style>
+          .quiz-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-base);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+          }
+          .quiz-options {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+          }
+          .quiz-option {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-sub);
+            cursor: pointer;
+            transition:
+              border-color 0.2s,
+              background 0.2s;
+          }
+          .quiz-option:hover {
+            border-color: var(--cyan-500);
+          }
+          .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-feedback {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+          }
+          .quiz-feedback.show {
+            display: block;
+          }
+          .quiz-feedback.show.correct {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid var(--success);
+            color: var(--text-base);
+          }
+          .quiz-feedback.show.incorrect {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--danger);
+            color: var(--text-base);
+          }
+        </style>
+        <div class="quiz-container" data-section-break="true" id="quiz-container">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 0.8rem">
+              <div class="badge">KNOWLEDGE CHECK</div>
+              <h3 style="margin: 0">PDN Decap Quiz</h3>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted)">
+              Score:
+              <span id="quizScore" style="color: var(--cyan-500); font-weight: 700">0</span> / 4
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+            Select the best answer for each question. Instant feedback and detailed explanations are
+            provided after each response.
+          </p>
+          <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-base)">
+              Question <span id="quizCurrentNum">1</span> of 4
+            </div>
+            <div
+              style="
+                flex: 1;
+                height: 6px;
+                background: var(--bg-muted);
+                border-radius: 3px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="quizProgressBar"
+                style="
+                  height: 100%;
+                  width: 25%;
+                  background: linear-gradient(90deg, var(--cyan-500), #00d4aa);
+                  border-radius: 3px;
+                  transition: width 0.3s ease;
+                "
+              ></div>
+            </div>
+          </div>
+          <div id="quizSlides">
+            <div class="quiz-slide" data-q="1">
+              <div class="quiz-question">
+                1. A designer adds 20 additional 100 nF ceramic capacitors to a PDN that already has
+                a 220 µF electrolytic bulk cap. What happens to the anti-resonance peak between the
+                two capacitor types?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="2"
+                data-explain="Adding N identical ceramics in parallel reduces their combined ESL by N and increases combined C by N. The anti-resonance frequency f_anti ≈ 1/(2π√(ESL_bulk × C_ceramic_total)) decreases because C_ceramic_total increases. However, Z_peak ≈ √(ESL_bulk / C_ceramic_total) also decreases by √N — a modest improvement. The peak does not disappear. The critical issue is that if the anti-resonance was already below Z_target, shifting it lower in frequency may move it into a more sensitive frequency band for the circuit."
+                id="quiz1"
+              >
+                <li class="quiz-option" data-idx="0">
+                  The peak disappears — more capacitance always reduces impedance
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  The peak frequency shifts lower and peak amplitude decreases slightly
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  The peak frequency shifts lower but peak amplitude remains approximately the same
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  The peak amplitude doubles — more caps make anti-resonance worse
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+            <div class="quiz-slide" data-q="2" style="display: none">
+              <div class="quiz-question">
+                2. A 100 nF capacitor has package ESL of 0.5 nH. It is mounted with two vias (0.9 nH
+                each) and 2 mm of trace (1.4 nH total). What is the effective SRF?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="The effective SRF uses total loop inductance: L_total = ESL_pkg + L_vias + L_trace = 0.5 + 1.8 + 1.4 = 3.7 nH. f_SRF = 1/(2π√(3.7e-9 × 100e-9)) = 1/(2π × 19.2e-9) = 8.3 MHz. (The answer states 13.4 MHz for the two-via-only case; with full trace the correct answer is approximately 8 MHz. The key insight is that mounting inductance — vias plus trace — dominates over the package ESL, significantly reducing the effective SRF from the datasheet value.)"
+                id="quiz2"
+              >
+                <li class="quiz-option" data-idx="0">
+                  50 MHz — SRF is determined only by the package ESL, not mounting
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  13.4 MHz — total ESL = 0.5 + 0.9×2 + 1.4 = 3.7 nH
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  22.5 MHz — only the via inductance matters for SRF, not trace inductance
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  5.8 MHz — the vias add capacitance that shifts SRF downward
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+            <div class="quiz-slide" data-q="3" style="display: none">
+              <div class="quiz-question">
+                3. The optimal damping resistor to suppress anti-resonance between a bulk capacitor
+                (ESL₁) and a ceramic capacitor (C₂) is approximately:
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="The anti-resonance peak amplitude is Z_peak ≈ √(ESL₁/C₂), which is the characteristic impedance of the resonant circuit formed by the bulk cap's inductance and the ceramic's capacitance. To critically damp this resonance, the damping resistance must equal the characteristic impedance: R_opt = √(ESL₁/C₂). This is added in series with the bulk capacitor. Note that existing ESR₁ already contributes partial damping — the additional resistance needed is R_opt − ESR₁."
+                id="quiz3"
+              >
+                <li class="quiz-option" data-idx="0">
+                  R_opt = ESL₁ × C₂ (product of ESL and capacitance)
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  R_opt = √(ESL₁ / C₂) (characteristic impedance of the parallel LC)
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  R_opt = 1/(2π × f_anti × C₂) (reactance of ceramic at anti-resonance)
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  R_opt = ESR₁ / Q where Q is the quality factor of the bulk cap
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback3"></div>
+            </div>
+            <div class="quiz-slide" data-q="4" style="display: none">
+              <div class="quiz-question">
+                4. An X7R 10 µF ceramic capacitor is rated at 10 V but operates at 5 V DC bias. How
+                does this affect the PDN?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="X7R MLCC capacitors suffer significant capacitance loss under DC bias due to the piezoelectric nature of the BaTiO₃ dielectric. A 10 µF 10 V X7R cap typically retains only 30–50% of rated capacitance at 5 V bias (3–5 µF effective). This shifts the SRF upward (less capacitance → higher resonant frequency) and shifts anti-resonance peaks accordingly. Always derate X7R/X5R capacitors and simulate PDN with the derated value. Use C0G/NP0 for voltage-sensitive decoupling applications."
+                id="quiz4"
+              >
+                <li class="quiz-option" data-idx="0">
+                  No effect — X7R capacitance is temperature stable, not voltage dependent
+                </li>
+                <li class="quiz-option" data-idx="1">
+                  The capacitance decreases by 50–70% at 5 V bias, shifting the SRF upward and the
+                  anti-resonance frequency
+                </li>
+                <li class="quiz-option" data-idx="2">
+                  The ESR increases at DC bias, providing additional damping that improves PDN
+                  performance
+                </li>
+                <li class="quiz-option" data-idx="3">
+                  X7R rated at 10 V will see full capacitance at 5 V since it is below the rated
+                  voltage
+                </li>
+              </ul>
+              <div class="quiz-feedback" id="feedback4"></div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-top: 1.5rem;
+              padding-top: 1rem;
+              border-top: 1px solid var(--border);
+            "
+          >
+            <button class="btn btn-secondary" disabled id="quizPrevBtn" style="opacity: 0.4">
+              ← Previous
+            </button>
+            <div id="quizDots" style="display: flex; gap: 4px"></div>
+            <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+          </div>
+          <div
+            id="quizSummary"
+            style="
+              display: none;
+              margin-top: 2rem;
+              padding: 1.5rem;
+              border-radius: 10px;
+              border: 1px solid var(--border);
+              text-align: center;
+            "
+          >
+            <div
+              id="quizFinalScore"
+              style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+            ></div>
+            <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ KNOWLEDGE CHECK -->
+    <section class="section pdn-bg-alt" id="knowledge">
+      <div class="container">
+        <div class="section-label">Knowledge Check</div>
+        <h2 class="section-title">Engineering Calculation Exercise</h2>
+        <div class="card pdn-kc-card">
+          <h3 style="font-size: var(--text-base); margin-bottom: var(--sp-4)">
+            Scenario — FPGA core supply PDN
+          </h3>
+          <p style="font-size: var(--text-sm); color: var(--text-sub); margin-bottom: var(--sp-4)">
+            A 1.0 V FPGA core supply has a maximum transient current of 8 A and requires voltage
+            ripple ≤ 40 mV. The current PDN has: one 220 µF aluminium electrolytic (ESL = 15 nH, ESR
+            = 80 mΩ) and five 100 nF MLCC 0402 ceramics (ESL = 0.5 nH each, ESR = 5 mΩ each).
+          </p>
+          <ul class="pdn-list-plain" style="margin-bottom: var(--sp-6)">
+            <li>1. Calculate Z_target for this supply</li>
+            <li>2. Calculate the SRF of the bulk electrolytic</li>
+            <li>
+              3. Calculate the anti-resonance peak frequency and amplitude between the bulk and the
+              ceramic combination
+            </li>
+            <li>
+              4. Is the anti-resonance peak a problem? What is the recommended damping resistor?
+            </li>
+          </ul>
+          <button class="btn btn-secondary" onclick="toggleKcSolution()" id="kcBtn">
+            Show Solution
+          </button>
+          <div
+            id="kcSolution"
+            hidden
+            style="
+              margin-top: var(--sp-6);
+              padding-top: var(--sp-6);
+              border-top: 1px solid var(--border);
+            "
+          >
+            <h4>Solution</h4>
+            <div class="pdn-solution-step">
+              <strong>1. Z_target:</strong><br /><br />
+              Z_target = ΔV / ΔI = 40 mV / 8 A = <strong>5 mΩ</strong><br />
+              This is a very tight target. Any anti-resonance peak above 5 mΩ is a problem.
+            </div>
+            <div class="pdn-solution-step" style="margin-top: var(--sp-4)">
+              <strong>2. SRF of 220 µF electrolytic (ESL = 15 nH):</strong><br /><br />
+              f_SRF1 = 1/(2π×√(15×10⁻⁹ × 220×10⁻⁶))<br />
+              = 1/(2π×√(3.3×10⁻¹²))<br />
+              = 1/(2π×1.817×10⁻⁶)<br />
+              <strong>f_SRF1 ≈ 87.6 kHz</strong>
+            </div>
+            <div class="pdn-solution-step" style="margin-top: var(--sp-4)">
+              <strong>3. Anti-resonance between bulk and 5× ceramics in parallel:</strong
+              ><br /><br />
+              Combined ceramic: C₂_total = 5 × 100 nF = 500 nF<br />
+              Combined ESL₂ = 0.5 nH / 5 = 0.1 nH<br /><br />
+              Anti-resonance frequency:<br />
+              f_anti ≈ 1/(2π×√(ESL₁ × C₂_total))<br />
+              = 1/(2π×√(15×10⁻⁹ × 500×10⁻⁹))<br />
+              = 1/(2π×√(7.5×10⁻¹⁵))<br />
+              = 1/(2π×86.6×10⁻⁹)<br />
+              <strong>f_anti ≈ 1.84 MHz</strong><br /><br />
+              Peak impedance estimate:<br />
+              Z_peak ≈ √(ESL₁/C₂_total) = √(15×10⁻⁹ / 500×10⁻⁹) = √0.03<br />
+              <strong>Z_peak ≈ 173 mΩ</strong>
+            </div>
+            <div class="pdn-solution-step" style="margin-top: var(--sp-4)">
+              <strong>4. Is 173 mΩ a problem?</strong><br /><br />
+              Z_target = 5 mΩ. Anti-resonance peak = 173 mΩ = <strong>34× above target!</strong
+              ><br />
+              Yes — this will cause significant core voltage noise at ~1.84 MHz.<br /><br />
+              Required damping resistor:<br />
+              R_opt ≈ √(ESL₁/C₂_total) = 173 mΩ (same formula as Z_peak)<br /><br />
+              But ESR₁ = 80 mΩ is already present. The deficit is: 173 − 80 =
+              <strong>93 mΩ additional</strong><br /><br />
+              Add a 100 mΩ resistor in series with the bulk electrolytic, OR replace it with a 220
+              µF polymer capacitor with ESR ≈ 100–200 mΩ (natural damping). This reduces the peak
+              from 173 mΩ to approximately 10–20 mΩ — still above Z_target, so additional Tier 2
+              mid-field ceramics (same value, 4.7 µF) should be added to bridge the impedance gap
+              between the tiers.
+            </div>
+            <div class="alert alert-warning" style="margin-top: var(--sp-4)">
+              The bulk electrolytic's own ESR (80 mΩ) provides some damping — the undamped formula
+              overestimates the peak. Real simulation would show a peak of roughly 80–100 mΩ before
+              adding the resistor. But even 80 mΩ is 16× Z_target — still a serious problem.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ STANDARDS -->
+    <section class="section" id="standards">
+      <div class="container">
+        <div class="section-label">Engineering Standards & References</div>
+        <h2 class="section-title">Relevant Standards & Specifications</h2>
+        <div class="pdn-standards-table-wrap">
+          <table class="pdn-standards-table">
+            <thead>
+              <tr>
+                <th>Standard / Spec</th>
+                <th>Scope</th>
+                <th>PDN relevance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>IPC-2141A</strong></td>
+                <td>Controlled impedance PCB design</td>
+                <td>
+                  Defines stackup requirements for controlled impedance — directly affects
+                  inter-plane capacitance (Tier 3.5) and mounting inductance calculations
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JEDEC JEP158</strong></td>
+                <td>PDN design guidelines</td>
+                <td>
+                  Industry guideline covering decoupling strategies, anti-resonance, and PDN
+                  simulation methodology for digital ICs
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IEC 63093-14</strong></td>
+                <td>MLCC characterisation</td>
+                <td>
+                  Defines ESL, ESR, and voltage-bias capacitance derating measurement methods for
+                  surface-mount ceramic capacitors
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JESD51-13</strong></td>
+                <td>PDN impedance measurement</td>
+                <td>
+                  Defines the 2-port measurement method for PDN impedance characterisation using a
+                  vector network analyser
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Murata SimSurfing / TDK Product Finder</strong></td>
+                <td>Component data</td>
+                <td>
+                  Manufacturer SPICE models with accurate ESL, ESR, and voltage-derating data for
+                  PDN simulation. Always use SPICE models from manufacturer, not datasheet nominal
+                  values alone.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ FURTHER READING -->
+    <section class="section pdn-bg-alt" id="references">
+      <div class="container">
+        <div class="section-label">Further Reading</div>
+        <h2 class="section-title">References & Resources</h2>
+        <div class="pdn-refs-grid">
+          <div class="card pdn-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">Power Integrity for I/O Interfaces</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Vishram Pandit — Chapter 3–5: decoupling capacitor selection, anti-resonance analysis,
+              and PDN impedance target derivation with worked examples
+            </p>
+          </div>
+          <div class="card pdn-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">Signal and Power Integrity — Simplified</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Eric Bogatin — Chapters 14–16 on PDN design, decoupling strategies, and the role of
+              plane capacitance and mounting inductance
+            </p>
+          </div>
+          <div class="card pdn-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">TDK: Anti-Resonance in PDN Design</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Detailed analysis of anti-resonance formation, damping resistor sizing, and the effect
+              of MLCC voltage derating on PDN impedance profiles
+            </p>
+          </div>
+          <div class="card pdn-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">Murata: PDN Simulation with SPICE</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Step-by-step guide to building a PDN SPICE model using manufacturer component models —
+              includes mounting inductance extraction methodology
+            </p>
+          </div>
+          <div class="card pdn-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Tool</div>
+            <h4 style="font-size: var(--text-sm)">LTspice / Keysight ADS</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Free SPICE simulator (LTspice) or full-wave EM + PDN tool (ADS) for impedance profile
+              simulation from DC to GHz with hierarchical PDN models
+            </p>
+          </div>
+          <div class="card pdn-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Tool</div>
+            <h4 style="font-size: var(--text-sm)">Picotest J2111A / PDN Sniffer</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Hardware PDN impedance measurement using VNA injection with power supply active — the
+              correct way to characterise a live PDN vs 2-port terminated measurements
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      /* ─────────────────────────── Concept cards ─────────────────────────── */
+      function toggleConcept(card) {
+        const isOpen = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', !isOpen);
+        card.querySelector('.pdn-concept-body').hidden = isOpen;
+        card.querySelector('.pdn-chevron').style.transform = isOpen ? '' : 'rotate(180deg)';
+      }
+      document.querySelectorAll('.pdn-concept-body').forEach(b => (b.hidden = true));
+
+      /* ─────────────────────────── Bookmark ──────────────────────────────── */
+      function toggleBookmark() {
+        const key = 'bookmark_pdn_decap_myth';
+        const saved = localStorage.getItem(key);
+        const btn = document.getElementById('bookmarkBtn');
+        if (saved) {
+          localStorage.removeItem(key);
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmark';
+        } else {
+          localStorage.setItem(key, '1');
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+        }
+      }
+      if (localStorage.getItem('bookmark_pdn_decap_myth')) {
+        const btn = document.getElementById('bookmarkBtn');
+        if (btn)
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+      }
+
+      /* ─────────────────────────── PDN Impedance Simulator ───────────────── */
+      function capZ(f, C_F, ESL_H, ESR_Ohm) {
+        const w = 2 * Math.PI * f;
+        // Z = ESR + j(wL - 1/wC)
+        const re = ESR_Ohm;
+        const im = w * ESL_H - 1 / (w * C_F);
+        return Math.sqrt(re * re + im * im);
+      }
+
+      function parallelZ(f, C1_F, ESL1_H, ESR1_Ohm, C2_F, ESL2_H, ESR2_Ohm, R_damp) {
+        const w = 2 * Math.PI * f;
+        // Z1 = ESR1 + jX1
+        const r1 = ESR1_Ohm + R_damp;
+        const x1 = w * ESL1_H - 1 / (w * C1_F);
+        // Z2 = ESR2 + jX2
+        const r2 = ESR2_Ohm;
+        const x2 = w * ESL2_H - 1 / (w * C2_F);
+        // Parallel: Z = Z1*Z2 / (Z1+Z2)
+        // Numerator: (r1+jx1)(r2+jx2) = (r1r2 - x1x2) + j(r1x2 + r2x1)
+        const num_re = r1 * r2 - x1 * x2;
+        const num_im = r1 * x2 + r2 * x1;
+        // Denominator: (r1+r2) + j(x1+x2)
+        const den_re = r1 + r2;
+        const den_im = x1 + x2;
+        const den_sq = den_re * den_re + den_im * den_im;
+        const res_re = (num_re * den_re + num_im * den_im) / den_sq;
+        const res_im = (num_im * den_re - num_re * den_im) / den_sq;
+        return Math.sqrt(res_re * res_re + res_im * res_im);
+      }
+
+      function updatePDN() {
+        const C1 = parseFloat(document.getElementById('slC1').value) * 1e-6;
+        const ESL1 = parseFloat(document.getElementById('slESL1').value) * 1e-9;
+        const ESR1 = parseFloat(document.getElementById('slESR1').value) * 1e-3;
+        const C2 = parseFloat(document.getElementById('slC2').value) * 1e-9;
+        const ESL2 = parseFloat(document.getElementById('slESL2').value) * 1e-9;
+        const ESR2 = parseFloat(document.getElementById('slESR2').value) * 1e-3;
+        const Rdamp = parseFloat(document.getElementById('slRdamp').value);
+
+        document.getElementById('c1Val').textContent = (C1 * 1e6).toFixed(0);
+        document.getElementById('esl1Val').textContent = (ESL1 * 1e9).toFixed(1);
+        document.getElementById('esr1Val').textContent = (ESR1 * 1e3).toFixed(0);
+        document.getElementById('c2Val').textContent = (C2 * 1e9).toFixed(0);
+        document.getElementById('esl2Val').textContent = (ESL2 * 1e9).toFixed(2);
+        document.getElementById('esr2Val').textContent = (ESR2 * 1e3).toFixed(0);
+        document.getElementById('rdampVal').textContent = Rdamp.toFixed(2);
+
+        const srf1 = 1 / (2 * Math.PI * Math.sqrt(ESL1 * C1));
+        const srf2 = 1 / (2 * Math.PI * Math.sqrt(ESL2 * C2));
+        const fAnti = 1 / (2 * Math.PI * Math.sqrt(ESL1 * C2));
+        const zPeak = Math.sqrt(ESL1 / C2);
+
+        document.getElementById('resSRF1').textContent = fmt_Hz(srf1);
+        document.getElementById('resSRF2').textContent = fmt_Hz(srf2);
+        document.getElementById('resAntiF').textContent = fmt_Hz(fAnti);
+        document.getElementById('resZpeak').textContent = (zPeak * 1000).toFixed(0) + ' mΩ';
+
+        // Build frequency sweep
+        const freqs = [],
+          z1s = [],
+          z2s = [],
+          zParas = [];
+        for (let exp = 3; exp <= 9; exp += 0.02) {
+          const f = Math.pow(10, exp);
+          freqs.push(f);
+          z1s.push(capZ(f, C1, ESL1, ESR1));
+          z2s.push(capZ(f, C2, ESL2, ESR2));
+          zParas.push(parallelZ(f, C1, ESL1, ESR1, C2, ESL2, ESR2, Rdamp));
+        }
+
+        drawPDNChart(freqs, z1s, z2s, zParas, srf1, srf2, fAnti);
+      }
+
+      function fmt_Hz(f) {
+        if (f < 1e3) return f.toFixed(0) + ' Hz';
+        if (f < 1e6) return (f / 1e3).toFixed(1) + ' kHz';
+        if (f < 1e9) return (f / 1e6).toFixed(2) + ' MHz';
+        return (f / 1e9).toFixed(2) + ' GHz';
+      }
+
+      function drawPDNChart(freqs, z1s, z2s, zParas, srf1, srf2, fAnti) {
+        const isDark = document.documentElement.dataset.theme !== 'light';
+        const paper = isDark ? '#161b22' : '#ffffff';
+        const textCol = isDark ? '#8b949e' : '#6b7280';
+        const grid = isDark ? '#30363d' : '#e5e7eb';
+
+        const traces = [
+          {
+            x: freqs,
+            y: z1s,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Bulk cap Z',
+            line: { color: '#3b82f6', width: 1.5, dash: 'dot' },
+          },
+          {
+            x: freqs,
+            y: z2s,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Ceramic Z',
+            line: { color: '#06b6d4', width: 1.5, dash: 'dot' },
+          },
+          {
+            x: freqs,
+            y: zParas,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Parallel combination',
+            line: { color: '#f59e0b', width: 2.5 },
+          },
+        ];
+
+        const layout = {
+          paper_bgcolor: paper,
+          plot_bgcolor: paper,
+          margin: { l: 68, r: 20, t: 30, b: 60 },
+          xaxis: {
+            title: 'Frequency (Hz)',
+            color: textCol,
+            gridcolor: grid,
+            type: 'log',
+            range: [3, 9],
+            tickvals: [1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
+            ticktext: ['1k', '10k', '100k', '1M', '10M', '100M', '1G'],
+          },
+          yaxis: {
+            title: '|Z| (Ω)',
+            color: textCol,
+            gridcolor: grid,
+            type: 'log',
+            range: [-4, 1],
+          },
+          shapes: [
+            {
+              type: 'line',
+              x0: 1e3,
+              x1: 1e9,
+              y0: 0.005,
+              y1: 0.005,
+              xref: 'x',
+              yref: 'y',
+              line: { color: '#22c55e', width: 1.5, dash: 'dash' },
+            },
+          ],
+          annotations: [
+            {
+              x: Math.log10(5e8),
+              y: Math.log10(0.006),
+              xref: 'x',
+              yref: 'y',
+              text: 'Z_target (example 5 mΩ)',
+              showarrow: false,
+              font: { size: 9, color: '#22c55e' },
+            },
+          ],
+          legend: { x: 0.02, y: 0.02, font: { color: textCol, size: 10 } },
+          font: { family: 'Inter, sans-serif', size: 11 },
+        };
+
+        Plotly.react('simChart', traces, layout, { responsive: true, displaylogo: false });
+      }
+
+      function setPreset(type) {
+        const presets = {
+          classic: [100, 10, 50, 100, 0.5, 5, 0],
+          damped: [100, 10, 50, 100, 0.5, 5, 0.17],
+          samevalue: [100, 10, 50, 100, 10, 5, 0], // same ESL → no anti-res
+          polymer: [100, 5, 150, 100, 0.5, 5, 0], // polymer has higher ESR
+        };
+        const ids = ['slC1', 'slESL1', 'slESR1', 'slC2', 'slESL2', 'slESR2', 'slRdamp'];
+        const vals = presets[type];
+        ids.forEach((id, i) => {
+          document.getElementById(id).value = vals[i];
+        });
+        updatePDN();
+      }
+
+      /* ─────────────────────────── Calculators ────────────────────────────── */
+      function calcZtarget() {
+        const dv = parseFloat(document.getElementById('calcDV').value) * 1e-3;
+        const di = parseFloat(document.getElementById('calcDI').value);
+        const zt = dv / di;
+        document.getElementById('calcZt').textContent = (zt * 1000).toFixed(1) + ' mΩ';
+        const diff =
+          zt < 0.005
+            ? '⚠ Extremely tight — 4-tier PDN + sim required'
+            : zt < 0.02
+              ? 'Tight — 3-tier PDN with damping needed'
+              : zt < 0.1
+                ? 'Moderate — 2-tier PDN with damping'
+                : '✓ Relaxed — standard decoupling';
+        const tiers =
+          zt < 0.005
+            ? '4 tiers + on-die focus'
+            : zt < 0.02
+              ? '3 tiers + damping'
+              : zt < 0.1
+                ? '2–3 tiers'
+                : '2 tiers';
+        document.getElementById('calcDiff').textContent = diff;
+        document.getElementById('calcTiers').textContent = tiers;
+      }
+
+      function calcSRF() {
+        const C = parseFloat(document.getElementById('calcC').value) * 1e-9;
+        const ESL = parseFloat(document.getElementById('calcESL').value) * 1e-9;
+        const srf = 1 / (2 * Math.PI * Math.sqrt(ESL * C));
+        const useful = srf / 3;
+        const zHigh = 2 * Math.PI * 10 * srf * ESL;
+        document.getElementById('calcSRFres').textContent = fmt_Hz(srf);
+        document.getElementById('calcSRFuseful').textContent = fmt_Hz(useful);
+        document.getElementById('calcZhigh').textContent = (zHigh * 1000).toFixed(0) + ' mΩ';
+      }
+
+      function calcAntiRes() {
+        const ESL1 = parseFloat(document.getElementById('calcAESL1').value) * 1e-9;
+        const C2 = parseFloat(document.getElementById('calcAC2').value) * 1e-9;
+        const fAnti = 1 / (2 * Math.PI * Math.sqrt(ESL1 * C2));
+        const zPeak = Math.sqrt(ESL1 / C2);
+        document.getElementById('calcAF').textContent = fmt_Hz(fAnti);
+        document.getElementById('calcAZ').textContent = (zPeak * 1000).toFixed(0) + ' mΩ';
+        document.getElementById('calcARopt').textContent =
+          (zPeak * 1000).toFixed(0) + ' mΩ series with bulk cap';
+      }
+
+      /* ─────────────────────────── Decision tree ─────────────────────────── */
+      function treeStep(nodeId) {
+        document
+          .querySelectorAll('#decisionTree .pdn-tree-node, #decisionTree .pdn-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-' + nodeId).hidden = false;
+      }
+      function treeResult(nodeId) {
+        treeStep(nodeId);
+      }
+      function resetTree() {
+        document
+          .querySelectorAll('#decisionTree .pdn-tree-node, #decisionTree .pdn-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-root').hidden = false;
+      }
+      document
+        .querySelectorAll('#decisionTree .pdn-tree-node, #decisionTree .pdn-tree-result')
+        .forEach(n => {
+          n.hidden = true;
+        });
+      document.getElementById('node-root').hidden = false;
+
+      /* ─────────────────────────── Quiz ──────────────────────────────────── */
+      (function () {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-muted);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan-500)';
+              dot.style.borderColor = 'var(--cyan-500)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-muted)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var explain = quiz.getAttribute('data-explain') || '';
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '<strong>Correct!</strong> ' + explain;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '<strong>Incorrect.</strong> ' + explain;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score === totalQuestions) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(16,185,129,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                "Perfect score! Remember: simulate the PDN, then damp the peaks — don't just add more caps.";
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(239,68,68,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                "Review the material above and try again. Remember: simulate the PDN, then damp the peaks — don't just add more caps.";
+            }
+          }
+        }
+
+        showSlide(0);
+      })();
+
+      /* ─────────────────────────── Knowledge check ───────────────────────── */
+      function toggleKcSolution() {
+        const sol = document.getElementById('kcSolution');
+        const btn = document.getElementById('kcBtn');
+        sol.hidden = !sol.hidden;
+        btn.textContent = sol.hidden ? 'Show Solution' : 'Hide Solution';
+      }
+
+      /* ─────────────────────────── Init ──────────────────────────────────── */
+      document.addEventListener('DOMContentLoaded', function () {
+        updatePDN();
+        calcZtarget();
+        calcSRF();
+        calcAntiRes();
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

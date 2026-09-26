@@ -1,0 +1,1373 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Capstone project: design thermal management for a 500W DC-DC power supply with high-side and low-side MOSFETs — compare natural convection and forced cooling approaches."
+    />
+    <title>
+      Project: Power Supply Thermal Design | Heatsink Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/HeatSink/12-power-supply-project.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Heatsink Design Academy
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction to Thermal Engineering</a
+          >
+          <a href="02-heat-transfer.html" class="module-item">02. Heat Transfer Fundamentals</a>
+          <a href="03-thermal-resistance.html" class="module-item"
+            >03. Thermal Resistance Networks</a
+          >
+          <a href="04-heatsink-fundamentals.html" class="module-item">04. Heatsink Fundamentals</a>
+          <a href="05-geometry-selection.html" class="module-item"
+            >05. Heatsink Geometry Selection</a
+          >
+          <a href="06-natural-convection.html" class="module-item"
+            >06. Natural Convection Cooling</a
+          >
+          <a href="07-forced-convection.html" class="module-item">07. Forced Convection Cooling</a>
+          <a href="08-material-selection.html" class="module-item"
+            >08. Heatsink Material Selection</a
+          >
+          <a href="09-tim.html" class="module-item">09. Thermal Interface Materials (TIM)</a>
+          <a href="10-design-wizard.html" class="module-item">10. Heatsink Design Wizard</a>
+          <a href="11-fpga-project.html" class="module-item">11. Project: FPGA Thermal Design</a>
+          <a href="12-power-supply-project.html" class="module-item active"
+            >12. Project: Power Supply Thermal Design</a
+          >
+          <a href="13-final-review.html" class="module-item"
+            >13. Final Review &amp; Knowledge Check</a
+          >
+          <div style="border-top: 1px solid var(--border); margin: var(--sp-3) 0"></div>
+          <div
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              color: var(--text-muted);
+              padding: 0 var(--sp-2) var(--sp-1);
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+            "
+          >
+            Tools
+          </div>
+          <a href="HS-Demo.html" class="module-item">Heatsink Design in 5 Minutes</a>
+          <a href="certificate.html" class="module-item">Course Certificate</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../home.html">Home</a><span>/</span>
+            <a href="../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Heatsink Design Academy</a><span>/</span>
+            <span>Project: Power Supply Thermal Design</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 12/13</span><span>92%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 92%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">CAPSTONE PROJECT 2</div>
+              <h1 style="font-size: 2.2rem">Power Supply Heat Sink Design</h1>
+              <p class="subtitle">
+                Design thermal management for a 500 W half-bridge DC-DC converter with high-side and
+                low-side MOSFETs. Compare natural convection and forced-air cooling approaches and
+                select the production solution.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Project overview -->
+              <div class="widget-container" style="margin-bottom: 2rem">
+                <h3 style="margin-bottom: 1rem">Project Overview</h3>
+                <div class="info-box">
+                  <strong>Application:</strong> 500 W Half-Bridge DC-DC Converter (48V &rarr;
+                  12V)<br />
+                  <strong>Target Device:</strong> Infineon IPP110N20N3 (N-Channel MOSFET, TO-220)<br />
+                  <strong>Total MOSFET Loss:</strong> 18 W per device (2 devices = 36 W total)<br />
+                  <strong>Switching Frequency:</strong> 100 kHz
+                </div>
+                <div class="metrics-grid" style="margin-top: 1rem">
+                  <div class="metric-card">
+                    <strong>Ambient Temperature</strong><br />50&deg;C (worst case)
+                  </div>
+                  <div class="metric-card">
+                    <strong>Maximum Junction</strong><br />150&deg;C (derated from 175&deg;C)
+                  </div>
+                  <div class="metric-card"><strong>Package</strong><br />TO-220-3</div>
+                  <div class="metric-card">
+                    <strong>R<sub>&theta;JC</sub></strong
+                    ><br />0.7 &deg;C/W
+                  </div>
+                  <div class="metric-card">
+                    <strong>R<sub>&theta;CS</sub></strong
+                    ><br />0.5 &deg;C/W (with insulator)
+                  </div>
+                  <div class="metric-card"><strong>Mounting</strong><br />Screw + thermal pad</div>
+                </div>
+              </div>
+
+              <!-- STEP 1: Extract -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body">
+                  <span>Step 1: Extract Information from Datasheet</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    For a power MOSFET in a switching converter, total loss = conduction loss +
+                    switching loss:
+                  </p>
+                  <div
+                    class="callout"
+                    style="text-align: center; font-family: monospace; font-size: 0.95rem"
+                  >
+                    P<sub>cond</sub> = I<sub>RMS</sub><sup>2</sup> &times; R<sub>DS(on)</sub>
+                  </div>
+                  <div
+                    class="callout"
+                    style="
+                      text-align: center;
+                      font-family: monospace;
+                      font-size: 0.95rem;
+                      margin-top: 0.75rem;
+                    "
+                  >
+                    P<sub>sw</sub> = 0.5 &times; V<sub>DS</sub> &times; I<sub>D</sub> &times; (t<sub
+                      >r</sub
+                    >
+                    + t<sub>f</sub>) &times; f<sub>sw</sub>
+                  </div>
+
+                  <div class="tip-box" style="margin-top: 1rem">
+                    <strong>Reading the MOSFET Datasheet for Thermal Parameters:</strong> key
+                    sections in the Infineon IPP110N20N3 datasheet: Page 1 Key Parameters (R<sub
+                      >DS(on)</sub
+                    >
+                    = 11 m&Omega;, V<sub>DS</sub> = 200V, I<sub>D</sub> = 88A); Thermal
+                    Characteristics Table (R<sub>&theta;JC</sub> = 0.7 &deg;C/W, R<sub
+                      >&theta;JA</sub
+                    >
+                    = 62 &deg;C/W); SOA diagram for safe operating area limits; transient thermal
+                    impedance Z<sub>&theta;JC</sub>(t) curves for pulsed operation. The TO-220
+                    package mounts directly to a heatsink via the metal tab (drain connection) — an
+                    electrical insulator (mica washer or silicone pad) is required for non-isolated
+                    mounting.
+                  </div>
+
+                  <h3 style="margin: 1.25rem 0 0.5rem">MOSFET Power Loss Calculator</h3>
+                  <div class="calc-wrap">
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >R<sub>DS(on)</sub> (m&Omega;) @ T<sub>J</sub>=150&deg;C</label
+                        ><input
+                          type="number"
+                          id="psRdson"
+                          value="22"
+                          step="1"
+                          onchange="calcPSLoss()"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >I<sub>RMS</sub> (A)</label
+                        ><input
+                          type="number"
+                          id="psIrms"
+                          value="20"
+                          step="1"
+                          onchange="calcPSLoss()"
+                        />
+                      </div>
+                    </div>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >V<sub>DS</sub> (V)</label
+                        ><input type="number" id="psVds" value="48" onchange="calcPSLoss()" />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >I<sub>D</sub> during switching (A)</label
+                        ><input type="number" id="psId" value="25" onchange="calcPSLoss()" />
+                      </div>
+                    </div>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >t<sub>r</sub> + t<sub>f</sub> (ns)</label
+                        ><input type="number" id="psTsw" value="60" onchange="calcPSLoss()" />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Switching Frequency (kHz)</label
+                        ><input type="number" id="psFsw" value="100" onchange="calcPSLoss()" />
+                      </div>
+                    </div>
+                    <div class="metrics-grid">
+                      <div class="metric-card">
+                        Conduction Loss (P<sub>cond</sub>)<br /><span
+                          class="slider-value"
+                          id="psPcond"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Switching Loss (P<sub>sw</sub>)<br /><span class="slider-value" id="psPsw"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Total Loss per MOSFET<br /><span
+                          class="slider-value"
+                          id="psPtotal"
+                          style="color: var(--cyan, #22d3ee)"
+                          >&mdash;</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 2: Thermal Budget -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec2body">
+                  <span>Step 2: Calculate Thermal Budget</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <div class="calc-wrap">
+                    <h3 style="margin-bottom: 0.75rem; font-size: 0.95rem">
+                      Heatsink Requirement Calculator
+                    </h3>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Total Power (W) per device</label
+                        ><input type="number" id="ps2Power" value="18" onchange="calcPS2()" />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Number of Devices on Same Heatsink</label
+                        ><input type="number" id="ps2Devices" value="2" onchange="calcPS2()" />
+                      </div>
+                    </div>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Max T<sub>J</sub> (&deg;C) &mdash; derated</label
+                        ><input type="number" id="ps2Tj" value="150" onchange="calcPS2()" />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Ambient Temperature (&deg;C)</label
+                        ><input type="number" id="ps2Ta" value="50" onchange="calcPS2()" />
+                      </div>
+                    </div>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >R<sub>&theta;JC</sub> (&deg;C/W)</label
+                        ><input
+                          type="number"
+                          id="ps2Rjc"
+                          value="0.7"
+                          step="0.1"
+                          onchange="calcPS2()"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >R<sub>&theta;CS</sub> (&deg;C/W) &mdash; with insulator</label
+                        ><input
+                          type="number"
+                          id="ps2Rcs"
+                          value="0.5"
+                          step="0.1"
+                          onchange="calcPS2()"
+                        />
+                      </div>
+                    </div>
+                    <div class="metrics-grid">
+                      <div class="metric-card">
+                        Thermal Budget (T<sub>J</sub> - T<sub>A</sub>)<br /><span
+                          class="slider-value"
+                          id="ps2Budget"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        &Delta;T used by R<sub>&theta;JC</sub> (per device)<br /><span
+                          class="slider-value"
+                          id="ps2DtJC"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        &Delta;T used by R<sub>&theta;CS</sub> (per device)<br /><span
+                          class="slider-value"
+                          id="ps2DtCS"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Available &Delta;T for heatsink<br /><span class="slider-value" id="ps2DtSA"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Total power to heatsink<br /><span class="slider-value" id="ps2Ptotal"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Required R<sub>&theta;SA</sub><br /><span
+                          class="slider-value"
+                          id="ps2Rsa"
+                          style="color: var(--cyan, #22d3ee)"
+                          >&mdash;</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="info-box" style="margin-top: 1rem">
+                    <strong>Important:</strong> When multiple devices share a heatsink, the total
+                    power is the sum of all devices, but R<sub>&theta;JC</sub> and R<sub
+                      >&theta;CS</sub
+                    >
+                    apply per device. The heatsink must handle the total heat from all devices.
+                  </div>
+                  <h3 style="margin: 1.25rem 0 0.5rem">
+                    Required R<sub>&theta;SA</sub> vs. Power per Device
+                  </h3>
+                  <div class="plot-area" style="height: 260px; background: var(--bg-alt)">
+                    <canvas id="ps2Plot"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 3: Natural Convection -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec3body">
+                  <span>Step 3: Natural Convection Design</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <div class="calc-wrap">
+                    <h3 style="margin-bottom: 0.75rem; font-size: 0.95rem">
+                      Natural Convection Heatsink Sizing
+                    </h3>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Required R<sub>&theta;SA</sub> (&deg;C/W)</label
+                        ><input
+                          type="number"
+                          id="ps3Rsa"
+                          value="1.94"
+                          step="0.01"
+                          onchange="calcPS3()"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Available Width (mm)</label
+                        ><input type="number" id="ps3Width" value="100" onchange="calcPS3()" />
+                      </div>
+                    </div>
+                    <div class="s1-settings-row">
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Fin Height (mm)</label
+                        ><input type="number" id="ps3FinH" value="50" onchange="calcPS3()" />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Fin Length / Depth (mm)</label
+                        ><input type="number" id="ps3FinL" value="80" onchange="calcPS3()" />
+                      </div>
+                    </div>
+                    <div class="metrics-grid">
+                      <div class="metric-card">
+                        Optimal Fin Spacing<br /><span class="slider-value" id="ps3Spacing"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Number of Fins<br /><span class="slider-value" id="ps3Fins">&mdash;</span>
+                      </div>
+                      <div class="metric-card">
+                        Total Surface Area<br /><span class="slider-value" id="ps3Area"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Estimated R<sub>&theta;SA</sub><br /><span class="slider-value" id="ps3EstR"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Meets Requirement?<br /><span class="slider-value" id="ps3Status"
+                          >&mdash;</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Challenge:</strong> With 36 W total and natural convection only,
+                    achieving R<sub>&theta;SA</sub> &lt; 2 &deg;C/W requires a large heatsink
+                    (typically &gt;150 cm&sup2; surface area in vertical orientation). This may
+                    exceed available board space.
+                  </div>
+                  <h3 style="margin: 1.25rem 0 0.5rem">
+                    Natural Convection: R<sub>&theta;SA</sub> vs. Fin Height
+                  </h3>
+                  <div class="plot-area" style="height: 260px; background: var(--bg-alt)">
+                    <canvas id="ps3Plot"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 4: Forced Convection -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec4body">
+                  <span>Step 4: Forced Convection Optimization</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Adding a fan dramatically reduces thermal resistance. Adjust air velocity and
+                    heatsink size to compare natural vs. forced convection performance.
+                  </p>
+                  <div class="calc-wrap">
+                    <h3 style="margin-bottom: 0.75rem; font-size: 0.95rem">
+                      Fan-Cooled Performance
+                    </h3>
+                    <div class="s1-settings-row">
+                      <div class="slider-group">
+                        <div class="slider-label">
+                          <span>Air Velocity</span
+                          ><span class="slider-value" id="ps4VelDisp">2.0 m/s</span>
+                        </div>
+                        <input
+                          type="range"
+                          id="ps4Vel"
+                          min="0"
+                          max="6"
+                          step="0.2"
+                          value="2"
+                          oninput="calcPS4()"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-sub)"
+                          >Heatsink Size (mm)</label
+                        >
+                        <select id="ps4Size" onchange="calcPS4()">
+                          <option value="small">60&times;60&times;25mm (compact)</option>
+                          <option value="medium" selected>80&times;80&times;35mm (standard)</option>
+                          <option value="large">100&times;100&times;50mm (large)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="metrics-grid">
+                      <div class="metric-card">
+                        Estimated R<sub>&theta;SA</sub><br /><span class="slider-value" id="ps4Rsa"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Predicted T<sub>J</sub><br /><span class="slider-value" id="ps4Tj"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Temperature Margin<br /><span class="slider-value" id="ps4Margin"
+                          >&mdash;</span
+                        >
+                      </div>
+                      <div class="metric-card">
+                        Improvement vs Natural<br /><span class="slider-value" id="ps4Improve"
+                          >&mdash;</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 style="margin: 1.25rem 0 0.5rem">Natural vs Forced Convection Comparison</h3>
+                  <div class="plot-area" style="height: 260px; background: var(--bg-alt)">
+                    <canvas id="ps4Plot"></canvas>
+                  </div>
+
+                  <div class="metrics-grid" style="margin-top: 1.25rem">
+                    <div class="metric-card">
+                      <strong>Natural Convection</strong><br />
+                      <span style="font-size: 0.78rem; color: var(--text-muted)">
+                        R<sub>&theta;SA</sub> &asymp; 2.5&ndash;4 &deg;C/W &middot; Requires large
+                        heatsink (100&times;100&times;50mm) &middot; Silent, no moving parts
+                        &middot; May not meet thermal requirement
+                      </span>
+                    </div>
+                    <div class="metric-card" style="border-color: var(--cyan, #22d3ee)">
+                      <strong>Forced Convection (2 m/s)</strong><br />
+                      <span style="font-size: 0.78rem; color: var(--text-muted)">
+                        R<sub>&theta;SA</sub> &asymp; 0.8&ndash;1.5 &deg;C/W &middot; Compact
+                        heatsink (80&times;80&times;35mm) &middot; Fan noise ~25-35 dBA &middot;
+                        Easily meets thermal requirement &#10003;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 5: Final Review -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="sec5body">
+                  <span>Step 5: Final Engineering Review</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+                  <h3 style="margin-bottom: 0.75rem; font-size: 0.95rem">
+                    Automated Design Review Checklist
+                  </h3>
+                  <div style="color: var(--text-sub); font-size: 0.85rem; line-height: 2">
+                    <div>
+                      &#9745; <strong>Thermal Performance:</strong> T<sub>J</sub> &lt; T<sub
+                        >J,max</sub
+                      >
+                      with &ge;20&deg;C margin
+                    </div>
+                    <div>
+                      &#9745; <strong>Reliability:</strong> MTTF &gt; 100,000 hours at operating
+                      temperature
+                    </div>
+                    <div>
+                      &#9745; <strong>Manufacturability:</strong> Standard TO-220 mounting,
+                      commercially available heatsink
+                    </div>
+                    <div>
+                      &#9745; <strong>Cost:</strong> Aluminum extrusion + standard fan within BOM
+                      target
+                    </div>
+                    <div>&#9745; <strong>Weight:</strong> Total heatsink assembly &lt; 300g</div>
+                    <div>
+                      &#9745; <strong>Mechanical:</strong> Screw mounting with proper torque (0.5
+                      N&middot;m)
+                    </div>
+                    <div>
+                      &#9745; <strong>Electrical Isolation:</strong> Insulator pad rated for V<sub
+                        >DS</sub
+                      >
+                      voltage + margin
+                    </div>
+                    <div>
+                      &#9744; <strong>Vibration:</strong> Verify heatsink retention under
+                      shock/vibration (if applicable)
+                    </div>
+                    <div>
+                      &#9744; <strong>Dust:</strong> Evaluate fin spacing for dust accumulation in
+                      operating environment
+                    </div>
+                  </div>
+
+                  <h3 style="margin: 1.25rem 0 0.5rem">Final Design Summary</h3>
+                  <div
+                    id="psReportText"
+                    style="
+                      white-space: pre-line;
+                      font-family: monospace;
+                      font-size: 0.8rem;
+                      line-height: 1.8;
+                      color: var(--text-sub);
+                      background: var(--bg-alt);
+                      border-radius: var(--radius-lg);
+                      padding: 1rem;
+                    "
+                  >
+                    &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;
+                    POWER SUPPLY HEAT SINK DESIGN REPORT Capstone Project 2 &mdash; Rising Edge
+                    Training
+                    &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;
+                    &#9472;&#9472; APPLICATION &#9472;&#9472; Converter: 500W Half-Bridge DC-DC (48V
+                    &rarr; 12V) Topology: Synchronous buck with half-bridge Devices: 2&times;
+                    Infineon IPP110N20N3 (TO-220) Total Loss: 36W (18W &times; 2 devices)
+                    &#9472;&#9472; THERMAL PARAMETERS &#9472;&#9472; R_&theta;JC: 0.7 &deg;C/W (per
+                    device) R_&theta;CS: 0.5 &deg;C/W (with silicone insulator) T_J,max: 150&deg;C
+                    (derated from 175&deg;C) T_ambient: 50&deg;C Required R_&theta;SA: 1.94 &deg;C/W
+                    &#9472;&#9472; NATURAL CONVECTION ANALYSIS &#9472;&#9472; Required Heatsink:
+                    100&times;100&times;50mm (vertical orientation) Estimated R_&theta;SA: 2.5
+                    &deg;C/W Status: &#10007; INSUFFICIENT (T_J = 158&deg;C exceeds limit)
+                    &#9472;&#9472; FORCED CONVECTION SOLUTION (RECOMMENDED) &#9472;&#9472; Heatsink:
+                    80&times;80&times;35mm extruded aluminum Material: Aluminum 6063-T5, black
+                    anodized Fan: 60mm axial, 3000 RPM, 15 CFM Air Velocity: ~2 m/s across fins
+                    Achieved R_&theta;SA: 1.1 &deg;C/W Predicted T_J: 93.6&deg;C Margin: 56.4&deg;C
+                    below maximum &#10003; &#9472;&#9472; MOUNTING DETAILS &#9472;&#9472;
+                    Attachment: M3 screws with spring washers Torque: 0.5 N&middot;m TIM: Silicone
+                    insulator pad (0.5 &deg;C/W) Electrical: 2.5kV isolation rating &#9472;&#9472;
+                    STATUS: PASS (Forced Convection) &#9472;&#9472;
+                    &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;
+                  </div>
+                  <button
+                    class="btn btn-primary"
+                    onclick="downloadPSReport()"
+                    style="margin-top: 1rem"
+                  >
+                    Download Report (TXT)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer"></div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="./11-fpga-project.html"
+                  >&larr; Previous: 11. Project: FPGA Thermal Design</a
+                >
+                <a class="btn btn-primary" href="./13-final-review.html"
+                  >Next: 13. Final Review &amp; Knowledge Check &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../assets/js/core.js"></script>
+    <script src="../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              if (btn.getAttribute('data-target') === 'sec2body') calcPS2();
+              if (btn.getAttribute('data-target') === 'sec3body') calcPS3();
+              if (btn.getAttribute('data-target') === 'sec4body') calcPS4();
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      function calcPSLoss() {
+        var Rdson = parseFloat(document.getElementById('psRdson').value) / 1000;
+        var Irms = parseFloat(document.getElementById('psIrms').value);
+        var Vds = parseFloat(document.getElementById('psVds').value);
+        var Id = parseFloat(document.getElementById('psId').value);
+        var tsw = parseFloat(document.getElementById('psTsw').value) * 1e-9;
+        var fsw = parseFloat(document.getElementById('psFsw').value) * 1000;
+        var Pcond = Irms * Irms * Rdson;
+        var Psw = 0.5 * Vds * Id * tsw * fsw;
+        var Ptotal = Pcond + Psw;
+        document.getElementById('psPcond').textContent = Pcond.toFixed(2) + ' W';
+        document.getElementById('psPsw').textContent = Psw.toFixed(2) + ' W';
+        document.getElementById('psPtotal').textContent = Ptotal.toFixed(2) + ' W';
+      }
+
+      function calcPS2() {
+        var P = parseFloat(document.getElementById('ps2Power').value);
+        var N = parseFloat(document.getElementById('ps2Devices').value);
+        var Tj = parseFloat(document.getElementById('ps2Tj').value);
+        var Ta = parseFloat(document.getElementById('ps2Ta').value);
+        var Rjc = parseFloat(document.getElementById('ps2Rjc').value);
+        var Rcs = parseFloat(document.getElementById('ps2Rcs').value);
+        var budget = Tj - Ta;
+        var dtJC = P * Rjc;
+        var dtCS = P * Rcs;
+        var dtSA = budget - dtJC - dtCS;
+        var Ptotal = P * N;
+        var Rsa = dtSA / Ptotal;
+
+        document.getElementById('ps2Budget').textContent = budget.toFixed(1) + ' °C';
+        document.getElementById('ps2DtJC').textContent = dtJC.toFixed(1) + ' °C';
+        document.getElementById('ps2DtCS').textContent = dtCS.toFixed(1) + ' °C';
+        document.getElementById('ps2DtSA').textContent = dtSA.toFixed(1) + ' °C';
+        document.getElementById('ps2Ptotal').textContent = Ptotal.toFixed(1) + ' W';
+        document.getElementById('ps2Rsa').textContent = Rsa.toFixed(3) + ' °C/W';
+
+        drawPS2Plot(Tj, Ta, Rjc, Rcs, N);
+      }
+
+      function drawPS2Plot(Tj, Ta, Rjc, Rcs, N) {
+        var canvas = document.getElementById('ps2Plot');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = (canvas.width = rect.width);
+        var h = (canvas.height = rect.height || 260);
+        ctx.clearRect(0, 0, w, h);
+
+        var powers = [],
+          rsas = [];
+        for (var p = 5; p <= 40; p += 2) {
+          powers.push(p);
+          rsas.push((Tj - Ta - p * Rjc - p * Rcs) / (p * N));
+        }
+        var minV = Math.min.apply(null, rsas),
+          maxV = Math.max.apply(null, rsas);
+        var padL = 55,
+          padB = 40,
+          padT = 20,
+          padR = 20;
+        var chartW = w - padL - padR,
+          chartH = h - padT - padB;
+        function x(p) {
+          return padL + ((p - 5) / (40 - 5)) * chartW;
+        }
+        function y(v) {
+          return padT + chartH - ((v - minV) / (maxV - minV || 1)) * chartH;
+        }
+
+        ctx.strokeStyle = 'rgba(150,150,150,0.35)';
+        ctx.beginPath();
+        ctx.moveTo(padL, padT);
+        ctx.lineTo(padL, padT + chartH);
+        ctx.lineTo(padL + chartW, padT + chartH);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#22d3ee';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        powers.forEach(function (p, i) {
+          var px = x(p),
+            py = y(rsas[i]);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(200,200,200,0.85)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Power per MOSFET (W)', padL + chartW / 2, h - 8);
+        ctx.save();
+        ctx.translate(14, padT + chartH / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Required R_SA (°C/W)', 0, 0);
+        ctx.restore();
+      }
+
+      function calcPS3() {
+        var Rsa = parseFloat(document.getElementById('ps3Rsa').value);
+        var W = parseFloat(document.getElementById('ps3Width').value);
+        var H = parseFloat(document.getElementById('ps3FinH').value);
+        var L = parseFloat(document.getElementById('ps3FinL').value);
+        var Ts = 80,
+          Ta = 50;
+        var Tf = (Ts + Ta) / 2 + 273.15;
+        var spacing =
+          ((2.714 * (H / 1000)) /
+            Math.pow(
+              (9.81 * (1 / Tf) * (Ts - Ta) * Math.pow(H / 1000, 3)) / (15.89e-6 * 22.5e-6),
+              0.25
+            )) *
+          1000;
+        spacing = Math.max(spacing, 4);
+        var nFins = Math.floor(W / (spacing + 1.5));
+        var area = (2 * H * L * nFins + W * L) / 100;
+        var h_nat = 8;
+        var estR = 1 / ((h_nat * area) / 1e4);
+        var meets = estR <= Rsa;
+
+        document.getElementById('ps3Spacing').textContent = spacing.toFixed(1) + ' mm';
+        document.getElementById('ps3Fins').textContent = nFins;
+        document.getElementById('ps3Area').textContent = area.toFixed(0) + ' cm²';
+        document.getElementById('ps3EstR').textContent = estR.toFixed(2) + ' °C/W';
+        var statusEl = document.getElementById('ps3Status');
+        statusEl.textContent = meets
+          ? '✓ Meets requirement'
+          : '✗ Does NOT meet requirement — forced convection needed';
+        statusEl.style.color = meets ? 'var(--success)' : 'var(--danger)';
+
+        drawPS3Plot(W, L, spacing, h_nat, Rsa);
+      }
+
+      function drawPS3Plot(W, L, spacing, h_nat, Rsa) {
+        var canvas = document.getElementById('ps3Plot');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = (canvas.width = rect.width);
+        var h = (canvas.height = rect.height || 260);
+        ctx.clearRect(0, 0, w, h);
+
+        var heights = [],
+          rsas = [];
+        for (var hh = 20; hh <= 80; hh += 5) {
+          heights.push(hh);
+          var n = Math.floor(W / (spacing + 1.5));
+          var a = (2 * hh * L * n + W * L) / 1e4;
+          rsas.push(1 / (h_nat * a));
+        }
+        var allV = rsas.concat([Rsa]);
+        var minV = Math.min.apply(null, allV),
+          maxV = Math.max.apply(null, allV);
+        var padL = 55,
+          padB = 40,
+          padT = 20,
+          padR = 20;
+        var chartW = w - padL - padR,
+          chartH = h - padT - padB;
+        function x(v) {
+          return padL + ((v - 20) / (80 - 20)) * chartW;
+        }
+        function y(v) {
+          return padT + chartH - ((v - minV) / (maxV - minV || 1)) * chartH;
+        }
+
+        ctx.strokeStyle = 'rgba(150,150,150,0.35)';
+        ctx.beginPath();
+        ctx.moveTo(padL, padT);
+        ctx.lineTo(padL, padT + chartH);
+        ctx.lineTo(padL + chartW, padT + chartH);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#22d3ee';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        heights.forEach(function (hh, i) {
+          var px = x(hh),
+            py = y(rsas[i]);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        ctx.strokeStyle = '#f87171';
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padL, y(Rsa));
+        ctx.lineTo(padL + chartW, y(Rsa));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#f87171';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Required R_SA', padL + 4, y(Rsa) - 4);
+
+        ctx.fillStyle = 'rgba(200,200,200,0.85)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Fin Height (mm)', padL + chartW / 2, h - 8);
+        ctx.save();
+        ctx.translate(14, padT + chartH / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('R_SA (°C/W)', 0, 0);
+        ctx.restore();
+      }
+
+      function calcPS4() {
+        var vel = parseFloat(document.getElementById('ps4Vel').value);
+        document.getElementById('ps4VelDisp').textContent = vel.toFixed(1) + ' m/s';
+        var size = document.getElementById('ps4Size').value;
+        var areas = { small: 120, medium: 220, large: 400 };
+        var area = areas[size] / 1e4;
+        var hcoef = vel < 0.3 ? 8 : 10 + vel * 15;
+        var Rsa = 1 / (hcoef * area * 0.75);
+        var P = 36,
+          Rjc = 0.7,
+          Rcs = 0.5,
+          Ta = 50;
+        var Tj = Ta + P * Rsa + 18 * (Rjc + Rcs);
+        var margin = 150 - Tj;
+        var natR = 1 / (8 * area * 0.75);
+        var improvement = ((natR - Rsa) / natR) * 100;
+
+        document.getElementById('ps4Rsa').textContent = Rsa.toFixed(2) + ' °C/W';
+        document.getElementById('ps4Tj').textContent = Tj.toFixed(1) + ' °C';
+        var marginEl = document.getElementById('ps4Margin');
+        marginEl.textContent =
+          margin.toFixed(1) + ' °C' + (margin > 20 ? ' ✓' : margin > 0 ? ' ⚠' : ' ✗');
+        marginEl.style.color =
+          margin > 20 ? 'var(--success)' : margin > 0 ? 'var(--warning)' : 'var(--danger)';
+        document.getElementById('ps4Improve').textContent =
+          improvement.toFixed(0) + '% reduction in R_SA';
+
+        drawPS4Plot(area);
+      }
+
+      function drawPS4Plot(area) {
+        var canvas = document.getElementById('ps4Plot');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = (canvas.width = rect.width);
+        var h = (canvas.height = rect.height || 260);
+        ctx.clearRect(0, 0, w, h);
+
+        var vels = [],
+          rsaForced = [],
+          rsaNat = [];
+        for (var v = 0; v <= 6; v += 0.3) {
+          vels.push(v);
+          var hv = v < 0.3 ? 8 : 10 + v * 15;
+          rsaForced.push(1 / (hv * area * 0.75));
+          rsaNat.push(1 / (8 * area * 0.75));
+        }
+        var required = 1.94;
+        var allV = rsaForced.concat(rsaNat).concat([required]);
+        var minV = Math.min.apply(null, allV),
+          maxV = Math.max.apply(null, allV);
+        var padL = 55,
+          padB = 40,
+          padT = 20,
+          padR = 20;
+        var chartW = w - padL - padR,
+          chartH = h - padT - padB;
+        function x(v) {
+          return padL + (v / 6) * chartW;
+        }
+        function y(v) {
+          return padT + chartH - ((v - minV) / (maxV - minV || 1)) * chartH;
+        }
+
+        ctx.strokeStyle = 'rgba(150,150,150,0.35)';
+        ctx.beginPath();
+        ctx.moveTo(padL, padT);
+        ctx.lineTo(padL, padT + chartH);
+        ctx.lineTo(padL + chartW, padT + chartH);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#22d3ee';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        vels.forEach(function (v, i) {
+          var px = x(v),
+            py = y(rsaForced[i]);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        ctx.strokeStyle = '#fb923c';
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        vels.forEach(function (v, i) {
+          var px = x(v),
+            py = y(rsaNat[i]);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = '#f87171';
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padL, y(required));
+        ctx.lineTo(padL + chartW, y(required));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = '9px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#22d3ee';
+        ctx.fillText('Forced Convection', padL + 4, padT + 12);
+        ctx.fillStyle = '#fb923c';
+        ctx.fillText('Natural Convection (baseline)', padL + 4, padT + 24);
+        ctx.fillStyle = '#f87171';
+        ctx.fillText('Required R_SA = 1.94 °C/W', padL + 4, y(required) - 4);
+
+        ctx.fillStyle = 'rgba(200,200,200,0.85)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Air Velocity (m/s)', padL + chartW / 2, h - 8);
+        ctx.save();
+        ctx.translate(14, padT + chartH / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('R_SA (°C/W)', 0, 0);
+        ctx.restore();
+      }
+
+      function downloadPSReport() {
+        var text = document.getElementById('psReportText').textContent;
+        var blob = new Blob([text], { type: 'text/plain' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'power_supply_heatsink_report.txt';
+        a.click();
+      }
+
+      var quizData = [
+        {
+          q: 'For the IPP110N20N3 MOSFET, why is an electrical insulator (mica washer or silicone pad) required when mounting to a shared heatsink?',
+          opts: [
+            'To improve thermal conductivity',
+            'The TO-220 metal tab is electrically connected to the drain',
+            'To reduce weight',
+            'It is not required for this package',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'When two MOSFETs share one heatsink, how does the required R_θSA calculation change?',
+          opts: [
+            'R_θJC and R_θCS are doubled',
+            'Total power is the sum of both devices, but R_θJC and R_θCS apply per device',
+            'Only one device power is used',
+            'The calculation is identical to a single device',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'With 36W total dissipation and natural convection only, what is the typical challenge in meeting R_θSA < 2°C/W?',
+          opts: [
+            'It requires no heatsink at all',
+            'It requires a large heatsink (>150 cm² surface area)',
+            'Natural convection always exceeds the requirement easily',
+            'The switching frequency must be reduced',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Roughly how much does forced convection (2 m/s) reduce R_θSA compared to natural convection for this design?',
+          opts: [
+            'No meaningful reduction',
+            'Roughly 10%',
+            'From ~2.5-4 °C/W down to ~0.8-1.5 °C/W — well over half',
+            'It only affects switching loss, not R_θSA',
+          ],
+          correct: 2,
+        },
+        {
+          q: 'What is the recommended final solution for this 500W power supply thermal design?',
+          opts: [
+            'Natural convection with a 100×100×50mm heatsink',
+            'Forced convection with an 80×80×35mm heatsink and 60mm fan',
+            'No heatsink, rely on PCB copper',
+            'Liquid cooling',
+          ],
+          correct: 1,
+        },
+      ];
+
+      function buildQuiz() {
+        var c = document.getElementById('quizContainer');
+        var n = quizData.length;
+        var html =
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">' +
+          '<div style="display:flex;align-items:center;gap:0.8rem">' +
+          '<div class="badge">KNOWLEDGE CHECK</div>' +
+          '<h3 style="margin:0">Knowledge Check</h3>' +
+          '</div>' +
+          '<div style="font-size:0.82rem;color:var(--text-muted)">Score: <span id="quizScore" style="color:var(--cyan);font-weight:700">0</span> / ' +
+          n +
+          '</div>' +
+          '</div>' +
+          '<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem">Answer each question, then click Next to continue.</p>' +
+          '<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem">' +
+          '<div style="font-size:0.82rem;font-weight:600;color:var(--text-primary)">Question <span id="quizCurrentNum">1</span> of ' +
+          n +
+          '</div>' +
+          '<div style="flex:1;height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden;"><div id="quizProgressBar" style="height:100%;width:' +
+          100 / n +
+          '%;background:linear-gradient(90deg,var(--cyan),#00d4aa);border-radius:3px;transition:width 0.3s ease;"></div></div>' +
+          '</div>' +
+          '<div id="quizSlides">';
+
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>' +
+            '<div class="quiz-question">' +
+            (qi + 1) +
+            '. ' +
+            item.q +
+            '</div>' +
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+
+        html +=
+          '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">' +
+          '<button class="btn btn-secondary" disabled id="quizPrevBtn" style="opacity:0.4">← Previous</button>' +
+          '<div id="quizDots" style="display:flex;gap:4px"></div>' +
+          '<button class="btn btn-primary" id="quizNextBtn">Next →</button>' +
+          '</div>' +
+          '<div id="quizSummary" style="display:none;margin-top:2rem;padding:1.5rem;border-radius:10px;border:1px solid var(--border);text-align:center;">' +
+          '<div id="quizFinalScore" style="font-size:1.4rem;font-weight:800;margin-bottom:0.5rem"></div>' +
+          '<div id="quizFinalMsg" style="font-size:0.88rem;color:var(--text-secondary)"></div>' +
+          '</div>';
+
+        c.innerHTML = html;
+        initQuizStepper();
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var PASS_THRESHOLD = Math.ceil(totalQuestions * 0.8);
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var explain = quiz.getAttribute('data-explain') || '';
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = explain
+                  ? '<strong>Correct!</strong> ' + explain
+                  : '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = explain
+                  ? '<strong>Incorrect.</strong> ' + explain
+                  : '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= PASS_THRESHOLD) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+
+        showSlide(0);
+      }
+
+      calcPSLoss();
+      calcPS2();
+      buildQuiz();
+      window.addEventListener('resize', function () {
+        calcPS2();
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

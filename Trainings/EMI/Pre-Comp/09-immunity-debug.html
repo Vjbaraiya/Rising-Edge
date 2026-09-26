@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 9 — Immunity pre-compliance and debug: quick, safe bench checks that approximate ESD, EFT/burst, surge and radiated immunity; reproducing field failures; and hardening with TVS, filtering and firmware recovery."
+    />
+    <title>
+      09 · Immunity Pre-Compliance &amp; Debug | EMC Pre-Compliance | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Pre-Comp/09-immunity-debug.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >EMC Pre-Compliance Testing &amp; Debugging</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-why-pre-compliance.html" class="module-item">01. Why Pre-Compliance</a>
+          <a href="02-building-a-bench.html" class="module-item"
+            >02. Building an Affordable Bench</a
+          >
+          <a href="03-measurement-technique.html" class="module-item"
+            >03. Measurement Technique &amp; Toolkit</a
+          >
+          <a href="04-spectrum-signatures.html" class="module-item">04. Reading the Spectrum</a>
+          <a href="05-fixing-at-the-source.html" class="module-item"
+            >05. Fixing at the Source (PCB/IC)</a
+          >
+          <a href="06-chokes-and-filtering.html" class="module-item"
+            >06. Common-Mode Chokes &amp; Filtering</a
+          >
+          <a href="07-shielding.html" class="module-item">07. Shielding &amp; Enclosures</a>
+          <a href="08-cables-and-grounding.html" class="module-item"
+            >08. Cables, Connectors &amp; Grounding</a
+          >
+          <a href="09-immunity-debug.html" class="module-item active"
+            >09. Immunity Pre-Compliance &amp; Debug</a
+          >
+          <a href="10-methodology-and-cases.html" class="module-item"
+            >10. Debug Methodology + Case Studies</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">EMC Pre-Compliance</a><span>/</span>
+            <span>09. Immunity Pre-Compliance &amp; Debug</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">EMI/EMC Academy</span>
+                <span class="badge badge-gray">~30 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Immunity Pre-Compliance &amp; Debug</h1>
+              <p class="subtitle">
+                Emissions are half of EMC; the product also has to keep working when the world
+                pushes back. This module covers quick, safe bench checks that approximate ESD,
+                EFT/burst, surge and radiated immunity — and how to harden a design that trips.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <div class="callout" style="margin-bottom: 1.5rem">
+                <strong>Learning objectives.</strong> Recall the four common immunity tests and
+                their standards; run safe, approximate bench pre-checks; reproduce field failures;
+                recall the performance criteria (A/B/C); and harden with TVS/varistors, filtering
+                and firmware recovery.
+              </div>
+
+              <!-- SECTION 1 : the tests -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="s1">
+                  <span>⚡ &nbsp;1. The Four Immunity Tests (recap)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body open" id="s1">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Test</th>
+                        <th>Standard</th>
+                        <th>Stress</th>
+                        <th>Deep dive</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>ESD</td>
+                        <td>IEC 61000-4-2</td>
+                        <td>±kV contact/air discharge</td>
+                        <td><a href="../ESD/index.html">ESD course</a></td>
+                      </tr>
+                      <tr>
+                        <td>EFT / Burst</td>
+                        <td>IEC 61000-4-4</td>
+                        <td>Fast repetitive transients on power/IO</td>
+                        <td>—</td>
+                      </tr>
+                      <tr>
+                        <td>Surge</td>
+                        <td>IEC 61000-4-5</td>
+                        <td>High-energy 1.2/50 µs surge</td>
+                        <td><a href="../Surge/index.html">Surge course</a></td>
+                      </tr>
+                      <tr>
+                        <td>Radiated immunity</td>
+                        <td>IEC 61000-4-3</td>
+                        <td>3–10 V/m RF field</td>
+                        <td>—</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p class="lead">
+                    Conducted immunity (IEC 61000-4-6) injects RF onto cables and is the immunity
+                    counterpart to conducted emissions. Note the symmetry: the same coupling paths
+                    that let noise <em>out</em> (Modules 5–8) let interference <em>in</em>, so most
+                    emission fixes also improve immunity.
+                  </p>
+                </div>
+              </div>
+
+              <!-- SECTION 2 : safe bench checks -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s2">
+                  <span>🧪 &nbsp;2. Safe, Approximate Bench Checks</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s2">
+                  <p class="lead">
+                    You can approximate immunity stresses cheaply — but respect the energy involved.
+                    <strong>ESD:</strong> an ESD simulator gun is ideal; if unavailable, a proper
+                    ESD pre-compliance kit beats improvised sparks.
+                    <strong>Radiated immunity:</strong> a small hand-probe/antenna driven by a
+                    signal generator + amplifier can find susceptible frequencies (relative, not
+                    calibrated). <strong>EFT:</strong> a bench burst generator couples onto power/IO
+                    via a capacitive clamp.
+                  </p>
+                  <div class="warning-box">
+                    <strong>Safety first.</strong> Surge and EFT involve high voltage/energy — use
+                    proper generators, coupling/decoupling networks, isolation and PPE, exactly as
+                    in the
+                    <a href="../Surge/05-test-setup-and-coupling.html">Surge test-setup module</a>.
+                    Do not improvise high-energy surge tests on the bench.
+                  </div>
+                  <div class="tip-box">
+                    Reproduce the field failure first. If a customer sees resets when a motor
+                    switches nearby, that's an EFT/burst clue. Instrument the failing signal (scope
+                    on reset, power, key IO) so you can <em>see</em> the upset and prove the fix
+                    with the delta method.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3 : decision aid -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s3">
+                  <span>🧭 &nbsp;3. Symptom → Hardening Decision Aid (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s3">
+                  <p class="lead">
+                    Pick the observed failure and get the likely stress and first hardening steps.
+                  </p>
+                  <div class="calc-wrap">
+                    <div class="calc-field" style="margin-bottom: 12px">
+                      <label
+                        for="symSel"
+                        style="
+                          display: block;
+                          font-size: 0.8rem;
+                          font-weight: 600;
+                          color: var(--text-sub);
+                          margin-bottom: 6px;
+                        "
+                        >Observed failure</label
+                      >
+                      <select id="symSel">
+                        <option value="reset">
+                          Random resets / lockups near switching or discharge events
+                        </option>
+                        <option value="port">
+                          A port dies after touching a connector (needs power cycle or is dead)
+                        </option>
+                        <option value="corrupt">
+                          Data corruption / comms errors under nearby RF or radio
+                        </option>
+                        <option value="surge">
+                          Damage after a lightning/mains transient event
+                        </option>
+                      </select>
+                    </div>
+                    <div
+                      class="calc-result"
+                      id="symResult"
+                      style="font-size: 0.95rem; line-height: 1.5"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4 : criteria + quiz -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s4">
+                  <span>📋 &nbsp;4. Performance Criteria</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s4">
+                  <p class="lead">
+                    Immunity results are graded by <strong>performance criteria</strong>:
+                    <strong>A</strong> = normal operation during the test; <strong>B</strong> =
+                    temporary degradation that self-recovers; <strong>C</strong> = requires operator
+                    intervention (e.g., power cycle). Know which criterion your product must meet —
+                    a watchdog that auto-recovers can turn a failing "C" into an acceptable "B".
+                  </p>
+                </div>
+              </div>
+
+              <div class="callout" style="margin-top: 1.5rem">
+                <strong>Key takeaways.</strong> Immunity uses the same coupling paths as emissions,
+                so bench pre-checks and the delta method still apply — safely. Harden with
+                TVS/varistors, filtering, bonding and firmware recovery. Next, we assemble
+                everything into one debug methodology.
+              </div>
+
+              <div
+                class="lesson-nav"
+                style="display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem"
+              >
+                <a class="btn btn-secondary" href="08-cables-and-grounding.html">← Previous</a>
+                <a class="btn btn-primary" href="10-methodology-and-cases.html"
+                  >Next: Debug Methodology + Case Studies →</a
+                >
+              </div>
+
+              <div id="global-bottom-nav"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        var fill = document.getElementById('progFill');
+        var pctEl = document.getElementById('progPct');
+        var total = document.querySelectorAll('.section-collapsible').length;
+        function updateProgress() {
+          var open = document.querySelectorAll('.section-body.open').length;
+          var p = total ? Math.round((open / total) * 100) : 0;
+          if (fill) fill.style.width = p + '%';
+          if (pctEl) pctEl.textContent = p + '%';
+        }
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+            updateProgress();
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+        updateProgress();
+      })();
+      (function () {
+        document.querySelectorAll('.quiz-question').forEach(function (q) {
+          var fb = q.querySelector('.quiz-feedback');
+          q.querySelectorAll('.quiz-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (q.getAttribute('data-answered')) return;
+              q.setAttribute('data-answered', '1');
+              var correct = opt.getAttribute('data-correct') === 'true';
+              q.querySelectorAll('.quiz-option').forEach(function (o) {
+                if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+              });
+              if (!correct) opt.classList.add('incorrect');
+              if (fb) fb.style.display = 'block';
+            });
+          });
+        });
+      })();
+      /* Symptom decision aid */
+      (function () {
+        var sel = document.getElementById('symSel');
+        var out = document.getElementById('symResult');
+        if (!sel || !out) return;
+        var map = {
+          reset:
+            '<strong>Likely EFT/burst (IEC 61000-4-4)</strong> coupling onto power/IO. First steps: add CM choke + filtering at the affected port, improve chassis bonding, and add a firmware watchdog so any upset self-recovers (criterion B).',
+          port: '<strong>Likely ESD (IEC 61000-4-2)</strong> into the connector. First steps: add low-capacitance TVS diodes at the connector pins, a ground stitching row, and a discharge path to chassis; keep the TVS loop tiny. See the <a href="../ESD/08-tvs-and-pcb-layout.html">ESD TVS/layout module</a>.',
+          corrupt:
+            '<strong>Likely radiated/conducted immunity (IEC 61000-4-3 / -4-6)</strong>. First steps: CM chokes on IO, better shielding/bonding, and filtering on susceptible analog/reset lines. The same fixes that cut emissions usually help here.',
+          surge:
+            '<strong>Likely surge (IEC 61000-4-5)</strong>. First steps: add appropriately rated MOV/GDT + series impedance + TVS staging on mains/long lines, and verify clamping energy. Treat as high-energy — follow the <a href="../Surge/index.html">Surge course</a>.',
+        };
+        function upd() {
+          out.innerHTML = map[sel.value] || '';
+        }
+        sel.addEventListener('change', upd);
+        upd();
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

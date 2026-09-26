@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Module 5 — Fixing EMC at the source (PCB/IC): edge-rate/slew control, series termination, spread spectrum, decoupling and PDN, return-path integrity, split-plane and stitching fixes, connector-area layout."
+    />
+    <title>05 · Fixing at the Source | EMC Pre-Compliance | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/Pre-Comp/05-fixing-at-the-source.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .lead {
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+      }
+      .lead strong {
+        color: var(--text-base);
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .diagram-cap {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.25rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >EMC Pre-Compliance Testing &amp; Debugging</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-why-pre-compliance.html" class="module-item">01. Why Pre-Compliance</a>
+          <a href="02-building-a-bench.html" class="module-item"
+            >02. Building an Affordable Bench</a
+          >
+          <a href="03-measurement-technique.html" class="module-item"
+            >03. Measurement Technique &amp; Toolkit</a
+          >
+          <a href="04-spectrum-signatures.html" class="module-item">04. Reading the Spectrum</a>
+          <a href="05-fixing-at-the-source.html" class="module-item active"
+            >05. Fixing at the Source (PCB/IC)</a
+          >
+          <a href="06-chokes-and-filtering.html" class="module-item"
+            >06. Common-Mode Chokes &amp; Filtering</a
+          >
+          <a href="07-shielding.html" class="module-item">07. Shielding &amp; Enclosures</a>
+          <a href="08-cables-and-grounding.html" class="module-item"
+            >08. Cables, Connectors &amp; Grounding</a
+          >
+          <a href="09-immunity-debug.html" class="module-item"
+            >09. Immunity Pre-Compliance &amp; Debug</a
+          >
+          <a href="10-methodology-and-cases.html" class="module-item"
+            >10. Debug Methodology + Case Studies</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item"
+            >11. Additional Case Studies</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">EMC Pre-Compliance</a><span>/</span>
+            <span>05. Fixing at the Source (PCB/IC)</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2rem 0 1.5rem">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">EMI/EMC Academy</span>
+                <span class="badge badge-gray">~35 min</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>Fixing at the Source — PCB &amp; IC Level</h1>
+              <p class="subtitle">
+                The cheapest dB you'll ever remove is the one you never generate. Before adding
+                ferrites and shields, attack the source: slower edges, controlled returns, tight
+                decoupling, and clean layout. Source fixes lower every downstream problem at once.
+              </p>
+              <div class="lesson-progress">
+                <div class="module-progress-label">
+                  <span>Module progress</span><span id="progPct">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="section" style="padding-top: 1rem">
+            <div class="container">
+              <div class="callout" style="margin-bottom: 1.5rem">
+                <strong>Learning objectives.</strong> Reduce emissions at the source via
+                edge-rate/slew control, series termination and spread-spectrum clocking; keep the
+                PDN quiet with proper decoupling; protect return paths; avoid split-plane crossings
+                or stitch them; and lay out the connector area to stop coupling onto cables.
+              </div>
+
+              <!-- SECTION 1 -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="s1">
+                  <span>⏫ &nbsp;1. Edge Rate — the Master Knob</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body open" id="s1">
+                  <p class="lead">
+                    A signal's harmonic content is set by its <strong>rise time</strong>, not its
+                    clock frequency. The spectral envelope rolls off faster above the "knee
+                    frequency" <em>f<sub>knee</sub> ≈ 0.35 / t<sub>r</sub></em
+                    >. Halving the edge rate (doubling t<sub>r</sub>) roughly halves the knee
+                    frequency, pulling high-frequency energy down where limits are easier to meet.
+                    If a net doesn't need a 1 ns edge, don't give it one.
+                  </p>
+                  <p class="lead">
+                    Practical levers: choose slower slew-rate driver options or lower drive
+                    strength; add a small <strong>series resistor</strong> (which also serves as
+                    source termination); and enable
+                    <strong>spread-spectrum clocking (SSC)</strong> where the protocol allows, which
+                    smears comb peaks by a few dB.
+                  </p>
+                  <div class="warning-box">
+                    <strong>Common mistake:</strong> over-slowing a signal until it fails timing or
+                    signal integrity. Slow the edge only to what the interface actually needs — see
+                    the
+                    <a href="../../Circuit/Interfaces/index.html">Serial Interfaces course</a> for
+                    the SI trade-offs.
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2 : before/after -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s2">
+                  <span>🔀 &nbsp;2. Before / After — Return-Path Fix (interactive)</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s2">
+                  <p class="lead">
+                    A high-speed signal's return current wants to flow on the reference plane
+                    directly beneath it. Cross a plane split or gap and the return is forced into a
+                    big detour — a loop that radiates. Toggle the fix below.
+                  </p>
+                  <div style="text-align: center; margin-bottom: 0.75rem">
+                    <button class="btn btn-secondary btn-sm" id="baToggle">Show the fix ▶</button>
+                  </div>
+                  <div class="diagram-box">
+                    <svg
+                      viewBox="0 0 620 200"
+                      width="100%"
+                      style="max-width: 620px"
+                      role="img"
+                      aria-label="Return current detouring around a plane gap, then fixed"
+                    >
+                      <line x1="40" y1="60" x2="580" y2="60" stroke="#f59e0b" stroke-width="4" />
+                      <text x="60" y="50" font-size="11" fill="#f59e0b">signal trace</text>
+                      <rect
+                        x="40"
+                        y="120"
+                        width="250"
+                        height="40"
+                        fill="rgba(34,197,94,0.12)"
+                        stroke="#22c55e"
+                      />
+                      <rect
+                        x="330"
+                        y="120"
+                        width="250"
+                        height="40"
+                        fill="rgba(34,197,94,0.12)"
+                        stroke="#22c55e"
+                      />
+                      <text
+                        x="300"
+                        y="185"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="currentColor"
+                        opacity="0.7"
+                      >
+                        reference plane
+                      </text>
+                      <rect
+                        id="baGap"
+                        x="290"
+                        y="115"
+                        width="40"
+                        height="50"
+                        fill="rgba(239,68,68,0.15)"
+                        stroke="#ef4444"
+                        stroke-dasharray="4 3"
+                      />
+                      <path
+                        id="baReturn"
+                        d="M120 140 L290 140 C290 95 330 95 330 140 L500 140"
+                        fill="none"
+                        stroke="#ef4444"
+                        stroke-width="2.5"
+                        stroke-dasharray="6 4"
+                      />
+                      <text
+                        id="baLabel"
+                        x="310"
+                        y="90"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="#ef4444"
+                      >
+                        forced detour → radiating loop
+                      </text>
+                      <circle
+                        id="baStitch"
+                        cx="310"
+                        cy="140"
+                        r="6"
+                        fill="#22d3ee"
+                        style="display: none"
+                      />
+                    </svg>
+                    <div class="diagram-cap" id="baCap">
+                      Before: the gap forces the return current into a large, radiating loop.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3 : PDN + layout -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="s3">
+                  <span>🔋 &nbsp;3. Decoupling, PDN &amp; Connector-Area Layout</span>
+                  <span class="chevron">▼</span>
+                </button>
+                <div class="section-body" id="s3">
+                  <p class="lead">
+                    Every switching output pulls a current spike from the power distribution network
+                    (PDN). If the PDN can't supply it locally, that current loops through the planes
+                    and radiates. Keep decoupling capacitors
+                    <strong>close, with short/wide vias</strong>
+                    to minimize mounting-loop inductance, and stagger values so the PDN stays
+                    low-impedance across the band. This is the same physics as the ground-bounce and
+                    PDN topics in your challenge bank.
+                  </p>
+                  <div class="two-col">
+                    <div class="info-box">
+                      <strong>Return-path rules.</strong> Route high-speed nets over continuous
+                      copper; never cross a split without a stitching cap/via at the crossing; keep
+                      a reference plane adjacent to every signal layer.
+                    </div>
+                    <div class="info-box">
+                      <strong>Connector area.</strong> This is where board energy jumps to cables.
+                      Add an I/O ground stitching row, keep noisy nets away from connectors, and
+                      provide footprints for common-mode chokes and filter caps <em>before</em> you
+                      need them.
+                    </div>
+                  </div>
+                  <div class="tip-box">
+                    <strong>Design-in insurance:</strong> place unpopulated footprints (0 Ω / DNP)
+                    for a series R, a filter cap, and a CM choke on every external interface. If
+                    pre-compliance flags that port, the fix is a stuff option, not a re-spin.
+                  </div>
+                </div>
+              </div>
+
+              <div class="callout" style="margin-top: 1.5rem">
+                <strong>Key takeaways.</strong> Slow edges to what's needed, keep returns
+                continuous, decouple tightly, and lay out the connector area to stop coupling onto
+                cables. When the source is as quiet as practical, we move to filtering the rest.
+              </div>
+
+              <div
+                class="lesson-nav"
+                style="display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem"
+              >
+                <a class="btn btn-secondary" href="04-spectrum-signatures.html">← Previous</a>
+                <a class="btn btn-primary" href="06-chokes-and-filtering.html"
+                  >Next: Common-Mode Chokes &amp; Filtering →</a
+                >
+              </div>
+
+              <div id="global-bottom-nav"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script src="../../../assets/js/training-social.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        var fill = document.getElementById('progFill');
+        var pctEl = document.getElementById('progPct');
+        var total = document.querySelectorAll('.section-collapsible').length;
+        function updateProgress() {
+          var open = document.querySelectorAll('.section-body.open').length;
+          var p = total ? Math.round((open / total) * 100) : 0;
+          if (fill) fill.style.width = p + '%';
+          if (pctEl) pctEl.textContent = p + '%';
+        }
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+            }
+            updateProgress();
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+        updateProgress();
+      })();
+      /* Before/after return-path toggle */
+      (function () {
+        var btn = document.getElementById('baToggle');
+        if (!btn) return;
+        var fixed = false;
+        btn.addEventListener('click', function () {
+          fixed = !fixed;
+          var ret = document.getElementById('baReturn');
+          var gap = document.getElementById('baGap');
+          var stitch = document.getElementById('baStitch');
+          var label = document.getElementById('baLabel');
+          var cap = document.getElementById('baCap');
+          if (fixed) {
+            ret.setAttribute('d', 'M120 140 L500 140');
+            ret.setAttribute('stroke', '#22c55e');
+            gap.setAttribute('fill', 'rgba(34,197,94,0.12)');
+            gap.setAttribute('stroke', '#22c55e');
+            stitch.style.display = '';
+            label.textContent = 'stitched — short return under trace';
+            label.setAttribute('fill', '#22c55e');
+            cap.textContent =
+              'After: a stitching cap/via bridges the gap — the return follows the trace, loop area collapses.';
+            btn.textContent = 'Show the problem ◀';
+          } else {
+            ret.setAttribute('d', 'M120 140 L290 140 C290 95 330 95 330 140 L500 140');
+            ret.setAttribute('stroke', '#ef4444');
+            gap.setAttribute('fill', 'rgba(239,68,68,0.15)');
+            gap.setAttribute('stroke', '#ef4444');
+            stitch.style.display = 'none';
+            label.textContent = 'forced detour → radiating loop';
+            label.setAttribute('fill', '#ef4444');
+            cap.textContent =
+              'Before: the gap forces the return current into a large, radiating loop.';
+            btn.textContent = 'Show the fix ▶';
+          }
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

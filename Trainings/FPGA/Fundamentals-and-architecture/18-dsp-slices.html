@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep dive into DSP48E1 — the 25x18-bit multiplier and 48-bit accumulator block that enables FIR filters, FFTs, and AI acceleration in Xilinx 7-series FPGAs."
+    />
+    <title>DSP Slices | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/18-dsp-slices.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      pre {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        margin: 16px 0;
+      }
+      code {
+        font-family: 'Courier New', monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-13"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item active" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <!-- Lesson Header -->
+        <div style="margin-bottom: 32px">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+            <span
+              style="
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: var(--text-muted);
+              "
+              >Lesson 18 of 25</span
+            >
+            <span style="font-size: 0.75rem; color: var(--text-muted)">·</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted)">15 MIN</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted)">·</span>
+            <span style="font-size: 0.75rem; font-weight: 600; color: #22d3ee">72% complete</span>
+          </div>
+          <h1
+            style="
+              font-size: 1.875rem;
+              font-weight: 800;
+              color: var(--text-base);
+              line-height: 1.2;
+              margin-bottom: 12px;
+            "
+          >
+            DSP Slices
+          </h1>
+          <p style="font-size: 1rem; color: var(--text-sub); line-height: 1.7; max-width: 720px">
+            The DSP48E1 is a dedicated arithmetic block featuring a 25×18-bit multiplier, pre-adder,
+            and 48-bit accumulator. It is the core engine behind FIR filters, FFTs, and AI/ML
+            inference on Xilinx 7-series FPGAs.
+          </p>
+        </div>
+
+        <!-- Section 1 -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          What is a DSP Slice?
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          A DSP Slice is a
+          <strong style="color: var(--text-base)">dedicated silicon block</strong> for high-speed
+          arithmetic — it is not built from LUTs or flip-flops. Implementing the equivalent function
+          in LUT fabric would require 100+ LUTs and would run at a fraction of the speed. DSP slices
+          give you that arithmetic free of LUT cost and at clock frequencies exceeding 700 MHz.
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            Xilinx 7-series primitive: <strong style="color: var(--text-base)">DSP48E1</strong>
+          </li>
+          <li>UltraScale / UltraScale+: DSP48E2 (wider A input: 34 bits vs 30 bits)</li>
+          <li>
+            Device counts: Artix-7 — 90 to 740 DSPs; Kintex-7 — 240 to 3600 DSPs; Zynq-7000 — 80 to
+            2020 DSPs
+          </li>
+        </ul>
+
+        <!-- Section 2 -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          DSP48E1 Internal Architecture
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          The DSP48E1 data path has three main computation stages, each of which can be
+          independently pipelined:
+        </p>
+        <ol
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">Pre-adder:</strong> computes D ± A, producing a
+            27-bit result before the multiplier — allows (A+D)×B without an extra LUT adder
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Multiplier:</strong> 25×18-bit signed multiplier
+            producing a 43-bit product
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Post-adder / accumulator:</strong> computes P =
+            X + Y + CARRYIN where X and Y are selected from the muxes below
+          </li>
+        </ol>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">X mux inputs:</strong> M (multiplier output), P
+            (feedback for accumulate), A:B (48-bit concatenation), 0
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Y mux inputs:</strong> C input, P (cascade), 0
+          </li>
+          <li><strong style="color: var(--text-base)">Total output width:</strong> 48 bits</li>
+        </ul>
+        <div class="mermaid">
+          flowchart LR D([D 27b]) --> PREADD["Pre-adder\nD ± A"] A([A 30b]) --> PREADD PREADD -->
+          MUL["Multiplier\n25×18b"] B([B 18b]) --> MUL MUL --> XMUX["X Mux"] C([C 48b]) --> YMUX["Y
+          Mux"] XMUX --> POSTADD["Post-adder /\nAccumulator\n48b"] YMUX --> POSTADD POSTADD --> P([P
+          48b output]) P -->|"PCOUT cascade"| NEXTDSP([Next DSP]) P -->|"accumulate feedback"| XMUX
+          style MUL fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style POSTADD
+          fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style PREADD
+          fill:#1e293b,stroke:#475569,color:#94a3b8
+        </div>
+
+        <!-- Section 3: Ports table -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Key Input Ports
+        </h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Port</th>
+              <th>Width</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>A</code></td>
+              <td>30 bits</td>
+              <td>Primary input (upper bits fed to pre-adder and multiplier)</td>
+            </tr>
+            <tr>
+              <td><code>B</code></td>
+              <td>18 bits</td>
+              <td>Secondary multiplier input</td>
+            </tr>
+            <tr>
+              <td><code>C</code></td>
+              <td>48 bits</td>
+              <td>Accumulator / adder third operand</td>
+            </tr>
+            <tr>
+              <td><code>D</code></td>
+              <td>27 bits</td>
+              <td>Pre-adder input (combined with A before multiply)</td>
+            </tr>
+            <tr>
+              <td><code>P</code></td>
+              <td>48 bits</td>
+              <td>Output (also fed back for accumulation)</td>
+            </tr>
+            <tr>
+              <td><code>PCIN / PCOUT</code></td>
+              <td>48 bits</td>
+              <td>Dedicated cascade between adjacent DSPs</td>
+            </tr>
+            <tr>
+              <td><code>OPMODE</code></td>
+              <td>7 bits</td>
+              <td>Controls X, Y, Z mux selections</td>
+            </tr>
+            <tr>
+              <td><code>ALUMODE</code></td>
+              <td>4 bits</td>
+              <td>Selects add, subtract, or logic operation</td>
+            </tr>
+            <tr>
+              <td><code>CARRYCASCIN</code></td>
+              <td>1 bit</td>
+              <td>Carry input from the previous DSP in a cascade</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 4: Pipeline -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Pipeline Registers and Timing
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          DSP48E1 has three optional pipeline register stages. Enabling all three stages
+          dramatically increases the achievable clock frequency at the cost of added latency:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">Stage 1:</strong> A1 / B1 registers — after the
+            input ports
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Stage 2:</strong> A2 / B2 / M registers — after
+            the pre-adder and multiplier
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Stage 3:</strong> P register — at the output of
+            the post-adder
+          </li>
+        </ul>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Pipeline stages enabled</th>
+              <th>Max frequency (Artix-7 -3)</th>
+              <th>Latency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0 (combinational)</td>
+              <td>~300 MHz</td>
+              <td>0 cycles</td>
+            </tr>
+            <tr>
+              <td>2 (A1/B1 + M)</td>
+              <td>~550 MHz</td>
+              <td>2 cycles</td>
+            </tr>
+            <tr>
+              <td>3 (full pipeline)</td>
+              <td>~741 MHz</td>
+              <td>3 cycles</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 5: PCIN/PCOUT Cascade -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          PCIN/PCOUT Cascade — Building Multi-DSP Architectures
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Each DSP48E1 has dedicated 48-bit cascade wires that connect directly to the adjacent DSP
+          above and below in the column. Using PCOUT → PCIN avoids the general routing fabric
+          entirely and adds zero routing delay:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>PCOUT[47:0] of DSP<sub>N</sub> connects to PCIN[47:0] of DSP<sub>N+1</sub></li>
+          <li>
+            Zero additional routing delay — the cascade wire is hardwired between adjacent DSPs
+          </li>
+          <li>
+            FIR filter implementation: each tap uses one DSP, PCOUT carries the running sum to the
+            next tap
+          </li>
+        </ul>
+        <div class="mermaid">
+          flowchart LR IN([x&#91;n&#93;]) --> DSP0["DSP0\nh&#91;0&#93; × x&#91;n&#93;"] DSP0
+          -->|PCOUT| DSP1["DSP1\nh&#91;1&#93; × x&#91;n-1&#93;"] DSP1 -->|PCOUT|
+          DSP2["DSP2\nh&#91;2&#93; × x&#91;n-2&#93;"] DSP2 -->|PCOUT| OUT([y&#91;n&#93; sum]) style
+          DSP0 fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style DSP1
+          fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style DSP2
+          fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd
+        </div>
+
+        <!-- Section 6: What DSP48E1 implements -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          What DSP48E1 Implements
+        </h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>DSPs Used</th>
+              <th>Operation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>18×18 multiplier</td>
+              <td>1</td>
+              <td>Direct multiply A×B</td>
+            </tr>
+            <tr>
+              <td>36×36 multiplier</td>
+              <td>4</td>
+              <td>Decomposition into four 18-bit partial products</td>
+            </tr>
+            <tr>
+              <td>MAC (multiply-accumulate)</td>
+              <td>1</td>
+              <td>P = P + A×B with P feedback</td>
+            </tr>
+            <tr>
+              <td>FIR filter (N taps)</td>
+              <td>N</td>
+              <td>One DSP per tap, cascade via PCIN/PCOUT</td>
+            </tr>
+            <tr>
+              <td>Complex multiply</td>
+              <td>3</td>
+              <td>(a+jb)(c+jd) using 3-DSP trick</td>
+            </tr>
+            <tr>
+              <td>Ternary adder</td>
+              <td>1</td>
+              <td>A + B + C in a single DSP post-adder</td>
+            </tr>
+            <tr>
+              <td>Barrel shifter</td>
+              <td>1–4</td>
+              <td>Using pre-adder and shift-by-1 cascades</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 7: Synthesis inference -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Synthesis Inference
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Vivado automatically infers DSP48E1 primitives from common arithmetic patterns in Verilog
+          or VHDL:
+        </p>
+        <pre><code>// Simple multiply — infers 1 DSP48E1
+assign p = a * b;
+
+// Multiply-accumulate — infers DSP48E1 with P feedback
+always @(posedge clk)
+  p_reg &lt;= p_reg + a * b;
+
+// Force DSP inference
+(* use_dsp = "yes" *)
+wire [47:0] result;
+assign result = a * b + c;
+
+// Prevent DSP inference (use LUT fabric instead)
+(* use_dsp = "no" *)
+wire [17:0] product;
+assign product = x * y;</code></pre>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-top: 12px">
+          After synthesis, check the Vivado Synthesis Report → Primitive Instantiation table for
+          <strong style="color: var(--text-base)">DSP48E1</strong> count. Also search the synthesis
+          log for "DSP48E1" to see which signals were mapped.
+        </p>
+
+        <!-- Section 8: FIR + Plotly -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          FIR Filter Implementation
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          A direct-form FIR filter computes y[n] = Σ h[k] × x[n−k]. Each tap requires exactly one
+          multiply-accumulate operation — mapping directly to one DSP48E1 per tap with PCOUT cascade
+          for the accumulation:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            Coefficient h[k] is preloaded into the A or B port (or stored in a small distributed
+            RAM)
+          </li>
+          <li>Delayed input sample x[n−k] is passed from a shift register chain</li>
+          <li>PCOUT carries the running partial sum from tap to tap with zero routing overhead</li>
+          <li>Total DSPs for an N-tap FIR = N</li>
+        </ul>
+        <div id="chart-fir" style="width: 100%; height: 300px; margin: 16px 0"></div>
+
+        <!-- Section 9: AI/ML -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          AI / ML Acceleration
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Modern FPGA AI inference engines exploit DSP48E1 in two key ways:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">INT8 packing:</strong> two signed 9-bit values
+            can be packed into the 18-bit B input, enabling two multiply-accumulate operations per
+            DSP per cycle
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">MACC chains:</strong> cascaded PCOUT chains
+            implement dot products for fully-connected and convolution layers
+          </li>
+          <li>Kintex UltraScale+ KU15P: 5,520 DSPs → approximately 170 GOPS at INT8 precision</li>
+        </ul>
+
+        <!-- Callouts -->
+        <div class="callout callout-info">
+          <strong>Pipeline your DSPs</strong>
+          DSP48E1 has 3 pipeline stages. Enabling all three increases maximum frequency from ~300
+          MHz to ~741 MHz. Always pipeline DSPs in high-speed designs — the latency cost is usually
+          worth the frequency gain.
+        </div>
+        <div class="callout callout-tip">
+          <strong>3-DSP complex multiply trick</strong>
+          For complex multiplication (a+jb)(c+jd), use: p1=a×c, p2=b×d, p3=(a+b)×(c+d), then
+          real=p1−p2, imag=p3−p1−p2. This requires only 3 DSPs instead of 4, saving 25% of DSP
+          resources.
+        </div>
+        <div class="callout callout-warning">
+          <strong>Check DSP availability before using LUTs for arithmetic</strong>
+          A 32×32-bit multiplier takes ~400 LUTs but only 4 DSPs. Never implement wide multipliers
+          in LUT fabric when DSPs are available. Check DSP counts in the device datasheet first.
+        </div>
+        <div class="callout callout-interview">
+          <strong>Interview question</strong>
+          Q: What is the pre-adder in DSP48E1 and why is it useful?<br />
+          A: The pre-adder computes D±A before the multiplier, allowing (D+A)×B in a single DSP.
+          This is critical for symmetric FIR filters where the same coefficient multiplies two
+          symmetric input samples — cutting the required DSP count nearly in half.
+        </div>
+
+        <!-- Quiz -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Knowledge Check
+        </h2>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q1. What is the multiplier width in DSP48E1?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-1', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> 18×18 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-1', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> 25×18 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-1', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> 30×18 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-1', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> 48×18 bits
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-1">
+            Correct! The multiplier in DSP48E1 is 25×18 bits, producing a 43-bit product. The 25-bit
+            A input comes from the pre-adder output (which is 27 bits, truncated to 25 for the
+            multiply stage).
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q2. What is the output width of DSP48E1?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-2', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> 43 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-2', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> 48 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-2', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> 36 bits
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-2', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> 64 bits
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-2">
+            Correct! The P output port (and the PCOUT cascade) are both 48 bits wide. This wide
+            accumulator prevents overflow during multi-tap accumulation in FIR filters.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">
+            Q3. Which port cascades the output of one DSP48E1 to the next in a chain?
+          </p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-3', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> ACOUT / ACIN
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-3', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> PCOUT / PCIN
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-3', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> CARRYCASCOUT
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-3', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> BCOUT / BCIN
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-3">
+            Correct! PCOUT[47:0] feeds directly into PCIN[47:0] of the adjacent DSP in the column.
+            These are dedicated wires with zero routing delay, enabling high-speed cascade chains.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">
+            Q4. How many DSP48E1 slices are needed to implement a 4-tap FIR filter?
+          </p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-4', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> 1
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-4', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> 2
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-4', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> 3
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-4', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> 4
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-4">
+            Correct! A direct-form FIR filter uses one DSP per tap — each tap computes h[k]×x[n−k]
+            and adds it to the cascade. A 4-tap filter requires 4 DSPs with PCOUT chaining the
+            partial sums.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q5. Which RTL attribute forces DSP inference in Vivado?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-5', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> <code>(* use_dsp = "no" *)</code>
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-5', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> <code>(* ram_style = "dsp" *)</code>
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-5', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> <code>(* use_dsp = "yes" *)</code>
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-5', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> <code>(* dsp_style = "primitive" *)</code>
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-5">
+            Correct! The <code>(* use_dsp = "yes" *)</code> attribute forces Vivado to map
+            arithmetic to DSP48E1 primitives. The opposite attribute
+            <code>(* use_dsp = "no" *)</code> forces LUT-based implementation.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q6. The pre-adder in DSP48E1 computes what operation?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-6', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> A + B before the multiplier
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-6', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> P + C in the accumulator stage
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-18-6', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> D ± A before the multiplier
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-18-6', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> A × D in a 27-bit pre-multiply
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-18-6">
+            Correct! The pre-adder computes D ± A, feeding the result into the 25-bit multiplier
+            input. This enables (D+A)×B in one DSP — essential for symmetric FIR filters to halve
+            the DSP count.
+          </div>
+        </div>
+
+        <!-- Practical Exercise -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Practical Exercise
+        </h2>
+        <div
+          style="
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+          "
+        >
+          <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+            Design a 16-tap FIR low-pass filter in Verilog with signed 16-bit coefficients and
+            16-bit input:
+          </p>
+          <pre><code>module fir16 #(parameter TAPS=16) (
+  input  wire        clk, rst,
+  input  wire [15:0] x_in,
+  output reg  [47:0] y_out
+);
+  reg  [15:0] h [0:TAPS-1];  // coefficients
+  reg  [15:0] xd[0:TAPS-1];  // delay line
+  integer i;
+
+  // Load coefficients (LPF values)
+  initial begin
+    h[0]=16'd100; h[1]=16'd200; // ... etc
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      y_out &lt;= 0;
+      for(i=0;i&lt;TAPS;i=i+1) xd[i] &lt;= 0;
+    end else begin
+      xd[0] &lt;= x_in;
+      for(i=1;i&lt;TAPS;i=i+1) xd[i] &lt;= xd[i-1];
+      y_out &lt;= 0;
+      for(i=0;i&lt;TAPS;i=i+1) y_out &lt;= y_out + $signed(h[i]) * $signed(xd[i]);
+    end
+  end
+endmodule</code></pre>
+          <p style="color: var(--text-sub); line-height: 1.8; margin-top: 12px">
+            Synthesize targeting Kintex-7 (xc7k70t). Verify that exactly 16 DSP48E1 primitives are
+            inferred (one per tap). Then check the Timing Summary to find the achievable clock
+            frequency with full 3-stage pipelining enabled via the <code>DSP_REG</code> attribute.
+          </p>
+        </div>
+
+        <div class="lesson-nav">
+          <a href="17-distributed-ram.html">← Distributed RAM</a>
+          <a href="19-io-banks.html">IO Banks →</a>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-18';
+      const TOTAL = 25;
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        var isDark = document.documentElement.dataset.theme === 'dark';
+        var textColor = isDark ? '#94a3b8' : '#475569';
+        var gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+        Plotly.newPlot(
+          'chart-fir',
+          [
+            {
+              x: ['4-tap', '8-tap', '16-tap', '32-tap', '64-tap'],
+              y: [4, 8, 16, 32, 64],
+              type: 'bar',
+              marker: { color: '#818cf8', opacity: 0.85 },
+              name: 'DSP48E1 count',
+            },
+          ],
+          {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: textColor, family: 'Inter,sans-serif' },
+            yaxis: {
+              title: { text: 'DSP48E1 slices used', font: { color: textColor } },
+              gridcolor: gridColor,
+              color: textColor,
+              tickfont: { color: textColor },
+            },
+            xaxis: {
+              title: { text: 'FIR filter tap count', font: { color: textColor } },
+              color: textColor,
+              tickfont: { color: textColor },
+            },
+            title: {
+              text: 'FIR Filter — DSP count scales linearly with tap count',
+              font: { color: textColor, size: 14 },
+            },
+            margin: { t: 50, b: 60, l: 70, r: 30 },
+            bargap: 0.3,
+            showlegend: false,
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      });
+    </script>
+  </body>
+</html>

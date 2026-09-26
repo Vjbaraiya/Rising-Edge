@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Master serial interfaces RS232, RS485 and RS422 — single-ended vs differential signaling, voltage levels, connectors and pinouts, ESD protection, termination and biasing, transceiver selection, and PCB layout, all through interactive diagrams and Plotly charts."
+    />
+    <title>RS232 / RS485 / RS422 Serial Interface Design Academy | Rising Edge Technologies</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/Trainings/Circuit/Interfaces/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .text-gradient {
+        background: linear-gradient(90deg, var(--cyan, #22d3ee), #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .si-hero {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-alt) 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl, 16px);
+        padding: 2.5rem 2rem;
+        margin-bottom: 2.5rem;
+      }
+      .si-hero h1 {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 800;
+        color: var(--text-base);
+        line-height: 1.25;
+        margin-bottom: 1rem;
+      }
+      .course-stat {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 0.875rem 1.25rem;
+        min-width: 90px;
+        text-align: center;
+      }
+      .course-stat-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        line-height: 1;
+        margin-bottom: 3px;
+      }
+      .course-stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 0.75rem;
+      }
+      .module-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 1.1rem 1.25rem;
+        text-decoration: none;
+        color: inherit;
+        transition:
+          border-color 0.18s,
+          box-shadow 0.18s,
+          transform 0.15s;
+      }
+      .module-card:hover {
+        border-color: var(--cyan, #22d3ee);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+        transform: translateY(-1px);
+      }
+      .module-num {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-md, 8px);
+        font-size: 0.7rem;
+        font-weight: 800;
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+      }
+      .module-num.available {
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.3);
+        color: var(--cyan, #22d3ee);
+      }
+      .module-num.capstone {
+        background: rgba(251, 146, 60, 0.1);
+        border-color: rgba(251, 146, 60, 0.25);
+        color: #fb923c;
+      }
+      .module-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 0.3rem;
+        line-height: 1.35;
+      }
+      .module-sub {
+        font-size: 0.8rem;
+        color: var(--text-sub);
+        line-height: 1.5;
+        margin-bottom: 0.6rem;
+      }
+      .module-meta {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Serial Interfaces (RS232 / RS485 / RS422)
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Introduction &amp; Comparison</a>
+          <a href="02-signal-levels.html" class="module-item">02. Signal Levels &amp; Duplex</a>
+          <a href="03-connectors-pinouts.html" class="module-item">03. Connectors &amp; Pinouts</a>
+          <a href="04-esd-protection.html" class="module-item">04. ESD Protection Front-End</a>
+          <a href="05-termination-biasing.html" class="module-item"
+            >05. Termination &amp; Biasing</a
+          >
+          <a href="06-transceiver-selection.html" class="module-item">06. Transceiver Selection</a>
+          <a href="07-pcb-layout-cabling.html" class="module-item">07. PCB Layout &amp; Cabling</a>
+          <a href="08-standards-decision-guide.html" class="module-item"
+            >08. Standards &amp; Decision Guide</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <span>Serial Interfaces (RS232 / RS485 / RS422)</span>
+          </nav>
+        </div>
+        <div class="lesson-body">
+          <!-- Populated by assets/js/training-progress.js for logged-in
+         users with prior progress — shows a progress bar and a
+         "Continue where you left off" button. Empty/hidden
+         otherwise. -->
+          <div id="course-resume-banner" style="margin: 24px 0"></div>
+          <!-- HERO -->
+          <section class="si-hero">
+            <div class="container">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+                <span class="badge badge-cyan">Circuit Design Academy</span>
+                <span class="badge badge-blue">8 Modules</span>
+                <span class="badge badge-green">Interactive</span>
+              </div>
+              <h1>
+                RS232 &middot; RS485 &middot; RS422<br /><span class="text-gradient"
+                  >Serial Interface Hardware Design from Signal to PCB</span
+                >
+              </h1>
+              <p
+                style="
+                  font-size: 1rem;
+                  color: var(--text-sub);
+                  line-height: 1.75;
+                  max-width: 660px;
+                  margin-bottom: 28px;
+                "
+              >
+                A complete, hands-on guide to the three workhorse serial interfaces. See why a
+                differential pair beats a single-ended line for noise and distance, compare voltage
+                levels, cable length and data rate on live Plotly charts, wire up DE-9 and terminal
+                blocks correctly, protect connectors against &plusmn;8&nbsp;kV ESD, terminate and
+                bias an RS485 bus, pick the right transceiver, and lay out controlled-impedance
+                differential pairs on the board.
+              </p>
+              <div style="display: flex; gap: 20px; flex-wrap: wrap">
+                <div class="course-stat">
+                  <div class="course-stat-val">8</div>
+                  <div class="course-stat-label">Modules</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">5+</div>
+                  <div class="course-stat-label">Interactive Tools</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">Plotly</div>
+                  <div class="course-stat-label">Live Charts</div>
+                </div>
+                <div class="course-stat">
+                  <div class="course-stat-val">3</div>
+                  <div class="course-stat-label">Interfaces Compared</div>
+                </div>
+              </div>
+              <div style="margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap">
+                <a class="btn btn-primary btn-lg" href="01-introduction.html"
+                  >Start Learning
+                  <svg
+                    fill="none"
+                    height="15"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewbox="0 0 24 24"
+                    width="15"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"></path></svg
+                ></a>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULES -->
+          <div class="section">
+            <div class="container">
+              <h2
+                style="
+                  font-size: 1.125rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin-bottom: 6px;
+                "
+              >
+                Course Modules
+              </h2>
+              <p style="font-size: 0.875rem; color: var(--text-sub); margin-bottom: 20px">
+                All eight modules are fully available &mdash; each with interactive animations,
+                calculators or live charts, worked diagrams, and a knowledge check.
+              </p>
+              <div class="module-grid">
+                <a class="module-card" href="01-introduction.html">
+                  <div class="module-num available">01</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Introduction &amp; Interface Comparison</div>
+                    <div class="module-sub">
+                      Single-ended vs differential signaling, how common-mode noise is rejected, the
+                      full RS232/RS485/RS422 comparison table, a live baud-rate-vs-cable-length
+                      Plotly chart, and a &quot;which interface should I use?&quot; decision guide.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~50 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="02-signal-levels.html">
+                  <div class="module-num available">02</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Signal Levels, Voltage &amp; Duplex Modes</div>
+                    <div class="module-sub">
+                      RS232 &plusmn;3&ndash;15&nbsp;V logic, RS485/RS422 differential
+                      &plusmn;1.5&ndash;5&nbsp;V, mark/space definitions, common-mode range, and
+                      full- vs half-duplex operation.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~45 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="03-connectors-pinouts.html">
+                  <div class="module-num available">03</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Connectors &amp; Pinouts</div>
+                    <div class="module-sub">
+                      DE-9 (DB9) RS232 pinout, RS485/RS422 terminal block and RJ45 conventions, A/B
+                      and D+/D&minus; naming, the Y/Z second pair, and the vendor A/B ambiguity
+                      trap.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~40 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="04-esd-protection.html">
+                  <div class="module-num available">04</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">ESD Protection Front-End</div>
+                    <div class="module-sub">
+                      TVS diode topology per line, uni- vs bidirectional selection, placement at the
+                      connector before series R/ferrite, IEC 61000-4-2 &plusmn;8&nbsp;kV levels, and
+                      the connector &rarr; TVS &rarr; series &rarr; transceiver schematic.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~45 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="05-termination-biasing.html">
+                  <div class="module-num available">05</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Termination &amp; Fail-Safe Biasing</div>
+                    <div class="module-sub">
+                      120&nbsp;&Omega; termination at each bus end, why it matches twisted-pair
+                      impedance, fail-safe pull-up/pull-down bias resistors, and the idle-bus
+                      indeterminate-state problem.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~45 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="06-transceiver-selection.html">
+                  <div class="module-num available">06</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Transceiver IC Selection</div>
+                    <div class="module-sub">
+                      RS232 charge-pump parts (MAX232 family), RS485/422 half-duplex with DE/RE
+                      control vs full-duplex, and slew-rate-limited vs high-speed transceivers.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~45 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="07-pcb-layout-cabling.html">
+                  <div class="module-num available">07</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">PCB Layout &amp; Cabling</div>
+                    <div class="module-sub">
+                      Controlled-impedance ~120&nbsp;&Omega; length-matched differential pairs,
+                      ground-plane continuity, TVS tight to the connector, shielded twisted pair,
+                      and one-end shield grounding.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~45 min</span>
+                    </div>
+                  </div>
+                </a>
+                <a class="module-card" href="08-standards-decision-guide.html">
+                  <div class="module-num capstone">CS</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="module-title">Standards, Isolation &amp; Decision Guide</div>
+                    <div class="module-sub">
+                      Isolated transceivers and digital isolators, multidrop daisy-chain topology,
+                      half-duplex turnaround timing, failure modes, the TIA/EIA and IEC standards
+                      footer, and a capstone selection challenge.
+                    </div>
+                    <div class="module-meta">
+                      <span class="badge badge-orange">Capstone</span
+                      ><span class="badge badge-green">Available</span
+                      ><span class="badge badge-gray">~50 min</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <!-- PREREQUISITES -->
+              <div class="card" style="margin-top: 36px; padding: 22px">
+                <h3
+                  style="
+                    font-size: 0.9375rem;
+                    font-weight: 700;
+                    color: var(--text-base);
+                    margin-bottom: 10px;
+                  "
+                >
+                  Prerequisites
+                </h3>
+                <p
+                  style="
+                    font-size: 0.875rem;
+                    color: var(--text-sub);
+                    line-height: 1.7;
+                    margin-bottom: 12px;
+                  "
+                >
+                  This course assumes basic familiarity with serial communication. You should be
+                  comfortable with:
+                </p>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--text-sub);
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    "
+                  >
+                    <svg
+                      fill="none"
+                      height="14"
+                      stroke="#22d3ee"
+                      stroke-width="2"
+                      viewbox="0 0 24 24"
+                      width="14"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    UART / serial basics (start bits, baud rate, TX/RX)
+                  </div>
+                  <div
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--text-sub);
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    "
+                  >
+                    <svg
+                      fill="none"
+                      height="14"
+                      stroke="#22d3ee"
+                      stroke-width="2"
+                      viewbox="0 0 24 24"
+                      width="14"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Ohm's law, voltage dividers, and basic circuit analysis
+                  </div>
+                  <div
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--text-sub);
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    "
+                  >
+                    <svg
+                      fill="none"
+                      height="14"
+                      stroke="#22d3ee"
+                      stroke-width="2"
+                      viewbox="0 0 24 24"
+                      width="14"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Digital logic levels and microcontroller I/O basics
+                  </div>
+                  <div
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--text-sub);
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    "
+                  >
+                    <svg
+                      fill="none"
+                      height="14"
+                      stroke="#22d3ee"
+                      stroke-width="2"
+                      viewbox="0 0 24 24"
+                      width="14"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Reading component and product datasheets
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="global-bottom-nav"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

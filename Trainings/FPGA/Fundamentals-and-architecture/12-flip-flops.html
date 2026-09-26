@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Deep dive into FPGA flip-flops: FDRE/FDSE/FDPE/FDCE primitives, timing parameters, metastability, clock enable, synchronous reset, and clock domain crossing."
+    />
+    <title>Flip-Flops and Registers | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/12-flip-flops.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      .timing-canvas-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .timing-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .timing-ctrl-btn {
+        padding: 7px 16px;
+        border-radius: 6px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-muted);
+        color: var(--text-sub);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+      }
+      .timing-ctrl-btn:hover,
+      .timing-ctrl-btn.active {
+        border-color: #22d3ee;
+        color: #22d3ee;
+        background: rgba(34, 211, 238, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item active" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Fundamentals</a><span>/</span>
+            <span>Flip-Flops and Registers</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 12/25</span><span>48%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 48%"></div></div>
+          </div>
+        </div>
+        <div class="lesson-body">
+          <section class="hero" style="padding: 2.5rem 2rem">
+            <div class="hero-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px">
+                <span class="badge">MODULE 12 OF 25</span>
+                <span class="badge">15 MIN</span>
+                <span class="badge badge-cyan">FPGA FUNDAMENTALS</span>
+              </div>
+              <h1
+                style="
+                  font-size: clamp(1.4rem, 3vw, 2rem);
+                  font-weight: 900;
+                  color: var(--text-base);
+                  margin-bottom: 12px;
+                "
+              >
+                Flip-Flops and Registers
+              </h1>
+              <p class="subtitle">
+                Master the D flip-flop as the fundamental storage element: FDRE/FDSE/FDPE/FDCE
+                primitives, setup/hold timing, metastability, clock enable, synchronous reset,
+                pipelining, and clock domain crossing.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 0 0 12px;
+                "
+              >
+                The D Flip-Flop — FPGA's Memory Atom
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                A <strong>D flip-flop</strong> stores one bit of state. On the active clock edge
+                (rising by default), the value at input D is captured and appears at output Q.
+                Between clock edges, Q holds its value regardless of what D does. This is the
+                fundamental storage element of all synchronous digital design — every counter,
+                register, state machine, and pipeline stage is built from flip-flops.
+              </p>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                In Xilinx 7-series FPGAs, each Slice contains <strong>8 flip-flops</strong> (4 LUTs
+                × 2 FFs per LUT). The standard FF primitive is
+                <code
+                  style="
+                    font-family: monospace;
+                    background: var(--bg-muted);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                  "
+                  >FDRE</code
+                >
+                — Flip-Flop D with synchronous Reset and Clock Enable.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Xilinx FF Primitives
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                The <strong>FDRE</strong> primitive inputs/outputs:
+              </p>
+              <pre
+                style="
+                  background: var(--bg-muted);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-family: monospace;
+                  font-size: 0.82rem;
+                  color: var(--text-base);
+                  overflow-x: auto;
+                  margin-bottom: 16px;
+                "
+              >
+// FDRE — Flip-Flop D, synchronous Reset, positive Edge, Clock Enable
+FDRE #(.INIT(1'b0)) ff_inst (
+  .D(d_in),    // Data input
+  .C(clk),     // Clock input (positive edge)
+  .CE(ce),     // Clock Enable — FF updates ONLY when CE=1
+  .R(rst),     // Synchronous reset — clears Q when R=1 at clock edge
+  .Q(q_out)    // Data output
+);
+
+// Inferred in Verilog (synthesis maps to FDRE automatically):
+always @(posedge clk) begin
+  if (rst)      q <= 1'b0;   // Synchronous reset
+  else if (ce)  q <= d;      // Clock enable gates the update
+end</pre>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Primitive</th>
+                    <th>Reset/Set Type</th>
+                    <th>Polarity</th>
+                    <th>Reset Pin</th>
+                    <th>When to Use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>FDRE</strong></td>
+                    <td>Synchronous Reset</td>
+                    <td>Positive edge</td>
+                    <td>R (active high, sync)</td>
+                    <td>Default choice — synchronous, timing-friendly</td>
+                  </tr>
+                  <tr>
+                    <td><strong>FDSE</strong></td>
+                    <td>Synchronous Set</td>
+                    <td>Positive edge</td>
+                    <td>S (active high, sync)</td>
+                    <td>When you need to set FF to 1 synchronously</td>
+                  </tr>
+                  <tr>
+                    <td><strong>FDPE</strong></td>
+                    <td>Asynchronous Preset</td>
+                    <td>Positive edge</td>
+                    <td>PRE (active high, async)</td>
+                    <td>Power-on preset — avoid in logic, use only at boundaries</td>
+                  </tr>
+                  <tr>
+                    <td><strong>FDCE</strong></td>
+                    <td>Asynchronous Clear</td>
+                    <td>Positive edge</td>
+                    <td>CLR (active high, async)</td>
+                    <td>Power-on clear — avoid in logic, use only at boundaries</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-warning">
+                <strong>Critical Rule — Never Gate the Clock</strong>
+                NEVER gate the clock in FPGA designs. Writing
+                <code style="font-family: monospace">always @(posedge clk &amp;&amp; en)</code> is
+                wrong and creates glitches. The correct approach is clock enable:
+                <code style="font-family: monospace">if (ce) q &lt;= d;</code> — this uses the CE
+                pin on the FDRE primitive, which is timed and glitch-free. Gating clocks causes
+                massive skew and timing closure failures.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Timing Parameters
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Three fundamental timing parameters govern flip-flop behavior:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>
+                  <strong>Setup time (T<sub>su</sub>):</strong> Data at D must be stable for this
+                  time <em>before</em> the clock edge. Violation causes metastability.
+                </li>
+                <li>
+                  <strong>Hold time (T<sub>h</sub>):</strong> Data at D must be stable for this time
+                  <em>after</em> the clock edge. Even 0ps for most 7-series FFs — but routing delays
+                  must satisfy this.
+                </li>
+                <li>
+                  <strong>Clock-to-Q delay (T<sub>cq</sub>):</strong> Time from clock edge to when Q
+                  output becomes valid. Typically 200–500ps in 7-series.
+                </li>
+              </ul>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Speed Grade</th>
+                    <th>T<sub>su</sub> (Setup)</th>
+                    <th>T<sub>h</sub> (Hold)</th>
+                    <th>T<sub>cq</sub> (Clock-to-Q)</th>
+                    <th>Max Fabric Freq</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Artix-7 -1 (slowest)</td>
+                    <td>~50 ps</td>
+                    <td>0 ps</td>
+                    <td>~450 ps</td>
+                    <td>~450 MHz</td>
+                  </tr>
+                  <tr>
+                    <td>Artix-7 -2</td>
+                    <td>~45 ps</td>
+                    <td>0 ps</td>
+                    <td>~380 ps</td>
+                    <td>~550 MHz</td>
+                  </tr>
+                  <tr>
+                    <td>Artix-7 -3 (fastest)</td>
+                    <td>~40 ps</td>
+                    <td>0 ps</td>
+                    <td>~330 ps</td>
+                    <td>~630 MHz</td>
+                  </tr>
+                  <tr>
+                    <td>Kintex-7 -1</td>
+                    <td>~40 ps</td>
+                    <td>0 ps</td>
+                    <td>~280 ps</td>
+                    <td>~600 MHz</td>
+                  </tr>
+                  <tr>
+                    <td>UltraScale+ -1</td>
+                    <td>~25 ps</td>
+                    <td>0 ps</td>
+                    <td>~200 ps</td>
+                    <td>~891 MHz</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Timing Path and Slack
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                A timing path connects source FF output → combinational logic → destination FF
+                input. The timing budget equation:
+              </p>
+              <pre
+                style="
+                  background: var(--bg-muted);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-family: monospace;
+                  font-size: 0.82rem;
+                  color: var(--text-base);
+                  overflow-x: auto;
+                  margin-bottom: 16px;
+                "
+              >
+Slack = Clock Period - (Tcq + Tlogic + Trouting + Tsu)
+
+Example (100 MHz clock, 10ns period):
+  Clock period  = 10.000 ns
+  Tcq           =  0.450 ns  (source FF clock-to-Q)
+  Tlogic        =  1.200 ns  (LUT + carry delays)
+  Trouting      =  0.800 ns  (routing delay between LUTs)
+  Tsu           =  0.050 ns  (destination FF setup time)
+  ─────────────────────────────
+  Slack = 10.000 - (0.450 + 1.200 + 0.800 + 0.050) = +7.500 ns  (PASSING)</pre>
+
+              <div class="mermaid">
+                graph LR CLK_SRC[Clock Edge\nSource] -->|Tcq| SRC_FF[Source FF\nQ Output] SRC_FF
+                -->|Tlogic + Trouting| DST_FF[Destination FF\nD Input] DST_FF -->|Setup check|
+                CLK_DST[Clock Edge\nDestination] subgraph TIMING["Timing Budget"] PERIOD[Clock
+                Period] --> TCQ2[- Tcq] TCQ2 --> TLOGIC[- Tlogic] TLOGIC --> TROUTE[- Troute] TROUTE
+                --> SLACK[= Slack must be >= 0] end
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Metastability
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                If the D input changes during the setup or hold window (the forbidden zone around
+                the clock edge), the flip-flop enters a <strong>metastable state</strong>. In
+                metastability, the FF's internal feedback loop is unresolved — the output oscillates
+                between 0 and 1 for an unpredictable time before settling to a random value. This
+                causes:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>Random bit errors in the captured data</li>
+                <li>
+                  Potential for the metastable output to propagate and corrupt downstream logic
+                </li>
+                <li>
+                  MTBF (Mean Time Between Failure) that depends on clock frequency and data
+                  frequency
+                </li>
+              </ul>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Metastability cannot be eliminated — it can only be made statistically improbable by
+                giving the FF time to resolve before the output is used.
+              </p>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Synchronous vs Asynchronous Reset
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Synchronous Reset (FDRE)</th>
+                    <th>Asynchronous Reset (FDCE)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>When reset takes effect</td>
+                    <td>Only on clock edge</td>
+                    <td>Immediately, independent of clock</td>
+                  </tr>
+                  <tr>
+                    <td>Timing analysis</td>
+                    <td>Fully timed by STA tool</td>
+                    <td>Reset path unconstrained — risky</td>
+                  </tr>
+                  <tr>
+                    <td>Recommended for FPGA?</td>
+                    <td>Yes — strongly preferred</td>
+                    <td>Avoid in fabric logic</td>
+                  </tr>
+                  <tr>
+                    <td>Resource usage</td>
+                    <td>Uses R pin of FDRE</td>
+                    <td>Uses CLR pin of FDCE</td>
+                  </tr>
+                  <tr>
+                    <td>Reset assertion</td>
+                    <td>Clean — only transitions on clock</td>
+                    <td>Can cause glitches if reset has noise</td>
+                  </tr>
+                  <tr>
+                    <td>Reset removal</td>
+                    <td>Automatic — timed by STA</td>
+                    <td>MUST de-assert synchronously (2-FF synchronizer)</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="callout callout-interview">
+                <strong>Interview Question</strong>
+                Q: What is metastability and how do you prevent it when crossing clock domains?<br />
+                A: Metastability occurs when a flip-flop's setup or hold time is violated, leaving
+                it in an indeterminate output state for an unpredictable duration. Prevent it at
+                clock domain crossings with a 2-FF synchronizer: pass the signal through two
+                back-to-back FFs in the destination clock domain. The first FF may go metastable;
+                the second FF receives a resolved signal. The MTBF becomes astronomically large with
+                proper synchronizer design.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Interactive Timing Diagram
+              </h3>
+              <div class="timing-canvas-wrap">
+                <canvas
+                  id="timingCanvas"
+                  width="700"
+                  height="280"
+                  style="
+                    width: 100%;
+                    max-width: 700px;
+                    display: block;
+                    margin: 0 auto;
+                    border-radius: 8px;
+                  "
+                ></canvas>
+                <div class="timing-controls">
+                  <button
+                    class="timing-ctrl-btn active"
+                    id="btn-normal"
+                    onclick="setTimingMode('normal')"
+                  >
+                    Normal Operation
+                  </button>
+                  <button class="timing-ctrl-btn" id="btn-ce" onclick="setTimingMode('ce')">
+                    CE Low
+                  </button>
+                  <button class="timing-ctrl-btn" id="btn-rst" onclick="setTimingMode('rst')">
+                    Reset Active
+                  </button>
+                  <button class="timing-ctrl-btn" id="btn-meta" onclick="setTimingMode('meta')">
+                    Metastability Risk
+                  </button>
+                </div>
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Pipelining for Timing Closure
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Pipelining inserts registers between combinational stages to shorten the critical
+                path and increase maximum clock frequency:
+              </p>
+              <pre
+                style="
+                  background: var(--bg-muted);
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-family: monospace;
+                  font-size: 0.82rem;
+                  color: var(--text-base);
+                  overflow-x: auto;
+                  margin-bottom: 16px;
+                "
+              >
+// Without pipeline — one long path, lower Fmax
+assign result = (a * b) + (c * d) + (e * f);  // 3 multipliers in series
+
+// With 2-stage pipeline — shorter paths, higher Fmax, 2-cycle latency
+always @(posedge clk) begin
+  pipe1 <= (a * b) + (c * d);  // Stage 1 register
+  e_r   <= e; f_r <= f;         // Register through-paths
+end
+always @(posedge clk) begin
+  result <= pipe1 + (e_r * f_r); // Stage 2 register
+end</pre>
+
+              <div class="callout callout-tip">
+                <strong>Engineering Tip — Fixing Timing Violations with Pipelining</strong>
+                If a critical path fails by less than 0.5ns, try adding ONE pipeline register in the
+                middle of the failing path. It splits the path roughly in half and usually fixes the
+                violation. In Vivado, identify the failing path in the Timing Summary report, find
+                its midpoint (highest-delay LUT), and insert a register there in RTL.
+              </div>
+
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 24px 0 12px;
+                "
+              >
+                Double-Data-Rate (DDR) Flip-Flops
+              </h3>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                Dedicated IO flip-flops in FPGA IOBs can capture data on both the rising and falling
+                clock edges. This doubles the effective data rate for the same clock frequency. DDR
+                FFs are used for:
+              </p>
+              <ul
+                style="
+                  color: var(--text-sub);
+                  line-height: 2;
+                  padding-left: 1.5rem;
+                  margin-bottom: 16px;
+                "
+              >
+                <li>DDR3/DDR4 memory interfaces (data and strobe signals)</li>
+                <li>High-speed serial deserializers (LVDS, differential pairs)</li>
+                <li>Double-speed clock outputs</li>
+              </ul>
+              <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 16px">
+                These are instantiated via IDDR and ODDR primitives, not synthesized from RTL. They
+                live in the IOB (IO Block), not in the fabric slice.
+              </p>
+
+              <div class="callout callout-danger">
+                <strong>Common Mistake — Inferring Latches Instead of FFs</strong>
+                In Verilog:
+                <code style="font-family: monospace">always @(a) if (en) q = a;</code> creates a
+                LATCH, not a flip-flop. Latches are transparent when enable is high — they have no
+                clock, making them nightmares for FPGA timing analysis. Always use
+                <code style="font-family: monospace">always @(posedge clk)</code> for synchronous
+                designs. If Vivado warns "inferred latch," find the combinational always block
+                missing an else branch.
+              </div>
+
+              <div class="callout callout-tip">
+                <strong>Best Practice — Reset Strategy</strong>
+                Use synchronous, active-high reset with a reset de-assertion synchronizer. Assert
+                reset from your system controller, pass it through a 2-FF synchronizer in the
+                destination clock domain before de-asserting. This ensures all FFs see the reset
+                de-assertion on the same clock edge, preventing partial reset conditions.
+              </div>
+
+              <!-- Quiz -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Knowledge Check
+              </h3>
+
+              <div class="quiz-wrap" id="q1">
+                <div class="quiz-q">1. FDRE stands for what?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>Fast Data Register Element</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>Flip-Flop D with synchronous Reset and clock Enable, positive edge</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>Flip-Flop Dual Reset Enable</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb1', document.getElementById('q1'))"
+                  >
+                    <span>Frequency-Division Register Element</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb1">
+                  Correct! FDRE = Flip-Flop D (data), R (synchronous Reset), E (clock Enable),
+                  positive edge triggered. It's the standard FF primitive for synchronous FPGA
+                  design.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q2">
+                <div class="quiz-q">
+                  2. What happens if the setup time (Tsu) is violated at a flip-flop input?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The flip-flop resets to 0</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The clock edge is skipped</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>Metastability — the output is undefined for an unpredictable time</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb2', document.getElementById('q2'))"
+                  >
+                    <span>The flip-flop captures the previous value correctly</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb2">
+                  Correct! Setup time violation causes metastability — the FF's internal loop is
+                  unresolved, producing an unpredictable output. This leads to random bit errors in
+                  the captured data.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q3">
+                <div class="quiz-q">3. When CE (Clock Enable) = 0, the flip-flop:</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>Resets its output to 0</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>Holds its previous Q value — ignores new data at D</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>Stops the clock internally</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb3', document.getElementById('q3'))"
+                  >
+                    <span>Enters a high-impedance state</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb3">
+                  Correct! When CE=0, the FDRE ignores clock edges and holds Q unchanged. This is
+                  the proper way to implement conditional register updates — never gate the clock
+                  itself.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q4">
+                <div class="quiz-q">
+                  4. Which reset type is strongly recommended for FPGA fabric flip-flops?
+                </div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>Asynchronous reset (FDCE/FDPE) — fastest response</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>Synchronous reset (FDRE) — timed by STA, glitch-free</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>No reset — initialize via INIT attribute only</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb4', document.getElementById('q4'))"
+                  >
+                    <span>Both async and sync on the same FF simultaneously</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb4">
+                  Correct! Synchronous reset is strongly preferred for FPGA. The reset path is fully
+                  timed by static timing analysis, eliminating glitches and reset de-assertion
+                  metastability risks.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q5">
+                <div class="quiz-q">5. What is Tcq (clock-to-Q delay)?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span
+                      >The time required for the clock to reach the FF from the global buffer</span
+                    >
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span
+                      >The propagation delay from clock edge to when the Q output becomes
+                      valid</span
+                    >
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>The setup time requirement at the clock input</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb5', document.getElementById('q5'))"
+                  >
+                    <span>The time between two consecutive clock edges</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb5">
+                  Correct! Tcq is the output propagation delay — after the clock edge, Q takes Tcq
+                  nanoseconds to become valid. This consumes part of the timing budget in the next
+                  stage's path.
+                </div>
+              </div>
+
+              <div class="quiz-wrap" id="q6">
+                <div class="quiz-q">6. A 2-FF synchronizer is used for what purpose?</div>
+                <ul class="quiz-opts">
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Doubling the data rate of a flip-flop</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Implementing a 2-bit shift register</span>
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, true, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span
+                      >Safely crossing a single-bit signal between two asynchronous clock
+                      domains</span
+                    >
+                  </li>
+                  <li
+                    class="quiz-opt"
+                    onclick="answerQuiz(this, false, 'fb6', document.getElementById('q6'))"
+                  >
+                    <span>Creating a 2-cycle pipeline stage</span>
+                  </li>
+                </ul>
+                <div class="quiz-fb" id="fb6">
+                  Correct! A 2-FF synchronizer passes a signal through two sequential FFs clocked by
+                  the destination clock. The first FF may go metastable; the second receives a
+                  resolved signal with astronomically high MTBF.
+                </div>
+              </div>
+
+              <!-- Practical Exercise -->
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  color: var(--text-base);
+                  margin: 32px 0 12px;
+                "
+              >
+                Practical Exercise
+              </h3>
+              <div
+                style="
+                  background: var(--bg-card);
+                  border: 1px solid var(--border);
+                  border-radius: 12px;
+                  padding: 24px;
+                  margin: 16px 0;
+                "
+              >
+                <p style="font-weight: 700; color: var(--text-base); margin-bottom: 12px">
+                  Timing Analysis
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(a)</strong> Your design has a combinational path with 1ns of logic delay
+                  and 0.5ns of routing delay. The clock period is 2ns. Given Tcq = 0.3ns and Tsu =
+                  0.1ns, calculate the timing slack. Does the path pass or fail?
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(b)</strong> If the path fails by 0.2ns, name three ways to fix it (think:
+                  architecture, constraints, placement).
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+                  <strong>(c)</strong> Write a Verilog module with synchronous active-high reset and
+                  clock enable. After synthesis in Vivado, open the schematic (F4) and verify the FF
+                  primitive shown is FDRE. Check the primitive properties panel.
+                </p>
+                <p style="color: var(--text-sub); line-height: 1.8">
+                  <strong>(d)</strong> Write a 2-FF synchronizer in Verilog. Add the attribute
+                  <code
+                    style="
+                      font-family: monospace;
+                      background: var(--bg-muted);
+                      padding: 2px 6px;
+                      border-radius: 4px;
+                    "
+                    >(*ASYNC_REG="TRUE"*)</code
+                  >
+                  to both FFs. After synthesis, confirm Vivado places them in the same Slice (check
+                  the Implemented Design → Device view).
+                </p>
+              </div>
+              <div class="lesson-nav">
+                <a href="11-lut.html">← Lookup Tables (LUT)</a>
+                <a href="13-carry-chains.html">Carry Chains →</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-12';
+      const TOTAL = 25;
+
+      // Timing Diagram
+      let timingMode = 'normal';
+      const isDark = () => document.documentElement.dataset.theme !== 'light';
+
+      function setTimingMode(mode) {
+        timingMode = mode;
+        document.querySelectorAll('.timing-ctrl-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + mode).classList.add('active');
+        drawTiming();
+      }
+
+      function drawTiming() {
+        const canvas = document.getElementById('timingCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width,
+          H = canvas.height;
+        const dark = isDark();
+        const bg = dark ? '#111827' : '#f9fafb';
+        const fg = dark ? '#e5e7eb' : '#111827';
+        const faint = dark ? '#6b7280' : '#9ca3af';
+        const cyan = '#22d3ee';
+        const orange = '#fb923c';
+        const green = '#34d399';
+        const red = '#f87171';
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const rows = ['CLK', 'D', 'CE', 'R', 'Q'];
+        const rowH = 44;
+        const labelW = 50;
+        const margin = 20;
+        const waveW = W - labelW - margin * 2;
+        const periods = 5;
+        const pw = waveW / periods;
+
+        // Draw labels
+        ctx.font = '13px monospace';
+        ctx.fillStyle = fg;
+        rows.forEach((r, i) => {
+          ctx.fillText(r, margin, margin + i * rowH + rowH * 0.55);
+        });
+
+        // Helper to draw square wave
+        function waveY(rowIdx) {
+          return margin + rowIdx * rowH;
+        }
+        function drawWave(signals, rowIdx, color) {
+          const x0 = margin + labelW;
+          const yBase = waveY(rowIdx) + rowH * 0.75;
+          const yTop = waveY(rowIdx) + rowH * 0.15;
+          ctx.beginPath();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          let curY = signals[0] ? yTop : yBase;
+          ctx.moveTo(x0, curY);
+          for (let i = 0; i < signals.length; i++) {
+            const x = x0 + (i / signals.length) * waveW;
+            const nx = x0 + ((i + 1) / signals.length) * waveW;
+            const newY = signals[i] ? yTop : yBase;
+            if (newY !== curY) {
+              ctx.lineTo(x, curY);
+              ctx.lineTo(x, newY);
+            }
+            curY = newY;
+            ctx.lineTo(nx, curY);
+          }
+          ctx.stroke();
+        }
+
+        const N = periods * 20;
+        const clk = Array.from({ length: N }, (_, i) => (i % 20 < 10 ? 0 : 1));
+        let d, ce, r, q;
+
+        if (timingMode === 'normal') {
+          d = Array.from({ length: N }, (_, i) => (i < 35 ? 0 : i < 65 ? 1 : i < 80 ? 0 : 1));
+          ce = Array.from({ length: N }, () => 1);
+          r = Array.from({ length: N }, () => 0);
+          q = Array.from({ length: N }, (_, i) =>
+            i < 10 ? 0 : i < 50 ? d[i - 10] : i < 70 ? 1 : i < 90 ? 0 : 1
+          );
+        } else if (timingMode === 'ce') {
+          d = Array.from({ length: N }, (_, i) => (i < 40 ? 0 : 1));
+          ce = Array.from({ length: N }, (_, i) => (i < 60 ? 1 : 0));
+          r = Array.from({ length: N }, () => 0);
+          q = Array.from({ length: N }, (_, i) => (i < 10 ? 0 : i < 50 ? 0 : i < 70 ? 1 : 1));
+        } else if (timingMode === 'rst') {
+          d = Array.from({ length: N }, () => 1);
+          ce = Array.from({ length: N }, () => 1);
+          r = Array.from({ length: N }, (_, i) => (i >= 30 && i < 60 ? 1 : 0));
+          q = Array.from({ length: N }, (_, i) => (i < 10 ? 1 : i < 40 ? 1 : i < 70 ? 0 : 1));
+        } else {
+          // meta: data changes just before clock edge
+          d = Array.from({ length: N }, (_, i) => (i < 48 ? 0 : 1));
+          ce = Array.from({ length: N }, () => 1);
+          r = Array.from({ length: N }, () => 0);
+          q = Array.from({ length: N }, (_, i) => (i < 10 ? 0 : i < 70 ? 0 : 1));
+        }
+
+        drawWave(clk, 0, cyan);
+        drawWave(d, 1, green);
+        drawWave(ce, 2, orange);
+        drawWave(r, 3, red);
+        drawWave(q, 4, fg);
+
+        // Draw setup/hold window at each rising clock edge
+        if (timingMode === 'meta') {
+          ctx.fillStyle = 'rgba(251,146,60,0.2)';
+          for (let p = 0; p < periods; p++) {
+            const edgeX = margin + labelW + (p + 0.5) * pw;
+            const winW = pw * 0.12;
+            ctx.fillRect(edgeX - winW, margin, winW * 2, H - margin * 2);
+          }
+          ctx.fillStyle = orange;
+          ctx.font = '11px sans-serif';
+          ctx.fillText('Setup/Hold window (danger zone)', margin + labelW + pw * 0.2, margin + 12);
+        }
+
+        // Labels on right side
+        ctx.fillStyle = faint;
+        ctx.font = '11px sans-serif';
+        const modeLabels = {
+          normal: 'Normal — FF captures D on each rising edge when CE=1',
+          ce: 'CE Low — FF holds Q, ignores D input',
+          rst: 'Sync Reset — Q clears on rising edge while R=1',
+          meta: 'Metastability Risk — D changes inside setup window',
+        };
+        ctx.fillText(modeLabels[timingMode] || '', margin, H - 8);
+      }
+
+      async function loadProgress() {
+        try {
+          const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+          const t = s.accessToken || s.token || '';
+          if (!t) return;
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const p = Math.round((done / TOTAL) * 100);
+          const sp = document.getElementById('sb-pct');
+          const sf = document.getElementById('sb-fill');
+          if (sp) sp.textContent = p + '%';
+          if (sf) sf.style.width = p + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {
+          alert('Could not save progress.');
+        }
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML =
+            '<svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ✓ Completed';
+          b.disabled = true;
+        }
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(function (o) {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        drawTiming();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="GTX/GTH/GTY transceivers enable PCIe, 10GbE, Aurora, and JESD204B — learn CDR, pre-emphasis, equalization, and the Transceiver Wizard IP."
+    />
+    <title>Transceivers | FPGA Fundamentals | Rising Edge</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/FPGA/Fundamentals-and-architecture/20-transceivers.html"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../../SI/training-compat.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .callout {
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin: 16px 0;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+      .callout-info {
+        background: rgba(37, 99, 235, 0.07);
+        border-left: 3px solid #3b82f6;
+        color: var(--text-sub);
+      }
+      .callout-warning {
+        background: rgba(251, 146, 60, 0.08);
+        border-left: 3px solid #fb923c;
+        color: var(--text-sub);
+      }
+      .callout-tip {
+        background: rgba(16, 185, 129, 0.07);
+        border-left: 3px solid #34d399;
+        color: var(--text-sub);
+      }
+      .callout-danger {
+        background: rgba(239, 68, 68, 0.07);
+        border-left: 3px solid #f87171;
+        color: var(--text-sub);
+      }
+      .callout-interview {
+        background: rgba(139, 92, 246, 0.07);
+        border-left: 3px solid #a78bfa;
+        color: var(--text-sub);
+      }
+      .callout strong {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 16px 0;
+      }
+      .data-table th {
+        background: var(--bg-muted);
+        color: var(--text-base);
+        font-weight: 700;
+        padding: 10px 12px;
+        text-align: left;
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .data-table td {
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+        vertical-align: top;
+      }
+      .data-table tr:hover td {
+        background: var(--bg-muted);
+      }
+      .mark-complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-sub);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        margin: 32px 0 0;
+      }
+      .mark-complete-btn:hover:not(:disabled) {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .mark-complete-btn:disabled {
+        border-color: #34d399;
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+        cursor: default;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .lesson-nav a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-decoration: none;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: all 0.15s;
+      }
+      .lesson-nav a:hover {
+        border-color: #22d3ee;
+        color: #22d3ee;
+      }
+      .quiz-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .quiz-q {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-base);
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .quiz-opts {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 8px;
+      }
+      .quiz-opt {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--bg-alt);
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        user-select: none;
+      }
+      .quiz-opt:hover:not(.correct):not(.incorrect) {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.06);
+      }
+      .quiz-opt.correct {
+        border-color: #34d399 !important;
+        background: rgba(52, 211, 153, 0.1) !important;
+        color: #34d399;
+      }
+      .quiz-opt.incorrect {
+        border-color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.08) !important;
+      }
+      .quiz-fb {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+      .quiz-fb.show {
+        display: block;
+      }
+      .quiz-fb.correct {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid #34d399;
+        color: #34d399;
+      }
+      .quiz-fb.incorrect {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #f87171;
+        color: var(--text-sub);
+      }
+      .mermaid {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .sidebar-prog-bar {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px var(--sp-5) 0;
+      }
+      .sidebar-prog-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22d3ee, #818cf8);
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+      .module-item.done-item::after {
+        content: ' ✓';
+        color: #34d399;
+        font-weight: 700;
+      }
+      pre {
+        background: var(--bg-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        margin: 16px 0;
+      }
+      code {
+        font-family: 'Courier New', monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            FPGA Fundamentals
+          </p>
+        </div>
+        <div
+          style="
+            padding: 8px var(--sp-5) 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <span>Progress</span><span id="sb-pct">–</span>
+        </div>
+        <div class="sidebar-prog-bar">
+          <div class="sidebar-prog-fill" id="sb-fill" style="width: 0%"></div>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a
+            href="index.html"
+            class="module-item"
+            style="font-size: 0.78rem; color: var(--text-muted)"
+            >↑ Course Overview</a
+          >
+          <a href="01-introduction.html" class="module-item" data-module="lesson-01"
+            >01. Introduction to FPGA</a
+          >
+          <a href="02-why-fpga.html" class="module-item" data-module="lesson-02">02. Why FPGA?</a>
+          <a href="03-fpga-vs-mcu.html" class="module-item" data-module="lesson-03"
+            >03. FPGA vs MCU</a
+          >
+          <a href="04-fpga-vs-asic.html" class="module-item" data-module="lesson-04"
+            >04. FPGA vs ASIC</a
+          >
+          <a href="05-fpga-vs-gpu.html" class="module-item" data-module="lesson-05"
+            >05. FPGA vs GPU</a
+          >
+          <a href="06-fpga-families.html" class="module-item" data-module="lesson-06"
+            >06. AMD Xilinx Families</a
+          >
+          <a href="07-inside-fpga-chip.html" class="module-item" data-module="lesson-07"
+            >07. Inside an FPGA Chip</a
+          >
+          <a href="08-internal-architecture.html" class="module-item" data-module="lesson-08"
+            >08. Architecture Overview</a
+          >
+          <a href="09-clb.html" class="module-item" data-module="lesson-09">09. CLB</a>
+          <a href="10-slices.html" class="module-item" data-module="lesson-10">10. Slices</a>
+          <a href="11-lut.html" class="module-item" data-module="lesson-11">11. Lookup Tables</a>
+          <a href="12-flip-flops.html" class="module-item" data-module="lesson-12"
+            >12. Flip-Flops</a
+          >
+          <a href="13-carry-chains.html" class="module-item" data-module="lesson-13"
+            >13. Carry Chains</a
+          >
+          <a href="14-routing-architecture.html" class="module-item" data-module="lesson-14"
+            >14. Routing Architecture</a
+          >
+          <a href="15-clock-distribution.html" class="module-item" data-module="lesson-15"
+            >15. Clock Distribution</a
+          >
+          <a href="16-block-ram.html" class="module-item" data-module="lesson-16">16. Block RAM</a>
+          <a href="17-distributed-ram.html" class="module-item" data-module="lesson-17"
+            >17. Distributed RAM</a
+          >
+          <a href="18-dsp-slices.html" class="module-item" data-module="lesson-18"
+            >18. DSP Slices</a
+          >
+          <a href="19-io-banks.html" class="module-item" data-module="lesson-19">19. IO Banks</a>
+          <a href="20-transceivers.html" class="module-item active" data-module="lesson-20"
+            >20. Transceivers</a
+          >
+          <a href="21-configuration-memory.html" class="module-item" data-module="lesson-21"
+            >21. Config Memory</a
+          >
+          <a href="22-configuration-process.html" class="module-item" data-module="lesson-22"
+            >22. Config Process</a
+          >
+          <a href="23-development-flow.html" class="module-item" data-module="lesson-23"
+            >23. Dev Flow</a
+          >
+          <a href="24-architecture-walkthrough.html" class="module-item" data-module="lesson-24"
+            >24. Architecture Tour</a
+          >
+          <a href="25-course-summary.html" class="module-item" data-module="lesson-25"
+            >25. Course Summary</a
+          >
+        </nav>
+      </aside>
+      <main class="content-main" id="main-content">
+        <!-- Lesson Header -->
+        <div style="margin-bottom: 32px">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+            <span
+              style="
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: var(--text-muted);
+              "
+              >Lesson 20 of 25</span
+            >
+            <span style="font-size: 0.75rem; color: var(--text-muted)">·</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted)">15 MIN</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted)">·</span>
+            <span style="font-size: 0.75rem; font-weight: 600; color: #22d3ee">80% complete</span>
+          </div>
+          <h1
+            style="
+              font-size: 1.875rem;
+              font-weight: 800;
+              color: var(--text-base);
+              line-height: 1.2;
+              margin-bottom: 12px;
+            "
+          >
+            High-Speed Transceivers
+          </h1>
+          <p style="font-size: 1rem; color: var(--text-sub); line-height: 1.7; max-width: 720px">
+            GTX/GTH/GTY transceivers are dedicated serial I/O blocks that enable PCIe, 10GbE,
+            Aurora, JESD204B, and other multi-gigabit protocols — completely separate from general
+            IO banks, with their own PLLs, CDR, equalization, and encoding engines.
+          </p>
+        </div>
+
+        <!-- Section 1 -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          What are GTX/GTH/GTY Transceivers?
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Transceivers are dedicated high-speed serial I/O blocks that exist completely outside the
+          general IO bank structure. They handle protocols at line rates from 600 Mbps to 58 Gbps
+          per lane — far beyond what regular LVDS IO can achieve. Each transceiver is self-contained
+          with its own PLL, serializer, deserializer, CDR, encoding, and equalization:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            Protocols supported: PCIe Gen1/2/3, 10 Gigabit Ethernet, SATA, SAS, DisplayPort,
+            JESD204B, Aurora, USB 3.0
+          </li>
+          <li>
+            Not available in all devices — present in Kintex-7, Virtex-7, Zynq-7000 (partial);
+            Artix-7 has GTP (lower rate)
+          </li>
+          <li>
+            Organized in <strong style="color: var(--text-base)">quads</strong>: 4 channels per
+            quad, each quad sharing one QPLL and individual CPLLs
+          </li>
+        </ul>
+
+        <!-- Section 2: Family Table -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Transceiver Family Comparison
+        </h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Max Line Rate</th>
+              <th>Typical Use</th>
+              <th>Device Family</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>GTP</strong></td>
+              <td>6.25 Gbps</td>
+              <td>USB 3.0, PCIe Gen2, SATA</td>
+              <td>Artix-7 (some SKUs)</td>
+            </tr>
+            <tr>
+              <td><strong>GTX</strong></td>
+              <td>12.5 Gbps</td>
+              <td>PCIe Gen3, 10GbE, Aurora</td>
+              <td>Kintex-7, Virtex-7</td>
+            </tr>
+            <tr>
+              <td><strong>GTH</strong></td>
+              <td>16.375 Gbps</td>
+              <td>40GbE, OTN, backplane</td>
+              <td>Virtex-7, Zynq UltraScale+</td>
+            </tr>
+            <tr>
+              <td><strong>GTY</strong></td>
+              <td>32.75 Gbps</td>
+              <td>100GbE, CFP</td>
+              <td>UltraScale+</td>
+            </tr>
+            <tr>
+              <td><strong>GTM</strong></td>
+              <td>58 Gbps</td>
+              <td>400GbE, PAM-4</td>
+              <td>Versal</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Plotly chart -->
+        <div id="chart-xcvr" style="width: 100%; height: 300px; margin: 16px 0"></div>
+
+        <!-- Section 3: Serial Link Architecture -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Serial Link Architecture
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Each transceiver channel is full-duplex with completely independent TX and RX paths. The
+          TX serializes parallel data from the FPGA fabric and drives a differential output; the RX
+          receives the incoming differential signal and recovers both clock and data before
+          deserializing back to parallel:
+        </p>
+        <div class="mermaid">
+          flowchart LR subgraph TX["TX Path"] direction LR TXDATA([Parallel\nData]) -->
+          ENC8B["8b/10b or\n64b/66b\nEncoder"] ENC8B --> SER["Serializer\nGEARBOX"] SER -->
+          PREEMPH["Pre-emphasis\nDriver"] PREEMPH --> TXPAD(["TX+/TX−\n(pad)"]) end subgraph RX["RX
+          Path"] direction LR RXPAD(["RX+/RX−\n(pad)"]) --> EQ["Equalizer\nLPM / DFE"] EQ -->
+          CDR["CDR\nPLL lock\nto data"] CDR --> DESER["Deserializer\nGEARBOX"] DESER -->
+          DEC8B["Decoder\n8b/10b or\n64b/66b"] DEC8B --> RXDATA([Parallel\nData]) end style ENC8B
+          fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style CDR
+          fill:#1e3a5f,stroke:#3b82f6,color:#93c5fd style SER
+          fill:#1e293b,stroke:#475569,color:#94a3b8 style DESER
+          fill:#1e293b,stroke:#475569,color:#94a3b8
+        </div>
+
+        <!-- Section 4: CDR -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Clock Recovery — CDR (Clock and Data Recovery)
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          The receiver has no separate clock input from the transmitter. Instead, it uses a
+          <strong style="color: var(--text-base)">CDR (Clock and Data Recovery)</strong> circuit to
+          extract the transmitter's clock from the transitions in the received data stream:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>The CDR PLL locks its phase and frequency to detected data transitions</li>
+          <li>Lock time: typically 1–10 ms depending on data pattern and PLL bandwidth</li>
+          <li>
+            <strong style="color: var(--text-base)">RXCDRLOCK</strong> status bit — the design must
+            check this bit before trusting recovered data
+          </li>
+          <li>
+            8b/10b encoding guarantees sufficient transitions for CDR lock; raw binary data without
+            coding can cause CDR loss-of-lock
+          </li>
+        </ul>
+
+        <!-- Section 5: PLLs -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          PLLs in Transceivers: QPLL and CPLL
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Each GTX quad contains two types of PLL for generating the high-rate serial clocks:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">QPLL (Quad PLL):</strong> one per quad, shared
+            across all 4 channels — used for high line rates (&gt;6.6 Gbps). Lower jitter than CPLL
+            at high rates.
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">CPLL (Channel PLL):</strong> one per channel —
+            used for lower rates, allows each channel to run independently at a different rate
+          </li>
+          <li>PCIe Gen3 (8 Gbps): use QPLL — all lanes share the same reference clock and PLL</li>
+          <li>Aurora at 3.125 Gbps: CPLL is adequate and allows mixed-rate quads</li>
+        </ul>
+        <div class="callout callout-info">
+          <strong>QPLL sharing constraint</strong>
+          Each GTX quad has 4 channels and 1 QPLL. The QPLL is shared — all 4 channels must run at
+          the same or harmonically related line rates. For designs mixing PCIe and SATA in the same
+          quad, use CPLL per channel or assign different protocols to different quads.
+        </div>
+
+        <!-- Section 6: Equalization and Pre-emphasis -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Equalization and Pre-emphasis
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Long PCB traces, connectors, and cables attenuate high-frequency content, causing
+          inter-symbol interference (ISI) that closes the received eye diagram. Transceivers
+          compensate using:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">TX Pre-emphasis:</strong> the transmitter
+            intentionally boosts high-frequency content before driving the line. Configured via
+            TXPRECURSOR, TXMAIN, TXPOSTCURSOR registers (each in 1/64 units of total voltage swing)
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">RX Linear Equalizer (LPM):</strong> a linear
+            filter that boosts high frequencies at the receiver — suitable for short to medium
+            channels (&lt;10 dB loss)
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">RX DFE (Decision Feedback Equalizer):</strong>
+            an adaptive equalizer that uses past symbol decisions to cancel ISI — required for
+            channels with &gt;10 dB insertion loss
+          </li>
+        </ul>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Equalization Mode</th>
+              <th>Best For</th>
+              <th>Power</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LPM (Linear)</td>
+              <td>Short channels, FR4 PCB traces &lt;15cm</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>DFE (Adaptive)</td>
+              <td>Long channels, backplanes, cables</td>
+              <td>Higher</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 7: 8b10b and 64b66b -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          8b/10b and 64b/66b Encoding
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Serial links require sufficient signal transitions for CDR lock and DC balance. Xilinx
+          transceivers support two encoding schemes natively in hardware:
+        </p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Encoding</th>
+              <th>Data bits → Line bits</th>
+              <th>Bandwidth overhead</th>
+              <th>Used in</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>8b/10b</td>
+              <td>8 → 10</td>
+              <td>20% overhead</td>
+              <td>PCIe Gen1/2, SATA, Aurora, JESD204B</td>
+            </tr>
+            <tr>
+              <td>64b/66b</td>
+              <td>64 → 66</td>
+              <td>3.1% overhead</td>
+              <td>PCIe Gen3, 10GbE, 40GbE, 100GbE</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-top: 12px">
+          8b/10b replaces each 8-bit data byte with a 10-bit code word chosen to guarantee at least
+          3 transitions per 10 bits and DC balance (equal 1s and 0s). The 20% bandwidth penalty is
+          the price of this guarantee.
+        </p>
+
+        <!-- Section 8: Protocol table -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Protocol Reference
+        </h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Protocol</th>
+              <th>Line Rate</th>
+              <th>Encoding</th>
+              <th>Typical GTX Config</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PCIe Gen1</td>
+              <td>2.5 Gbps/lane</td>
+              <td>8b/10b</td>
+              <td>CPLL or QPLL, x1/x4/x8 lanes</td>
+            </tr>
+            <tr>
+              <td>PCIe Gen2</td>
+              <td>5.0 Gbps/lane</td>
+              <td>8b/10b</td>
+              <td>QPLL preferred</td>
+            </tr>
+            <tr>
+              <td>PCIe Gen3</td>
+              <td>8.0 Gbps/lane</td>
+              <td>64b/66b</td>
+              <td>QPLL required</td>
+            </tr>
+            <tr>
+              <td>10GbE (XFI)</td>
+              <td>10.3125 Gbps</td>
+              <td>64b/66b</td>
+              <td>GTX QPLL, 1 lane</td>
+            </tr>
+            <tr>
+              <td>Aurora 8b/10b</td>
+              <td>3.125 Gbps/lane</td>
+              <td>8b/10b</td>
+              <td>CPLL, 1–4 lanes</td>
+            </tr>
+            <tr>
+              <td>JESD204B</td>
+              <td>3.072–12.5 Gbps</td>
+              <td>8b/10b</td>
+              <td>QPLL for &gt;6.6G</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 9: Transceiver Wizard -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Xilinx Transceiver Wizard IP
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          Manually configuring a GTX requires setting over 100 attributes correctly. Xilinx provides
+          the Transceiver Wizard IP to automate this entirely:
+        </p>
+        <ol
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            Open
+            <strong style="color: var(--text-base)"
+              >Vivado IP Catalog → Transceiver Wizard (7 Series)</strong
+            >
+          </li>
+          <li>
+            Select transceiver type (GTX, GTH, GTP), line rate, reference clock frequency, and
+            protocol
+          </li>
+          <li>
+            The wizard calculates all QPLL/CPLL M/N divider values and sets all GTX attributes
+          </li>
+          <li>
+            Output: complete Verilog wrapper, simulation model, XDC constraints with REFCLK pin
+            assignments
+          </li>
+          <li>Includes an example design with a self-test loopback mode for hardware bring-up</li>
+        </ol>
+        <div class="callout callout-tip">
+          <strong>Always use the Transceiver Wizard</strong>
+          GTX has 100+ configuration attributes — setting them manually is error-prone and not
+          supported by Xilinx for general use. The Wizard generates validated configurations with
+          simulation models and example designs. Never manually configure GTX attributes from
+          scratch.
+        </div>
+
+        <!-- Section 10: Eye Diagram -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Eye Diagram and Signal Quality
+        </h2>
+        <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+          An <strong style="color: var(--text-base)">eye diagram</strong> is the primary tool for
+          evaluating received signal quality at multi-gigabit rates. It overlays many successive bit
+          periods to show the statistical distribution of voltage and timing:
+        </p>
+        <ul
+          style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em; margin-bottom: 16px"
+        >
+          <li>
+            <strong style="color: var(--text-base)">Open eye:</strong> wide vertical opening → good
+            signal integrity, low BER
+          </li>
+          <li>
+            <strong style="color: var(--text-base)">Closed eye:</strong> traces collapse to the
+            center → excessive ISI, reflections, or noise → bit errors
+          </li>
+          <li>
+            Measured using <strong style="color: var(--text-base)">Vivado IBERT</strong> (Integrated
+            Bit Error Ratio Tester) — a debug core inserted into the design that sweeps voltage/time
+            margins and plots a bathtub curve
+          </li>
+          <li>IBERT communicates via JTAG while the transceiver operates at full line rate</li>
+        </ul>
+
+        <!-- Callouts -->
+        <div class="callout callout-warning">
+          <strong>GTX reference clock pin requirement</strong>
+          GTX reference clocks must come from dedicated REFCLK pins (MGTREFCLK0 / MGTREFCLK1 per
+          quad), not from BUFG or general IO. Using a non-dedicated reference clock source will
+          cause the QPLL to fail to lock and Vivado will report a critical warning.
+        </div>
+        <div class="callout callout-interview">
+          <strong>Interview question</strong>
+          Q: What is CDR in a transceiver and why is it needed?<br />
+          A: CDR (Clock and Data Recovery) extracts the transmitter's clock from the received data
+          stream. Since the receiver has no separate clock input from the transmitter, CDR uses a
+          PLL that locks onto data transitions to reconstruct the correct sampling clock. Without
+          CDR, the receiver cannot sample the incoming data reliably.
+        </div>
+
+        <!-- Quiz -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Knowledge Check
+        </h2>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q1. How many channels are in one GTX quad?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-1', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> 2
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-1', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> 3
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-1', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> 4
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-1', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> 8
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-1">
+            Correct! Each GTX quad contains exactly 4 independent transceiver channels, all sharing
+            one QPLL. This is why PCIe x4 and x8 configurations must stay within one or two quads
+            respectively.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q2. What does CDR stand for?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-2', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> Channel Data Rate
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-2', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> Clock and Data Recovery
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-2', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> Calibrated Delay Reference
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-2', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> Continuous Data Routing
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-2">
+            Correct! CDR — Clock and Data Recovery — is the circuit that extracts the transmitter's
+            clock from the received serial data stream by locking a PLL to the data transitions.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q3. Which GTX PLL is shared across all 4 channels in a quad?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-3', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> CPLL (Channel PLL)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-3', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> QPLL (Quad PLL)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-3', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> MMCM
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-3', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> PLL_ADV
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-3">
+            Correct! The QPLL (Quad PLL) is shared across all 4 channels in a quad. It is preferred
+            for high line rates (&gt;6.6 Gbps) due to lower jitter. The CPLL is a per-channel PLL
+            used for lower rates or mixed-rate quads.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q4. PCIe Gen3 uses which encoding scheme?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-4', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> 8b/10b
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-4', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> 64b/66b
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-4', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> NRZ with no encoding
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-4', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> 128b/132b
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-4">
+            Correct! PCIe Gen3 switched from 8b/10b to 64b/66b encoding to reduce the bandwidth
+            overhead from 20% down to 3.1%. This is why Gen3 at 8 Gbps raw line rate delivers ~7.877
+            Gbps effective throughput per lane.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">
+            Q5. What Xilinx debug core measures bit error rate on transceivers at full line rate?
+          </p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-5', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> ILA (Integrated Logic Analyzer)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-5', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> VIO (Virtual IO)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-5', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> IBERT (Integrated Bit Error Ratio Tester)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-5', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> ChipScope Pro AURORA
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-5">
+            Correct! IBERT is a dedicated Vivado debug IP that inserts alongside the transceiver to
+            sweep TX swing, pre-emphasis, and RX equalization settings while counting bit errors and
+            generating eye diagram / bathtub curve data via JTAG.
+          </div>
+        </div>
+
+        <div class="quiz-wrap" data-answered="">
+          <p class="quiz-q">Q6. GTX reference clocks must come from which source?</p>
+          <ul class="quiz-opts">
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-6', this.closest('.quiz-wrap'))"
+            >
+              <span>A</span> Any BUFG-driven clock in the design
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-6', this.closest('.quiz-wrap'))"
+            >
+              <span>B</span> MMCM output divided to the required frequency
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, true, 'fb-20-6', this.closest('.quiz-wrap'))"
+            >
+              <span>C</span> Dedicated REFCLK pins (MGTREFCLK0 / MGTREFCLK1)
+            </li>
+            <li
+              class="quiz-opt"
+              onclick="answerQuiz(this, false, 'fb-20-6', this.closest('.quiz-wrap'))"
+            >
+              <span>D</span> Any general IO pin with LVDS standard
+            </li>
+          </ul>
+          <div class="quiz-fb correct" id="fb-20-6">
+            Correct! GTX reference clocks must use the dedicated MGTREFCLK0 or MGTREFCLK1 pins of
+            each quad. These feed directly into the QPLL/CPLL with the low-jitter path required for
+            multi-gigabit locking. Using general IO or BUFG will cause QPLL lock failure.
+          </div>
+        </div>
+
+        <!-- Practical Exercise -->
+        <h2
+          style="font-size: 1.25rem; font-weight: 700; color: var(--text-base); margin: 32px 0 12px"
+        >
+          Practical Exercise
+        </h2>
+        <div
+          style="
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+          "
+        >
+          <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: 12px">
+            Use the Vivado Transceiver Wizard (IP Catalog → 7 Series FPGAs Transceivers Wizard) to
+            generate a GTX configuration with the following requirements:
+          </p>
+          <ul style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em">
+            <li>Protocol: Aurora 8b/10b</li>
+            <li>Number of lanes: 4 (full quad)</li>
+            <li>Line rate per lane: 3.125 Gbps</li>
+            <li>Reference clock: 156.25 MHz (from MGTREFCLK0)</li>
+            <li>Encoding: 8b/10b (hardware)</li>
+          </ul>
+          <p style="color: var(--text-sub); line-height: 1.8; margin-top: 12px">
+            After generation, note:
+          </p>
+          <ol style="color: var(--text-sub); line-height: 1.9; padding-left: 1.4em">
+            <li>Which PLL was selected — CPLL or QPLL? What are the M and N divider values?</li>
+            <li>What is the TXOUTCLK frequency delivered to the FPGA fabric?</li>
+            <li>What are the recommended TXPRECURSOR and TXPOSTCURSOR pre-emphasis values?</li>
+          </ol>
+          <p style="color: var(--text-sub); line-height: 1.8; margin-top: 12px">
+            Open the generated example design and review the top-level port list. Identify the
+            REFCLK, TXP/TXN, RXP/RXN, and GTXRESET ports. Simulate the example design using the
+            provided simulation model to observe TXOUTCLK and RXRECCLKOUT timing.
+          </p>
+        </div>
+
+        <div class="lesson-nav">
+          <a href="19-io-banks.html">← IO Banks</a>
+          <a href="21-configuration-memory.html">Config Memory →</a>
+        </div>
+      </main>
+    </div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      const COURSE_SLUG = 'fpga-fundamentals';
+      const MODULE_ID = 'lesson-20';
+      const TOTAL = 25;
+      async function loadProgress() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) return;
+        try {
+          const r = await fetch('/api/modules/progress/' + COURSE_SLUG, {
+            headers: { Authorization: 'Bearer ' + t },
+          });
+          const d = await r.json();
+          let done = 0;
+          d.forEach(function (item) {
+            if (item.completed) {
+              done++;
+              const l = document.querySelector('a[data-module="' + item.module_id + '"]');
+              if (l) l.classList.add('done-item');
+            }
+            if (item.module_id === MODULE_ID && item.completed) markAsCompleteUI();
+          });
+          const pct = Math.round((done / TOTAL) * 100);
+          document.getElementById('sb-pct').textContent = pct + '%';
+          document.getElementById('sb-fill').style.width = pct + '%';
+        } catch (e) {}
+      }
+      async function markComplete() {
+        const s = JSON.parse(localStorage.getItem('re_session') || '{}');
+        const t = s.accessToken || s.token || '';
+        if (!t) {
+          alert('Please log in to save your progress.');
+          return;
+        }
+        try {
+          const r = await fetch('/api/modules/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+            body: JSON.stringify({
+              course_slug: COURSE_SLUG,
+              module_id: MODULE_ID,
+              completed: true,
+              quiz_score: 0,
+              quiz_max: 0,
+            }),
+          });
+          if (r.ok) markAsCompleteUI();
+        } catch (e) {}
+      }
+      function markAsCompleteUI() {
+        const b = document.getElementById('mark-complete-btn');
+        if (b) {
+          b.innerHTML = '&#10003; Completed';
+          b.disabled = true;
+        }
+        const l = document.querySelector('a[data-module="' + MODULE_ID + '"]');
+        if (l) l.classList.add('done-item');
+      }
+      function answerQuiz(optEl, isCorrect, feedbackId, questionEl) {
+        if (questionEl.dataset.answered) return;
+        questionEl.dataset.answered = '1';
+        questionEl.querySelectorAll('.quiz-opt').forEach(o => {
+          o.style.pointerEvents = 'none';
+        });
+        optEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const fb = document.getElementById(feedbackId);
+        if (fb) {
+          fb.classList.add('show');
+          fb.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      }
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        var isDark = document.documentElement.dataset.theme === 'dark';
+        var textColor = isDark ? '#94a3b8' : '#475569';
+        var gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+        Plotly.newPlot(
+          'chart-xcvr',
+          [
+            {
+              x: ['GTP', 'GTX', 'GTH', 'GTY', 'GTM'],
+              y: [6.25, 12.5, 16.375, 32.75, 58],
+              type: 'bar',
+              marker: {
+                color: ['#3b82f6', '#22d3ee', '#818cf8', '#f472b6', '#fb923c'],
+                opacity: 0.85,
+              },
+              text: ['6.25 Gbps', '12.5 Gbps', '16.375 Gbps', '32.75 Gbps', '58 Gbps'],
+              textposition: 'outside',
+              textfont: { color: textColor, size: 11 },
+            },
+          ],
+          {
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: textColor, family: 'Inter,sans-serif' },
+            yaxis: {
+              title: { text: 'Max line rate (Gbps)', font: { color: textColor } },
+              gridcolor: gridColor,
+              color: textColor,
+              tickfont: { color: textColor },
+              range: [0, 70],
+            },
+            xaxis: {
+              title: { text: 'Transceiver type', font: { color: textColor } },
+              color: textColor,
+              tickfont: { color: textColor, size: 13 },
+            },
+            title: {
+              text: 'Xilinx Transceiver Family — Maximum Line Rates',
+              font: { color: textColor, size: 14 },
+            },
+            margin: { t: 50, b: 60, l: 70, r: 30 },
+            bargap: 0.3,
+            showlegend: false,
+          },
+          { responsive: true, displayModeBar: false }
+        );
+      });
+    </script>
+  </body>
+</html>

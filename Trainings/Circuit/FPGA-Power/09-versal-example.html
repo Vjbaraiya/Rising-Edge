@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Worked example: complete power supply design for an AMD Versal AI Edge VE2302 adaptive SoC — real part numbers (LM74910-Q1, LM25148-Q1, TPS62876-Q1, TPS746-Q1, TPS389006-Q1), with specific datasheet parameters referenced at every design step."
+    />
+    <title>
+      Worked Example: Versal SoC Power | FPGA Power Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/09-versal-example.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .ds-ref {
+        font-size: 0.72rem;
+        color: var(--cyan, #22d3ee);
+        font-family: monospace;
+        white-space: nowrap;
+      }
+      .step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--cyan, #22d3ee);
+        color: #06202a;
+        font-size: 0.72rem;
+        font-weight: 800;
+        margin-right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item active"
+            >09. Worked Example: Versal SoC</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Worked Example: Versal SoC</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 09</span>
+              <span class="badge badge-orange">Worked Example</span>
+              <h1>Powering an AMD Versal™ AI Edge SoC — End to End</h1>
+              <p class="subtitle">
+                Everything from Modules 01–08 applied to a real device: the
+                <strong>Versal AI Edge VE2302</strong>, powered with real, orderable part numbers
+                from TI's validated PMP23227 reference design — with the specific datasheet
+                parameter you must check called out at every step.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- step 1: device -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3><span class="step-num">1</span> The device and its governing documents</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Target device: <strong>AMD Versal AI Edge VE2302</strong> (XCVE2302) — a
+                  low/mid-power AI Edge adaptive SoC with AI Engines, Arm PS cores, PL fabric and
+                  GTYP transceivers. Three documents drive the whole power design:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Document</th>
+                        <th>What you pull from it</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <a
+                            href="https://docs.amd.com/r/en-US/ds958-versal-ai-edge"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>DS958</strong></a
+                          >
+                          — Versal AI Edge Series Data Sheet: DC and AC Switching Characteristics
+                        </td>
+                        <td>
+                          <span class="ds-ref">Recommended Operating Conditions</span> table — rail
+                          voltages &amp; DC tolerances;
+                          <span class="ds-ref">Power Supply Sequencing</span> section — required
+                          up/down order, ramp windows and POR_B conditions; AC ripple limits per
+                          rail.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a
+                            href="https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/power-design-manager.html"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>AMD Power Design Manager (PDM)</strong></a
+                          >
+                          (successor to XPE for Versal; user guide
+                          <a
+                            href="https://docs.amd.com/r/en-US/ug1556-power-design-manager"
+                            target="_blank"
+                            rel="noopener"
+                            >UG1556</a
+                          >)
+                        </td>
+                        <td>
+                          Per-rail current estimates for <em>your</em> configuration, and the
+                          official <span class="ds-ref">rail-consolidation ("Minimum Rails")</span>
+                          options that say which supplies may legally share a regulator.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a
+                            href="https://docs.amd.com/r/en-US/ug1506-acap-board-system-design-methodology"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>UG1506</strong></a
+                          >
+                          — Versal Adaptive SoC Board System Design Methodology Guide
+                        </td>
+                        <td>Board-level power methodology, decoupling and PCB guidance.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tip-box">
+                  Rule from Module 01, now concrete: <strong>run PDM first.</strong> The currents
+                  below are the PMP23227 example estimation for a VE2302 at ~50 W system power —
+                  your AI Engine utilization can move the 0.8 V group current dramatically.
+                </div>
+              </div>
+
+              <!-- step 2: rails -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>
+                    <span class="step-num">2</span> Rail map with AMD's "Minimum Rails"
+                    consolidation
+                  </h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Versal lists a dozen supplies; PDM's Minimum Rails option (Module 03's "merge
+                  rules", done officially) consolidates them into a buildable set. As used in
+                  PMP23227:
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Group</th>
+                        <th>Versal rails consolidated</th>
+                        <th>V</th>
+                        <th>I (example)</th>
+                        <th>Spec to verify in DS958</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Core group</strong></td>
+                        <td>VCCINT, VCC_SOC, VCC_PMC, VCC_PSFP, VCC_PSLP, VCC_RAM, VCC_IO</td>
+                        <td>0.80 V</td>
+                        <td><strong>39 A</strong> peak</td>
+                        <td>
+                          <span class="ds-ref">±1 % DC tolerance, ±17 mV AC</span> — sets the
+                          transient budget (Module 05) and demands remote sense
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>I/O</td>
+                        <td>VCCO banks (example 1.0 V / DDR-dependent)</td>
+                        <td>1.0 V</td>
+                        <td>3 A</td>
+                        <td>
+                          <span class="ds-ref">VCCO range per I/O standard</span>; PMC-domain VCCO
+                          up-first rule
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Aux group</td>
+                        <td>VCCAUX, VCCAUX_PMC, VCCAUX_SMON</td>
+                        <td>1.50 V</td>
+                        <td>1.1 A</td>
+                        <td>
+                          <span class="ds-ref">±1 % DC, 10 mV p-p AC ripple limit</span> — note
+                          Versal's VCCAUX is 1.5 V, not the 1.8 V of older families!
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>GTYP analog</td>
+                        <td>Transceiver AVCC</td>
+                        <td>0.88 V</td>
+                        <td>0.7 A</td>
+                        <td>
+                          <span class="ds-ref">GTYP supply ripple/noise limits</span> — the jitter
+                          budget rail
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>GTYP termination</td>
+                        <td>Transceiver AVTT</td>
+                        <td>1.20 V</td>
+                        <td>1.3 A</td>
+                        <td>same section</td>
+                      </tr>
+                      <tr>
+                        <td>Housekeeping</td>
+                        <td>1.5 V analog (SMON-class, quiet) / 3.3 V utility</td>
+                        <td>1.5 / 3.3 V</td>
+                        <td>50 / 12 mA</td>
+                        <td>low-noise requirement → LDO, not buck</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="warning-box">
+                  The core group at 0.8 V / ±1 % gives a total window of just
+                  <strong>±8 mV DC</strong> plus a ±17 mV AC allowance — recall the tolerance stack
+                  (Module 01). At 39 A that implies a milliohm-class PDN and mandatory remote sense.
+                </div>
+              </div>
+
+              <!-- step 3: parts -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>
+                    <span class="step-num">3</span> Part selection — with the datasheet parameter
+                    that justifies each
+                  </h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.6">
+                  Parts are from TI's validated
+                  <a href="https://www.ti.com/tool/PMP23227" target="_blank" rel="noopener"
+                    >PMP23227</a
+                  >
+                  Versal AI Edge reference design (8–18 V input, ~50 W). For every selection, the
+                  right-hand column names the parameter to verify in that part's datasheet.
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Function</th>
+                        <th>Part number</th>
+                        <th>Why this class of part (Module 02)</th>
+                        <th>Datasheet parameters to check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Front-end protection</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/LM74910-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>LM74910-Q1</strong></a
+                          >
+                        </td>
+                        <td>
+                          Ideal-diode controller + circuit breaker: reverse-polarity, UV/OV,
+                          overcurrent for the 12 V input
+                        </td>
+                        <td>
+                          <span class="ds-ref"
+                            >UVLO/OVLO comparator thresholds &amp; hysteresis</span
+                          >
+                          (set your 8–18 V window via the UV/OV divider equations);
+                          <span class="ds-ref">gate-drive charge-pump voltage</span> vs your FET's
+                          V<sub>GS</sub> rating
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>5 V intermediate bus, 12 A</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/LM25148-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>LM25148-Q1</strong></a
+                          >
+                        </td>
+                        <td>
+                          42 V sync buck controller — the intermediate-bus pattern from Module 03
+                          (low-V<sub>IN</sub> PoL bucks can't take 18 V directly)
+                        </td>
+                        <td>
+                          <span class="ds-ref">VIN operating range (3.5–42 V)</span>;
+                          <span class="ds-ref">RT pin frequency-set equation</span> (place f<sub
+                            >sw</sub
+                          >
+                          off your EMC-sensitive bands);
+                          <span class="ds-ref">SS pin soft-start capacitor equation</span> — this
+                          sets the 5 V ramp that everything downstream sees
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>0.8 V core group, 39 A</strong></td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/TPS62876-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>TPS62876-Q1</strong></a
+                          >
+                          × 2 (stacked)
+                        </td>
+                        <td>
+                          2.7–6 V input, 25 A <em>stackable</em> synchronous buck — two phases share
+                          the 39 A with interleaved ripple (Module 02's multi-phase rule)
+                        </td>
+                        <td>
+                          <span class="ds-ref">Stacked/multi-phase operation section</span> (current
+                          sharing, phase interleave);
+                          <span class="ds-ref">output-voltage accuracy</span> vs the ±1 % DS958
+                          budget;
+                          <span class="ds-ref">differential remote-sense (VOSNS±) connections</span>
+                          — sense at the VE2302 balls;
+                          <span class="ds-ref">I²C V<sub>OUT</sub> step size</span> for margining at
+                          bring-up (Module 07)
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Mid-current PoL bucks (1.0 V VCCO, 1.2 V AVTT, 0.88 V AVCC, 1.5 V AUX)
+                        </td>
+                        <td><strong>TPS62830x</strong> family (3 A class, per rail)</td>
+                        <td>
+                          Small integrated-FET sync bucks off the 5 V bus; one per voltage group
+                        </td>
+                        <td>
+                          <span class="ds-ref">Output ripple vs f<sub>sw</sub></span> against the
+                          DS958 AC limits (10 mV p-p on AUX!);
+                          <span class="ds-ref">soft-start / EN threshold</span> — these pins
+                          implement the sequence in step 5
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Low-noise analog rails (GTYP AVCC cleanup / 1.5 V SMON)</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/TPS746-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>TPS746-Q1</strong></a
+                          >
+                        </td>
+                        <td>
+                          1 A high-PSRR LDO with power-good — the buck-then-LDO pattern for
+                          jitter-critical GTYP supplies (Module 02)
+                        </td>
+                        <td>
+                          <span class="ds-ref"
+                            >PSRR vs frequency curve at your upstream buck's f<sub>sw</sub></span
+                          >
+                          (not the 1 kHz headline!);
+                          <span class="ds-ref">output noise (µV<sub>RMS</sub>)</span> vs the GTYP
+                          jitter budget; <span class="ds-ref">dropout voltage at load</span> —
+                          confirms 1.0 V→0.88 V headroom; <span class="ds-ref">PG thresholds</span>
+                          for the sequencing chain
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>3.3 V housekeeping (12 mA)</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/TPS7B69-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>TPS7B69-Q1</strong></a
+                          >
+                        </td>
+                        <td>
+                          150 mA, 40 V-tolerant LDO straight off the input — alive before the bus
+                          converters
+                        </td>
+                        <td>
+                          <span class="ds-ref">Wide-V<sub>IN</sub> rating (40 V)</span>;
+                          <span class="ds-ref">quiescent current</span> (always-on rail)
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Rail monitoring &amp; sequencing</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/TPS389006-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>TPS389006-Q1</strong></a
+                          >
+                          (+ TPS38700S sequencer option)
+                        </td>
+                        <td>
+                          6-channel I²C-programmable UV/OV monitor supervising every group; drives
+                          POR_B (Modules 04 &amp; 07)
+                        </td>
+                        <td>
+                          <span class="ds-ref">Threshold accuracy spec</span> — must be much tighter
+                          than the ±1 % rails it polices;
+                          <span class="ds-ref">programmable UV/OV window &amp; glitch filter</span>;
+                          <span class="ds-ref">RESET/alert output behavior</span> vs the VE2302's
+                          POR_B requirement
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><em>Alternative: PMIC route</em></td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/product/LP8769-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            ><strong>LP8769-Q1</strong></a
+                          >
+                        </td>
+                        <td>
+                          Four-buck PMIC (5 A/20 A multiphase) with built-in NVM sequencing — the
+                          "multi-rail PMIC" architecture from Module 02 collapsing several discrete
+                          parts
+                        </td>
+                        <td>
+                          <span class="ds-ref"
+                            >Per-buck current limits in multiphase configurations</span
+                          >
+                          vs the 39 A core group;
+                          <span class="ds-ref">NVM sequence-slot programming</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- step 4: tree -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3><span class="step-num">4</span> The resulting power tree</h3>
+                </div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 720 330"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Versal VE2302 power tree: 12 volt input through LM74910 protection into LM25148 5 volt bus; two stacked TPS62876 make the 0.8 volt 39 amp core group; TPS62830x bucks make 1.0, 1.5, 1.2 and 0.88 volt rails; TPS746 LDO cleans the transceiver rail; TPS389006 monitors all rails and drives POR_B."
+                  >
+                    <!-- input + protection -->
+                    <rect
+                      x="4"
+                      y="140"
+                      width="64"
+                      height="46"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--text-muted)"
+                    />
+                    <text
+                      x="36"
+                      y="160"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="10"
+                      font-weight="800"
+                    >
+                      8–18 V
+                    </text>
+                    <text
+                      x="36"
+                      y="174"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7.5"
+                    >
+                      input
+                    </text>
+                    <line
+                      x1="68"
+                      y1="163"
+                      x2="92"
+                      y2="163"
+                      stroke="var(--text-muted)"
+                      stroke-width="2.5"
+                    />
+                    <rect
+                      x="92"
+                      y="140"
+                      width="86"
+                      height="46"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="135"
+                      y="158"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      LM74910-Q1
+                    </text>
+                    <text
+                      x="135"
+                      y="172"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7"
+                    >
+                      ideal diode · UV/OV · OC
+                    </text>
+                    <line
+                      x1="178"
+                      y1="163"
+                      x2="204"
+                      y2="163"
+                      stroke="var(--text-muted)"
+                      stroke-width="2.5"
+                    />
+                    <!-- 5V bus -->
+                    <rect
+                      x="204"
+                      y="140"
+                      width="86"
+                      height="46"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="247"
+                      y="158"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      LM25148-Q1
+                    </text>
+                    <text
+                      x="247"
+                      y="172"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7"
+                    >
+                      5 V / 12 A bus
+                    </text>
+                    <line
+                      x1="290"
+                      y1="163"
+                      x2="316"
+                      y2="163"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <line
+                      x1="316"
+                      y1="40"
+                      x2="316"
+                      y2="290"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2.5"
+                    />
+                    <!-- core group -->
+                    <line
+                      x1="316"
+                      y1="52"
+                      x2="344"
+                      y2="52"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="344"
+                      y="30"
+                      width="120"
+                      height="44"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="404"
+                      y="48"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8.5"
+                      font-weight="700"
+                    >
+                      TPS62876-Q1 ×2
+                    </text>
+                    <text
+                      x="404"
+                      y="62"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7"
+                    >
+                      stacked · remote sense
+                    </text>
+                    <line
+                      x1="464"
+                      y1="52"
+                      x2="560"
+                      y2="52"
+                      stroke="var(--danger,#f87171)"
+                      stroke-width="3"
+                    />
+                    <text
+                      x="470"
+                      y="44"
+                      fill="var(--danger,#f87171)"
+                      font-size="8.5"
+                      font-weight="800"
+                    >
+                      0.8 V · 39 A core ②
+                    </text>
+                    <!-- VCCO -->
+                    <line
+                      x1="316"
+                      y1="108"
+                      x2="344"
+                      y2="108"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="344"
+                      y="96"
+                      width="120"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="404"
+                      y="112"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      TPS62830x — 1.0 V / 3 A
+                    </text>
+                    <line
+                      x1="464"
+                      y1="108"
+                      x2="560"
+                      y2="108"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="470"
+                      y="100"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="8.5"
+                      font-weight="800"
+                    >
+                      VCCO ①
+                    </text>
+                    <!-- AUX -->
+                    <line
+                      x1="316"
+                      y1="152"
+                      x2="344"
+                      y2="152"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="344"
+                      y="140"
+                      width="120"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="404"
+                      y="156"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      TPS62830x — 1.5 V / 1.1 A
+                    </text>
+                    <line
+                      x1="464"
+                      y1="152"
+                      x2="560"
+                      y2="152"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2.5"
+                    />
+                    <text
+                      x="470"
+                      y="144"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="8.5"
+                      font-weight="800"
+                    >
+                      VCCAUX group ③
+                    </text>
+                    <!-- AVTT -->
+                    <line
+                      x1="316"
+                      y1="196"
+                      x2="344"
+                      y2="196"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="344"
+                      y="184"
+                      width="120"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="#a78bfa"
+                    />
+                    <text
+                      x="404"
+                      y="200"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      TPS62830x — 1.2 V / 1.3 A
+                    </text>
+                    <line x1="464" y1="196" x2="560" y2="196" stroke="#a78bfa" stroke-width="2.5" />
+                    <text x="470" y="188" fill="#a78bfa" font-size="8.5" font-weight="800">
+                      GTYP AVTT ④
+                    </text>
+                    <!-- AVCC via buck+LDO -->
+                    <line
+                      x1="316"
+                      y1="244"
+                      x2="344"
+                      y2="244"
+                      stroke="var(--warning,#fb923c)"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="344"
+                      y="232"
+                      width="76"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="#a78bfa"
+                    />
+                    <text
+                      x="382"
+                      y="248"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="7.5"
+                      font-weight="700"
+                    >
+                      buck 1.0 V
+                    </text>
+                    <line x1="420" y1="244" x2="438" y2="244" stroke="#a78bfa" stroke-width="2" />
+                    <rect
+                      x="438"
+                      y="232"
+                      width="80"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="#a78bfa"
+                    />
+                    <text
+                      x="478"
+                      y="248"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="7.5"
+                      font-weight="700"
+                    >
+                      TPS746-Q1 LDO
+                    </text>
+                    <line x1="518" y1="244" x2="560" y2="244" stroke="#a78bfa" stroke-width="2.5" />
+                    <text x="470" y="226" fill="#a78bfa" font-size="8.5" font-weight="800">
+                      GTYP AVCC 0.88 V ④
+                    </text>
+                    <!-- 3.3 housekeeping from input -->
+                    <line
+                      x1="135"
+                      y1="186"
+                      x2="135"
+                      y2="290"
+                      stroke="var(--text-muted)"
+                      stroke-width="1.5"
+                    />
+                    <line
+                      x1="135"
+                      y1="290"
+                      x2="344"
+                      y2="290"
+                      stroke="var(--text-muted)"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="344"
+                      y="278"
+                      width="120"
+                      height="24"
+                      rx="6"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="404"
+                      y="294"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      TPS7B69-Q1 — 3.3 V LDO
+                    </text>
+                    <line
+                      x1="464"
+                      y1="290"
+                      x2="560"
+                      y2="290"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="2.5"
+                    />
+                    <!-- FPGA -->
+                    <rect
+                      x="560"
+                      y="24"
+                      width="154"
+                      height="282"
+                      rx="12"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="637"
+                      y="58"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="12"
+                      font-weight="800"
+                    >
+                      Versal AI Edge
+                    </text>
+                    <text
+                      x="637"
+                      y="76"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="9"
+                    >
+                      XCVE2302
+                    </text>
+                    <g font-size="7.5" fill="var(--text-sub)" text-anchor="middle">
+                      <text x="637" y="104">VCCINT · VCC_SOC · VCC_PMC</text>
+                      <text x="637" y="117">VCC_PSFP · VCC_PSLP</text>
+                      <text x="637" y="130">VCC_RAM · VCC_IO</text>
+                      <text x="637" y="160">VCCO banks</text>
+                      <text x="637" y="186">VCCAUX · VCCAUX_PMC · SMON</text>
+                      <text x="637" y="216">GTYP AVTT / AVCC</text>
+                      <text x="637" y="262">POR_B ← supervisor</text>
+                    </g>
+                    <!-- supervisor -->
+                    <rect
+                      x="204"
+                      y="240"
+                      width="86"
+                      height="50"
+                      rx="7"
+                      fill="var(--bg-muted)"
+                      stroke="var(--success,#34d399)"
+                    />
+                    <text
+                      x="247"
+                      y="260"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      TPS389006-Q1
+                    </text>
+                    <text
+                      x="247"
+                      y="274"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="7"
+                    >
+                      6-ch UV/OV monitor
+                    </text>
+                    <path
+                      d="M247 290 V318 H637 V306"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="1.6"
+                      stroke-dasharray="4 3"
+                    />
+                    <text
+                      x="440"
+                      y="314"
+                      text-anchor="middle"
+                      fill="var(--success,#34d399)"
+                      font-size="8"
+                      font-weight="700"
+                    >
+                      POR_B released only when all rails valid
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    PMP23227-style tree: protected 12 V → 5 V intermediate bus → PoL converters.
+                    Circled numbers = power-up groups (next step). GTYP AVCC uses the buck-then-LDO
+                    pattern for noise.
+                  </p>
+                </div>
+              </div>
+
+              <!-- step 5: sequencing -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3><span class="step-num">5</span> Sequencing per DS958</h3>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    DS958's <span class="ds-ref">Power Supply Sequencing</span> section is law:
+                    Versal requires the <strong>PMC-domain supplies</strong> (and PMC-bank VCCO)
+                    valid early, and
+                    <strong>POR_B may only be released after VCCAUX_PMC is stable</strong> (AMD
+                    answer record 000039045 covers the I/O behavior during ramp).
+                  </li>
+                  <li>
+                    In the consolidated TI design the groups come up
+                    <strong>① VCCO → ② 0.8 V core group → ③ VCCAUX group → ④ GTYP rails</strong>,
+                    implemented with EN/PGOOD chaining (Module 04) or the TPS38700S sequencer; the
+                    TPS389006-Q1 verifies every rail's window before the supervisor releases POR_B.
+                  </li>
+                  <li>
+                    Monotonic-ramp rule (Module 04) applies to every group — verify each regulator's
+                    <span class="ds-ref">soft-start behavior into pre-biased outputs</span> in its
+                    datasheet.
+                  </li>
+                  <li>
+                    Margining bonus: TPS62876-Q1's
+                    <span class="ds-ref">I²C V<sub>OUT</sub> control</span> lets you run DS958
+                    corner testing (±5 %) at bring-up without soldering — Module 07's load-transient
+                    test, automated.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- step 6: verify -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3><span class="step-num">6</span> Design verification shortlist</h3>
+                </div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>PDN:</strong> Z<sub>target</sub> for the core group = 0.8 V × 1.5 % ÷
+                    (0.33 × 39 A) ≈ <strong>0.9 mΩ</strong> — run it through the Module 05
+                    calculator; follow UG1506's decoupling table as the floor.
+                  </li>
+                  <li>
+                    <strong>Thermal:</strong> TPS746 dropping 1.0 → 0.88 V at 0.7 A dissipates ~84
+                    mW — trivial; the TPS62876 pair at 39 A is the real hotspot → check its
+                    <span class="ds-ref">R<sub>θJA</sub>/thermal design section</span> and give it
+                    the copper.
+                  </li>
+                  <li>
+                    <strong>Efficiency sanity:</strong> ~50 W out of an 18 V input → front-end + two
+                    conversion stages ≈ 85–90 % — confirmed by the PMP23227 test report (TIDT387)
+                    efficiency curves.
+                  </li>
+                  <li>
+                    <strong>Bring-up:</strong> follow the Module 07 ritual; capture the 4-group
+                    sequence and archive it against DS958's requirements.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- references -->
+              <div class="widget-container" id="references">
+                <div class="widget-header"><h3>References</h3></div>
+                <p style="font-size: 0.8rem; color: var(--text-sub); line-height: 1.6">
+                  Every document used in this module. Datasheet links use the manufacturers'
+                  permanent URLs; always confirm you have the latest revision before sign-off.
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Document</th>
+                        <th>Publisher</th>
+                        <th>Link</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>[1]</td>
+                        <td>
+                          <strong>DS958</strong> — Versal AI Edge Series Data Sheet: DC and AC
+                          Switching Characteristics
+                        </td>
+                        <td>AMD</td>
+                        <td>
+                          <a
+                            href="https://docs.amd.com/r/en-US/ds958-versal-ai-edge"
+                            target="_blank"
+                            rel="noopener"
+                            >docs.amd.com</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[2]</td>
+                        <td>
+                          <strong>UG1506</strong> — Versal Adaptive SoC Board System Design
+                          Methodology Guide
+                        </td>
+                        <td>AMD</td>
+                        <td>
+                          <a
+                            href="https://docs.amd.com/r/en-US/ug1506-acap-board-system-design-methodology"
+                            target="_blank"
+                            rel="noopener"
+                            >docs.amd.com</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[3]</td>
+                        <td>
+                          <strong>UG1556</strong> — Power Design Manager User Guide (PDM tool page)
+                        </td>
+                        <td>AMD</td>
+                        <td>
+                          <a
+                            href="https://docs.amd.com/r/en-US/ug1556-power-design-manager"
+                            target="_blank"
+                            rel="noopener"
+                            >docs.amd.com</a
+                          >
+                          ·
+                          <a
+                            href="https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/power-design-manager.html"
+                            target="_blank"
+                            rel="noopener"
+                            >tool</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[4]</td>
+                        <td>
+                          <strong>AR 000039045</strong> — Versal I/O behavior at power-up (answer
+                          record)
+                        </td>
+                        <td>AMD</td>
+                        <td>
+                          <a
+                            href="https://adaptivesupport.amd.com/s/article/000039045?language=en_US"
+                            target="_blank"
+                            rel="noopener"
+                            >adaptivesupport.amd.com</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[5]</td>
+                        <td>
+                          <strong>PMP23227</strong> — Power delivery reference design for AMD Versal
+                          AI Edge (design page)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a href="https://www.ti.com/tool/PMP23227" target="_blank" rel="noopener"
+                            >ti.com/tool/PMP23227</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[6]</td>
+                        <td>
+                          PMP23227 design files — schematic <strong>TIDMCR9</strong> · BOM
+                          <strong>TIDMCS1</strong> · test report <strong>TIDT387</strong>
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/pdf/TIDMCR9"
+                            target="_blank"
+                            rel="noopener"
+                            >schematic</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/lit/pdf/TIDMCS1"
+                            target="_blank"
+                            rel="noopener"
+                            >BOM</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/lit/pdf/TIDT387"
+                            target="_blank"
+                            rel="noopener"
+                            >test report</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[7]</td>
+                        <td>
+                          <strong>SNVAA98</strong> — Power Supply Design for AMD Versal AI Edge
+                          Series (application note)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/pdf/snvaa98"
+                            target="_blank"
+                            rel="noopener"
+                            >ti.com/lit/pdf/snvaa98</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[8]</td>
+                        <td>
+                          <strong>TIDUFF9</strong> — Power Supply Proof-of-Concept Design for Versal
+                          AI Edge Gen 2 (design guide)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/pdf/TIDUFF9"
+                            target="_blank"
+                            rel="noopener"
+                            >ti.com/lit/pdf/TIDUFF9</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[9]</td>
+                        <td>
+                          <strong>LM74910-Q1</strong> datasheet — ideal-diode front-end controller
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/LM74910-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/LM74910-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[10]</td>
+                        <td>
+                          <strong>LM25148-Q1</strong> datasheet — 42 V synchronous buck controller
+                          (5 V bus)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/LM25148-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/LM25148-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[11]</td>
+                        <td>
+                          <strong>TPS62876-Q1</strong> datasheet — 25 A stackable buck (0.8 V core
+                          group)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/TPS62876-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/TPS62876-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[12]</td>
+                        <td>
+                          <strong>TPS746-Q1</strong> datasheet — 1 A high-PSRR LDO (GTYP analog
+                          rails)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/TPS746-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/TPS746-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[13]</td>
+                        <td>
+                          <strong>TPS7B69-Q1</strong> datasheet — 150 mA 40 V LDO (3.3 V
+                          housekeeping)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/TPS7B69-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/TPS7B69-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[14]</td>
+                        <td>
+                          <strong>TPS389006-Q1</strong> datasheet — 6-channel I²C UV/OV supervisor
+                          (POR_B gating)
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/TPS389006-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/TPS389006-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[15]</td>
+                        <td><strong>LP8769-Q1</strong> datasheet — four-buck PMIC alternative</td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/gpn/LP8769-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >PDF</a
+                          >
+                          ·
+                          <a
+                            href="https://www.ti.com/product/LP8769-Q1"
+                            target="_blank"
+                            rel="noopener"
+                            >product page</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[16]</td>
+                        <td>
+                          TPS62830x mid-current bucks and TPS38700S sequencer — exact variants per
+                          the PMP23227 BOM [6]
+                        </td>
+                        <td>TI</td>
+                        <td>
+                          <a
+                            href="https://www.ti.com/lit/pdf/TIDMCS1"
+                            target="_blank"
+                            rel="noopener"
+                            >see BOM</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[17]</td>
+                        <td>
+                          <strong>ISLVERSALDEMO3Z</strong> — Renesas power management reference
+                          design for Versal (alternative tree)
+                        </td>
+                        <td>Renesas</td>
+                        <td>
+                          <a
+                            href="https://www.renesas.com/en/design-resources/reference-designs/islversaldemo3z"
+                            target="_blank"
+                            rel="noopener"
+                            >renesas.com</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[18]</td>
+                        <td>
+                          Power tree for Versal AI Edge / Prime Gen 2 — minimum rails (alternative
+                          tree)
+                        </td>
+                        <td>Infineon</td>
+                        <td>
+                          <a
+                            href="https://www.infineon.com/assets/row/public/documents/24/57/infineon-power-tree-for-versaltm-ai-edge-and-prime-gen2-minimum-rails-additionaltechnicalinformation-en.pdf"
+                            target="_blank"
+                            rel="noopener"
+                            >infineon.com (PDF)</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[19]</td>
+                        <td>Versal AI Edge (automotive) reference design (alternative tree)</td>
+                        <td>MPS</td>
+                        <td>
+                          <a
+                            href="https://www.monolithicpower.com/versal-ai-edge-automotive-reference-design"
+                            target="_blank"
+                            rel="noopener"
+                            >monolithicpower.com</a
+                          >
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>[20]</td>
+                        <td>
+                          VE2302 Carrier Card Hardware User Guide — a shipping board's power
+                          implementation to study
+                        </td>
+                        <td>Avnet</td>
+                        <td>
+                          <a
+                            href="https://www.avnet.com/wcm/connect/52fe7263-bd0d-4d53-bf42-53d1ffbfd913/VE2302-IOCC-UG-V1P2.pdf?MOD=AJPERES&amp;CACHEID=ROOTWORKSPACE-52fe7263-bd0d-4d53-bf42-53d1ffbfd913-pxXmEOZ"
+                            target="_blank"
+                            rel="noopener"
+                            >avnet.com (PDF)</a
+                          >
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="info-box">
+                  Same method, different silicon: [17]–[19] are validated alternative power trees
+                  from other vendors. Always re-run PDM [3] and re-verify every cited parameter
+                  against the <em>current</em> datasheet revision before committing a BOM.
+                </div>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="08-checklist-faq.html">← Checklist &amp; FAQ</a>
+                <a class="btn btn-primary" href="index.html">Course Home ↺</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+  </body>
+</html>

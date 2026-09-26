@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="Why FPGA power design is different: the rail map from VCCINT to transceiver rails, design-dependent currents, vendor power estimators, tolerance stacks, and a rail budget calculator."
+    />
+    <title>
+      Why FPGA Power is Different | FPGA Power Design Academy | Rising Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/01-introduction.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+      .rail-row input {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        color: var(--text-base);
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        width: 90px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item active"
+            >01. Why FPGA Power is Different</a
+          >
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Introduction</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 01</span>
+              <h1>Why FPGA Power is Different</h1>
+              <p class="subtitle">
+                An MCU wants one rail and 100 mA. An FPGA wants nine rails, three of them within ±3
+                %, brought up in the right order, with transients measured in amps per microsecond.
+                Here's the map before we start walking.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <!-- rail map -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The rail map</h3></div>
+                <div class="table-scroll">
+                  <table class="iface-spec-table">
+                    <thead>
+                      <tr>
+                        <th>Rail family</th>
+                        <th>Typical voltage</th>
+                        <th>Feeds</th>
+                        <th>Current</th>
+                        <th>Sensitivity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>VCCINT</strong></td>
+                        <td>0.7 – 1.0 V</td>
+                        <td>Core logic fabric</td>
+                        <td>Highest (1 – 30+ A)</td>
+                        <td>±3 % total — the hardest rail</td>
+                      </tr>
+                      <tr>
+                        <td><strong>VCCBRAM</strong></td>
+                        <td>= VCCINT (usually)</td>
+                        <td>Block RAM</td>
+                        <td>Low–mid</td>
+                        <td>Sag ⇒ memory corruption</td>
+                      </tr>
+                      <tr>
+                        <td><strong>VCCAUX</strong></td>
+                        <td>1.8 V</td>
+                        <td>Config logic, clock mgmt.</td>
+                        <td>Low–mid</td>
+                        <td>Needed before configuration</td>
+                      </tr>
+                      <tr>
+                        <td><strong>VCCO (per bank)</strong></td>
+                        <td>1.2 – 3.3 V</td>
+                        <td>I/O banks</td>
+                        <td>Design-dependent</td>
+                        <td>Set by I/O standard (DDR bank ≠ LVCMOS bank)</td>
+                      </tr>
+                      <tr>
+                        <td><strong>VMGTAVCC / AVTT</strong></td>
+                        <td>0.9 / 1.2 V</td>
+                        <td>Transceivers (GTX/GTH…)</td>
+                        <td>Mid</td>
+                        <td><strong>Noise-critical</strong> — mV of ripple = bit errors</td>
+                      </tr>
+                      <tr>
+                        <td>VCCADC / VREF / VBATT</td>
+                        <td>1.8 V / ext / coin cell</td>
+                        <td>XADC, references, key storage</td>
+                        <td>mA</td>
+                        <td>Quiet analog supply</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="info-box">
+                  Names shown are AMD/Xilinx-style; Intel (VCC, VCCA, VCCIO…), Lattice and Microchip
+                  use different labels for the same families. The design method is identical — map
+                  every datasheet rail into these five roles: core, aux/config, I/O,
+                  analog/transceiver, housekeeping.
+                </div>
+              </div>
+
+              <!-- load profile -->
+              <div class="widget-container">
+                <div class="widget-header">
+                  <h3>Design-dependent current — same chip, 10× difference</h3>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  Unlike a CPU, an FPGA's current depends on <em>your bitstream</em>: logic
+                  utilization, clock frequencies, toggle rates and I/O loading. A design at 30 %
+                  utilization / 100 MHz and one at 90 % / 400 MHz can differ by an order of
+                  magnitude on VCCINT. Three consequences:
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>You must run the vendor estimator</strong> (AMD XPE / Intel EPE) with
+                    your real design parameters — copying another board's supply is how boards die
+                    at 80 % utilization.
+                  </li>
+                  <li>
+                    <strong>Inrush &amp; configuration current:</strong> at power-up, before your
+                    logic even runs, configuration draws a current spike — datasheets specify
+                    minimum supply current capability just to configure.
+                  </li>
+                  <li>
+                    <strong>Transients:</strong> a clock-enable flipping half the fabric on in one
+                    cycle creates di/dt steps of amps per microsecond — this is what the PDN (Module
+                    05) must absorb, not the regulator.
+                  </li>
+                </ul>
+                <div class="tip-box">
+                  <strong>Margin policy:</strong> take estimator worst-case numbers, then add 20–30
+                  %. Fabric utilization grows over a product's life; power supplies rarely get
+                  redesigned.
+                </div>
+              </div>
+
+              <!-- tolerance stack -->
+              <div class="widget-container">
+                <div class="widget-header"><h3>The tolerance stack</h3></div>
+                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.75">
+                  VCCINT at "0.85 V ±3 %" gives you a total window of ±25.5 mV — and
+                  <em>everything</em> must fit inside it:
+                </p>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 640 180"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Tolerance stack diagram: the ±3 percent window is consumed by regulator set-point accuracy, output ripple, and transient droop, leaving little margin."
+                  >
+                    <rect
+                      x="60"
+                      y="20"
+                      width="520"
+                      height="140"
+                      fill="none"
+                      stroke="var(--border)"
+                    />
+                    <line
+                      x1="60"
+                      y1="90"
+                      x2="580"
+                      y2="90"
+                      stroke="var(--text-muted)"
+                      stroke-dasharray="4 4"
+                    />
+                    <text
+                      x="52"
+                      y="94"
+                      text-anchor="end"
+                      fill="var(--text-base)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      0.850 V
+                    </text>
+                    <text
+                      x="52"
+                      y="30"
+                      text-anchor="end"
+                      fill="var(--success,#34d399)"
+                      font-size="9"
+                    >
+                      +25.5 mV
+                    </text>
+                    <text
+                      x="52"
+                      y="160"
+                      text-anchor="end"
+                      fill="var(--danger,#f87171)"
+                      font-size="9"
+                    >
+                      −25.5 mV
+                    </text>
+                    <!-- setpoint band -->
+                    <rect
+                      x="90"
+                      y="76"
+                      width="120"
+                      height="28"
+                      fill="rgba(34,211,238,0.18)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="150"
+                      y="70"
+                      text-anchor="middle"
+                      fill="var(--cyan,#22d3ee)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      set-point ±1 % (±8.5 mV)
+                    </text>
+                    <!-- ripple band -->
+                    <rect
+                      x="250"
+                      y="66"
+                      width="120"
+                      height="48"
+                      fill="rgba(251,146,60,0.15)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="310"
+                      y="60"
+                      text-anchor="middle"
+                      fill="var(--warning,#fb923c)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      + ripple ±10 mV
+                    </text>
+                    <!-- droop band -->
+                    <rect
+                      x="410"
+                      y="52"
+                      width="120"
+                      height="76"
+                      fill="rgba(248,113,113,0.14)"
+                      stroke="var(--danger,#f87171)"
+                    />
+                    <text
+                      x="470"
+                      y="46"
+                      text-anchor="middle"
+                      fill="var(--danger,#f87171)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      + transient droop ±15 mV
+                    </text>
+                    <text
+                      x="470"
+                      y="145"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="9"
+                    >
+                      ≈ 2 mV of margin left!
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    Set-point accuracy + ripple + load-transient droop must all stack inside the
+                    datasheet window. This stack drives regulator choice (Module 02) and PDN design
+                    (Module 05).
+                  </p>
+                </div>
+              </div>
+
+              <!-- rail budget calculator -->
+              <div class="widget-container" id="budget">
+                <div class="widget-header">
+                  <h3>Rail budget worksheet</h3>
+                  <span class="badge badge-green">Calculator</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.6">
+                  Enter your estimator outputs; get total power, per-rail margined current, and the
+                  input current your source must supply (assumes 90 % average conversion
+                  efficiency).
+                </p>
+                <div class="table-scroll">
+                  <table class="iface-spec-table" id="railTable">
+                    <thead>
+                      <tr>
+                        <th>Rail</th>
+                        <th>Voltage (V)</th>
+                        <th>Current (A)</th>
+                        <th>Margin %</th>
+                        <th>Margined I</th>
+                        <th>Power</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="rail-row">
+                        <td>VCCINT</td>
+                        <td><input type="number" step="0.05" value="0.85" class="rv" /></td>
+                        <td><input type="number" step="0.1" value="6" class="ri" /></td>
+                        <td><input type="number" step="5" value="25" class="rm" /></td>
+                        <td class="ro-i">—</td>
+                        <td class="ro-p">—</td>
+                      </tr>
+                      <tr class="rail-row">
+                        <td>VCCAUX</td>
+                        <td><input type="number" step="0.05" value="1.8" class="rv" /></td>
+                        <td><input type="number" step="0.1" value="0.8" class="ri" /></td>
+                        <td><input type="number" step="5" value="25" class="rm" /></td>
+                        <td class="ro-i">—</td>
+                        <td class="ro-p">—</td>
+                      </tr>
+                      <tr class="rail-row">
+                        <td>VCCO (all banks)</td>
+                        <td><input type="number" step="0.05" value="1.5" class="rv" /></td>
+                        <td><input type="number" step="0.1" value="2" class="ri" /></td>
+                        <td><input type="number" step="5" value="25" class="rm" /></td>
+                        <td class="ro-i">—</td>
+                        <td class="ro-p">—</td>
+                      </tr>
+                      <tr class="rail-row">
+                        <td>VMGTAVCC</td>
+                        <td><input type="number" step="0.05" value="0.9" class="rv" /></td>
+                        <td><input type="number" step="0.1" value="1.2" class="ri" /></td>
+                        <td><input type="number" step="5" value="20" class="rm" /></td>
+                        <td class="ro-i">—</td>
+                        <td class="ro-p">—</td>
+                      </tr>
+                      <tr class="rail-row">
+                        <td>VMGTAVTT</td>
+                        <td><input type="number" step="0.05" value="1.2" class="rv" /></td>
+                        <td><input type="number" step="0.1" value="0.9" class="ri" /></td>
+                        <td><input type="number" step="5" value="20" class="rm" /></td>
+                        <td class="ro-i">—</td>
+                        <td class="ro-p">—</td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th colspan="4" style="text-align: right">Totals</th>
+                        <th id="totI">—</th>
+                        <th id="totP">—</th>
+                      </tr>
+                      <tr>
+                        <th colspan="4" style="text-align: right">
+                          Input current @ 12 V, η = 90 %
+                        </th>
+                        <th colspan="2" id="totIn">—</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Map every datasheet rail to a role: core, aux, I/O, analog/transceiver,
+                    housekeeping.
+                  </li>
+                  <li>
+                    Current is bitstream-dependent — run XPE/EPE with real parameters, then add
+                    20–30 %.
+                  </li>
+                  <li>
+                    The ±3 % window is a stack: set-point + ripple + droop. Budget all three
+                    explicitly.
+                  </li>
+                  <li>
+                    Transceiver rails are a different discipline: treat them as analog supplies.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="index.html">← Course Home</a>
+                <a class="btn btn-primary" href="02-component-selection.html"
+                  >Next: Selecting Components →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        function recalc() {
+          var totI = 0;
+          var totP = 0;
+          document.querySelectorAll('#railTable .rail-row').forEach(function (row) {
+            var v = parseFloat(row.querySelector('.rv').value) || 0;
+            var i = parseFloat(row.querySelector('.ri').value) || 0;
+            var m = parseFloat(row.querySelector('.rm').value) || 0;
+            var im = i * (1 + m / 100);
+            var p = v * im;
+            row.querySelector('.ro-i').textContent = im.toFixed(2) + ' A';
+            row.querySelector('.ro-p').textContent = p.toFixed(2) + ' W';
+            totI += im;
+            totP += p;
+          });
+          document.getElementById('totI').textContent = totI.toFixed(2) + ' A';
+          document.getElementById('totP').textContent = totP.toFixed(2) + ' W';
+          document.getElementById('totIn').textContent = (totP / 0.9 / 12).toFixed(2) + ' A';
+        }
+        document.querySelectorAll('#railTable input').forEach(function (inp) {
+          inp.addEventListener('input', recalc);
+        });
+        recalc();
+      })();
+    </script>
+  </body>
+</html>

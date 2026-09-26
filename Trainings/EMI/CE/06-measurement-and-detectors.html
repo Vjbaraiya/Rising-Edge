@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="How to read a conducted-emission compliance plot against a limit line, and how Peak, Quasi-Peak, Average, and RMS detectors report the same signal differently."
+    />
+    <title>
+      Reading CE Graphs &amp; Detector Types | Conducted Emissions (CE) Testing Academy | Rising
+      Edge Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/CE/06-measurement-and-detectors.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .detector-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Conducted Emissions (CE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Is Conducted Emission</a
+          >
+          <a href="02-noise-modes.html" class="module-item"
+            >02. CE vs. RE, Noise Paths &amp; Common/Differential Mode</a
+          >
+          <a href="03-frequency-and-standards.html" class="module-item"
+            >03. Frequency Ranges &amp; CE Standards</a
+          >
+          <a href="04-product-categories.html" class="module-item"
+            >04. CE Requirements by Product Category</a
+          >
+          <a href="05-lisn-and-test-setup.html" class="module-item"
+            >05. LISN, EMI Receiver &amp; Test Setup</a
+          >
+          <a href="06-measurement-and-detectors.html" class="module-item active"
+            >06. Reading CE Graphs &amp; Detector Types</a
+          >
+          <a href="07-case-studies.html" class="module-item"
+            >07. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="08-debugging-and-pcb-design.html" class="module-item"
+            >08. Debugging Workflow &amp; PCB Design</a
+          >
+          <a href="09-filtering-and-power-design.html" class="module-item"
+            >09. Filtering, Power Supply &amp; Cable/Shielding</a
+          >
+          <a href="10-precompliance-and-summary.html" class="module-item"
+            >10. Pre-Compliance Testing &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Conducted Emissions (CE) Testing</a><span>/</span>
+            <span>Reading CE Graphs &amp; Detector Types</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 6/10</span><span>60%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 60%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 06</div>
+              <h1 style="font-size: 2.2rem">Reading CE Graphs &amp; Detector Types</h1>
+              <p class="subtitle">
+                A compliance plot is only useful if you can read it correctly, and the number it
+                shows depends heavily on which detector produced it. This module covers both: how to
+                interpret a real conducted-emission graph, and how Peak, Quasi-Peak, Average, and
+                RMS detectors report the same signal differently.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Section 1: Reading graphs -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="secGraph">
+                  <span>Section 1: Reading a Conducted-Emission Graph</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="secGraph">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Every conducted-emission plot has the same three ingredients: frequency on the
+                    X-axis (usually log-scaled), level in dBµV on the Y-axis, and a limit line from
+                    the applicable standard. Hover the interactive plot below to read exact values,
+                    and see the margin computed automatically at the worst-case point.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Interactive: Compliance Plot with Live Margin
+                    </h3>
+                    <div id="plotlyComplianceGraph" style="width: 100%; height: 360px"></div>
+                    <div class="metrics-grid" style="margin-top: 12px">
+                      <div class="metric-card">
+                        <div class="metric-value" id="marginFreq">–</div>
+                        <div class="metric-label">Worst-Case Frequency</div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-value" id="marginLevel">–</div>
+                        <div class="metric-label">Measured Level</div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-value" id="marginValue">–</div>
+                        <div class="metric-label">Margin to Limit</div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-value" id="marginStatus">–</div>
+                        <div class="metric-label">Result</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="info-box" style="margin-top: 1rem">
+                    A "pass" with less than about 3-6 dB of margin is still risky in production --
+                    unit-to-unit variation, temperature drift, and different mains impedance at
+                    different test sites can easily consume a few dB. Engineers typically design for
+                    at least 6 dB of margin before calling a design final.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Detector types -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secDetectors">
+                  <span>Section 2: How Each Detector Type Reads the Same Signal</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secDetectors">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    The same noisy pulse train can produce four very different displayed levels
+                    depending on which detector is selected, which is why standards specify the
+                    detector to use for compliance rather than leaving it to the tester's choice.
+                  </p>
+                  <table class="data-table" style="width: 100%; margin-bottom: 1.25rem">
+                    <thead>
+                      <tr>
+                        <th>Detector</th>
+                        <th>How It Responds</th>
+                        <th>Purpose</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span
+                            class="detector-badge"
+                            style="background: rgba(239, 68, 68, 0.15); color: #ef4444"
+                            >Peak</span
+                          >
+                        </td>
+                        <td>Captures and holds the single highest instantaneous amplitude.</td>
+                        <td>
+                          Fast pre-scan -- always reads at or above the true compliance level.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span
+                            class="detector-badge"
+                            style="background: rgba(59, 130, 246, 0.15); color: #3b82f6"
+                            >Quasi-Peak</span
+                          >
+                        </td>
+                        <td>
+                          Weights repetitive pulses by how often they occur using standardized
+                          charge/discharge time constants.
+                        </td>
+                        <td>
+                          CISPR compliance -- the detector named in most commercial limit lines.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span
+                            class="detector-badge"
+                            style="background: rgba(245, 158, 11, 0.15); color: #f59e0b"
+                            >Average</span
+                          >
+                        </td>
+                        <td>Averages the signal envelope over the measurement time.</td>
+                        <td>Continuous / narrowband emissions such as clock harmonics.</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span
+                            class="detector-badge"
+                            style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6"
+                            >RMS</span
+                          >
+                        </td>
+                        <td>Reads the true root-mean-square power of the signal.</td>
+                        <td>Broadband measurements where total energy content matters most.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">Animated: Four Detectors, One Pulse Train</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 10px">
+                      A repetitive noisy pulse scrolls across the top trace. Each colored bar shows
+                      what that detector would report in real time -- Peak always sits highest,
+                      Average and RMS settle lower and steadier.
+                    </p>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="detectorDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+
+                  <div class="tip-box" style="margin-top: 1rem">
+                    Why is Peak &gt; Quasi-Peak &gt; Average, in that order, for the same real-world
+                    signal? Peak reports the single worst instant seen. Quasi-Peak weights by
+                    repetition rate, so it sits below Peak unless the pulse repeats extremely often.
+                    Average smooths everything over time, discarding the pulse's peakiness entirely
+                    -- so it reads lowest of the three for a typical repetitive noise source.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 6 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">10</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">10</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 10%;
+                        background: linear-gradient(90deg, #3b82f6, #22c55e);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="05-lisn-and-test-setup.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="07-case-studies.html">Next Lesson &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        var light = isLightTheme();
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: light ? '#334155' : '#b0bec5', size: 11 },
+          margin: { l: 55, r: 20, t: 20, b: 45 },
+        };
+      }
+    </script>
+
+    <!-- Section 1: Compliance graph with live margin -->
+    <script>
+      function drawComplianceGraph() {
+        var el = document.getElementById('plotlyComplianceGraph');
+        if (!el || !window.Plotly) return;
+        var freqs = [];
+        for (var f = 0.15; f <= 30; f *= 1.02) freqs.push(f);
+        function harmonic(f, f0, amp, widthFactor) {
+          var width = f0 * widthFactor;
+          return amp * Math.exp(-Math.pow((f - f0) / width, 2));
+        }
+        var fsw = 0.32;
+        var trace = freqs.map(function (f) {
+          var v = 16 - 3 * Math.log10(f + 0.2);
+          for (var n = 1; n <= 30; n++) {
+            var fh = fsw * n;
+            if (fh > 30) break;
+            v += harmonic(f, fh, 42 / Math.pow(n, 1.25), 0.02);
+          }
+          return v;
+        });
+        var limitFreqs = [0.15, 0.5, 5, 30];
+        var limitVals = [66, 56, 56, 60];
+        function limitAt(f) {
+          for (var i = 0; i < limitFreqs.length - 1; i++) {
+            if (f >= limitFreqs[i] && f <= limitFreqs[i + 1]) return limitVals[i];
+          }
+          return limitVals[limitVals.length - 1];
+        }
+        var worstIdx = 0,
+          worstMargin = -999;
+        freqs.forEach(function (f, i) {
+          var m = limitAt(f) - trace[i];
+          if (trace[i] - limitAt(f) > worstMargin - 1e9 && limitAt(f) - trace[i] < worstMargin) {
+          }
+        });
+        var worstDiff = -999,
+          worstI = 0;
+        freqs.forEach(function (f, i) {
+          var diff = trace[i] - limitAt(f);
+          if (diff > worstDiff) {
+            worstDiff = diff;
+            worstI = i;
+          }
+        });
+        var layout = Object.assign({}, getPlotlyLayoutBase(), {
+          xaxis: {
+            title: 'Frequency (MHz)',
+            type: 'log',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          yaxis: {
+            title: 'dBµV (Quasi-Peak)',
+            gridcolor: isLightTheme() ? 'rgba(15,23,32,0.08)' : 'rgba(255,255,255,0.08)',
+          },
+          legend: { orientation: 'h', y: -0.25 },
+        });
+        Plotly.newPlot(
+          el,
+          [
+            {
+              x: freqs,
+              y: trace,
+              name: 'Measured emission',
+              mode: 'lines',
+              line: { color: '#3b82f6', width: 1.6 },
+            },
+            {
+              x: limitFreqs,
+              y: limitVals,
+              name: 'CISPR Class B limit',
+              mode: 'lines',
+              line: { color: '#f59e0b', width: 2, dash: 'dash' },
+              line_shape: 'hv',
+            },
+            {
+              x: [freqs[worstI]],
+              y: [trace[worstI]],
+              name: 'Worst-case point',
+              mode: 'markers',
+              marker: { color: worstDiff > 0 ? '#ef4444' : '#4cdf8b', size: 10 },
+            },
+          ],
+          layout,
+          { displayModeBar: false, responsive: true }
+        );
+
+        document.getElementById('marginFreq').textContent = freqs[worstI].toFixed(2) + ' MHz';
+        document.getElementById('marginLevel').textContent = trace[worstI].toFixed(1) + ' dBµV';
+        document.getElementById('marginValue').textContent = Math.abs(worstDiff).toFixed(1) + ' dB';
+        var statusEl = document.getElementById('marginStatus');
+        statusEl.textContent = worstDiff > 0 ? 'FAIL' : 'PASS';
+        statusEl.style.color = worstDiff > 0 ? '#ef4444' : '#4cdf8b';
+      }
+      drawComplianceGraph();
+      window.addEventListener('resize', drawComplianceGraph);
+    </script>
+
+    <!-- Section 2: Detector pulse-train animation -->
+    <script>
+      var detStart = null;
+      function drawDetectorDiagram(ts) {
+        var canvas = document.getElementById('detectorDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawDetectorDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (detStart === null) detStart = ts;
+        var elapsed = (ts - detStart) / 1000;
+
+        var traceTop = 10,
+          traceH = h * 0.34,
+          traceBase = traceTop + traceH;
+        ctx.strokeStyle = inkColor(0.25);
+        ctx.beginPath();
+        ctx.moveTo(0, traceBase);
+        ctx.lineTo(w, traceBase);
+        ctx.stroke();
+
+        var scrollSpeed = 60,
+          period = 46;
+        var offset = (elapsed * scrollSpeed) % period;
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (var x = 0; x <= w; x += 2) {
+          var xp = x + offset;
+          var local = xp % period;
+          var amp =
+            local < 6
+              ? Math.sin((local / 6) * Math.PI) * (0.75 + 0.25 * Math.sin(xp * 0.01))
+              : 0.04 * Math.sin(xp * 0.4);
+          var y = traceBase - amp * traceH;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = inkColor(0.6);
+        ctx.font = '11px sans-serif';
+        ctx.fillText('EUT emission (switching-supply pulse train)', 6, traceTop + 4);
+
+        var peakVal = 0.95 + 0.03 * Math.sin(elapsed * 2);
+        var qpVal = 0.55 + 0.06 * Math.sin(elapsed * 1.3 + 1);
+        var avgVal = 0.32 + 0.03 * Math.sin(elapsed * 0.9 + 2);
+        var rmsVal = 0.4 + 0.03 * Math.sin(elapsed * 1.1 + 3);
+        var meters = [
+          { label: 'Peak', val: peakVal, color: '#ef4444' },
+          { label: 'Quasi-Peak', val: qpVal, color: '#3b82f6' },
+          { label: 'Average', val: avgVal, color: '#f59e0b' },
+          { label: 'RMS', val: rmsVal, color: '#8b5cf6' },
+        ];
+        var meterTop = traceBase + 26;
+        var meterH = (h - meterTop - 10) / meters.length;
+        meters.forEach(function (m, i) {
+          var y = meterTop + i * meterH + meterH * 0.3;
+          var barMaxW = w - 140;
+          ctx.fillStyle = inkColor(0.7);
+          ctx.font = '11px sans-serif';
+          ctx.fillText(m.label, 4, y + 9);
+          ctx.strokeStyle = inkColor(0.2);
+          ctx.strokeRect(90, y, barMaxW, 10);
+          ctx.fillStyle = m.color;
+          ctx.fillRect(90, y, Math.max(0, barMaxW * m.val), 10);
+          ctx.fillStyle = inkColor(0.85);
+          ctx.fillText((m.val * 100).toFixed(0) + '%', 90 + barMaxW + 8, y + 9);
+        });
+
+        requestAnimationFrame(drawDetectorDiagram);
+      }
+      requestAnimationFrame(drawDetectorDiagram);
+      window.addEventListener('resize', function () {
+        detStart = null;
+      });
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'What are the three core ingredients of every conducted-emission compliance plot?',
+          opts: [
+            'Time, voltage, and temperature',
+            'Frequency (X-axis), level in dBµV (Y-axis), and a limit line',
+            'Power, current, and resistance',
+            'Only a pass/fail indicator',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What does a small margin (1-2 dB) between the measured trace and the limit line at "pass" typically indicate?',
+          opts: [
+            'The design is completely safe with no risk',
+            'It is still risky in production -- unit variation and site differences can consume a few dB',
+            'Small margins are always preferred by regulators',
+            'Margin has no practical meaning',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What margin do engineers typically target before calling a design final?',
+          opts: [
+            '0 dB exactly',
+            'At least about 6 dB',
+            'Margin is never considered',
+            '50 dB minimum',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Which detector captures and holds the single highest instantaneous amplitude?',
+          opts: ['Average', 'RMS', 'Peak', 'Quasi-Peak'],
+          correct: 2,
+        },
+        {
+          q: 'Which detector is named in most commercial CISPR limit lines for final compliance?',
+          opts: ['Peak', 'Quasi-Peak', 'RMS only', "None -- limits don't specify a detector"],
+          correct: 1,
+        },
+        {
+          q: 'What does the Quasi-Peak detector weight that a simple Peak detector does not?',
+          opts: [
+            'Signal polarity',
+            'How often a repetitive pulse occurs, using standardized charge/discharge time constants',
+            'The antenna gain',
+            'The cable resistance',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'For a typical repetitive noise source, in what order (highest to lowest) do Peak, Quasi-Peak, and Average typically read?',
+          opts: [
+            'Average > Quasi-Peak > Peak',
+            'Peak > Quasi-Peak > Average',
+            'They always read identically',
+            'Quasi-Peak > Peak > Average',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Which detector reads the true root-mean-square power of a signal, best suited for broadband energy measurements?',
+          opts: ['Peak', 'Quasi-Peak', 'Average', 'RMS'],
+          correct: 3,
+        },
+        {
+          q: 'Why is Peak detection typically used for a fast pre-scan?',
+          opts: [
+            'It always reads at or above the true compliance level, so it never misses a candidate frequency',
+            'It is the only detector standards allow',
+            'It responds slower than all other detectors',
+            'It ignores high frequencies',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'Why does the Average detector typically read lowest of Peak/Quasi-Peak/Average for a peaky repetitive signal?',
+          opts: [
+            'It amplifies the peaks further',
+            "It smooths the signal over time, discarding the pulse's peakiness entirely",
+            'Average detectors are broken by design',
+            'It only measures DC',
+          ],
+          correct: 1,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2792 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="Slower clock means SI isn't important — myth busted. Learn why fast edge rates create transmission line effects regardless of clock frequency."
+    />
+    <title>Slow Clock & Signal Integrity — Myth vs Reality | Rising Edge</title>
+    <link rel="canonical" href="https://www.risingedgetech.com/resources/slow-clock-si-myth.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../assets/css/themes.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="css/slow-clock-si-myth.css" />
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════ HERO -->
+    <section class="sc-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../home.html">Home</a><span>/</span> <a href="resources.html">Resources</a
+          ><span>/</span>
+          <span>SI Myths</span>
+        </nav>
+
+        <div class="sc-hero-badge">
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Engineering Myth #13 — Signal Integrity
+        </div>
+
+        <h1 class="sc-hero-title">
+          Slower Clock Means<br />
+          <span class="sc-hero-accent">SI Isn't Important</span>
+        </h1>
+        <p class="sc-hero-sub">
+          Reality: Fast edge rates create transmission line effects, reflections, and EMI regardless
+          of how slow the clock frequency is.
+        </p>
+
+        <div class="sc-hero-meta">
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M2 12h20M12 2a10 10 0 0 1 0 20" />
+            </svg>
+            Signal Integrity · PCB Design</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            20 min</span
+          >
+          <span class="chip chip-outline"
+            ><svg
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Intermediate</span
+          >
+          <span class="chip chip-outline">Prerequisites: Transmission lines, Rise time</span>
+        </div>
+
+        <div class="sc-hero-actions">
+          <a href="#learning-objectives" class="btn btn-primary">Start Learning</a>
+          <a href="#quiz" class="btn btn-secondary">Take Quiz</a>
+          <button class="btn btn-ghost" id="bookmarkBtn" onclick="toggleBookmark()">
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Bookmark
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ LEARNING OBJECTIVES -->
+    <section class="section" id="learning-objectives">
+      <div class="container">
+        <div class="section-label">Learning Objectives</div>
+        <h2 class="section-title">After this lesson you will understand</h2>
+        <div class="sc-objectives-grid">
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">📐</span>
+            <div>
+              <strong>Rise/fall time vs clock frequency</strong>
+              <p>
+                Why equivalent signal bandwidth is set by edge rate (t<sub>r</sub>/t<sub>f</sub>),
+                not by clock period — and how to calculate the critical frequency from any waveform
+              </p>
+            </div>
+          </div>
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">📏</span>
+            <div>
+              <strong>Critical trace length</strong>
+              <p>
+                Why propagation delay vs. rise time — not wavelength — is the real test for when a
+                PCB trace must be treated as a transmission line, regardless of clock frequency
+              </p>
+            </div>
+          </div>
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">🔁</span>
+            <div>
+              <strong>Reflection mechanisms</strong>
+              <p>
+                How impedance discontinuities cause reflections, ringing, and false triggering on
+                slow-clock but fast-edge signals
+              </p>
+            </div>
+          </div>
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">📡</span>
+            <div>
+              <strong>EMI from edge rate</strong>
+              <p>
+                How a 1 MHz clock with a 1 ns rise time radiates energy up to 350 MHz — and why
+                reducing edge rate is the most effective EMI fix
+              </p>
+            </div>
+          </div>
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">⚡</span>
+            <div>
+              <strong>Ground bounce and di/dt</strong>
+              <p>
+                Why fast edges on any clock — even MHz-range — create supply noise that corrupts
+                adjacent signals through Ldi/dt coupling
+              </p>
+            </div>
+          </div>
+          <div class="sc-obj-card">
+            <span class="sc-obj-icon">✅</span>
+            <div>
+              <strong>Design rules</strong>
+              <p>
+                When to apply series termination, controlled impedance, and edge-rate filtering —
+                keyed to rise time, not clock frequency
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ TOPIC OVERVIEW -->
+    <section class="section sc-bg-alt" id="overview">
+      <div class="container">
+        <div class="section-label">Overview</div>
+        <h2 class="section-title">The Real SI Parameter: Edge Rate</h2>
+
+        <div class="sc-overview-grid">
+          <div>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              Signal integrity engineers have a phrase:
+              <em>"It's not the clock that matters — it's the edge."</em> A waveform's ability to
+              excite transmission line effects, reflections, ringing, and crosstalk is determined
+              almost entirely by its rise and fall time (t<sub>r</sub>/t<sub>f</sub> — the edge
+              transition time, conventionally measured 10–90% of the voltage swing), not by how many
+              times per second it transitions. Throughout this article, "rise time" implies fall
+              time as well — real drivers rarely have identical rise and fall edges, and both must
+              be checked.
+            </p>
+            <p style="color: var(--text-sub); line-height: 1.8; margin-bottom: var(--sp-4)">
+              Modern logic families (CMOS, LVDS, LVCMOS) have rise times of 1–5 ns regardless of
+              clock frequency. A 1 MHz clock with a 2 ns edge and a 100 MHz clock with the same 2 ns
+              edge excite the <em>same</em> transmission-line behaviour, reflections, and ringing on
+              a given trace — that part is edge-rate-only. Their EMI signatures are related but not
+              identical: edge rate sets the <em>same</em> spectral envelope (bandwidth and rolloff)
+              for both, but clock frequency still sets the harmonic spacing, so the 100 MHz clock
+              packs far more harmonic lines under that envelope and radiates more average power. In
+              short — the transmission-line behaviour depends on edge transition rather than
+              repetition frequency, but repetition frequency still shapes the emissions spectrum.
+            </p>
+            <div class="alert alert-warning" style="margin-bottom: var(--sp-4)">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <strong>Common misconception:</strong> "Our clock is only 10 MHz, so we don't need to
+              worry about transmission lines or termination." In practice, a standard CMOS output at
+              10 MHz has a ~2 ns rise time — creating an effective bandwidth of ~175 MHz and
+              requiring controlled impedance and termination for traces longer than roughly 56 mm on
+              typical FR4 microstrip (see the critical-length calculation below).
+            </div>
+            <div class="alert alert-info">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <strong>Rule of thumb:</strong> BW ≈ 0.35 / t<sub>r</sub> &nbsp;(single-pole Gaussian
+              approximation, 10–90% rise time). A 1 ns rise time has ~350 MHz of equivalent signal
+              bandwidth — independent of clock speed. Other references use 0.45 or 0.5 depending on
+              waveform assumptions (see Concept Card 01); this article uses 0.35 throughout for
+              first-order estimation.
+            </div>
+          </div>
+
+          <!-- Animated SVG: clock waveform with edge-rate zoom -->
+          <div
+            class="sc-svg-container"
+            role="img"
+            aria-label="Animated waveform showing edge rate and clock period"
+          >
+            <svg id="overviewSvg" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Clock period annotation -->
+              <text x="10" y="20" font-size="9" fill="var(--text-faint)">
+                10 MHz clock — period = 100 ns
+              </text>
+
+              <!-- Slow clock waveform -->
+              <polyline
+                points="10,80 10,40 130,40 130,80 260,80 260,40 390,40 390,80 410,80"
+                stroke="var(--primary-400,#3b82f6)"
+                stroke-width="2"
+                fill="none"
+              />
+
+              <!-- Period arrow -->
+              <line x1="10" y1="95" x2="130" y2="95" stroke="var(--text-faint)" stroke-width="1" />
+              <polygon points="10,92 10,98 4,95" fill="var(--text-faint)" />
+              <polygon points="130,92 130,98 136,95" fill="var(--text-faint)" />
+              <text x="70" y="108" font-size="8" fill="var(--text-faint)" text-anchor="middle">
+                Period = 100 ns (clock)
+              </text>
+
+              <!-- Rise time zoom box -->
+              <rect
+                x="118"
+                y="32"
+                width="24"
+                height="56"
+                rx="2"
+                stroke="var(--error)"
+                stroke-width="1.5"
+                fill="rgba(239,68,68,.06)"
+                stroke-dasharray="4,2"
+              />
+              <text x="130" y="28" font-size="7.5" fill="var(--error)" text-anchor="middle">
+                edge!
+              </text>
+
+              <!-- Zoom arrow down -->
+              <line
+                x1="130"
+                y1="120"
+                x2="130"
+                y2="140"
+                stroke="var(--error)"
+                stroke-width="1.5"
+                stroke-dasharray="3,2"
+              />
+              <polygon points="127,138 130,148 133,138" fill="var(--error)" />
+
+              <!-- Zoomed edge -->
+              <text x="10" y="170" font-size="9" fill="var(--text-faint)">
+                Zoomed edge — same signal, 2 ns rise time
+              </text>
+              <polyline
+                id="edgePolyline"
+                points="80,230 80,180 86,176 92,174 100,172 120,195"
+                stroke="var(--error)"
+                stroke-width="2.5"
+                fill="none"
+              />
+              <!-- 10-90 markers -->
+              <line
+                x1="70"
+                y1="230"
+                x2="130"
+                y2="230"
+                stroke="var(--border)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+              <line
+                x1="70"
+                y1="174"
+                x2="130"
+                y2="174"
+                stroke="var(--border)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+              <text x="68" y="233" font-size="7" fill="var(--text-faint)" text-anchor="end">
+                10%
+              </text>
+              <text x="68" y="177" font-size="7" fill="var(--text-faint)" text-anchor="end">
+                90%
+              </text>
+              <!-- tr annotation -->
+              <line x1="80" y1="200" x2="100" y2="200" stroke="var(--error)" stroke-width="1" />
+              <polygon points="80,197 80,203 74,200" fill="var(--error)" />
+              <polygon points="100,197 100,203 106,200" fill="var(--error)" />
+              <text x="90" y="215" font-size="8" fill="var(--error)" text-anchor="middle">
+                t_r ≈ 2 ns
+              </text>
+
+              <!-- Bandwidth annotation -->
+              <text x="220" y="185" font-size="9" fill="var(--text-sub)">BW = 0.35 / 2 ns</text>
+              <text x="220" y="200" font-size="10" fill="var(--success)" font-weight="600">
+                = 175 MHz
+              </text>
+              <text x="220" y="215" font-size="8.5" fill="var(--text-faint)">
+                Even on a 10 MHz clock!
+              </text>
+
+              <!-- Critical length -->
+              <text x="220" y="238" font-size="8" fill="var(--warning)">
+                L_crit ≈ t_r / (6 × T_PD)
+              </text>
+              <text x="220" y="251" font-size="8" fill="var(--warning)">
+                ≈ 2ns / (6 × 150ps/in) ≈ 2.2 inch
+              </text>
+            </svg>
+            <div class="sc-svg-controls">
+              <button class="btn btn-ghost btn-sm" onclick="animateEdge()">▶ Animate Edge</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ CONCEPT EXPLORER -->
+    <section class="section" id="concepts">
+      <div class="container">
+        <div class="section-label">Interactive Concept Explorer</div>
+        <h2 class="section-title">Five SI Effects Driven by Edge Rate, Not Clock Speed</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Click each card to expand the engineering detail.
+        </p>
+
+        <div class="sc-concept-grid">
+          <!-- Card 1 -->
+          <div
+            class="sc-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="sc-concept-header">
+              <div class="sc-concept-num">01</div>
+              <div>
+                <h3>Rise/Fall Time Defines Bandwidth</h3>
+                <p class="sc-concept-tagline">
+                  The spectrum of a digital signal is set by t<sub>r</sub>/t<sub>f</sub>, not f<sub
+                    >clk</sub
+                  >
+                </p>
+              </div>
+              <svg
+                class="sc-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="sc-concept-body">
+              <div class="sc-two-col">
+                <div>
+                  <h4>The Fourier argument</h4>
+                  <p>
+                    A digital signal is not truly band-limited — a periodic trapezoidal waveform has
+                    an infinite harmonic series. What we call "bandwidth" here is really the
+                    <strong>equivalent signal bandwidth</strong>: the frequency above which harmonic
+                    content falls off fast enough to be considered negligible for most SI/EMI
+                    purposes. For a trapezoidal waveform with rise time t<sub>r</sub>, the spectral
+                    envelope rolls off at −20 dB/decade above f<sub>1</sub> = 1/(π·τ) (τ = pulse
+                    width), then at −40 dB/decade above f<sub>2</sub> = 1/(π·t<sub>r</sub>). The
+                    clock frequency only sets the spacing between the harmonic lines under that
+                    envelope — not the envelope's shape or its highest-amplitude corner.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Key formula</h4>
+                  <div class="sc-formula">BW<sub>−3dB</sub> ≈ 0.35 / t<sub>r</sub></div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    This 0.35 constant is a single-pole Gaussian approximation of the −3 dB corner
+                    for a 10–90% rise time. It is a convention, not a universal law — different
+                    references use different constants depending on waveform model and rise-time
+                    definition: 0.35 (Gaussian, used throughout this article), 0.45 (some
+                    oscilloscope/TDR literature), or f<sub>knee</sub> = 0.5 / t<sub>r</sub> (a
+                    simpler linear-ramp model). All three are first-order estimates — treat the
+                    result as "approximately this frequency and above," not an exact cutoff.
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Examples</h4>
+                  <div class="sc-example-table">
+                    <div class="sc-ex-row sc-ex-header">
+                      <span>Rise time</span><span>Bandwidth</span><span>Clock</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>1 ns</span><span>350 MHz</span><span>any</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>2 ns</span><span>175 MHz</span><span>any</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>5 ns</span><span>70 MHz</span><span>any</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>10 ns</span><span>35 MHz</span><span>any</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4>Why clock frequency is irrelevant to bandwidth</h4>
+                  <ul class="sc-list">
+                    <li>
+                      A 1 MHz clock with 1 ns edges has identical spectral width to a 100 MHz clock
+                      with 1 ns edges
+                    </li>
+                    <li>
+                      The 100 MHz clock has more harmonics (spaced 100 MHz apart), but same rolloff
+                      corner
+                    </li>
+                    <li>
+                      Transmission lines, capacitors, and antennas respond to signal bandwidth, not
+                      repetition rate
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Implication for PCB design</h4>
+                  <ul class="sc-list sc-list-success">
+                    <li>
+                      Always calculate SI requirements from t<sub>r</sub>, not f<sub>clk</sub>
+                    </li>
+                    <li>
+                      Check driver datasheet for rise/fall time — often independent of frequency
+                    </li>
+                    <li>
+                      Slowing edge rate (series resistor or RC filter) is the most effective SI fix
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div
+            class="sc-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="sc-concept-header">
+              <div class="sc-concept-num">02</div>
+              <div>
+                <h3>Critical Trace Length</h3>
+                <p class="sc-concept-tagline">
+                  Once propagation delay exceeds ~t<sub>r</sub>/6, a trace behaves as a transmission
+                  line
+                </p>
+              </div>
+              <svg
+                class="sc-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="sc-concept-body">
+              <div class="sc-two-col">
+                <div>
+                  <h4>The transmission line threshold</h4>
+                  <p>
+                    The primary threshold is defined in terms of time, not distance: a trace must be
+                    treated as a transmission line once its one-way propagation delay
+                    (T<sub>D</sub>) becomes a significant fraction of the signal's rise time —
+                    conventionally, once T<sub>D</sub> &gt; t<sub>r</sub> / 6. Below that, the whole
+                    trace can be approximated as a single lumped node; above it, different points on
+                    the trace see meaningfully different voltages at the same instant, and
+                    reflections must be considered.
+                  </p>
+                  <p>
+                    Converting that time-domain threshold into a physical trace length using the
+                    board's propagation delay per unit length (T<sub>PD</sub>) gives the familiar
+                    "λ/6" critical-length rule — so called because T<sub>D</sub> = t<sub>r</sub>/6
+                    corresponds to roughly one-sixth of a wavelength at the signal's equivalent
+                    bandwidth. The rule is a distance shorthand for the underlying delay comparison,
+                    not an independent wavelength criterion:
+                  </p>
+                  <div class="sc-formula">
+                    L<sub>crit</sub> = t<sub>r</sub> / (6 × T<sub>PD</sub>)
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    T<sub>PD</sub> = propagation delay per unit length (≈ 150 ps/inch for FR4
+                    microstrip, ≈ 180 ps/inch for stripline)
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Example — 2 ns rise time (FR4 microstrip)</h4>
+                  <div class="sc-formula">
+                    L<sub>crit</sub> = 2 ns / (6 × 150 ps/in) = <strong>2.2 inch (56 mm)</strong>
+                  </div>
+                  <p>
+                    Any trace longer than ~56 mm with a 2 ns edge must have controlled impedance and
+                    termination — regardless of whether the clock is 1 MHz or 100 MHz.
+                  </p>
+                </div>
+                <div>
+                  <h4>What happens above L<sub>crit</sub></h4>
+                  <ul class="sc-list">
+                    <li>Incident wave arrives at load before source has finished transitioning</li>
+                    <li>Reflection travels back to source, causing ringing</li>
+                    <li>
+                      Ringing amplitude = Γ × V<sub>swing</sub> where Γ is the reflection
+                      coefficient
+                    </li>
+                    <li>Undershoot/overshoot can exceed device absolute maximum ratings</li>
+                    <li>Multiple reflections cause glitches that false-trigger sequential logic</li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Critical lengths for common drivers</h4>
+                  <div class="sc-example-table">
+                    <div class="sc-ex-row sc-ex-header">
+                      <span>Driver / family</span><span>t<sub>r</sub></span
+                      ><span>L<sub>crit</sub></span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>74HC CMOS</span><span>5–10 ns</span><span>55–110 mm</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>74AHC / ALVC</span><span>1–2 ns</span><span>11–22 mm</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>LVDS</span><span>0.3–0.6 ns</span><span>3–7 mm</span>
+                    </div>
+                    <div class="sc-ex-row">
+                      <span>FPGA I/O (fast)</span><span>0.5–1 ns</span><span>5–11 mm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div
+            class="sc-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="sc-concept-header">
+              <div class="sc-concept-num">03</div>
+              <div>
+                <h3>Reflections and Ringing</h3>
+                <p class="sc-concept-tagline">
+                  Impedance mismatches create voltage spikes proportional to t<sub>r</sub> — not
+                  f<sub>clk</sub>
+                </p>
+              </div>
+              <svg
+                class="sc-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="sc-concept-body">
+              <div class="sc-two-col">
+                <div>
+                  <h4>Reflection coefficient</h4>
+                  <div class="sc-formula">
+                    Γ<sub>L</sub> = (Z<sub>L</sub> − Z<sub>0</sub>) / (Z<sub>L</sub> +
+                    Z<sub>0</sub>)
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    Z<sub>L</sub> = load impedance, Z<sub>0</sub> = trace impedance
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Ringing example</h4>
+                  <p>
+                    Unterminated CMOS input (Z<sub>L</sub> = ∞, Z<sub>0</sub> = 50 Ω):<br />
+                    Γ<sub>L</sub> = (∞ − 50) / (∞ + 50) = +1.0
+                  </p>
+                  <p style="margin-top: var(--sp-2)">
+                    Full reflection — voltage doubles at load, then the reflected wave returns to
+                    the source (Γ<sub>S</sub> ≈ −0.5 for a typical CMOS driver), bouncing until
+                    damped. This occurs on every edge, independent of clock speed.
+                  </p>
+                </div>
+                <div>
+                  <h4>Ringing characteristics</h4>
+                  <ul class="sc-list">
+                    <li>Overshoot can exceed V<sub>CC</sub>+0.5V — ESD diode conduction</li>
+                    <li>Undershoot below GND−0.5V on the low edge</li>
+                    <li>
+                      Ring frequency set by T<sub>D</sub>: f<sub>ring</sub> ≈ 1/(4 × T<sub>D</sub>)
+                    </li>
+                    <li>Amplitude decays by Γ<sub>S</sub> × Γ<sub>L</sub> per round trip</li>
+                    <li>Glitches cause false clocking of downstream flip-flops</li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Fixes</h4>
+                  <ul class="sc-list sc-list-success">
+                    <li>
+                      Series termination: R<sub>s</sub> = Z<sub>0</sub> − Z<sub>driver</sub>, placed
+                      near source
+                    </li>
+                    <li>Parallel termination at load (AC, Thevenin, or diode)</li>
+                    <li>Reduce edge rate with series RC snubber</li>
+                    <li>Match PCB trace impedance to driver output impedance</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div
+            class="sc-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="sc-concept-header">
+              <div class="sc-concept-num">04</div>
+              <div>
+                <h3>EMI from Fast Edges</h3>
+                <p class="sc-concept-tagline">
+                  Radiated emissions follow edge rate — a 1 MHz clock can fail at 350 MHz
+                </p>
+              </div>
+              <svg
+                class="sc-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="sc-concept-body">
+              <div class="sc-two-col">
+                <div>
+                  <h4>EMI spectral envelope</h4>
+                  <p>
+                    The radiated emissions spectrum of a digital clock has envelope breakpoints at:
+                  </p>
+                  <div class="sc-formula">
+                    f<sub>1</sub> = 1 / (π × τ) &nbsp;&nbsp; f<sub>2</sub> = 1 / (π × t<sub>r</sub>)
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    τ = pulse width, t<sub>r</sub> = rise time
+                  </p>
+                  <p style="margin-top: var(--sp-2)">
+                    Below f<sub>1</sub>: spectrum rolls off at −20 dB/decade<br />
+                    Between f<sub>1</sub> and f<sub>2</sub>: flat (−20 dB/dec still)<br />
+                    Above f<sub>2</sub>: rolls off at −40 dB/decade
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Key insight</h4>
+                  <p>
+                    CISPR 32 Class B measures from 30 MHz to 1 GHz. A 1 MHz clock with 1 ns edges
+                    has significant harmonic energy across this entire band — it can fail at
+                    frequencies 350× higher than the clock.
+                  </p>
+                </div>
+                <div>
+                  <h4>Practical failure examples</h4>
+                  <ul class="sc-list">
+                    <li>
+                      1 MHz SPI clock, 2 ns rise: harmonics at 3, 5, 7… MHz × 1 MHz up to ~175 MHz
+                    </li>
+                    <li>
+                      10 MHz CAN clock, 1 ns rise: harmonic #35 at 350 MHz — exactly CISPR
+                      measurement band
+                    </li>
+                    <li>
+                      5 MHz PWM, 3 ns rise: harmonics detectable at 117 MHz — AM broadcast
+                      interference
+                    </li>
+                    <li>Any fast GPIO toggle can cause failures even at low toggle rates</li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Effective EMI reductions</h4>
+                  <ul class="sc-list sc-list-success">
+                    <li>
+                      Slowing t<sub>r</sub> from 1 ns to 5 ns reduces emissions above f<sub>2</sub>
+                      by 14 dB
+                    </li>
+                    <li>
+                      Spread-spectrum clocking randomises harmonic peaks (±0.5% usually sufficient)
+                    </li>
+                    <li>
+                      Ferrite bead on clock line suppresses high-frequency energy in PCB trace
+                    </li>
+                    <li>Guard traces with stitching vias at &lt; λ/20 spacing</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div
+            class="sc-concept-card"
+            onclick="toggleConcept(this)"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+          >
+            <div class="sc-concept-header">
+              <div class="sc-concept-num">05</div>
+              <div>
+                <h3>Ground Bounce from di/dt</h3>
+                <p class="sc-concept-tagline">
+                  Switching current × package inductance = voltage noise on every edge
+                </p>
+              </div>
+              <svg
+                class="sc-chevron"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="sc-concept-body">
+              <div class="sc-two-col">
+                <div>
+                  <h4>Ground bounce mechanism</h4>
+                  <div class="sc-formula">
+                    V<sub>bounce</sub> = L<sub>pkg</sub> × (di/dt) = L<sub>pkg</sub> × I<sub
+                      >sw</sub
+                    >
+                    / t<sub>r</sub>
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--text-muted)">
+                    L<sub>pkg</sub> = package pin inductance (typically 2–10 nH), I<sub>sw</sub> =
+                    switching current
+                  </p>
+                  <h4 style="margin-top: var(--sp-4)">Example</h4>
+                  <p>
+                    CMOS output driving 50 Ω, V<sub>swing</sub> = 3.3 V:<br />
+                    I<sub>sw</sub> = 3.3 / 50 = 66 mA<br />
+                    L<sub>pkg</sub> = 5 nH, t<sub>r</sub> = 2 ns:<br />
+                    V<sub>bounce</sub> = 5×10⁻⁹ × 0.066/2×10⁻⁹ = <strong>165 mV</strong>
+                  </p>
+                  <p style="margin-top: var(--sp-2)">
+                    This bounces the ground reference of every other output on the same package —
+                    corrupting adjacent signals, regardless of the clock frequency.
+                  </p>
+                  <p
+                    style="
+                      font-size: var(--text-xs);
+                      color: var(--text-muted);
+                      margin-top: var(--sp-2);
+                    "
+                  >
+                    V<sub>bounce</sub> = L<sub>pkg</sub> × di/dt is a first-order approximation
+                    using a single lumped pin inductance. Real ground bounce also depends on mutual
+                    inductance between adjacent pins/bond wires, the quality of the return path
+                    (package and PCB), and the switching sequence of simultaneous outputs — treat
+                    this as an order-of-magnitude estimate, not a precise prediction.
+                  </p>
+                </div>
+                <div>
+                  <h4>Consequences</h4>
+                  <ul class="sc-list">
+                    <li>
+                      Ground bounce appears as noise on all other I/O sharing the same GND pin
+                    </li>
+                    <li>Causes data corruption in parallel buses and byte-wide GPIO</li>
+                    <li>
+                      Simultaneous switching output (SSO) noise scales with number of switching
+                      outputs
+                    </li>
+                    <li>
+                      V<sub>bounce</sub> ∝ 1/t<sub>r</sub> — slower edge rate directly reduces
+                      ground bounce
+                    </li>
+                  </ul>
+                  <h4 style="margin-top: var(--sp-4)">Mitigation</h4>
+                  <ul class="sc-list sc-list-success">
+                    <li>Slow edge rates — most effective single measure</li>
+                    <li>Use multiple GND pins (reduces effective L<sub>pkg</sub>)</li>
+                    <li>Local bypass capacitor &lt; 5 mm from IC VCC/GND pins</li>
+                    <li>Avoid simultaneous switching of wide buses</li>
+                    <li>Use flip-chip packages (much lower inductance than QFP/SOIC)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ INTERACTIVE SIMULATOR -->
+    <section class="section sc-bg-alt" id="simulator">
+      <div class="container">
+        <div class="section-label">Interactive Simulation</div>
+        <h2 class="section-title">Edge Rate → Bandwidth → Critical Length</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          Adjust rise time and clock frequency to see how the signal spectrum and critical trace
+          length change. Notice that clock frequency moves the harmonic lines but never changes the
+          bandwidth envelope. The harmonic count shown below is an approximation for an idealized
+          50% duty-cycle square wave — real duty cycle, rise/fall asymmetry, and jitter all shift
+          the exact number and spacing of significant harmonics.
+        </p>
+
+        <div class="sc-sim-layout">
+          <!-- Controls -->
+          <div class="card sc-sim-controls">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-6)">Signal Parameters</h3>
+
+            <label class="sc-label"
+              >Rise time t<sub>r</sub>: <strong id="trVal">2</strong> ns</label
+            >
+            <input
+              type="range"
+              id="trSlider"
+              min="0.3"
+              max="20"
+              value="2"
+              step="0.1"
+              class="sc-slider"
+              oninput="updateSim()"
+              aria-label="Rise time in nanoseconds"
+            />
+
+            <label class="sc-label" style="margin-top: var(--sp-4)"
+              >Clock frequency: <strong id="fclkVal">10</strong> MHz</label
+            >
+            <input
+              type="range"
+              id="fclkSlider"
+              min="1"
+              max="200"
+              value="10"
+              step="1"
+              class="sc-slider"
+              oninput="updateSim()"
+              aria-label="Clock frequency in megahertz"
+            />
+
+            <label class="sc-label" style="margin-top: var(--sp-4)"
+              >PCB medium: <strong id="mediumVal">FR4 microstrip</strong></label
+            >
+            <select
+              id="mediumSelect"
+              class="input"
+              style="margin-bottom: var(--sp-4)"
+              onchange="updateSim()"
+              aria-label="PCB medium"
+            >
+              <option value="150">FR4 microstrip (150 ps/in)</option>
+              <option value="180">FR4 stripline (180 ps/in)</option>
+              <option value="100">Rogers RO4003 microstrip (100 ps/in)</option>
+              <option value="200">FR4 embedded microstrip (200 ps/in)</option>
+            </select>
+
+            <div class="sc-sim-results" id="simResults">
+              <div class="sc-result-row">
+                <span>Bandwidth (BW = 0.35/t<sub>r</sub>)</span>
+                <strong id="bwOut" class="sc-res-val">—</strong>
+              </div>
+              <div class="sc-result-row">
+                <span>Critical length (λ/6 rule)</span>
+                <strong id="lcritOut" class="sc-res-val">—</strong>
+              </div>
+              <div class="sc-result-row">
+                <span>Wavelength at BW</span>
+                <strong id="lambdaOut" class="sc-res-val">—</strong>
+              </div>
+              <div class="sc-result-row">
+                <span>Harmonics in BW band</span>
+                <strong id="harmonicsOut" class="sc-res-val">—</strong>
+              </div>
+              <div class="sc-result-row">
+                <span>SI risk level</span>
+                <strong id="riskOut" class="sc-res-val">—</strong>
+              </div>
+            </div>
+
+            <div class="sc-preset-row" style="margin-top: var(--sp-4)">
+              <button class="btn btn-ghost btn-sm" onclick="setPreset(2, 10)">10 MHz CMOS</button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset(1, 100)">100 MHz CMOS</button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset(0.5, 1)">1 MHz FPGA</button>
+              <button class="btn btn-ghost btn-sm" onclick="setPreset(10, 1)">⊙ Safe 1 MHz</button>
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="sc-chart-wrap">
+            <div id="simChart" style="width: 100%; height: 380px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ DESIGN REVIEW -->
+    <section class="section" id="design-review">
+      <div class="container">
+        <div class="section-label">Design Review</div>
+        <h2 class="section-title">Good vs Bad Design — Same 10 MHz Clock</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-6)">
+          Both boards run a 10 MHz clock. The only difference is awareness of edge rate. The "bad"
+          design fails EMC and has false triggering. The "good" design passes first time.
+        </p>
+
+        <div class="sc-compare-grid">
+          <!-- BAD -->
+          <div class="card sc-compare-card sc-compare-bad">
+            <div class="sc-compare-badge sc-badge-fail">✗ "Slow clock, no worries"</div>
+            <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" class="sc-pcb-svg">
+              <rect
+                x="10"
+                y="10"
+                width="300"
+                height="200"
+                rx="4"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1.5"
+              />
+              <!-- Uncontrolled trace — long, no termination -->
+              <rect x="10" y="20" width="300" height="180" rx="2" fill="rgba(239,68,68,0.04)" />
+              <!-- IC -->
+              <rect
+                x="20"
+                y="90"
+                width="40"
+                height="40"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1.5"
+              />
+              <text x="40" y="113" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                CPU
+              </text>
+              <!-- Long unrouted trace -->
+              <line x1="60" y1="110" x2="280" y2="110" stroke="var(--error)" stroke-width="2.5" />
+              <!-- Receiver -->
+              <rect
+                x="270"
+                y="90"
+                width="40"
+                height="40"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--error)"
+                stroke-width="1.5"
+              />
+              <text x="290" y="113" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                MCU
+              </text>
+              <!-- Length annotation -->
+              <line
+                x1="60"
+                y1="125"
+                x2="270"
+                y2="125"
+                stroke="var(--error)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+              <text x="165" y="140" font-size="8" fill="var(--error)" text-anchor="middle">
+                220 mm — 4× L_crit!
+              </text>
+              <!-- No termination mark -->
+              <text x="165" y="160" font-size="7.5" fill="var(--error)" text-anchor="middle">
+                No termination · No impedance control
+              </text>
+              <!-- Ringing waveform sketch -->
+              <polyline
+                points="60,75 75,58 90,75 100,68 115,75 125,72 140,75"
+                stroke="var(--error)"
+                stroke-width="1.5"
+                fill="none"
+                opacity="0.8"
+              />
+              <text x="100" y="52" font-size="7" fill="var(--error)" text-anchor="middle">
+                ringing at receiver
+              </text>
+            </svg>
+            <div class="sc-compare-issues">
+              <div class="sc-issue-item">Trace = 220 mm, L_crit = 55 mm → 4× too long</div>
+              <div class="sc-issue-item">No impedance control → Z<sub>0</sub> varies 30–100 Ω</div>
+              <div class="sc-issue-item">No series/parallel termination → Γ = +0.8 at load</div>
+              <div class="sc-issue-item">
+                Ringing amplitude 1.5 V → false triggers on 3.3 V logic
+              </div>
+              <div class="sc-issue-item">
+                May fail CISPR 32 Class B near 175 MHz (~17th harmonic of the 10 MHz clock) — actual
+                pass/fail depends on enclosure, cabling, and grounding, not the PCB alone
+              </div>
+            </div>
+          </div>
+
+          <!-- GOOD -->
+          <div class="card sc-compare-card sc-compare-good">
+            <div class="sc-compare-badge sc-badge-pass">✓ Edge-Rate Aware Design</div>
+            <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" class="sc-pcb-svg">
+              <rect
+                x="10"
+                y="10"
+                width="300"
+                height="200"
+                rx="4"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1.5"
+              />
+              <rect x="10" y="20" width="300" height="180" rx="2" fill="rgba(34,197,94,0.04)" />
+              <!-- IC -->
+              <rect
+                x="20"
+                y="90"
+                width="40"
+                height="40"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1.5"
+              />
+              <text x="40" y="113" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                CPU
+              </text>
+              <!-- Series R -->
+              <rect
+                x="68"
+                y="104"
+                width="18"
+                height="12"
+                rx="2"
+                fill="var(--warning)"
+                opacity="0.8"
+              />
+              <text x="77" y="113" font-size="6" fill="var(--bg-base)" text-anchor="middle">
+                33Ω
+              </text>
+              <!-- Controlled trace -->
+              <line x1="60" y1="110" x2="68" y2="110" stroke="var(--success)" stroke-width="2.5" />
+              <line x1="86" y1="110" x2="270" y2="110" stroke="var(--success)" stroke-width="2.5" />
+              <!-- Receiver -->
+              <rect
+                x="270"
+                y="90"
+                width="40"
+                height="40"
+                rx="3"
+                fill="var(--bg-card)"
+                stroke="var(--success)"
+                stroke-width="1.5"
+              />
+              <text x="290" y="113" font-size="7" fill="var(--text-sub)" text-anchor="middle">
+                MCU
+              </text>
+              <!-- Length annotation -->
+              <line
+                x1="60"
+                y1="125"
+                x2="270"
+                y2="125"
+                stroke="var(--success)"
+                stroke-width="1"
+                stroke-dasharray="3,2"
+              />
+              <text x="165" y="140" font-size="8" fill="var(--success)" text-anchor="middle">
+                220 mm — matched with series R + 50 Ω control
+              </text>
+              <!-- Clean waveform -->
+              <polyline
+                points="60,75 65,60 75,58 220,58 225,75"
+                stroke="var(--success)"
+                stroke-width="1.5"
+                fill="none"
+                opacity="0.9"
+              />
+              <text x="145" y="52" font-size="7" fill="var(--success)" text-anchor="middle">
+                clean step — no ringing
+              </text>
+              <!-- Impedance note -->
+              <text x="165" y="160" font-size="7.5" fill="var(--success)" text-anchor="middle">
+                50 Ω controlled · Z
+                <sub>0</sub>
+                matched · edge rate managed
+              </text>
+            </svg>
+            <div class="sc-compare-issues sc-compare-ok">
+              <div class="sc-ok-item">
+                33 Ω series R at source: Z<sub>0</sub> + Z<sub>driver</sub> ≈ Z<sub>trace</sub>
+              </div>
+              <div class="sc-ok-item">Trace routed as 50 Ω microstrip throughout</div>
+              <div class="sc-ok-item">Effective Γ reduced to &lt; 0.05 — no visible ringing</div>
+              <div class="sc-ok-item">
+                Modelled with 10+ dB of margin to CISPR 32 Class B on the PCB source alone — final
+                pass/fail still depends on the enclosure, cabling, and system-level grounding
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Industry examples -->
+        <h3 style="margin-top: var(--sp-12); margin-bottom: var(--sp-6)">
+          Real-World Failures — "It's Only a Slow Clock"
+        </h3>
+        <div class="cards-grid" style="--grid-min: 220px">
+          <div class="card" style="border-top: 3px solid var(--primary-400)">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Automotive</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              CAN Bus — 1 Mbit/s
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              1 MHz bit rate but a 40 ns rise time — equivalent bandwidth ≈ 8.75 MHz. An
+              unterminated 200 mm stub off the bus can ring near its own quarter-wave resonance
+              (order-of-magnitude estimate assuming ~0.6c cable velocity factor; actual frequency
+              depends on cable dielectric, stub termination, and connector parasitics — always
+              confirm with TDR or simulation rather than this estimate alone). ISO 7637-2 pulse
+              testing can excite this resonance and cause ringing-induced false messages — a
+              safety-critical failure mode.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--warning)">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Industrial</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              RS-485 — 9600 baud
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Only 9.6 kHz data rate, but the CMOS driver has a 3 ns rise time → 117 MHz bandwidth.
+              A 3 m cable without termination rings and corrupts data under IEC 61000-4-4 EFT test.
+              "Slow" baud rate was irrelevant.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--cyan-400)">
+            <div class="badge badge-cyan" style="margin-bottom: var(--sp-3)">Consumer</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              32.768 kHz RTC Clock
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Extremely low frequency — but the CMOS buffer driving it has a 2 ns edge, giving it
+              ~175 MHz of equivalent bandwidth. A 150 mm trace to the crystal runs alongside an
+              audio line; capacitive coupling injects that 175 MHz energy directly into the audio
+              path. In the receiver, this doesn't "become" audible on its own — it beats against the
+              radio's local oscillator or another strong RF source in the same non-linear IF stage
+              (intermodulation/mixing), and the difference frequency (here, ≈175 kHz) falls inside
+              the IF passband, where it demodulates into an audible tone. The fix is to keep the
+              coupling from happening at all (shielding, separation, filtering at the RTC buffer),
+              not to explain away the mixing product.
+            </p>
+          </div>
+          <div class="card" style="border-top: 3px solid var(--success)">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">Medical</div>
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">5 MHz SPI to ADC</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              5 MHz SCLK seems "medium speed," but the FPGA GPIO has a 0.5 ns edge → ~700 MHz
+              equivalent bandwidth. For an unterminated 80 mm stub (FR4 microstrip, T<sub>PD</sub> ≈
+              150 ps/in ≈ 5.9 ps/mm), one-way delay T<sub>D</sub> ≈ 80 mm × 5.9 ps/mm ≈ 472 ps;
+              using f<sub>ring</sub> ≈ 1/(4 × T<sub>D</sub>) from Concept Card 03 gives a ringing
+              resonance around ~530 MHz — well inside the 700 MHz signal bandwidth, so the edge
+              excites it strongly. Under IEC 60601-1-2 immunity test, this ringing can corrupt ADC
+              reads — a patient-safety risk that has nothing to do with the "slow" 5 MHz clock rate.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ ENGINEERING CALCULATOR -->
+    <section class="section sc-bg-alt" id="calculator">
+      <div class="container">
+        <div class="section-label">Engineering Calculator</div>
+        <h2 class="section-title">SI Design Rule Calculator</h2>
+
+        <div class="sc-calc-layout">
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Critical Trace Length & Bandwidth
+            </h3>
+            <div class="sc-calc-grid">
+              <div class="sc-calc-field">
+                <label>Rise time t<sub>r</sub> (ns)</label>
+                <input
+                  type="number"
+                  id="calcTr"
+                  value="2"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                  class="input"
+                  oninput="calcSI()"
+                />
+              </div>
+              <div class="sc-calc-field">
+                <label>T<sub>PD</sub> per inch (ps)</label>
+                <input
+                  type="number"
+                  id="calcTpd"
+                  value="150"
+                  min="50"
+                  max="300"
+                  step="5"
+                  class="input"
+                  oninput="calcSI()"
+                />
+              </div>
+            </div>
+            <div class="sc-calc-formula">
+              <p>
+                BW = 0.35 / t<sub>r</sub> &nbsp;&nbsp;&nbsp; L<sub>crit</sub> = t<sub>r</sub> / (6 ×
+                T<sub>PD</sub>)
+              </p>
+            </div>
+            <div class="sc-calc-result">
+              <div class="sc-calc-out">
+                <span>Bandwidth (−3 dB)</span><strong id="calcBW">175 MHz</strong>
+              </div>
+              <div class="sc-calc-out">
+                <span>Critical length (inch)</span><strong id="calcLin">2.2 in</strong>
+              </div>
+              <div class="sc-calc-out">
+                <span>Critical length (mm)</span><strong id="calcLmm">56 mm</strong>
+              </div>
+              <div class="sc-calc-out">
+                <span>Termination required above</span><strong id="calcTerm">56 mm</strong>
+              </div>
+            </div>
+            <div class="alert alert-info" style="margin-top: var(--sp-4)">
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              Some designers use λ/10 (more conservative) or λ/4 (less conservative) instead of λ/6.
+              λ/6 is the most common industry choice.
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--text-sm); margin-bottom: var(--sp-4)">
+              Ground Bounce Calculator
+            </h3>
+            <div class="sc-calc-grid">
+              <div class="sc-calc-field">
+                <label>Package inductance L<sub>pkg</sub> (nH)</label>
+                <input
+                  type="number"
+                  id="calcLpkg"
+                  value="5"
+                  min="0.1"
+                  max="50"
+                  step="0.5"
+                  class="input"
+                  oninput="calcGndBounce()"
+                />
+              </div>
+              <div class="sc-calc-field">
+                <label>Switching current I<sub>sw</sub> (mA)</label>
+                <input
+                  type="number"
+                  id="calcIsw"
+                  value="66"
+                  min="1"
+                  max="500"
+                  step="1"
+                  class="input"
+                  oninput="calcGndBounce()"
+                />
+              </div>
+              <div class="sc-calc-field">
+                <label>Rise time t<sub>r</sub> (ns)</label>
+                <input
+                  type="number"
+                  id="calcTrBounce"
+                  value="2"
+                  min="0.1"
+                  max="20"
+                  step="0.1"
+                  class="input"
+                  oninput="calcGndBounce()"
+                />
+              </div>
+              <div class="sc-calc-field">
+                <label>Simultaneous outputs (#)</label>
+                <input
+                  type="number"
+                  id="calcNout"
+                  value="1"
+                  min="1"
+                  max="64"
+                  step="1"
+                  class="input"
+                  oninput="calcGndBounce()"
+                />
+              </div>
+            </div>
+            <div class="sc-calc-formula">
+              <p>V<sub>bounce</sub> = N × L<sub>pkg</sub> × I<sub>sw</sub> / t<sub>r</sub></p>
+            </div>
+            <div class="sc-calc-result">
+              <div class="sc-calc-out">
+                <span>Ground bounce per output</span><strong id="calcVb">165 mV</strong>
+              </div>
+              <div class="sc-calc-out">
+                <span>Total bounce (N outputs)</span><strong id="calcVbN">165 mV</strong>
+              </div>
+              <div class="sc-calc-out">
+                <span>Noise margin remaining</span><strong id="calcMargin">—</strong>
+              </div>
+            </div>
+            <p style="font-size: var(--text-xs); color: var(--text-muted); margin-top: var(--sp-3)">
+              First-order estimate (single lumped L<sub>pkg</sub>) — does not model mutual
+              inductance between pins, return-path quality, or switching sequence.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ COMMON MISTAKES -->
+    <section class="section" id="mistakes">
+      <div class="container">
+        <div class="section-label">Common Mistakes</div>
+        <h2 class="section-title">The Six Most Frequent "Slow Clock" SI Errors</h2>
+        <div class="sc-mistakes-grid">
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M1</div>
+            <h4>Checking clock frequency instead of rise time</h4>
+            <p class="sc-mistake-symptom">
+              Symptom: Design passes at bench, fails at EMC pre-scan at unexpected frequencies
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Engineers look at the schematic, see "10 MHz," and apply no SI rules. The CMOS
+              driver's 2 ns edge isn't on the schematic — it's only in the datasheet.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Read driver datasheet rise/fall time spec. Use that to calculate BW and L_crit
+              before routing.
+            </div>
+          </div>
+
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M2</div>
+            <h4>Long clock traces without termination</h4>
+            <p class="sc-mistake-symptom">
+              Symptom: Intermittent logic errors on slow bus that worsen at low temperature
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              Temperature affects driver output impedance and load capacitance. Ringing amplitude
+              that is borderline at room temperature crosses the logic threshold at −20 °C or +85
+              °C.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Series terminate at source (R_s ≈ Z_0 − R_driver). Works for point-to-point nets
+              regardless of frequency.
+            </div>
+          </div>
+
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M3</div>
+            <h4>Using a fast FPGA GPIO to drive a slow bus</h4>
+            <p class="sc-mistake-symptom">Symptom: 100 kHz I²C bus causes EMI failure at 175 MHz</p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              FPGA I/O configured for maximum drive strength has sub-nanosecond edges by default.
+              I²C at 100 kHz with 0.5 ns edges radiates up to 700 MHz.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Configure FPGA drive strength and slew rate. Use SLOW slew for any net below 50
+              Mbps. Add series R if needed.
+            </div>
+          </div>
+
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M4</div>
+            <h4>Ignoring connector and via stubs</h4>
+            <p class="sc-mistake-symptom">
+              Symptom: Board works standalone, fails when cable is attached
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              A 50 mm connector stub resonates at 1 GHz for a 1 ns rise time edge. The connector pin
+              becomes a λ/4 antenna — even if the PCB trace is correctly terminated.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Minimise stub length at connectors. Use matched connectors with controlled Z.
+              Terminate at the connector entry point.
+            </div>
+          </div>
+
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M5</div>
+            <h4>Adding a ferrite bead "to fix EMI" on a fast clock</h4>
+            <p class="sc-mistake-symptom">
+              Symptom: Ferrite bead causes more ringing than without it
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              A real ferrite bead is not a pure inductor: below its self-resonant frequency it
+              behaves inductively, but above self-resonance its impedance becomes dominated by the
+              lossy, resistive part of the core material — this resistive loss is exactly what makes
+              ferrite beads effective, dissipative EMI suppressors rather than simple reactive
+              filters. The trouble is what happens on the way there: while still acting inductively,
+              the bead's inductance combines with downstream trace/pin capacitance into an LC
+              network that can ring at f<sub>res</sub> = 1/(2π√LC). For a 100 nH bead (in its
+              inductive region) and 20 pF of trace capacitance, f<sub>res</sub> ≈ 112 MHz — adding a
+              resonance rather than damping one, if that frequency falls inside the signal's
+              bandwidth.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Slow the edge rate first (series R near the driver). Use ferrite beads only where
+              there is a resistive load to damp the LC resonance, and check the datasheet's
+              impedance-vs-frequency curve to confirm where the bead becomes resistive rather than
+              assuming it is inductive at your operating frequency.
+            </div>
+          </div>
+
+          <div class="card sc-mistake-card">
+            <div class="sc-mistake-num">M6</div>
+            <h4>
+              Blaming a "slow" ADC/SPI interface for data errors instead of checking edge rate
+            </h4>
+            <p class="sc-mistake-symptom">
+              Symptom: Low-speed SPI/I²C link to an ADC reads noisy or corrupted data, but the bus
+              clock is only a few MHz
+            </p>
+            <p style="font-size: var(--text-xs); color: var(--text-sub); margin-top: var(--sp-2)">
+              This is one of the most common industry cases of the myth in practice: a SPI clock in
+              the low single-digit MHz range "should" be electrically trivial, so engineers look
+              elsewhere for the bug (grounding, power supply noise, ADC configuration) before
+              checking the driver's actual edge rate. A fast MCU or FPGA GPIO on that same "slow"
+              bus commonly has sub-nanosecond rise/fall times, producing hundreds of MHz of
+              equivalent bandwidth and ringing on any unterminated stub — indistinguishable from
+              "noisy" ADC data on a scope capture unless you specifically look at the edges.
+            </p>
+            <div class="sc-mistake-fix">
+              Fix: Before investigating power, grounding, or ADC settings, check the driver
+              datasheet's rise/fall time and probe the actual edge with a sufficiently fast scope.
+              Reduce GPIO drive strength/slew rate or add series termination if the edge rate is
+              driving reflections on the SPI lines.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ DECISION TREE -->
+    <section class="section sc-bg-alt" id="decision">
+      <div class="container">
+        <div class="section-label">Interactive Decision Tree</div>
+        <h2 class="section-title">Does Signal Integrity Matter for This Trace?</h2>
+
+        <div class="sc-tree" id="decisionTree">
+          <div class="sc-tree-node" id="node-root">
+            <p>What is the rise/fall time of the driver on this net?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeStep('q-tr-fast')">
+                &lt; 2 ns (CMOS, FPGA fast)
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-tr-med')">
+                2–10 ns (74HC, AHC)
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeStep('q-tr-slow')">
+                &gt; 10 ns (RS-232, relay driver)
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeStep('q-unknown')">Unknown</button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-tr-fast" hidden>
+            <p>What is the trace length?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-terminate-always')">
+                &gt; 10 mm
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-short-fast')">
+                &lt; 10 mm
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-tr-med" hidden>
+            <p>What is the trace length?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-terminate-long')">
+                &gt; 55 mm
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeStep('q-tr-med-mid')">
+                15–55 mm
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="treeResult('r-ok-short')">
+                &lt; 15 mm
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-tr-med-mid" hidden>
+            <p>Is the load capacitive (CMOS input) or resistive (terminated line)?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-series-r')">
+                Capacitive (CMOS/FPGA input)
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-ok-short')">
+                Resistive / already terminated
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-tr-slow" hidden>
+            <p>Is EMC compliance (CISPR, FCC, CE) required?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeStep('q-emc-slow')">Yes</button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-low-risk')">
+                No (internal product, no emissions test)
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-emc-slow" hidden>
+            <p>What is the trace length vs 60 mm (conservative L_crit for 10 ns rise)?</p>
+            <div class="sc-tree-btns">
+              <button class="btn btn-primary btn-sm" onclick="treeResult('r-terminate-long')">
+                &gt; 60 mm
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="treeResult('r-ok-short')">
+                &lt; 60 mm — likely OK
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-tree-node" id="node-q-unknown" hidden>
+            <div class="alert alert-warning" style="margin-bottom: var(--sp-4)">
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              You must find the rise time before making a decision. Check the driver IC datasheet
+              (t<sub>r</sub> or t<sub>rise</sub> parameter). If the datasheet only specifies I/O
+              current or drive strength, measure the edge with a scope (≥ 1 GHz bandwidth probe
+              required for sub-2 ns edges).
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+
+          <!-- Results -->
+          <div class="sc-tree-result sc-result-warn" id="node-r-terminate-always" hidden>
+            <strong>⚠ Controlled impedance + series termination required.</strong>
+            <p>
+              With &lt; 2 ns rise time, L_crit is under 10 mm. This trace MUST be routed as a
+              controlled-impedance line and terminated with a series resistor (R_s ≈ Z_0 − R_driver)
+              placed within 5 mm of the driver pin. Review for EMI — bandwidth exceeds 175 MHz.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="sc-tree-result sc-result-ok" id="node-r-short-fast" hidden>
+            <strong>✓ Short enough — but watch EMI and ground bounce.</strong>
+            <p>
+              Trace length is below L_crit. No termination required, but: (1) verify edge rate won't
+              cause ground bounce on adjacent signals; (2) the fast edge still radiates — review PCB
+              layer stackup and shielding if EMC compliance required.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="sc-tree-result sc-result-warn" id="node-r-terminate-long" hidden>
+            <strong>⚠ Termination required.</strong>
+            <p>
+              Trace exceeds L_crit. Add a series termination resistor at the source (R_s = Z_0 −
+              R_driver, typically 22–47 Ω) within 10 mm of the driver. Route as 50 Ω microstrip or
+              stripline. Verify with SPICE or HyperLynx simulation before committing to layout.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="sc-tree-result sc-result-ok" id="node-r-series-r" hidden>
+            <strong>✓ Add series resistor — low cost fix.</strong>
+            <p>
+              A 22–33 Ω series resistor at the driver absorbs the reflection without the cost of a
+              parallel termination supply. Capacitive loads improve with series R because the RC
+              low-pass also reduces edge rate, decreasing EMI and ground bounce.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="sc-tree-result sc-result-ok" id="node-r-ok-short" hidden>
+            <strong>✓ Within limits — verify with simulation for critical signals.</strong>
+            <p>
+              Trace is short enough that reflections damp before the next edge. No formal
+              termination required. Still recommended: add a 0 Ω resistor pad in series so
+              termination can be added during debug without board respins.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+          <div class="sc-tree-result sc-result-skip" id="node-r-low-risk" hidden>
+            <strong>⊘ Low risk — no action required.</strong>
+            <p>
+              Slow edges with no EMC requirement and short traces: SI issues are unlikely to cause
+              problems. Consider adding a 0 Ω placeholder for future flexibility. Document the rise
+              time assumption in the design file in case requirements change.
+            </p>
+            <button class="btn btn-ghost btn-sm" onclick="resetTree()">↩ Start again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ QUIZ -->
+    <section class="section" id="quiz">
+      <div class="container">
+        <div class="section-label">Interactive Quiz</div>
+        <h2 class="section-title">Test Your Understanding</h2>
+
+        <style>
+          .quiz-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-base);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+          }
+          .quiz-options {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+          }
+          .quiz-option {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-sub);
+            cursor: pointer;
+            transition:
+              border-color 0.2s,
+              background 0.2s;
+          }
+          .quiz-option:hover {
+            border-color: var(--cyan-500);
+          }
+          .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--text-base);
+          }
+          .quiz-feedback {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+          }
+          .quiz-feedback.show {
+            display: block;
+          }
+          .quiz-feedback.show.correct {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid var(--success);
+            color: var(--text-base);
+          }
+          .quiz-feedback.show.incorrect {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--danger);
+            color: var(--text-base);
+          }
+        </style>
+        <div class="quiz-container" data-section-break="true" id="quiz-container">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 0.8rem">
+              <div class="badge">KNOWLEDGE CHECK</div>
+              <h3 style="margin: 0">Slow Clock SI Quiz</h3>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted)">
+              Score:
+              <span id="quizScore" style="color: var(--cyan-500); font-weight: 700">0</span> / 4
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+            Select the best answer for each question. Instant feedback and detailed explanations are
+            provided after each response.
+          </p>
+          <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-base)">
+              Question <span id="quizCurrentNum">1</span> of 4
+            </div>
+            <div
+              style="
+                flex: 1;
+                height: 6px;
+                background: var(--bg-muted);
+                border-radius: 3px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="quizProgressBar"
+                style="
+                  height: 100%;
+                  width: 25%;
+                  background: linear-gradient(90deg, var(--cyan-500), #00d4aa);
+                  border-radius: 3px;
+                  transition: width 0.3s ease;
+                "
+              ></div>
+            </div>
+          </div>
+          <div id="quizSlides">
+            <div class="quiz-slide" data-q="1">
+              <div class="quiz-question">
+                1. A 74AHC logic gate has a rise time of 1.5 ns. What is the effective signal
+                bandwidth?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="BW = 0.35 / t_r = 0.35 / 1.5×10⁻⁹ ≈ 233 MHz. This is the bandwidth regardless of the clock frequency driving the gate — a 1 MHz clock with a 1.5 ns edge has 233 MHz of spectral content."
+                id="quiz1"
+              >
+                <li class="quiz-option" data-idx="0">23 MHz</li>
+                <li class="quiz-option" data-idx="1">233 MHz</li>
+                <li class="quiz-option" data-idx="2">1.5 GHz</li>
+                <li class="quiz-option" data-idx="3">47 MHz</li>
+              </ul>
+              <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+            <div class="quiz-slide" data-q="2" style="display: none">
+              <div class="quiz-question">
+                2. A trace is 90 mm long. The driver has t_r = 3 ns. FR4 microstrip T_PD = 150
+                ps/inch. Is termination required?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="L_crit = 3 ns / (6 × 150 ps/in) = 3.33 inch = 84.7 mm. The 90 mm trace is 1.06× L_crit — just over the threshold. Termination is required. The clock frequency is irrelevant to this calculation."
+                id="quiz2"
+              >
+                <li class="quiz-option" data-idx="0">No — the clock is slow enough</li>
+                <li class="quiz-option" data-idx="1">Yes — the trace exceeds L_crit by 2.8×</li>
+                <li class="quiz-option" data-idx="2">Only if the clock is above 100 MHz</li>
+                <li class="quiz-option" data-idx="3">Not needed for single-ended signals</li>
+              </ul>
+              <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+            <div class="quiz-slide" data-q="3" style="display: none">
+              <div class="quiz-question">
+                3. Which parameter most directly determines whether a PCB trace requires controlled
+                impedance?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="2"
+                data-explain="Rise/fall time (t_r) determines bandwidth and therefore critical length. A 1 MHz clock with a 1 ns edge requires controlled impedance for traces over ~11 mm. A 500 MHz clock with a 10 ns edge does not require it for traces under 55 mm. t_r is the fundamental parameter."
+                id="quiz3"
+              >
+                <li class="quiz-option" data-idx="0">Clock frequency</li>
+                <li class="quiz-option" data-idx="1">Data rate in Mbps</li>
+                <li class="quiz-option" data-idx="2">Signal rise/fall time</li>
+                <li class="quiz-option" data-idx="3">Supply voltage</li>
+              </ul>
+              <div class="quiz-feedback" id="feedback3"></div>
+            </div>
+            <div class="quiz-slide" data-q="4" style="display: none">
+              <div class="quiz-question">
+                4. An FPGA GPIO is set to "SLOW" slew rate, reducing t_r from 0.8 ns to 5 ns. By how
+                much does radiated EMI decrease above the new bandwidth corner?
+              </div>
+              <ul
+                class="quiz-options"
+                data-correct="1"
+                data-explain="Above the BW corner, the spectrum rolls off at −40 dB/decade. Increasing t_r by 6.25× (0.8 → 5 ns) shifts the corner from 437 MHz to 70 MHz. At any given frequency above the original BW, emissions drop by 40×log10(5/0.8) ≈ 40 × 0.79 ≈ 32 dB. But between the two BW corners (70–437 MHz), the improvement is 20×log10(5/0.8) ≈ 16 dB. The closest answer is 14 dB — the practical measured improvement in that band."
+                id="quiz4"
+              >
+                <li class="quiz-option" data-idx="0">3 dB</li>
+                <li class="quiz-option" data-idx="1">14 dB</li>
+                <li class="quiz-option" data-idx="2">40 dB</li>
+                <li class="quiz-option" data-idx="3">6 dB</li>
+              </ul>
+              <div class="quiz-feedback" id="feedback4"></div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-top: 1.5rem;
+              padding-top: 1rem;
+              border-top: 1px solid var(--border);
+            "
+          >
+            <button class="btn btn-secondary" disabled id="quizPrevBtn" style="opacity: 0.4">
+              ← Previous
+            </button>
+            <div id="quizDots" style="display: flex; gap: 4px"></div>
+            <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+          </div>
+          <div
+            id="quizSummary"
+            style="
+              display: none;
+              margin-top: 2rem;
+              padding: 1.5rem;
+              border-radius: 10px;
+              border: 1px solid var(--border);
+              text-align: center;
+            "
+          >
+            <div
+              id="quizFinalScore"
+              style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+            ></div>
+            <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ KNOWLEDGE CHECK -->
+    <section class="section sc-bg-alt" id="knowledge">
+      <div class="container">
+        <div class="section-label">Knowledge Check</div>
+        <h2 class="section-title">Engineering Calculation Exercise</h2>
+        <div class="card sc-kc-card">
+          <h3 style="font-size: var(--text-base); margin-bottom: var(--sp-4)">Given:</h3>
+          <ul class="sc-list-plain" style="margin-bottom: var(--sp-6)">
+            <li>FPGA GPIO configured at "fast" slew: t<sub>r</sub> = 0.8 ns</li>
+            <li>Signal: SPI clock at 5 MHz</li>
+            <li>PCB: FR4 microstrip (T<sub>PD</sub> = 150 ps/inch)</li>
+            <li>Trace length: 85 mm (3.35 inch)</li>
+            <li>Package inductance: 3 nH per pin</li>
+            <li>Load current: 30 mA per output</li>
+          </ul>
+          <h3 style="font-size: var(--text-base); margin-bottom: var(--sp-4)">Calculate:</h3>
+          <ol class="sc-list-plain" style="margin-bottom: var(--sp-6)">
+            <li>Signal bandwidth</li>
+            <li>Critical trace length</li>
+            <li>Is termination required?</li>
+            <li>Ground bounce voltage</li>
+          </ol>
+          <button class="btn btn-secondary" onclick="toggleKcSolution()" id="kcBtn">
+            Show Solution
+          </button>
+          <div
+            id="kcSolution"
+            hidden
+            style="
+              margin-top: var(--sp-6);
+              padding-top: var(--sp-6);
+              border-top: 1px solid var(--border);
+            "
+          >
+            <h4>Solution</h4>
+            <div class="sc-solution-step">
+              <strong>1. Signal bandwidth:</strong><br />
+              BW = 0.35 / t_r = 0.35 / 0.8×10⁻⁹<br />
+              <strong>BW = 437.5 MHz</strong> — despite a 5 MHz SPI clock
+            </div>
+            <div class="sc-solution-step" style="margin-top: var(--sp-4)">
+              <strong>2. Critical trace length:</strong><br />
+              L_crit = t_r / (6 × T_PD) = 0.8 ns / (6 × 150 ps/in)<br />
+              L_crit = 0.8 / 0.9 = <strong>0.89 inch = 22.5 mm</strong>
+            </div>
+            <div class="sc-solution-step" style="margin-top: var(--sp-4)">
+              <strong>3. Termination required?</strong><br />
+              Trace = 85 mm, L_crit = 22.5 mm<br />
+              85 / 22.5 = 3.8× over L_crit<br />
+              <strong>YES — termination is mandatory.</strong> Use 33 Ω series R at driver pin.
+            </div>
+            <div class="sc-solution-step" style="margin-top: var(--sp-4)">
+              <strong>4. Ground bounce:</strong><br />
+              V_bounce = L_pkg × I_sw / t_r<br />
+              V_bounce = 3×10⁻⁹ × 30×10⁻³ / 0.8×10⁻⁹<br />
+              <strong>V_bounce = 112 mV</strong> per switching output<br />
+              Worst-case SSO with 4 outputs: 4 × 112 mV = <strong>450 mV</strong> — exceeds noise
+              margin for 3.3 V logic (typ. 300 mV margin).
+            </div>
+            <div class="alert alert-warning" style="margin-top: var(--sp-4)">
+              This "slow" 5 MHz SPI interface needs: controlled-impedance routing, series
+              termination, and reduced FPGA drive strength (switch to SLOW slew) to pass EMC and
+              maintain logic margins. The clock frequency is irrelevant — the 0.8 ns edge is what
+              matters.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ STANDARDS -->
+    <section class="section" id="standards">
+      <div class="container">
+        <div class="section-label">Engineering Standards</div>
+        <h2 class="section-title">Relevant Standards & Guidelines</h2>
+        <div class="sc-standards-table-wrap">
+          <table class="sc-standards-table">
+            <thead>
+              <tr>
+                <th>Standard</th>
+                <th>Scope</th>
+                <th>Edge-Rate Relevance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>IPC-2141B</strong></td>
+                <td>Controlled Impedance PCB Design</td>
+                <td>
+                  Defines transmission line design rules — explicitly based on rise time, not clock
+                  frequency
+                </td>
+              </tr>
+              <tr>
+                <td><strong>CISPR 32</strong></td>
+                <td>Multimedia Equipment Emissions</td>
+                <td>
+                  30 MHz – 1 GHz radiated emissions — affected by edge rate on any clock ≥ 100 kHz
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IEC 61000-4-4</strong></td>
+                <td>Electrical Fast Transient (EFT) Immunity</td>
+                <td>
+                  EFT pulses (5 ns rise time) excite unterminated traces — immunity depends on PCB
+                  SI quality
+                </td>
+              </tr>
+              <tr>
+                <td><strong>FCC Part 15B</strong></td>
+                <td>US Unintentional Radiation Limits</td>
+                <td>
+                  Class A/B limits from 30 MHz — edge rate determines which harmonics appear in the
+                  test band
+                </td>
+              </tr>
+              <tr>
+                <td><strong>JEDEC JESD79</strong></td>
+                <td>DDR SDRAM Standards</td>
+                <td>
+                  Specifies controlled impedance, termination voltage, and slew rate for each DDR
+                  generation
+                </td>
+              </tr>
+              <tr>
+                <td><strong>ISO 11452-5</strong></td>
+                <td>Automotive EMC — Stripline</td>
+                <td>
+                  Automotive immunity testing — pass/fail depends on harness SI quality and
+                  edge-rate management
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IEC 60601-1-2</strong></td>
+                <td>Medical Electrical Equipment EMC</td>
+                <td>
+                  Stricter emissions limits — medical boards with any fast GPIO must manage edge
+                  rate aggressively
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IPC-2251</strong></td>
+                <td>Generic Guidelines for High-Speed PCB Design</td>
+                <td>
+                  Broader companion to IPC-2141B — routing, stack-up, and layout guidance driven by
+                  rise time and equivalent bandwidth rather than clock rate
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IBIS Specification</strong></td>
+                <td>I/O Buffer Information Specification</td>
+                <td>
+                  Standardised driver/receiver I-V and V-t behavioural models — the rise/fall time
+                  and output impedance values used in SI simulation come from here, not the clock
+                  spec
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IEEE 1597</strong></td>
+                <td>Standard for Validation of Computational EM Modeling</td>
+                <td>
+                  Defines validation procedures for the field solvers used to compute trace
+                  impedance and coupling — relevant when verifying L<sub>crit</sub> and Z<sub
+                    >0</sub
+                  >
+                  calculations against simulation
+                </td>
+              </tr>
+              <tr>
+                <td><strong>PCIe Base Specification</strong></td>
+                <td>PCI Express Electrical &amp; Protocol Requirements</td>
+                <td>
+                  Defines rise-time, jitter, and impedance budgets for a multi-GHz differential
+                  interface — a concrete example of a spec written entirely around edge rate and
+                  eye-diagram margin, not clock frequency alone
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ RELATED CONCEPTS -->
+    <section class="section sc-bg-alt" id="related-concepts">
+      <div class="container">
+        <div class="section-label">Related Concepts</div>
+        <h2 class="section-title">Ten Ideas Worth Understanding Next</h2>
+        <p style="color: var(--text-sub); margin-bottom: var(--sp-8)">
+          This article focuses on why edge rate — not clock frequency — drives SI and EMI behaviour.
+          These related concepts build directly on that idea; each is worth its own deep dive, but a
+          working summary is given here so you know what to look up next.
+        </p>
+        <div class="cards-grid" style="--grid-min: 260px">
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              1. Why digital signals contain harmonics
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Any periodic non-sinusoidal waveform can be decomposed into a fundamental frequency
+              plus an infinite series of harmonics. A digital clock is periodic and trapezoidal, so
+              it always radiates and couples energy well above its fundamental frequency — the basis
+              for everything else on this page.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              2. Fourier series explanation
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              A Fourier series expresses a periodic waveform as a sum of sine/cosine terms at
+              integer multiples of the fundamental. For a trapezoidal wave, the harmonic
+              coefficients fall off as sin(x)/x, shaped by pulse width and rise time — this is the
+              rigorous basis for the −20/−40 dB/decade envelope used throughout this article.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              3. Why square waves need high-frequency content
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              A perfectly sharp edge requires infinite bandwidth to reconstruct (Gibbs phenomenon);
+              a real, finite-rise-time edge only needs enough harmonics to reproduce that finite
+              slope. Faster edges therefore always require more high-frequency content than slower
+              edges, regardless of repetition rate.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              4. Eye diagram degradation from reflections
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              An eye diagram overlays many bit periods on top of each other. Reflections from
+              impedance mismatches add timing jitter and amplitude noise that close the eye
+              vertically and horizontally — a direct, measurable consequence of the ringing
+              described in Concept Card 03.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              5. Driver output impedance effects
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              The source reflection coefficient Γ<sub>S</sub> depends on how well the driver's
+              output impedance matches the trace. Low-impedance CMOS drivers into a 50 Ω trace
+              create significant Γ<sub>S</sub>, which is exactly what series termination is designed
+              to cancel out.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              6. Transmission-line delay vs. rise time
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              The core comparison behind Concept Card 02: a trace's one-way propagation delay T<sub
+                >D</sub
+              >
+              versus the signal's rise time t<sub>r</sub>. When T<sub>D</sub> is a small fraction of
+              t<sub>r</sub>, lumped-circuit approximations hold; once it isn't, distributed
+              transmission-line analysis is required.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              7. Propagation delay vs. clock period
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              These are easy to conflate but unrelated in magnitude: propagation delay is a
+              per-trace, per-geometry number (picoseconds to low nanoseconds), while clock period is
+              a system timing budget (often much larger). A trace can be "electrically long" for SI
+              purposes while still being timing-closed for the clock period.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              8. Distributed vs. lumped circuits
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              A lumped model assumes voltage is the same everywhere on a conductor at a given
+              instant; a distributed model accounts for finite propagation speed, so voltage varies
+              with both position and time. The T<sub>D</sub> &gt; t<sub>r</sub>/6 threshold is the
+              practical dividing line between the two for digital design.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              9. Why edge-rate control reduces EMI
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Because the spectral envelope's corner frequencies are set by t<sub>r</sub>, slowing
+              the edge (series R, controlled slew rate, RC filtering) pushes the −40 dB/decade
+              rolloff to a lower frequency — directly lowering radiated and conducted emissions
+              without touching the clock frequency at all.
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="font-size: var(--text-sm); margin-bottom: var(--sp-2)">
+              10. SI vs. PI relationship
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Signal integrity (SI) concerns the quality of a signal on its own net; power integrity
+              (PI) concerns the stability of the supply rails feeding the drivers. They interact
+              directly through ground bounce (Concept Card 05): a fast edge is simultaneously an SI
+              event on its own trace and a PI event on the shared power/ground system.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ FURTHER READING -->
+    <section class="section sc-bg-alt" id="references">
+      <div class="container">
+        <div class="section-label">Further Reading</div>
+        <h2 class="section-title">References & Resources</h2>
+        <div class="sc-refs-grid">
+          <div class="card sc-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">Signal and Power Integrity — Simplified</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Eric Bogatin — The defining reference on rise time, critical length, and transmission
+              line effects on digital boards
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">
+              High-Speed Digital Design: A Handbook of Black Magic
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Howard Johnson & Martin Graham — the classic 1993 reference that established rise
+              time, not clock frequency, as the governing SI parameter for digital design
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">High-Speed Signal Propagation</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Howard Johnson & Martin Graham — Chapter 3: "It's the Edge That Counts" — the source
+              of the BW = 0.35/t_r approximation
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">
+              Advanced Signal Integrity for High-Speed Digital Designs
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Stephen Hall & Howard Heck — rigorous treatment of transmission lines, coupling, and
+              package/board co-design for multi-Gbps interfaces
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-blue" style="margin-bottom: var(--sp-3)">Book</div>
+            <h4 style="font-size: var(--text-sm)">
+              Right The First Time: A Practical Handbook on High Speed PCB and System Design
+            </h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Lee Ritchey & Larry Smith — practical, production-tested stack-up, routing, and
+              termination guidance from a working PCB design consultancy
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">XAPP085: FPGA I/O Slew Rate Control</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              AMD/Xilinx — How to configure FPGA I/O drive strength and slew rate to manage edge
+              rate and EMI
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-green" style="margin-bottom: var(--sp-3)">App Note</div>
+            <h4 style="font-size: var(--text-sm)">SLOA237: Transmission Line Termination</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Texas Instruments — Practical termination guide with SPICE simulations for series,
+              parallel, and AC termination
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">IEEE Paper</div>
+            <h4 style="font-size: var(--text-sm)">Rise Time and Bandwidth</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              IEEE TEMC — Derivation and experimental validation of the BW = 0.35/t_r and BW =
+              0.5/t_r relationships
+            </p>
+          </div>
+          <div class="card sc-ref-card">
+            <div class="badge badge-orange" style="margin-bottom: var(--sp-3)">Web</div>
+            <h4 style="font-size: var(--text-sm)">BeTheSignal.com</h4>
+            <p style="font-size: var(--text-xs); color: var(--text-sub)">
+              Eric Bogatin's online learning platform — free video series on transmission lines and
+              SI fundamentals
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../assets/js/core.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      /* ─────────────────────────── Concept cards ─────────────────────────── */
+      function toggleConcept(card) {
+        const isOpen = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', !isOpen);
+        card.querySelector('.sc-concept-body').hidden = isOpen;
+        card.querySelector('.sc-chevron').style.transform = isOpen ? '' : 'rotate(180deg)';
+      }
+      document.querySelectorAll('.sc-concept-body').forEach(b => (b.hidden = true));
+
+      /* ─────────────────────────── Bookmark ──────────────────────────────── */
+      function toggleBookmark() {
+        const key = 'bookmark_slow_clock_si';
+        const saved = localStorage.getItem(key);
+        const btn = document.getElementById('bookmarkBtn');
+        if (saved) {
+          localStorage.removeItem(key);
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmark';
+        } else {
+          localStorage.setItem(key, '1');
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+        }
+      }
+      if (localStorage.getItem('bookmark_slow_clock_si')) {
+        const btn = document.getElementById('bookmarkBtn');
+        if (btn)
+          btn.innerHTML =
+            '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Bookmarked';
+      }
+
+      /* ─────────────────────────── Overview animation ─────────────────────── */
+      let edgeAnimating = false;
+      let edgeRaf = null;
+      function animateEdge() {
+        const btn = document.querySelector('.sc-svg-controls button');
+        const poly = document.getElementById('edgePolyline');
+        if (edgeAnimating) {
+          edgeAnimating = false;
+          cancelAnimationFrame(edgeRaf);
+          btn.textContent = '▶ Animate Edge';
+          return;
+        }
+        edgeAnimating = true;
+        btn.textContent = '⏹ Stop';
+        let t = 0;
+        const tick = () => {
+          if (!edgeAnimating) return;
+          t += 0.04;
+          const phase = (Math.sin(t) + 1) / 2; // 0–1
+          // Morph the edge between slow (straight) and fast (steep)
+          const y1 = 230 - 56 * phase;
+          const y2 = 230 - 50 * phase;
+          poly.setAttribute(
+            'points',
+            `80,230 80,${y1} 86,${y2 - 4} 92,${y2 - 6} 100,${y2 - 8} 120,195`
+          );
+          edgeRaf = requestAnimationFrame(tick);
+        };
+        tick();
+      }
+
+      /* ─────────────────────────── Simulation chart ─────────────────────────── */
+      function updateSim() {
+        // Sliders are UI-constrained to their min/max, but guard against
+        // NaN/0 defensively (e.g. if a value were ever set programmatically).
+        let tr = parseFloat(document.getElementById('trSlider').value);
+        let fclk = parseFloat(document.getElementById('fclkSlider').value);
+        if (!isFinite(tr) || tr <= 0) tr = 2;
+        if (!isFinite(fclk) || fclk <= 0) fclk = 10;
+        const tpd = parseFloat(document.getElementById('mediumSelect').value) || 150;
+
+        document.getElementById('trVal').textContent = tr.toFixed(1);
+        document.getElementById('fclkVal').textContent = fclk;
+        const medOpts = document.getElementById('mediumSelect');
+        document.getElementById('mediumVal').textContent =
+          medOpts.options[medOpts.selectedIndex].text.split(' (')[0];
+
+        const BW = 0.35 / (tr * 1e-9); // Hz
+        const Lcrit_in = tr / (6 * (tpd / 1000)); // inches — tr in ns, tpd in ps/in
+        const Lcrit_mm = Lcrit_in * 25.4;
+        const lambda_mm = (3e8 / BW) * 1e3; // mm at BW frequency (assume free space for display)
+        const harmonics = Math.floor(BW / (fclk * 1e6));
+
+        document.getElementById('bwOut').textContent = (BW / 1e6).toFixed(0) + ' MHz';
+        document.getElementById('lcritOut').textContent = Lcrit_mm.toFixed(0) + ' mm';
+        document.getElementById('lambdaOut').textContent = lambda_mm.toFixed(0) + ' mm';
+        document.getElementById('harmonicsOut').textContent =
+          harmonics > 1 ? `~${harmonics} harmonics` : '< 1 (broadband edge)';
+
+        const risk = BW > 300e6 ? '🔴 High' : BW > 100e6 ? '🟡 Medium' : '🟢 Low';
+        document.getElementById('riskOut').textContent = risk;
+
+        // Build frequency spectrum model
+        const freqs = [];
+        const envelope = [];
+        const harmonicX = [];
+        const harmonicY = [];
+
+        for (let i = 0; i <= 300; i++) {
+          const f = 1e6 * Math.pow(1000, i / 300); // 1 MHz – 1 GHz log
+          freqs.push(f / 1e6);
+          // Trapezoidal spectrum envelope: flat up to f1 = 1/(pi*tr), then -20dB/dec, then -40dB/dec above f2=BW
+          const f1 = 1 / (Math.PI * tr * 1e-9);
+          const f2 = BW;
+          let amp;
+          if (f <= f1) amp = 0;
+          else if (f <= f2) amp = -20 * Math.log10(f / f1);
+          else amp = -20 * Math.log10(f2 / f1) - 40 * Math.log10(f / f2);
+          envelope.push(amp);
+        }
+
+        // Harmonic spikes
+        const fclkHz = fclk * 1e6;
+        for (let n = 1; n * fclkHz <= 1e9 && n <= 200; n += 2) {
+          const fh = n * fclkHz;
+          const fMHz = fh / 1e6;
+          const f1 = 1 / (Math.PI * tr * 1e-9);
+          const f2 = BW;
+          let amp;
+          if (fh <= f1) amp = 0;
+          else if (fh <= f2) amp = -20 * Math.log10(fh / f1);
+          else amp = -20 * Math.log10(f2 / f1) - 40 * Math.log10(fh / f2);
+          harmonicX.push(fMHz);
+          harmonicY.push(amp);
+        }
+
+        const isDark = document.documentElement.dataset.theme !== 'light';
+        const paper = isDark ? '#161b22' : '#ffffff';
+        const gridCol = isDark ? '#30363d' : '#e5e7eb';
+        const textCol = isDark ? '#8b949e' : '#6b7280';
+
+        const traceEnv = {
+          x: freqs,
+          y: envelope,
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Spectral envelope',
+          line: { color: '#3b82f6', width: 2.5 },
+          fill: 'tozeroy',
+          fillcolor: 'rgba(59,130,246,0.06)',
+        };
+
+        const traceHarm = {
+          x: harmonicX,
+          y: harmonicY,
+          type: 'bar',
+          name: 'Clock harmonics',
+          marker: { color: 'rgba(239,68,68,0.7)' },
+          width: harmonicX.map(() => 0.01),
+        };
+
+        const bwLine = BW / 1e6;
+        const layout = {
+          paper_bgcolor: paper,
+          plot_bgcolor: paper,
+          margin: { l: 54, r: 20, t: 30, b: 50 },
+          xaxis: {
+            title: 'Frequency (MHz)',
+            type: 'log',
+            gridcolor: gridCol,
+            color: textCol,
+            tickvals: [1, 10, 100, 1000],
+            ticktext: ['1', '10', '100', '1000'],
+          },
+          yaxis: {
+            title: 'Relative amplitude (dB)',
+            range: [-80, 10],
+            gridcolor: gridCol,
+            color: textCol,
+          },
+          shapes: [
+            {
+              type: 'line',
+              x0: bwLine,
+              x1: bwLine,
+              y0: -80,
+              y1: 10,
+              xref: 'x',
+              yref: 'y',
+              line: { color: '#22c55e', width: 1.5, dash: 'dot' },
+            },
+          ],
+          annotations: [
+            {
+              x: Math.log10(bwLine),
+              y: 5,
+              xref: 'x',
+              yref: 'y',
+              text: `BW = ${(BW / 1e6).toFixed(0)} MHz`,
+              showarrow: false,
+              font: { size: 10, color: '#22c55e' },
+              xanchor: 'left',
+            },
+          ],
+          font: { family: 'Inter, sans-serif', size: 11 },
+          legend: { font: { color: textCol }, x: 0.02, y: 0.02 },
+          barmode: 'overlay',
+        };
+
+        Plotly.react('simChart', [traceEnv, traceHarm], layout, {
+          responsive: true,
+          displaylogo: false,
+        });
+      }
+
+      function setPreset(tr, fclk) {
+        document.getElementById('trSlider').value = tr;
+        document.getElementById('fclkSlider').value = fclk;
+        updateSim();
+      }
+
+      /* ─────────────────────────── Calculators ───────────────────────────── */
+      /** Reads a numeric <input>, clamps it to [min, max], rejects non-finite
+       * / zero / negative values, and writes the clamped value back into the
+       * field so the user sees what value was actually used (e.g. typing
+       * "0", a negative number, or an unrealistic value like 0.01 ps rise
+       * time snaps back into a physically sensible range instead of
+       * producing NaN/Infinity results downstream). */
+      function sanitizeNumberInput(id, min, max, fallback) {
+        const el = document.getElementById(id);
+        let v = parseFloat(el.value);
+        if (!isFinite(v) || v <= 0) v = fallback;
+        if (v < min) v = min;
+        if (v > max) v = max;
+        // Reflect the corrected value back into the field (avoid fighting
+        // the user mid-keystroke by only rewriting when it actually changed)
+        if (String(v) !== el.value) el.value = v;
+        return v;
+      }
+
+      function calcSI() {
+        const tr = sanitizeNumberInput('calcTr', 0.1, 100, 2); // ns
+        const tpd = sanitizeNumberInput('calcTpd', 50, 300, 150); // ps/in
+        const BW = 0.35 / (tr * 1e-9);
+        const Lcrit_in = tr / (6 * (tpd / 1000));
+        const Lcrit_mm = Lcrit_in * 25.4;
+        document.getElementById('calcBW').textContent = (BW / 1e6).toFixed(0) + ' MHz';
+        document.getElementById('calcLin').textContent = Lcrit_in.toFixed(2) + ' in';
+        document.getElementById('calcLmm').textContent = Lcrit_mm.toFixed(0) + ' mm';
+        document.getElementById('calcTerm').textContent = Lcrit_mm.toFixed(0) + ' mm';
+      }
+
+      function calcGndBounce() {
+        const Lpkg = sanitizeNumberInput('calcLpkg', 0.1, 50, 5) * 1e-9; // H
+        const Isw = sanitizeNumberInput('calcIsw', 1, 500, 66) * 1e-3; // A
+        const tr = sanitizeNumberInput('calcTrBounce', 0.1, 20, 2) * 1e-9; // s
+        const N = Math.round(sanitizeNumberInput('calcNout', 1, 64, 1));
+        const Vb = (Lpkg * Isw) / tr;
+        const VbN = N * Vb;
+        document.getElementById('calcVb').textContent = (Vb * 1000).toFixed(0) + ' mV';
+        document.getElementById('calcVbN').textContent = (VbN * 1000).toFixed(0) + ' mV';
+        const margin = 300 - VbN * 1000; // approx noise margin for 3.3V CMOS
+        const marginEl = document.getElementById('calcMargin');
+        if (margin < 0) {
+          marginEl.textContent = 'EXCEEDED';
+          marginEl.style.color = 'var(--error)';
+        } else {
+          marginEl.textContent = margin.toFixed(0) + ' mV';
+          marginEl.style.color = margin < 100 ? 'var(--warning)' : 'var(--success)';
+        }
+      }
+
+      /* ─────────────────────────── Decision tree ─────────────────────────── */
+      function treeStep(nodeId) {
+        document
+          .querySelectorAll('#decisionTree .sc-tree-node, #decisionTree .sc-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-' + nodeId).hidden = false;
+      }
+      function treeResult(nodeId) {
+        treeStep(nodeId);
+      }
+      function resetTree() {
+        document
+          .querySelectorAll('#decisionTree .sc-tree-node, #decisionTree .sc-tree-result')
+          .forEach(n => {
+            n.hidden = true;
+          });
+        document.getElementById('node-root').hidden = false;
+      }
+      document
+        .querySelectorAll('#decisionTree .sc-tree-node, #decisionTree .sc-tree-result')
+        .forEach(n => {
+          n.hidden = true;
+        });
+      document.getElementById('node-root').hidden = false;
+
+      /* ─────────────────────────── Quiz ──────────────────────────────────── */
+      (function () {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+
+        var current = 0;
+        var score = 0;
+        var answered = 0;
+        var answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-muted);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan-500)';
+              dot.style.borderColor = 'var(--cyan-500)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-muted)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) {
+            showSlide(current + 1);
+          } else if (answered === totalQuestions) {
+            showSummary();
+          }
+        });
+
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var explain = quiz.getAttribute('data-explain') || '';
+          var feedbackId = quiz.id.replace('quiz', 'feedback');
+          var feedback = document.getElementById(feedbackId);
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '<strong>Correct!</strong> ' + explain;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '<strong>Incorrect.</strong> ' + explain;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+
+              if (answered === totalQuestions) {
+                nextBtn.textContent = 'Show Results →';
+              }
+            });
+          });
+        });
+
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score === totalQuestions) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(16,185,129,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                "Perfect score! Remember: it's the edge, not the clock, that determines SI requirements.";
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(239,68,68,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                "Review the material above and try again. Remember: it's the edge, not the clock, that determines SI requirements.";
+            }
+          }
+        }
+
+        showSlide(0);
+      })();
+
+      /* ─────────────────────────── Knowledge check ───────────────────────── */
+      function toggleKcSolution() {
+        const sol = document.getElementById('kcSolution');
+        const btn = document.getElementById('kcBtn');
+        sol.hidden = !sol.hidden;
+        btn.textContent = sol.hidden ? 'Show Solution' : 'Hide Solution';
+      }
+
+      /* ─────────────────────────── Init ──────────────────────────────────── */
+      document.addEventListener('DOMContentLoaded', function () {
+        updateSim();
+        calcSI();
+        calcGndBounce();
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,315 @@
+/* ═══════════════════════════════════════════════════════════════════
+   RISING EDGE — Training Social Bar (Like · Share · Feedback)
+   Include after core.js on any training main page:
+     <script src="../../assets/js/training-social.js"></script>
+   Auto-injects a bar after the page's breadcrumb. The training slug is
+   derived from the URL path, e.g. /Trainings/EMI/ESD/ → "EMI/ESD".
+   Depends on core.js globals: reApiFetch, isLoggedIn, rootPath.
+═══════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* ── slug from URL ────────────────────────────────────────────── */
+  function trainingSlug() {
+    var m = decodeURIComponent(window.location.pathname).match(
+      /Trainings\/(.+?)\/?(index\.html)?$/
+    );
+    if (!m) return null;
+    return m[1].replace(/\/+$/, '');
+  }
+
+  var SLUG = trainingSlug();
+  if (!SLUG) return;
+
+  var pageUrl = window.location.origin + window.location.pathname;
+  var pageTitle = document.title.replace(/\s*\|.*$/, '');
+
+  /* ── styles ───────────────────────────────────────────────────── */
+  var css =
+    '.ts-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 4px}' +
+    '.ts-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;' +
+    'border:1px solid var(--border);background:var(--bg-card);color:var(--text-base,inherit);' +
+    'font:inherit;font-size:.8125rem;cursor:pointer;transition:border-color .15s}' +
+    '.ts-btn:hover{border-color:var(--accent,#06b6d4)}' +
+    '.ts-btn.ts-liked{color:#ef4444;border-color:#ef4444}' +
+    '.ts-pop{position:absolute;z-index:1001;background:var(--bg-card);border:1px solid var(--border);' +
+    'border-radius:12px;padding:8px;display:none;flex-direction:column;gap:2px;min-width:190px;' +
+    'box-shadow:0 8px 30px rgba(0,0,0,.35)}' +
+    '.ts-pop.open{display:flex}' +
+    '.ts-pop button,.ts-pop a{display:flex;align-items:center;gap:8px;padding:8px 10px;border:none;' +
+    'background:none;color:var(--text-base,inherit);font:inherit;font-size:.8125rem;cursor:pointer;' +
+    'border-radius:8px;text-decoration:none;text-align:left;width:100%}' +
+    '.ts-pop button:hover,.ts-pop a:hover{background:rgba(128,128,128,.12)}' +
+    '.ts-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1002;display:none;' +
+    'align-items:center;justify-content:center;padding:1rem}' +
+    '.ts-overlay.open{display:flex}' +
+    '.ts-modal{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;' +
+    'padding:22px;max-width:440px;width:100%}' +
+    '.ts-modal textarea{width:100%;background:transparent;border:1px solid var(--border);' +
+    'border-radius:8px;color:inherit;font:inherit;font-size:.85rem;padding:10px;resize:vertical}' +
+    '.ts-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1003;' +
+    'background:var(--bg-card);border:1px solid var(--border);border-radius:999px;' +
+    'padding:8px 18px;font-size:.8125rem;box-shadow:0 8px 30px rgba(0,0,0,.35);' +
+    'opacity:0;transition:opacity .2s;pointer-events:none}' +
+    '.ts-toast.show{opacity:1}';
+  var styleEl = document.createElement('style');
+  styleEl.textContent = css;
+  document.head.appendChild(styleEl);
+
+  /* ── helpers ──────────────────────────────────────────────────── */
+  function toast(msg) {
+    var t = document.getElementById('ts-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'ts-toast';
+      t.className = 'ts-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () {
+      t.classList.remove('show');
+    }, 2600);
+  }
+
+  function copyLink(cb) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pageUrl).then(cb, function () {
+        fallbackCopy(cb);
+      });
+    } else {
+      fallbackCopy(cb);
+    }
+  }
+  function fallbackCopy(cb) {
+    var ta = document.createElement('textarea');
+    ta.value = pageUrl;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      /* ignore */
+    }
+    document.body.removeChild(ta);
+    cb();
+  }
+
+  function goLogin() {
+    window.location.href =
+      rootPath() + 'Login-pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+  }
+
+  /* ── build bar ────────────────────────────────────────────────── */
+  function buildBar() {
+    var bar = document.createElement('div');
+    bar.className = 'ts-bar';
+    bar.id = 'training-social';
+
+    /* Like */
+    var likeBtn = document.createElement('button');
+    likeBtn.className = 'ts-btn';
+    likeBtn.id = 'ts-like';
+    likeBtn.innerHTML = '♥ Like · <span id="ts-like-count">0</span>';
+    likeBtn.onclick = function () {
+      if (!isLoggedIn()) {
+        goLogin();
+        return;
+      }
+      likeBtn.disabled = true;
+      reApiFetch('/api/trainings/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: SLUG }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          likeBtn.disabled = false;
+          if (!d.success) return;
+          likeBtn.classList.toggle('ts-liked', d.data.liked);
+          document.getElementById('ts-like-count').textContent = d.data.count;
+          toast(d.data.liked ? 'Thanks for the like!' : 'Like removed');
+        })
+        .catch(function () {
+          likeBtn.disabled = false;
+        });
+    };
+
+    /* Share */
+    var shareWrap = document.createElement('div');
+    shareWrap.style.position = 'relative';
+    var shareBtn = document.createElement('button');
+    shareBtn.className = 'ts-btn';
+    shareBtn.innerHTML = '↗ Share';
+    var pop = document.createElement('div');
+    pop.className = 'ts-pop';
+    var encUrl = encodeURIComponent(pageUrl);
+    var encText = encodeURIComponent(pageTitle + ' — ' + pageUrl);
+    pop.innerHTML =
+      '<button id="ts-copy">🔗 Copy link</button>' +
+      '<a href="https://wa.me/?text=' +
+      encText +
+      '" target="_blank" rel="noopener">🟢 WhatsApp</a>' +
+      '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' +
+      encUrl +
+      '" target="_blank" rel="noopener">💼 LinkedIn</a>' +
+      '<button id="ts-insta">📸 Instagram</button>' +
+      '<a href="mailto:?subject=' +
+      encodeURIComponent(pageTitle) +
+      '&body=' +
+      encText +
+      '">✉️ Email</a>';
+    shareBtn.onclick = function (e) {
+      e.stopPropagation();
+      pop.classList.toggle('open');
+    };
+    document.addEventListener('click', function () {
+      pop.classList.remove('open');
+    });
+    shareWrap.appendChild(shareBtn);
+    shareWrap.appendChild(pop);
+
+    /* Feedback */
+    var fbBtn = document.createElement('button');
+    fbBtn.className = 'ts-btn';
+    fbBtn.innerHTML = '💬 Send feedback';
+    fbBtn.onclick = function () {
+      if (!isLoggedIn()) {
+        goLogin();
+        return;
+      }
+      document.getElementById('ts-fb-overlay').classList.add('open');
+    };
+
+    bar.appendChild(likeBtn);
+    bar.appendChild(shareWrap);
+    bar.appendChild(fbBtn);
+    return bar;
+  }
+
+  /* ── feedback modal ───────────────────────────────────────────── */
+  function buildModal() {
+    var ov = document.createElement('div');
+    ov.className = 'ts-overlay';
+    ov.id = 'ts-fb-overlay';
+    ov.innerHTML =
+      '<div class="ts-modal">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+      '<strong>Feedback — ' +
+      pageTitle.replace(/</g, '&lt;') +
+      '</strong>' +
+      '<button class="ts-btn" id="ts-fb-close" style="padding:4px 10px">✕</button></div>' +
+      '<textarea id="ts-fb-text" rows="5" maxlength="2000" ' +
+      'placeholder="What did you like? What can we improve?"></textarea>' +
+      '<p id="ts-fb-err" style="display:none;color:#ef4444;font-size:.8rem;margin-top:8px"></p>' +
+      '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">' +
+      '<button class="ts-btn" id="ts-fb-send">Send feedback</button></div></div>';
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) ov.classList.remove('open');
+    });
+    document.body.appendChild(ov);
+
+    document.getElementById('ts-fb-close').onclick = function () {
+      ov.classList.remove('open');
+    };
+    document.getElementById('ts-fb-send').onclick = function () {
+      var txt = document.getElementById('ts-fb-text').value.trim();
+      var err = document.getElementById('ts-fb-err');
+      err.style.display = 'none';
+      if (!txt) {
+        err.textContent = 'Please write something first.';
+        err.style.display = '';
+        return;
+      }
+      var btn = this;
+      btn.disabled = true;
+      reApiFetch('/api/trainings/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: SLUG, message: txt }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          btn.disabled = false;
+          if (!d.success) {
+            err.textContent = d.error || 'Could not send feedback.';
+            err.style.display = '';
+            return;
+          }
+          document.getElementById('ts-fb-text').value = '';
+          ov.classList.remove('open');
+          toast('Feedback sent — thank you!');
+        })
+        .catch(function () {
+          btn.disabled = false;
+          err.textContent = 'Network error — please try again.';
+          err.style.display = '';
+        });
+    };
+  }
+
+  /* ── init ─────────────────────────────────────────────────────── */
+  function init() {
+    var bar = buildBar();
+    var crumb = document.querySelector('nav.breadcrumb');
+    if (crumb && crumb.parentNode) {
+      crumb.parentNode.insertBefore(bar, crumb.nextSibling);
+    } else {
+      var main = document.querySelector('main') || document.body;
+      main.insertBefore(bar, main.firstChild);
+    }
+    buildModal();
+
+    document.getElementById('ts-copy').onclick = function () {
+      copyLink(function () {
+        toast('Link copied to clipboard');
+      });
+    };
+    document.getElementById('ts-insta').onclick = function () {
+      copyLink(function () {
+        toast('Link copied — paste it in your Instagram story or bio');
+        window.open('https://www.instagram.com/', '_blank', 'noopener');
+      });
+    };
+
+    /* load counts + my-like state */
+    fetch('/api/trainings/likes')
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (d.success && d.data[SLUG]) {
+          document.getElementById('ts-like-count').textContent = d.data[SLUG];
+        }
+      })
+      .catch(function () {
+        /* server offline — bar still works for share */
+      });
+    if (isLoggedIn()) {
+      reApiFetch('/api/me/training-likes')
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          if (d.success && d.data.indexOf(SLUG) !== -1) {
+            document.getElementById('ts-like').classList.add('ts-liked');
+          }
+        })
+        .catch(function () {
+          /* ignore */
+        });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

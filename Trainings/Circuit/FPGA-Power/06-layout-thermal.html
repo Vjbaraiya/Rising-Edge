@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta
+      name="description"
+      content="FPGA power layout and thermal design: regulator placement, plane strategy, remote-sense Kelvin routing, via stitching for high current, and an LDO junction-temperature quick-check calculator."
+    />
+    <title>Layout &amp; Thermal | FPGA Power Design Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/Circuit/FPGA-Power/06-layout-thermal.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../Optocoupler/training-compat.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .diagram-box {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 14px 0;
+      }
+      .diagram-caption {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >FPGA Power Design Academy</a
+            >
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item">01. Why FPGA Power is Different</a>
+          <a href="02-component-selection.html" class="module-item">02. Selecting Components</a>
+          <a href="03-power-tree.html" class="module-item">03. Building the Power Tree</a>
+          <a href="04-sequencing.html" class="module-item">04. Power Sequencing</a>
+          <a href="05-pdn-decoupling.html" class="module-item">05. PDN &amp; Decoupling</a>
+          <a href="06-layout-thermal.html" class="module-item active">06. Layout &amp; Thermal</a>
+          <a href="07-bringup-verification.html" class="module-item"
+            >07. Bring-up &amp; Verification</a
+          >
+          <a href="08-checklist-faq.html" class="module-item">08. Checklist &amp; FAQ</a>
+          <a href="09-versal-example.html" class="module-item">09. Worked Example: Versal SoC</a>
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">FPGA Power Academy</a><span>/</span>
+            <span>Layout &amp; Thermal</span>
+          </nav>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 32px 20px">
+            <div class="hero-content container">
+              <span class="badge badge-cyan">Module 06</span>
+              <span class="badge badge-green">Calculator</span>
+              <h1>Layout &amp; Thermal</h1>
+              <p class="subtitle">
+                A perfect schematic dies in a bad floorplan: sense lines through switch nodes, amps
+                squeezed through two vias, LDOs cooking at 150 °C. The rules here are cheap on day
+                one and impossible on day ninety.
+              </p>
+            </div>
+          </section>
+
+          <div class="section">
+            <div class="container">
+              <div class="widget-container">
+                <div class="widget-header"><h3>Floorplan &amp; placement</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>PoL bucks close to the FPGA</strong> — VCCINT's regulator within a few
+                    cm; resistance of a long 1.0 V path eats the tolerance stack (1 mΩ at 10 A = 10
+                    mV!).
+                  </li>
+                  <li>
+                    <strong>Keep switch nodes tiny and contained:</strong> the SW copper is the EMI
+                    antenna — minimal area, no routing under it, input cap loop as tight as
+                    physically possible.
+                  </li>
+                  <li>
+                    <strong>Switchers away from MGT rails/lines:</strong> place low-noise LDOs and
+                    transceiver supplies on the quiet side of the board; never route a switch node
+                    near transceiver pairs.
+                  </li>
+                  <li>
+                    Orient bucks so their input loops share the input bulk caps naturally; star the
+                    input from the connector's bulk capacitance.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Planes, vias &amp; current density</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    <strong>A plane (or fat pour) per major rail</strong>, tightly coupled to ground
+                    — this is both the low-inductance PDN interconnect (Module 05) and the DC path.
+                  </li>
+                  <li>
+                    <strong>Via math:</strong> a 0.3 mm via is good for roughly 1–2 A continuous; a
+                    10 A VCCINT path wants 8–12 stitching vias at every layer change. Spread them;
+                    don't share one via between the cap and the load.
+                  </li>
+                  <li>
+                    Check copper weight: 1 oz outer/inner is marginal above ~6 A on narrow pours —
+                    go 2 oz or widen.
+                  </li>
+                  <li>
+                    Thermal relief kills power vias' effectiveness — use solid connections on power
+                    nets (talk to your fab about assembly needs).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Remote sense: route it like a signal</h3></div>
+                <div class="diagram-box">
+                  <svg
+                    viewBox="0 0 640 150"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="width: 100%"
+                    role="img"
+                    aria-label="Remote sense routing: a Kelvin pair leaves the FPGA ball field and returns to the buck's sense pins, routed away from the switch node."
+                  >
+                    <rect
+                      x="20"
+                      y="40"
+                      width="130"
+                      height="70"
+                      rx="8"
+                      fill="var(--bg-muted)"
+                      stroke="var(--warning,#fb923c)"
+                    />
+                    <text
+                      x="85"
+                      y="70"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="10"
+                      font-weight="700"
+                    >
+                      Buck 1.0 V
+                    </text>
+                    <text x="85" y="86" text-anchor="middle" fill="var(--text-muted)" font-size="8">
+                      FB / GNDS pins
+                    </text>
+                    <rect
+                      x="470"
+                      y="30"
+                      width="150"
+                      height="90"
+                      rx="10"
+                      fill="var(--bg-muted)"
+                      stroke="var(--cyan,#22d3ee)"
+                    />
+                    <text
+                      x="545"
+                      y="70"
+                      text-anchor="middle"
+                      fill="var(--text-base)"
+                      font-size="11"
+                      font-weight="700"
+                    >
+                      FPGA
+                    </text>
+                    <text
+                      x="545"
+                      y="88"
+                      text-anchor="middle"
+                      fill="var(--text-muted)"
+                      font-size="8"
+                    >
+                      VCCINT ball field
+                    </text>
+                    <!-- power path -->
+                    <rect x="150" y="52" width="320" height="14" fill="rgba(248,113,113,0.35)" />
+                    <text
+                      x="310"
+                      y="48"
+                      text-anchor="middle"
+                      fill="var(--danger,#f87171)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      high-current path (plane, many vias)
+                    </text>
+                    <!-- sense pair -->
+                    <path
+                      d="M470 100 H160 Q150 100 150 92"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M470 106 H158 Q146 106 146 94"
+                      fill="none"
+                      stroke="var(--success,#34d399)"
+                      stroke-width="1.6"
+                      stroke-dasharray="4 3"
+                    />
+                    <text
+                      x="310"
+                      y="122"
+                      text-anchor="middle"
+                      fill="var(--success,#34d399)"
+                      font-size="9"
+                      font-weight="700"
+                    >
+                      Kelvin sense pair — quiet route, no current
+                    </text>
+                  </svg>
+                  <p class="diagram-caption">
+                    Sense at the load, not the inductor. Route the pair together, away from switch
+                    nodes, with an RC filter per the regulator datasheet.
+                  </p>
+                </div>
+              </div>
+
+              <!-- LDO thermal calc -->
+              <div class="widget-container" id="thermal">
+                <div class="widget-header">
+                  <h3>LDO thermal quick-check</h3>
+                  <span class="badge badge-green">Calculator</span>
+                </div>
+                <div class="calc-grid">
+                  <div class="calc-inputs">
+                    <div class="calc-field">
+                      <label class="slider-label" for="tVin">V<sub>in</sub> (V)</label>
+                      <input type="number" id="tVin" value="1.8" step="0.1" min="0" />
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="tVout">V<sub>out</sub> (V)</label>
+                      <input type="number" id="tVout" value="1.0" step="0.1" min="0" />
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="tI">Load current (A)</label>
+                      <input type="number" id="tI" value="0.8" step="0.1" min="0" />
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="tTheta">θ<sub>JA</sub> (°C/W)</label>
+                      <input type="number" id="tTheta" value="60" step="5" min="1" />
+                    </div>
+                    <div class="calc-field">
+                      <label class="slider-label" for="tAmb">Max ambient (°C)</label>
+                      <input type="number" id="tAmb" value="55" step="5" />
+                    </div>
+                  </div>
+                  <div class="calc-results">
+                    <div class="calc-result-item">
+                      <span class="calc-result-label"
+                        >Dissipation P = (V<sub>in</sub>−V<sub>out</sub>)·I</span
+                      >
+                      <span class="calc-result-value" id="tP">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Temperature rise</span>
+                      <span class="calc-result-value" id="tRise">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Junction temperature</span>
+                      <span class="calc-result-value" id="tJ">—</span>
+                    </div>
+                    <div class="calc-result-item">
+                      <span class="calc-result-label">Efficiency</span>
+                      <span class="calc-result-value" id="tEff">—</span>
+                    </div>
+                    <p id="tWarn" style="display: none; font-size: 0.8rem; line-height: 1.5"></p>
+                  </div>
+                </div>
+                <div class="tip-box">
+                  θ<sub>JA</sub> on the datasheet assumes the JEDEC test board — your real number
+                  depends on copper area. More pour + more thermal vias = lower θ<sub>JA</sub>. If
+                  T<sub>J</sub> is marginal, drop V<sub>in</sub> (better intermediate rail) before
+                  adding copper. Deep dive: the
+                  <a href="../../HeatSink/index.html">Heat Sink training</a>.
+                </div>
+              </div>
+
+              <div class="widget-container">
+                <div class="widget-header"><h3>Key takeaways</h3></div>
+                <ul style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.9">
+                  <li>
+                    Place VCCINT's buck close; every milliohm of path is millivolts of your budget.
+                  </li>
+                  <li>
+                    Planes per rail, solid via farms at layer changes, real copper weight for amps.
+                  </li>
+                  <li>
+                    Remote sense is a quiet Kelvin pair to the ball field — treat it as a signal.
+                  </li>
+                  <li>
+                    Run the (V<sub>in</sub>−V<sub>out</sub>)·I·θ<sub>JA</sub> check on every LDO
+                    before layout, not after.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="lesson-nav">
+                <a class="btn btn-outline" href="05-pdn-decoupling.html">← PDN &amp; Decoupling</a>
+                <a class="btn btn-primary" href="07-bringup-verification.html"
+                  >Next: Bring-up &amp; Verification →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        function calc() {
+          var vin = parseFloat(document.getElementById('tVin').value) || 0;
+          var vout = parseFloat(document.getElementById('tVout').value) || 0;
+          var i = parseFloat(document.getElementById('tI').value) || 0;
+          var theta = parseFloat(document.getElementById('tTheta').value) || 0;
+          var amb = parseFloat(document.getElementById('tAmb').value) || 0;
+          var p = Math.max(0, (vin - vout) * i);
+          var rise = p * theta;
+          var tj = amb + rise;
+          document.getElementById('tP').textContent = p.toFixed(2) + ' W';
+          document.getElementById('tRise').textContent = rise.toFixed(0) + ' °C';
+          document.getElementById('tJ').textContent = tj.toFixed(0) + ' °C';
+          document.getElementById('tEff').textContent =
+            vin > 0 ? ((vout / vin) * 100).toFixed(0) + ' %' : '—';
+          var warn = document.getElementById('tWarn');
+          if (tj > 125) {
+            warn.textContent =
+              '✗ T_J exceeds 125 °C — lower Vin, spread copper, or switch to a buck-then-LDO cascade.';
+            warn.style.color = '#f87171';
+            warn.style.display = '';
+          } else if (tj > 105) {
+            warn.textContent = '⚠ T_J above 105 °C — fine for most parts but margin is thin.';
+            warn.style.color = '#fb923c';
+            warn.style.display = '';
+          } else {
+            warn.textContent = '✓ Thermally comfortable.';
+            warn.style.color = '#34d399';
+            warn.style.display = '';
+          }
+        }
+        ['tVin', 'tVout', 'tI', 'tTheta', 'tAmb'].forEach(function (id) {
+          document.getElementById(id).addEventListener('input', calc);
+        });
+        calc();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="A structured frequency-based decision tree for isolating CE failures, plus switching-loop, ground, and return-path PCB layout techniques."
+    />
+    <title>
+      Debugging Workflow &amp; PCB Design | Conducted Emissions (CE) Testing Academy | Rising Edge
+      Technologies
+    </title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/CE/08-debugging-and-pcb-design.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <style>
+      .tree-node {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .tree-node.active {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--text-base);
+        font-weight: 700;
+      }
+      .tree-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .tree-arrow {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Conducted Emissions (CE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Is Conducted Emission</a
+          >
+          <a href="02-noise-modes.html" class="module-item"
+            >02. CE vs. RE, Noise Paths &amp; Common/Differential Mode</a
+          >
+          <a href="03-frequency-and-standards.html" class="module-item"
+            >03. Frequency Ranges &amp; CE Standards</a
+          >
+          <a href="04-product-categories.html" class="module-item"
+            >04. CE Requirements by Product Category</a
+          >
+          <a href="05-lisn-and-test-setup.html" class="module-item"
+            >05. LISN, EMI Receiver &amp; Test Setup</a
+          >
+          <a href="06-measurement-and-detectors.html" class="module-item"
+            >06. Reading CE Graphs &amp; Detector Types</a
+          >
+          <a href="07-case-studies.html" class="module-item"
+            >07. Engineering Case Studies (10 Failures)</a
+          >
+          <a href="08-debugging-and-pcb-design.html" class="module-item active"
+            >08. Debugging Workflow &amp; PCB Design</a
+          >
+          <a href="09-filtering-and-power-design.html" class="module-item"
+            >09. Filtering, Power Supply &amp; Cable/Shielding</a
+          >
+          <a href="10-precompliance-and-summary.html" class="module-item"
+            >10. Pre-Compliance Testing &amp; Summary</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Conducted Emissions (CE) Testing</a><span>/</span>
+            <span>Debugging Workflow &amp; PCB Design</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label"><span>Lesson 8/10</span><span>80%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">MODULE 08</div>
+              <h1 style="font-size: 2.2rem">Debugging Workflow &amp; PCB Design</h1>
+              <p class="subtitle">
+                Every case study in Module 07 was solved with the same structured approach: narrow
+                by frequency, isolate DM vs. CM, then fix the physical root cause. This module
+                formalizes that decision tree and covers the PCB layout techniques that prevent most
+                conducted-emission problems before they ever reach the lab.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <!-- Section 1: Debugging workflow -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="secWorkflow">
+                  <span>Section 1: Interactive Debugging Decision Tree</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body open" id="secWorkflow">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Click through the tree below the way you would on the bench: start with the
+                    failing frequency, and let it point you toward differential-mode or common-mode
+                    causes.
+                  </p>
+                  <div class="widget-container">
+                    <div class="tree-row">
+                      <div class="tree-node active" data-node="start">Product failed CE test</div>
+                    </div>
+                    <div class="tree-arrow">&#8595;</div>
+                    <div class="tree-row">
+                      <div class="tree-node" data-node="lowfreq">150–500 kHz</div>
+                      <div class="tree-node" data-node="highfreq">&gt;5 MHz</div>
+                    </div>
+                    <div class="tree-arrow">&#8595;</div>
+                    <div class="tree-row">
+                      <div class="tree-node" data-node="dm">Likely Differential Mode</div>
+                      <div class="tree-node" data-node="cm">Likely Common Mode</div>
+                    </div>
+                    <div class="tree-arrow">&#8595;</div>
+                    <div class="tree-row" id="checkRow"></div>
+                    <div class="stage-detail" id="workflowDetail" style="margin-top: 10px"></div>
+                  </div>
+                  <div class="tip-box" style="margin-top: 1rem">
+                    This is a starting heuristic, not a guarantee -- always confirm with an actual
+                    DM/CM separation measurement (Module 02) before committing to a filter redesign,
+                    since real designs can have a dominant mode that doesn't match the "typical"
+                    frequency split.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: PCB design -->
+              <div class="section-collapsible">
+                <button class="section-header-btn" data-target="secPcb">
+                  <span>Section 2: PCB Design Best Practices</span>
+                  <span class="chevron">&#9662;</span>
+                </button>
+                <div class="section-body" id="secPcb">
+                  <p
+                    style="
+                      color: var(--text-sub);
+                      font-size: 0.88rem;
+                      line-height: 1.7;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    Good and bad layout side by side for the four techniques that matter most for
+                    conducted (and radiated) emissions.
+                  </p>
+                  <div class="widget-container">
+                    <h3 style="margin-bottom: 0.5rem">
+                      Animated: Good vs. Bad Switching Loop &amp; Return Path
+                    </h3>
+                    <div style="position: relative; width: 100%; height: 260px">
+                      <canvas
+                        id="pcbCompareDiagram"
+                        style="width: 100%; height: 100%; display: block"
+                      ></canvas>
+                    </div>
+                  </div>
+                  <table class="data-table" style="width: 100%; margin-top: 1.25rem">
+                    <thead>
+                      <tr>
+                        <th>Technique</th>
+                        <th>Bad Practice</th>
+                        <th>Good Practice</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Switching loop</td>
+                        <td>Input cap far from the switch node, sprawling hot loop</td>
+                        <td>
+                          Input cap immediately adjacent to the switch node, minimal loop area
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Ground</td>
+                        <td>Split or slotted ground plane under switching traces</td>
+                        <td>Continuous, unbroken ground plane beneath all high-current paths</td>
+                      </tr>
+                      <tr>
+                        <td>Return path</td>
+                        <td>Return current forced to detour around a slot or gap</td>
+                        <td>Return current follows directly beneath its forward trace</td>
+                      </tr>
+                      <tr>
+                        <td>Filter placement</td>
+                        <td>Filter placed after noise has already spread across the board</td>
+                        <td>Filter placed immediately at the connector, before noise can spread</td>
+                      </tr>
+                      <tr>
+                        <td>Via stitching</td>
+                        <td>No stitching vias between ground/power planes</td>
+                        <td>Dense stitching vias, especially near plane edges and connectors</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Quiz -->
+              <div class="quiz-container" id="quizContainer" style="margin-top: 2rem">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 0.8rem">
+                    <div class="badge">KNOWLEDGE CHECK</div>
+                    <h3 style="margin: 0">Module 8 Quiz</h3>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted)">
+                    Score: <span id="quizScore" style="color: #3b82f6; font-weight: 700">0</span> /
+                    <span id="quizTotalNum">10</span>
+                  </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem">
+                  Select the best answer for each question. Instant feedback is provided after each
+                  response.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem">
+                  <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary)">
+                    Question <span id="quizCurrentNum">1</span> of
+                    <span id="quizTotalNum2">10</span>
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 6px;
+                      background: var(--bg-secondary);
+                      border-radius: 3px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="quizProgressBar"
+                      style="
+                        height: 100%;
+                        width: 10%;
+                        background: linear-gradient(90deg, #3b82f6, #22c55e);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                      "
+                    ></div>
+                  </div>
+                </div>
+                <div id="quizSlides"></div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border);
+                  "
+                >
+                  <button
+                    class="btn btn-secondary"
+                    disabled=""
+                    id="quizPrevBtn"
+                    style="opacity: 0.4"
+                  >
+                    ← Previous
+                  </button>
+                  <div id="quizDots" style="display: flex; gap: 4px"></div>
+                  <button class="btn btn-primary" id="quizNextBtn">Next →</button>
+                </div>
+                <div
+                  id="quizSummary"
+                  style="
+                    display: none;
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                    text-align: center;
+                  "
+                >
+                  <div
+                    id="quizFinalScore"
+                    style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"
+                  ></div>
+                  <div
+                    id="quizFinalMsg"
+                    style="font-size: 0.88rem; color: var(--text-secondary)"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="07-case-studies.html">&larr; Previous Lesson</a>
+                <a class="btn btn-primary" href="09-filtering-and-power-design.html"
+                  >Next Lesson &rarr;</a
+                >
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <script>
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+
+    <script>
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        alpha = alpha === undefined ? 1 : alpha;
+        return isLightTheme() ? 'rgba(15,23,32,' + alpha + ')' : 'rgba(255,255,255,' + alpha + ')';
+      }
+      function labelPlate(ctx, text, x, y, align, fontPx) {
+        align = align || 'center';
+        fontPx = fontPx || 10;
+        ctx.font = fontPx + 'px sans-serif';
+        var metrics = ctx.measureText(text);
+        var padX = 4,
+          padY = 3;
+        var boxW = metrics.width + padX * 2;
+        var boxH = fontPx + padY * 2;
+        var boxX = align === 'center' ? x - boxW / 2 : align === 'right' ? x - boxW : x;
+        var boxY = y - boxH + 2;
+        ctx.fillStyle = isLightTheme() ? 'rgba(255,255,255,0.88)' : 'rgba(10,15,20,0.75)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.95);
+        ctx.textAlign = align;
+        ctx.fillText(text, x, y);
+        ctx.textAlign = 'left';
+      }
+      function drawPcbBoard(ctx, x, y, w, h) {
+        var grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#0f4a36');
+        grad.addColorStop(1, '#0a3527');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+        ctx.lineWidth = 1;
+      }
+    </script>
+
+    <!-- Section 1: Decision tree -->
+    <script>
+      var checksData = {
+        dm: [
+          {
+            label: 'Check input filter',
+            text: "Review the DM filter's corner frequency and component values -- an undersized inductor or capacitor lets DM noise pass through unattenuated.",
+          },
+          {
+            label: 'Check switching loop',
+            text: 'Measure the hot-loop area with a near-field probe -- large loop area at lower conducted frequencies is a classic DM signature.',
+          },
+          {
+            label: 'Check MOSFET/transformer',
+            text: 'Probe the switch node for ringing and check transformer leakage inductance -- both directly drive DM harmonic content.',
+          },
+        ],
+        cm: [
+          {
+            label: 'Check cable',
+            text: 'Measure common-mode current directly on suspect cables with a clamp-on current probe -- CM noise often rides on cables far longer than the internal loop.',
+          },
+          {
+            label: 'Check Y-capacitor',
+            text: 'Review Y-capacitor value and placement relative to the noise source and the primary/secondary (or chassis) boundary.',
+          },
+          {
+            label: 'Check shield/bonding',
+            text: "Verify shield termination and chassis bonding -- an ungrounded or poorly bonded shield can't divert CM current effectively.",
+          },
+        ],
+      };
+      var currentBranch = 'dm';
+      function renderChecks() {
+        var row = document.getElementById('checkRow');
+        row.innerHTML = '';
+        checksData[currentBranch].forEach(function (c) {
+          var node = document.createElement('div');
+          node.className = 'tree-node';
+          node.textContent = c.label;
+          node.addEventListener('click', function () {
+            document.querySelectorAll('#checkRow .tree-node').forEach(function (n) {
+              n.classList.remove('active');
+            });
+            node.classList.add('active');
+            document.getElementById('workflowDetail').textContent = c.text;
+          });
+          row.appendChild(node);
+        });
+        document.getElementById('workflowDetail').textContent = checksData[currentBranch][0].text;
+        row.firstChild.classList.add('active');
+      }
+      document
+        .querySelectorAll('[data-node="lowfreq"], [data-node="highfreq"]')
+        .forEach(function (n) {
+          n.addEventListener('click', function () {
+            document
+              .querySelectorAll('[data-node="lowfreq"], [data-node="highfreq"]')
+              .forEach(function (x) {
+                x.classList.remove('active');
+              });
+            n.classList.add('active');
+            currentBranch = n.getAttribute('data-node') === 'lowfreq' ? 'dm' : 'cm';
+            document.querySelectorAll('[data-node="dm"], [data-node="cm"]').forEach(function (x) {
+              x.classList.remove('active');
+            });
+            document.querySelector('[data-node="' + currentBranch + '"]').classList.add('active');
+            renderChecks();
+          });
+        });
+      document.querySelector('[data-node="lowfreq"]').classList.add('active');
+      document.querySelector('[data-node="dm"]').classList.add('active');
+      renderChecks();
+    </script>
+
+    <!-- Section 2: PCB good/bad comparison -->
+    <script>
+      var pcbStart = null;
+      function drawPcbCompareDiagram(ts) {
+        var canvas = document.getElementById('pcbCompareDiagram');
+        if (!canvas) return;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.max(0, rect.width);
+        var h = Math.max(0, rect.height);
+        if (w === 0 || h === 0) {
+          requestAnimationFrame(drawPcbCompareDiagram);
+          return;
+        }
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (pcbStart === null) pcbStart = ts;
+        var elapsed = (ts - pcbStart) / 1000;
+        var panelW = w / 2;
+
+        function panel(x0, bad, label) {
+          var boardX = x0 + 14,
+            boardY = 16,
+            boardW = panelW - 28,
+            boardH = h - 60;
+          drawPcbBoard(ctx, boardX, boardY, boardW, boardH);
+
+          var icX = boardX + boardW * 0.28,
+            icY = boardY + boardH * 0.35;
+          var loadX = bad ? boardX + boardW * 0.85 : boardX + boardW * 0.5;
+          var loadY = icY;
+
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(icX - 12, icY - 10, 24, 20);
+          ctx.fillRect(loadX - 10, loadY - 10, 20, 20);
+
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(icX + 12, icY - 4);
+          ctx.lineTo(loadX - 10, loadY - 4);
+          ctx.stroke();
+          ctx.strokeStyle = inkColor(0.45);
+          ctx.setLineDash(bad ? [2, 2] : []);
+          ctx.beginPath();
+          if (bad) {
+            ctx.moveTo(loadX - 10, loadY + 6);
+            ctx.lineTo(boardX + boardW - 6, boardY + boardH - 8);
+            ctx.lineTo(boardX + 6, boardY + boardH - 8);
+            ctx.lineTo(icX + 12, icY + 6);
+          } else {
+            ctx.moveTo(loadX - 10, loadY + 6);
+            ctx.lineTo(icX + 12, icY + 6);
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+
+          var ringT = (elapsed / (bad ? 1.1 : 1.6)) % 1;
+          var ringMax = bad ? boardW * 0.4 : 16;
+          var ringR = ringT * ringMax;
+          if (ringR > 0) {
+            ctx.beginPath();
+            ctx.arc(icX, icY, ringR, 0, Math.PI * 2);
+            ctx.strokeStyle =
+              (bad ? 'rgba(239,68,68,' : 'rgba(76,223,139,') + ((1 - ringT) * 0.5).toFixed(2) + ')';
+            ctx.stroke();
+          }
+
+          labelPlate(ctx, label, x0 + panelW / 2, h - 10, 'center', 11);
+        }
+
+        panel(0, true, 'BAD: sprawling loop, split return path');
+        panel(panelW, false, 'GOOD: tight loop, direct return path');
+
+        requestAnimationFrame(drawPcbCompareDiagram);
+      }
+      requestAnimationFrame(drawPcbCompareDiagram);
+      window.addEventListener('resize', function () {
+        pcbStart = null;
+      });
+    </script>
+
+    <!-- Quiz -->
+    <script>
+      var quizData = [
+        {
+          q: 'In the debugging decision tree, a failure in the 150–500 kHz range points toward which mode as a starting hypothesis?',
+          opts: [
+            'Differential mode',
+            'Common mode',
+            'Neither mode is relevant below 500 kHz',
+            'Only radiated emissions',
+          ],
+          correct: 0,
+        },
+        {
+          q: 'A failure above 5 MHz points toward which mode as a starting hypothesis?',
+          opts: [
+            'Differential mode',
+            'Common mode',
+            'This frequency range never fails',
+            'Only conducted DC emissions',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why is the frequency-based DM/CM heuristic described as "a starting point, not a guarantee"?',
+          opts: [
+            'It is always 100% accurate',
+            "Real designs can have a dominant mode that doesn't match the typical frequency split, so direct measurement is still needed",
+            'Frequency has no relationship to mode at all',
+            'The heuristic only applies to automotive products',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the recommended fix for a large, sprawling switching hot loop?',
+          opts: [
+            'Increase the loop area further',
+            'Place the input capacitor immediately adjacent to the switch node to minimize loop area',
+            'Remove the input capacitor entirely',
+            'Add more copper anywhere on the board',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why does a continuous, unbroken ground plane beneath high-current paths reduce conducted emissions?',
+          opts: [
+            'It has no effect on emissions',
+            'It gives return current a direct, low-impedance path beneath its forward trace instead of forcing a detour',
+            'It only affects DC resistance, not noise',
+            'Ground planes increase emissions',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Where should an EMI filter ideally be placed relative to the noise source and the connector?',
+          opts: [
+            'As far from the connector as possible',
+            'Immediately at the connector, before noise has a chance to spread across the board',
+            "Anywhere -- placement doesn't matter",
+            'Only on the output side of the power supply',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is the purpose of via stitching between ground and power planes near plane edges and connectors?',
+          opts: [
+            'To reduce the number of layers required',
+            'To maintain a low-impedance return path and reduce unintentional slot-antenna effects at plane discontinuities',
+            "To increase the board's weight",
+            'Via stitching has no effect on emissions',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'What is a classic diagnostic step for isolating a common-mode failure on a suspect cable?',
+          opts: [
+            'Measuring common-mode current directly on the cable with a clamp-on current probe',
+            'Disconnecting the power supply entirely',
+            'Measuring only the DC resistance of the cable',
+            'Ignoring the cable and only checking the PCB',
+          ],
+          correct: 0,
+        },
+        {
+          q: "What happens to return current when it's forced to detour around a slot or gap in the ground plane?",
+          opts: [
+            'Nothing changes -- return current ignores ground plane geometry',
+            'The detour enlarges the effective loop area, increasing radiated and conducted emissions',
+            'The current simply stops flowing',
+            'It automatically finds the shortest possible path regardless of plane geometry',
+          ],
+          correct: 1,
+        },
+        {
+          q: 'Why is checking transformer leakage inductance and switch-node ringing part of the differential-mode debugging branch?',
+          opts: [
+            'Both directly drive differential-mode harmonic content in a switching converter',
+            'Transformers have no relationship to differential-mode noise',
+            'Ringing only matters for common-mode issues',
+            'This check is unrelated to the failing frequency',
+          ],
+          correct: 0,
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html +=
+            '<div class="quiz-slide" data-q="' +
+            (qi + 1) +
+            '"' +
+            (qi === 0 ? '' : ' style="display: none"') +
+            '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html +=
+            '<ul class="quiz-options" data-correct="' +
+            item.correct +
+            '" id="quiz' +
+            (qi + 1) +
+            '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul>';
+          html += '<div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div>';
+          html += '</div>';
+        });
+        slidesEl.innerHTML = html;
+        var totalEls = document.querySelectorAll('#quizTotalNum, #quizTotalNum2');
+        totalEls.forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dot.setAttribute('data-dot', d);
+          dotsContainer.appendChild(dot);
+        }
+        updateDots();
+
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? 'Finish →' : 'Next →';
+          updateDots();
+        }
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('span');
+          dots.forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = '#3b82f6';
+              dot.style.borderColor = '#3b82f6';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct!';
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted above.';
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = 'Show Results →';
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          if (summary && finalScore && finalMsg) {
+            summary.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+            if (score >= passThreshold) {
+              finalScore.style.color = 'var(--success)';
+              summary.style.background = 'rgba(76,223,139,0.05)';
+              summary.style.borderColor = 'var(--success)';
+              finalMsg.textContent =
+                'Congratulations! You passed the Knowledge Check. You may proceed to the next module.';
+            } else {
+              finalScore.style.color = 'var(--danger)';
+              summary.style.background = 'rgba(255,107,107,0.05)';
+              summary.style.borderColor = 'var(--danger)';
+              finalMsg.textContent =
+                'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+            }
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

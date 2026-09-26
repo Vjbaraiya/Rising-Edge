@@ -1,0 +1,2202 @@
+<!doctype html>
+<html lang="en" data-theme="">
+  <head>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2385317738136367"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
+    <meta
+      name="description"
+      content="16 real-world radiated emission case studies across FPGA interfaces, switch-mode power supplies, motor drives, and cable/connector issues — pick one to see its failure graph, debugging approach, root cause, and fix."
+    />
+    <title>Additional Case Studies | RE Testing Academy | Rising Edge Technologies</title>
+    <link
+      rel="canonical"
+      href="https://www.risingedgetech.com/Trainings/EMI/RE/11-additional-case-studies.html"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../../../assets/css/tokens.css" />
+    <link rel="stylesheet" href="../../../assets/css/themes.css" />
+    <link rel="stylesheet" href="../../../assets/css/base.css" />
+    <link rel="stylesheet" href="../../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../../assets/css/layouts.css" />
+    <link rel="stylesheet" href="../../../assets/css/utilities.css" />
+    <link rel="stylesheet" href="training-compat.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('re-theme') || 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>
+      .ba-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      .ba-card {
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        text-align: center;
+      }
+      .ba-before {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid var(--danger, #f87171);
+      }
+      .ba-after {
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid var(--success, #34d399);
+      }
+      .ba-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .ba-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+      }
+      .ba-before .ba-value {
+        color: var(--danger, #f87171);
+      }
+      .ba-after .ba-value {
+        color: var(--success, #34d399);
+      }
+      .ba-sub {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        margin-top: 4px;
+      }
+      @media (max-width: 640px) {
+        .ba-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .check-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .check-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .check-list li:last-child {
+        border-bottom: none;
+      }
+      .check-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(52, 211, 153, 0.15);
+        color: var(--success, #34d399);
+        font-size: 0.75rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+      }
+      .num-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: step;
+      }
+      .num-list li {
+        counter-increment: step;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.875rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-bottom: 1px solid var(--border);
+      }
+      .num-list li:last-child {
+        border-bottom: none;
+      }
+      .num-list li::before {
+        content: counter(step);
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(34, 211, 238, 0.15);
+        color: var(--cyan, #22d3ee);
+        font-size: 0.72rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+      }
+      .figure-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        overflow: hidden;
+      }
+      .figure-card img {
+        display: block;
+        width: 100%;
+        height: 210px;
+        object-fit: cover;
+        background: #0b0f14;
+      }
+      .figure-caption {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .figure-caption strong {
+        color: var(--text-base);
+        display: block;
+        font-size: 0.82rem;
+        margin-bottom: 2px;
+      }
+      .figure-caption a {
+        color: var(--cyan);
+      }
+      .figure-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .emit-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .emit-card h4 {
+        margin: 0 0 0.3rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .emit-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.03));
+        border: 1px solid var(--border);
+        margin: 0.75rem 0;
+      }
+      .emit-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .equip-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.9rem;
+        margin-top: 1rem;
+      }
+      .equip-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+      }
+      .equip-card .equip-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.35rem;
+      }
+      .equip-card h5 {
+        margin: 0 0 0.25rem;
+        font-size: 0.88rem;
+        color: var(--text-base);
+      }
+      .equip-card p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .case-select-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg, 10px);
+        padding: 1.1rem 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+      .case-select-wrap label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+      #caseSelect {
+        width: 100%;
+        font-size: 0.92rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-page, var(--bg-base));
+        color: var(--text-base);
+      }
+      .case-cat-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="global-nav"></div>
+
+    <div class="content-layout" style="min-height: calc(100vh - var(--nav-height))">
+      <aside class="content-sidebar">
+        <div style="padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border)">
+          <p
+            style="
+              font-size: 0.65rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--text-muted);
+              margin-bottom: 4px;
+            "
+          >
+            Course
+          </p>
+          <p
+            style="
+              font-size: 0.875rem;
+              font-weight: 700;
+              color: var(--text-base);
+              line-height: 1.35;
+            "
+          >
+            Radiated Emissions (RE) Testing
+          </p>
+        </div>
+        <nav style="padding: var(--sp-3)">
+          <a href="01-introduction.html" class="module-item"
+            >01. Introduction &amp; What Are Radiated Emissions</a
+          >
+          <a href="02-spectrum-and-importance.html" class="module-item"
+            >02. EM Spectrum &amp; Why RE Testing Matters</a
+          >
+          <a href="03-sources.html" class="module-item">03. Sources of Radiated Emissions</a>
+          <a href="04-test-types.html" class="module-item">04. Types of RE Testing</a>
+          <a href="05-frequency-and-standards.html" class="module-item"
+            >05. Frequency Ranges &amp; RE Standards</a
+          >
+          <a href="06-product-categories.html" class="module-item"
+            >06. RE Requirements by Product Category</a
+          >
+          <a href="07-environment-and-equipment.html" class="module-item"
+            >07. Test Environment &amp; Equipment</a
+          >
+          <a href="08-setup-and-measurement.html" class="module-item"
+            >08. Test Setup, Measurement &amp; Detectors</a
+          >
+          <a href="09-failures-and-design.html" class="module-item"
+            >09. Failure Mechanisms, Design &amp; Troubleshooting</a
+          >
+          <a href="10-case-study-and-best-practices.html" class="module-item"
+            >10. Case Study, Best Practices &amp; Summary</a
+          >
+          <a href="11-additional-case-studies.html" class="module-item active"
+            >11. Additional Case Studies (FPGA, Power Supply &amp; More)</a
+          >
+        </nav>
+      </aside>
+
+      <main class="content-main" id="main-content">
+        <div class="content-header">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../../home.html">Home</a><span>/</span>
+            <a href="../../trainings.html">Trainings</a><span>/</span>
+            <a href="index.html">Radiated Emissions (RE) Testing</a><span>/</span>
+            <span>Additional Case Studies</span>
+          </nav>
+          <div class="lesson-progress">
+            <div class="module-progress-label">
+              <span>Bonus Lesson 11/11</span><span>100%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+          </div>
+        </div>
+
+        <div class="lesson-body">
+          <section class="hero" style="padding: 3rem 2rem">
+            <div class="hero-content">
+              <div class="badge" style="margin-bottom: 1rem">
+                BONUS MODULE &mdash; CASE STUDY LIBRARY
+              </div>
+              <h1 style="font-size: 2.2rem">Additional Case Studies</h1>
+              <p class="subtitle">
+                16 real-world radiated emission failures across FPGA interfaces, switch-mode power
+                supplies, motor drives, and cable/connector issues. Pick a case study from the
+                dropdown below to see the failing frequency, a real before/after spectrum graph, the
+                debugging approach used to find it, the root cause, the fix, and the key takeaways
+                &mdash; with animations showing exactly how each source emitted.
+              </p>
+            </div>
+          </section>
+
+          <section class="section" style="padding-top: 2rem">
+            <div class="container">
+              <div class="case-select-wrap">
+                <label for="caseSelect">Select a Case Study</label>
+                <select id="caseSelect"></select>
+                <div class="case-cat-badges">
+                  <span class="badge badge-blue">FPGA</span>
+                  <span class="badge badge-orange">Power Supply</span>
+                  <span class="badge badge-green">Other / Mixed Issues</span>
+                </div>
+              </div>
+
+              <!-- Dynamic case study content -->
+              <div class="widget-container">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.6rem;
+                    margin-bottom: 0.25rem;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <span class="badge" id="caseCatBadge">CATEGORY</span>
+                  <h3 style="margin: 0" id="caseTitle">Title</h3>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 1rem">
+                  Failing frequency:
+                  <strong id="caseFreqLabel" style="color: var(--text-base)"></strong>
+                </p>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Problem
+                </h4>
+                <p
+                  style="color: var(--text-sub); font-size: 0.875rem; line-height: 1.7"
+                  id="caseProblem"
+                ></p>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Debugging Approach &mdash; How the Issue Was Identified
+                </h4>
+                <ol class="num-list" id="caseInvestigation"></ol>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Root Cause
+                </h4>
+                <p
+                  style="color: var(--text-sub); font-size: 0.875rem; line-height: 1.7"
+                  id="caseRootCause"
+                ></p>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 14px 0 6px">
+                  Solution
+                </h4>
+                <ul class="check-list" id="caseFix"></ul>
+
+                <h4 style="font-size: 0.85rem; color: var(--text-base); margin: 16px 0 6px">
+                  Result
+                </h4>
+                <div class="ba-grid">
+                  <div class="ba-card ba-before">
+                    <div class="ba-label">Before</div>
+                    <div class="ba-value" id="caseMarginBefore"></div>
+                    <div class="ba-sub" id="caseSubBefore"></div>
+                  </div>
+                  <div class="ba-card ba-after">
+                    <div class="ba-label">After</div>
+                    <div class="ba-value" id="caseMarginAfter"></div>
+                    <div class="ba-sub" id="caseSubAfter"></div>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.85rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">Before/After Spectrum Plot</strong>
+                </p>
+                <div class="widget-container" style="padding: 1rem">
+                  <div id="plotlyCase" style="width: 100%; height: 380px"></div>
+                  <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem">
+                    Representative quasi-peak trace against the CISPR 32 Class B limit line
+                    (extended flat above 1 GHz for teaching purposes). Always verify against the
+                    actual measured data from your test lab.
+                  </p>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.75rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">How This Source Actually Emitted</strong>
+                </p>
+                <div class="emit-card">
+                  <h4 id="caseEmitTitle">&#9889; Emission Mechanism</h4>
+                  <p
+                    style="font-size: 0.84rem; color: var(--text-muted); margin: 0"
+                    id="caseEmitDesc"
+                  ></p>
+                  <div class="emit-canvas-wrap">
+                    <canvas id="caseAnimCanvas"></canvas>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.75rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">Board / Circuit Involved</strong>
+                </p>
+                <div
+                  class="figure-grid"
+                  style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"
+                >
+                  <div class="figure-card">
+                    <img id="caseHwImg" src="" alt="" loading="lazy" />
+                    <div class="figure-caption">
+                      <strong id="caseHwName"></strong>
+                      <span id="caseHwDesc"></span>
+                      <br /><a id="caseHwLink" href="#" target="_blank" rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                      <div
+                        style="
+                          margin-top: 6px;
+                          font-size: 0.72rem;
+                          color: var(--text-muted);
+                          font-style: italic;
+                        "
+                      >
+                        Representative hardware of this type — not the actual proprietary board from
+                        the case, which is not publicly available.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.75rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)"
+                    >Test Environment &amp; Antenna Used</strong
+                  >
+                </p>
+                <div class="figure-grid">
+                  <div class="figure-card">
+                    <img
+                      src="https://commons.wikimedia.org/wiki/Special:FilePath/Anechoic_chamber_for_EMC_testing_(Electromagnetic_Compatibility)_Nemko_Norway.jpg"
+                      alt="Semi-anechoic chamber used for EMC radiated emission testing, showing RF absorber cones lining the walls and ceiling"
+                      loading="lazy"
+                    />
+                    <div class="figure-caption">
+                      <strong>Semi-Anechoic Chamber (SAC)</strong>
+                      Absorber-lined walls/ceiling and a conductive floor eliminate reflections for
+                      both retests.
+                      <br /><a
+                        href="https://commons.wikimedia.org/wiki/File:Anechoic_chamber_for_EMC_testing_(Electromagnetic_Compatibility)_Nemko_Norway.jpg"
+                        target="_blank"
+                        rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                  <div class="figure-card">
+                    <img
+                      src="https://commons.wikimedia.org/wiki/Special:FilePath/A_modern_real_time_spectrum_analyzer.jpg"
+                      alt="Modern real-time spectrum analyzer used as an EMI test receiver"
+                      loading="lazy"
+                    />
+                    <div class="figure-caption">
+                      <strong>EMI Test Receiver / Spectrum Analyzer</strong>
+                      Captured the quasi-peak trace shown in the before/after plot above.
+                      <br /><a
+                        href="https://commons.wikimedia.org/wiki/File:A_modern_real_time_spectrum_analyzer.jpg"
+                        target="_blank"
+                        rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                  <div class="figure-card">
+                    <img id="caseAntennaImg" src="" alt="" loading="lazy" />
+                    <div class="figure-caption">
+                      <strong id="caseAntennaName"></strong>
+                      <span id="caseAntennaDesc"></span>
+                      <br /><a id="caseAntennaLink" href="#" target="_blank" rel="noopener"
+                        >Wikimedia Commons</a
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)">Key Takeaways</strong>
+                </p>
+                <ul class="check-list" id="caseTakeaways"></ul>
+
+                <p
+                  style="
+                    color: var(--text-sub);
+                    font-size: 0.88rem;
+                    line-height: 1.7;
+                    margin: 1.5rem 0 0.5rem;
+                  "
+                >
+                  <strong style="color: var(--text-base)"
+                    >How to Avoid This Failure &mdash; Best Practices</strong
+                  >
+                </p>
+                <ul class="check-list" id="caseBestPractices"></ul>
+              </div>
+
+              <!-- Shared equipment reference -->
+              <div class="widget-container" style="margin-top: 1.5rem">
+                <h3 style="margin-bottom: 0.5rem">
+                  Typical Equipment Used Across These Case Studies
+                </h3>
+                <div class="equip-grid">
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128225;</div>
+                    <h5>EMI Receiver / Spectrum Analyzer</h5>
+                    <p>
+                      CISPR 16-1-1 compliant receiver with peak, quasi-peak, and average detectors.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128246;</div>
+                    <h5>Loop, Log-Periodic &amp; Horn Antennas</h5>
+                    <p>
+                      Cover 9 kHz&ndash;40 GHz in overlapping bands, matched to each failure's
+                      frequency.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128269;</div>
+                    <h5>Near-Field H-Field/E-Field Probe Set</h5>
+                    <p>
+                      Used on the bench to localize hot loops, splits, and coupling paths before a
+                      chamber retest.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#9878;&#65039;</div>
+                    <h5>Current Probe / Clamp</h5>
+                    <p>Measures common-mode current on cables and harnesses non-invasively.</p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128260;</div>
+                    <h5>Turntable &amp; Antenna Mast</h5>
+                    <p>
+                      Automated 0&ndash;360&deg; rotation and 1&ndash;4 m antenna height scan to
+                      find worst case.
+                    </p>
+                  </div>
+                  <div class="equip-card">
+                    <div class="equip-icon">&#128202;</div>
+                    <h5>High-Bandwidth Oscilloscope</h5>
+                    <p>
+                      Captures ringing, overshoot, and edge rates directly on switch nodes and clock
+                      traces.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-top: 3rem;
+                  padding-top: 2rem;
+                  border-top: 1px solid var(--border);
+                "
+              >
+                <a class="btn btn-secondary" href="10-case-study-and-best-practices.html"
+                  >&larr; Previous Lesson</a
+                >
+                <a class="btn btn-primary" href="index.html">Back to Course Overview &rarr;</a>
+              </div>
+            </div>
+          </section>
+          <hr class="section-divider" />
+        </div>
+      </main>
+    </div>
+
+    <div id="global-footer"></div>
+    <div id="global-bottom-nav"></div>
+    <script src="../../../assets/js/core.js"></script>
+    <script src="../../../assets/js/training-progress.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <script>
+      /* ─── Theme helpers (shared by Plotly + canvas) ─────────────────── */
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+      function inkColor(alpha) {
+        return isLightTheme() ? 'rgba(15,23,42,' + alpha + ')' : 'rgba(226,232,240,' + alpha + ')';
+      }
+      function getPlotlyLayoutBase() {
+        return {
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { color: isLightTheme() ? '#1f2937' : '#e2e8f0', size: 11 },
+          margin: { l: 60, r: 20, t: 20, b: 40 },
+        };
+      }
+
+      /* ─── Case study data (16 entries) ───────────────────────────────── */
+      var CASES = [
+        {
+          id: 'ddr-bus',
+          category: 'FPGA',
+          title: 'DDR3/DDR4 Interface Harmonic Radiation',
+          mechanism: 'loop',
+          freqMHz: 800,
+          freqLabel: '800 MHz (2nd harmonic of the 400 MHz DDR clock)',
+          problem:
+            'An FPGA-based board with a DDR3 memory interface failed radiated emission testing at 800 MHz with a 5 dB margin above the CISPR 32 Class B limit.',
+          investigation: [
+            'Correlated the failing frequency to 2x the 400 MHz DDR clock using an FFT on a near-field probe capture.',
+            'Probed the DDR address/command bus with a small H-field probe and found a hot spot directly over a via field near a plane split.',
+            'Checked the PCB stackup and found the DDR bus routed across a gap between two ground plane islands.',
+          ],
+          rootCause:
+            'The DDR bus crossed a split in the ground reference plane, forcing return current to take a long detour and creating a large radiating loop at the bus harmonics.',
+          fix: [
+            'Rerouted the DDR bus to avoid crossing the plane split.',
+            'Added stitching capacitors across the remaining unavoidable split.',
+            'Tightened impedance-matched length rules on the address/command group.',
+          ],
+          before: {
+            floor: 20,
+            peaks: [
+              { center: 100, width: 0.05, peak: 3 },
+              { center: 400, width: 0.04, peak: 10 },
+              { center: 800, width: 0.04, peak: 32 },
+              { center: 1200, width: 0.03, peak: 6 },
+              { center: 1600, width: 0.03, peak: 4 },
+            ],
+          },
+          after: {
+            floor: 18,
+            peaks: [
+              { center: 100, width: 0.05, peak: 2 },
+              { center: 400, width: 0.04, peak: 6 },
+              { center: 800, width: 0.04, peak: 25 },
+              { center: 1200, width: 0.03, peak: 3 },
+              { center: 1600, width: 0.03, peak: 2 },
+            ],
+          },
+          marginBefore: '+5 dB over limit',
+          subBefore: 'Failed at 800 MHz (2nd harmonic of 400 MHz DDR clock)',
+          marginAfter: '−4 dB margin',
+          subAfter: 'Redesigned board passed with 4 dB compliance margin',
+          takeaways: [
+            'Plane splits under high-speed buses are a leading cause of FPGA memory-interface RE failures.',
+            'A near-field probe scan can localize the loop before a chamber retest.',
+            'Harmonics of the DDR clock, not just the fundamental, must be checked.',
+          ],
+          bestPractices: [
+            'Route high-speed buses only over continuous, unbroken reference planes.',
+            'Stitch any unavoidable plane transition with decoupling/stitching capacitors.',
+            'Review DDR/memory bus routing against the ground plane in every layout review.',
+          ],
+          emitTitle: '⏱ Return Current Detour Around a Plane Split',
+          emitDesc:
+            'A slot or split in the reference plane directly under the bus forces return current to detour around the gap, enlarging the effective current loop area — and radiated field strength scales with loop area × current × frequency².',
+        },
+        {
+          id: 'serdes-cable',
+          category: 'FPGA',
+          title: 'FPGA SerDes Cable Common-Mode Radiation',
+          mechanism: 'cable',
+          freqMHz: 3125,
+          freqLabel: '3.125 GHz (SerDes line rate)',
+          problem:
+            'A board using an FPGA GTX transceiver at 3.125 Gbps failed radiated emissions near 3.1 GHz when connected to an external cable.',
+          investigation: [
+            'Repeated the test with the cable removed and the failure disappeared, confirming the cable was the radiator.',
+            'Measured common-mode voltage on the cable shield with a current probe and found it rising sharply near the SerDes line rate.',
+            'Inspected the AC-coupling capacitor and connector layout and found an asymmetric ground return near the connector.',
+          ],
+          rootCause:
+            'A missing ground stitching via near the SerDes connector unbalanced the differential pair, converting part of the signal into common-mode current that drove the cable as an antenna.',
+          fix: [
+            'Added ground stitching vias immediately adjacent to the connector shell.',
+            'Tightened intra-pair length and skew matching for the differential traces.',
+            'Added a common-mode choke on the cable near the connector exit.',
+          ],
+          before: {
+            floor: 22,
+            peaks: [
+              { center: 780, width: 0.03, peak: 5 },
+              { center: 1560, width: 0.03, peak: 4 },
+              { center: 3125, width: 0.03, peak: 34 },
+              { center: 4687, width: 0.03, peak: 8 },
+            ],
+          },
+          after: {
+            floor: 19,
+            peaks: [
+              { center: 780, width: 0.03, peak: 3 },
+              { center: 1560, width: 0.03, peak: 2 },
+              { center: 3125, width: 0.03, peak: 25 },
+              { center: 4687, width: 0.03, peak: 4 },
+            ],
+          },
+          marginBefore: '+9 dB over limit',
+          subBefore: 'Failed at 3.125 GHz (SerDes line rate)',
+          marginAfter: '−3 dB margin',
+          subAfter: 'Redesigned connector/cable interface passed with 3 dB margin',
+          takeaways: [
+            'High-speed serial links can radiate efficiently through the cable even when PCB signal integrity looks fine.',
+            'Common-mode current, not the differential data itself, is almost always the actual radiator.',
+            'Ground return continuity right at the connector matters as much as the differential pair.',
+          ],
+          bestPractices: [
+            'Always add ground stitching vias next to high-speed connectors.',
+            'Match differential pair length/skew tightly through the connector transition.',
+            'Add common-mode chokes on external cables carrying multi-Gbps signals as standard practice.',
+          ],
+          emitTitle: '🔌 Common-Mode Current Driving the Cable',
+          emitDesc:
+            'Once unbalanced, part of the SerDes signal appears as common-mode current on the cable shield/return. At 3.1 GHz, even a short cable is a large fraction of a wavelength, so it radiates like a monopole.',
+        },
+        {
+          id: 'config-clock',
+          category: 'FPGA',
+          title: 'FPGA Configuration Clock Harmonic',
+          mechanism: 'loop',
+          freqMHz: 175,
+          freqLabel: '175 MHz (7th harmonic of the 25 MHz configuration clock)',
+          problem:
+            'A board failed at 175 MHz — a frequency the design team did not expect, since none of the "main" system clocks land there.',
+          investigation: [
+            'Divided 175 MHz by small integers and found 175 / 25 = 7, pointing to the 25 MHz FPGA configuration/JTAG clock.',
+            'Probed the configuration PROM clock trace and found emissions tracking configuration activity mainly at power-up.',
+            'Found the configuration clock trace routed along the board edge, crossing a connector cutout in the reference plane.',
+          ],
+          rootCause:
+            'A rarely reviewed low-speed configuration clock was routed across a board-edge cutout in the ground plane, and its high odd harmonic content radiated efficiently despite the low fundamental frequency.',
+          fix: [
+            'Rerouted the configuration clock away from the board-edge cutout.',
+            'Added a series termination resistor to slow the clock edge rate.',
+            'Added the configuration/JTAG clock to the standard EMC design review checklist.',
+          ],
+          before: {
+            floor: 18,
+            peaks: [
+              { center: 25, width: 0.06, peak: 2 },
+              { center: 75, width: 0.04, peak: 10 },
+              { center: 125, width: 0.04, peak: 14 },
+              { center: 175, width: 0.03, peak: 25 },
+              { center: 225, width: 0.03, peak: 10 },
+            ],
+          },
+          after: {
+            floor: 16,
+            peaks: [
+              { center: 25, width: 0.06, peak: 1 },
+              { center: 75, width: 0.04, peak: 6 },
+              { center: 125, width: 0.04, peak: 9 },
+              { center: 175, width: 0.03, peak: 19 },
+              { center: 225, width: 0.03, peak: 6 },
+            ],
+          },
+          marginBefore: '+3 dB over limit',
+          subBefore: 'Failed at 175 MHz (7th harmonic of 25 MHz config clock)',
+          marginAfter: '−5 dB margin',
+          subAfter: 'Rerouted design passed with 5 dB compliance margin',
+          takeaways: [
+            'Even "housekeeping" clocks like JTAG/configuration lines can cause an RE failure.',
+            'A failing frequency with no obvious relationship to system clocks is often a harmonic of a low, easily overlooked clock.',
+            'Board-edge cutouts and connector keep-outs in the reference plane are common hidden hazards.',
+          ],
+          bestPractices: [
+            'Include every clock on the board — not just the "main" ones — in the EMC design review.',
+            'Avoid routing any clock trace across board-edge connector cutouts.',
+            'Add series termination to slow edge rates on non-critical low-speed clocks.',
+          ],
+          emitTitle: '⏱ Overlooked Clock Crossing a Plane Cutout',
+          emitDesc:
+            'Just like the DDR case, a plane discontinuity forces a longer return path — this time under a clock most reviewers never think to check, proving even low-speed housekeeping signals need EMC review.',
+        },
+        {
+          id: 'sso-noise',
+          category: 'FPGA',
+          title: 'FPGA I/O Bank Simultaneous Switching Noise',
+          mechanism: 'loop',
+          freqMHz: 240,
+          freqLabel: '240 MHz (broadband SSO spike)',
+          problem:
+            'A broad emissions hump centered near 240 MHz appeared only when a specific 16-bit parallel bus switched together.',
+          investigation: [
+            'Toggled the parallel bus in isolation and reproduced the hump on demand, isolating it from other board activity.',
+            'Measured power rail ripple at the FPGA I/O bank with a high-bandwidth probe and saw a large voltage sag/ring on each switch.',
+            'Found only two decoupling capacitors serving the entire 16-bit output bank.',
+          ],
+          rootCause:
+            'Simultaneous switching of many FPGA outputs drew a large transient current from an under-decoupled I/O bank, causing ground bounce that radiated as broadband noise.',
+          fix: [
+            'Added dedicated decoupling capacitors directly at each I/O bank power pin.',
+            'Staggered the parallel bus outputs in firmware to reduce simultaneous transitions.',
+            'Reduced output drive strength on non-critical signals in that bus.',
+          ],
+          before: {
+            floor: 24,
+            peaks: [
+              { center: 80, width: 0.15, peak: 8 },
+              { center: 160, width: 0.15, peak: 10 },
+              { center: 240, width: 0.15, peak: 27 },
+              { center: 320, width: 0.15, peak: 14 },
+            ],
+          },
+          after: {
+            floor: 21,
+            peaks: [
+              { center: 80, width: 0.15, peak: 5 },
+              { center: 160, width: 0.15, peak: 6 },
+              { center: 240, width: 0.15, peak: 20 },
+              { center: 320, width: 0.15, peak: 8 },
+            ],
+          },
+          marginBefore: '+4 dB over limit',
+          subBefore: 'Failed broadband hump near 240 MHz (SSO)',
+          marginAfter: '−6 dB margin',
+          subAfter: 'Additional decoupling and staggering passed with 6 dB margin',
+          takeaways: [
+            'SSO-driven emissions show up as a broad hump rather than a sharp harmonic line, easy to misdiagnose as a clock harmonic.',
+            'Isolating the failing bus in firmware is often the fastest way to confirm the source.',
+            'Decoupling at I/O banks is just as important as at the core supply.',
+          ],
+          bestPractices: [
+            'Provide dedicated decoupling at every FPGA I/O bank, not just the core power rails.',
+            'Stagger simultaneous output switching in firmware where timing allows.',
+            'Review drive strength settings for wide parallel buses during EMC design review.',
+          ],
+          emitTitle: '⚡ Simultaneous Switching Ground Bounce',
+          emitDesc:
+            'Many outputs switching together draw a large transient current spike from an under-decoupled supply pin, producing ground bounce that radiates broadband noise across a wide frequency range.',
+        },
+        {
+          id: 'clock-tree-ringing',
+          category: 'FPGA',
+          title: 'Unterminated Clock Distribution Ringing',
+          mechanism: 'loop',
+          freqMHz: 450,
+          freqLabel: '450 MHz (ringing harmonic of a fanned-out 150 MHz clock tree)',
+          problem:
+            'A clock fanned out from one FPGA output to four downstream loads failed emissions at 450 MHz, unrelated to any multiple of the 150 MHz clock itself.',
+          investigation: [
+            'Captured the clock waveform on an oscilloscope and saw significant overshoot and ringing after each edge.',
+            'Correlated the ringing frequency (450 MHz) directly to the failing emission frequency.',
+            'Found the clock tree had no series or parallel termination and multiple stub lengths of different electrical length.',
+          ],
+          rootCause:
+            'The unterminated, multi-drop clock tree reflected energy at each unterminated stub, producing high-frequency ringing that radiated independently of the clock fundamental.',
+          fix: [
+            'Added a series termination resistor at the driver for each branch.',
+            'Restructured the topology to a star/fly-by arrangement with matched stub lengths.',
+            'Verified clean edges with no overshoot on the oscilloscope after the fix.',
+          ],
+          before: {
+            floor: 19,
+            peaks: [
+              { center: 150, width: 0.05, peak: 5 },
+              { center: 300, width: 0.03, peak: 12 },
+              { center: 450, width: 0.03, peak: 34 },
+              { center: 600, width: 0.03, peak: 10 },
+              { center: 750, width: 0.03, peak: 7 },
+            ],
+          },
+          after: {
+            floor: 17,
+            peaks: [
+              { center: 150, width: 0.05, peak: 3 },
+              { center: 300, width: 0.03, peak: 8 },
+              { center: 450, width: 0.03, peak: 26 },
+              { center: 600, width: 0.03, peak: 6 },
+              { center: 750, width: 0.03, peak: 4 },
+            ],
+          },
+          marginBefore: '+6 dB over limit',
+          subBefore: 'Failed at 450 MHz (ringing, not a clock harmonic)',
+          marginAfter: '−4 dB margin',
+          subAfter: 'Terminated/restructured clock tree passed with 4 dB margin',
+          takeaways: [
+            'Ringing frequencies from an unterminated clock tree may not match any multiple of the clock rate.',
+            'Poor multi-drop topology is a common, avoidable EMC risk in clock distribution.',
+            'Fixing signal integrity (ringing) often directly fixes an RE failure.',
+          ],
+          bestPractices: [
+            'Always terminate multi-drop clock trees appropriately (series or parallel).',
+            'Prefer star or fly-by topologies with matched stub lengths for fanned-out clocks.',
+            'Check clock waveforms on a scope for ringing/overshoot before board release.',
+          ],
+          emitTitle: '⏱ Reflections on an Unterminated Clock Tree',
+          emitDesc:
+            'Each unterminated stub reflects part of the signal, producing high-frequency ringing on every edge. That ringing radiates at its own frequency, independent of the clock rate itself.',
+        },
+        {
+          id: 'buck-noise',
+          category: 'Power Supply',
+          title: 'Buck Converter Switching Harmonic on Loop Antenna',
+          mechanism: 'loop',
+          freqMHz: 27,
+          freqLabel: '27 MHz (54th harmonic of the 500 kHz switching frequency)',
+          problem:
+            'A board with an onboard buck regulator failed the low-frequency (loop antenna) RE test at 27 MHz.',
+          investigation: [
+            'Confirmed the 500 kHz switching frequency on the regulator datasheet — 27 MHz sits near its 54th harmonic.',
+            'Used a small H-field loop probe to trace the hot spot directly to the switch-node/inductor loop.',
+            'Measured the physical loop area formed by the input capacitor, switch node, and inductor — larger than the regulator layout guideline recommends.',
+          ],
+          rootCause:
+            'A larger-than-recommended switch node loop (input capacitor placed too far from the switching IC) radiated efficiently at high-order harmonics of the 500 kHz switching frequency.',
+          fix: [
+            'Moved the input capacitor directly adjacent to the switching IC to minimize the hot loop.',
+            'Added a small snubber network across the switch node to damp ringing.',
+            'Added a ferrite bead in series with the input power path.',
+          ],
+          before: {
+            floor: 12,
+            peaks: [
+              { center: 10, width: 0.02, peak: 10 },
+              { center: 25, width: 0.02, peak: 19 },
+              { center: 26, width: 0.02, peak: 25 },
+              { center: 27, width: 0.02, peak: 31 },
+              { center: 28, width: 0.02, peak: 25 },
+              { center: 29, width: 0.02, peak: 19 },
+            ],
+          },
+          after: {
+            floor: 10,
+            peaks: [
+              { center: 10, width: 0.02, peak: 6 },
+              { center: 25, width: 0.02, peak: 12 },
+              { center: 26, width: 0.02, peak: 18 },
+              { center: 27, width: 0.02, peak: 24 },
+              { center: 28, width: 0.02, peak: 18 },
+              { center: 29, width: 0.02, peak: 12 },
+            ],
+          },
+          marginBefore: '+3 dB over limit',
+          subBefore: 'Failed at 27 MHz (high-order switching harmonic)',
+          marginAfter: '−6 dB margin',
+          subAfter: 'Tightened hot-loop layout passed with 6 dB margin',
+          takeaways: [
+            'Even a 500 kHz switcher can fail RE testing through high-order harmonics reaching into the tens of MHz.',
+            'The physical "hot loop" area around the switch node is usually the dominant factor, not the switching frequency itself.',
+            'A simple H-field probe scan can localize a switching regulator failure in minutes.',
+          ],
+          bestPractices: [
+            'Always follow the regulator manufacturer hot-loop layout guidelines exactly.',
+            'Place input capacitors as close as physically possible to the switch pin.',
+            'Add snubbers/ferrite beads as standard mitigation on switch-node loops.',
+          ],
+          emitTitle: '⚡ Switch-Node Hot Loop Radiation',
+          emitDesc:
+            'The loop formed by the input capacitor, switch, and inductor carries high dI/dt current at the switching frequency and its harmonics — the larger the physical loop, the more efficiently it radiates.',
+        },
+        {
+          id: 'flyback-cm',
+          category: 'Power Supply',
+          title: 'Flyback SMPS Transformer Common-Mode Coupling',
+          mechanism: 'cable',
+          freqMHz: 65,
+          freqLabel: '65 MHz (harmonic coupled through transformer parasitic capacitance)',
+          problem:
+            'An isolated flyback power supply failed RE testing at 65 MHz, with the emission appearing on both the primary-side AC cord and the secondary-side output cable.',
+          investigation: [
+            'Noted the emission appeared on both sides of the isolation barrier, pointing to common-mode coupling.',
+            "Measured the transformer's primary-to-secondary parasitic capacitance and found it higher than typical for this power level.",
+            'Added a temporary Y-capacitor across the isolation barrier and saw the emission redistribute, confirming the coupling path.',
+          ],
+          rootCause:
+            'High primary-to-secondary parasitic capacitance in the flyback transformer let switching harmonics couple across the isolation barrier as common-mode current on both cable sets.',
+          fix: [
+            'Replaced the transformer with a lower interwinding-capacitance design (shielded winding).',
+            'Added a proper Y-capacitor and common-mode choke on both primary and secondary sides.',
+            'Added a shield winding tied to primary return, per the transformer EMC application note.',
+          ],
+          before: {
+            floor: 20,
+            peaks: [
+              { center: 33, width: 0.03, peak: 14 },
+              { center: 65, width: 0.03, peak: 22 },
+              { center: 98, width: 0.03, peak: 16 },
+              { center: 130, width: 0.03, peak: 11 },
+            ],
+          },
+          after: {
+            floor: 18,
+            peaks: [
+              { center: 33, width: 0.03, peak: 9 },
+              { center: 65, width: 0.03, peak: 15 },
+              { center: 98, width: 0.03, peak: 10 },
+              { center: 130, width: 0.03, peak: 6 },
+            ],
+          },
+          marginBefore: '+2 dB over limit',
+          subBefore: 'Failed at 65 MHz on both primary and secondary cables',
+          marginAfter: '−7 dB margin',
+          subAfter: 'Shielded transformer + CM chokes passed with 7 dB margin',
+          takeaways: [
+            'Emissions appearing on both sides of an isolation barrier are a strong signature of transformer common-mode coupling.',
+            'Transformer construction (interwinding capacitance, shield windings) is as important as the schematic topology.',
+            'A temporary Y-cap "probe test" can confirm a coupling-path hypothesis before a transformer respin.',
+          ],
+          bestPractices: [
+            'Specify transformers with a grounded shield winding for isolated SMPS designs.',
+            'Budget for proper Y-capacitors and common-mode chokes on both sides of the isolation barrier from the start.',
+            'Ask the transformer vendor for interwinding capacitance and EMC guidance during component selection.',
+          ],
+          emitTitle: '🔌 Cross-Isolation Common-Mode Coupling',
+          emitDesc:
+            "Switching harmonics couple across the transformer's parasitic primary-to-secondary capacitance, driving common-mode current onto cables on both sides of the isolation barrier simultaneously.",
+        },
+        {
+          id: 'boost-cable',
+          category: 'Power Supply',
+          title: 'Boost Converter Input Cable Radiation',
+          mechanism: 'cable',
+          freqMHz: 45,
+          freqLabel: '45 MHz (3rd harmonic of a 15 MHz boost switching frequency)',
+          problem:
+            'A battery-powered boost converter module failed RE testing at 45 MHz only when connected to its full-length input power cable.',
+          investigation: [
+            'Shortened the input cable during pre-compliance testing and observed the emission dropping significantly.',
+            'Measured common-mode current on the input cable with a clamp-on current probe — well above acceptable levels at 45 MHz.',
+            'Found no input-side common-mode filtering in the original design.',
+          ],
+          rootCause:
+            'Switching noise from the boost converter coupled onto the input power cable as common-mode current with no filtering to attenuate it, turning the cable into the dominant radiator.',
+          fix: [
+            'Added an input common-mode choke immediately at the board input connector.',
+            'Added small ceramic capacitors from each input line to chassis ground.',
+            'Specified a shielded input cable for the production configuration.',
+          ],
+          before: {
+            floor: 16,
+            peaks: [
+              { center: 15, width: 0.03, peak: 18 },
+              { center: 30, width: 0.03, peak: 14 },
+              { center: 45, width: 0.03, peak: 25 },
+              { center: 60, width: 0.03, peak: 12 },
+            ],
+          },
+          after: {
+            floor: 14,
+            peaks: [
+              { center: 15, width: 0.03, peak: 13 },
+              { center: 30, width: 0.03, peak: 10 },
+              { center: 45, width: 0.03, peak: 21 },
+              { center: 60, width: 0.03, peak: 8 },
+            ],
+          },
+          marginBefore: '+1 dB over limit',
+          subBefore: 'Failed at 45 MHz with full-length input cable connected',
+          marginAfter: '−5 dB margin',
+          subAfter: 'Input CM choke + filtering passed with 5 dB margin',
+          takeaways: [
+            'Cable length directly affects RE results — always test with the actual production cable length.',
+            'Input-side filtering is frequently overlooked because designers focus on output ripple, not RE.',
+            'A clamp-on current probe is a fast, non-invasive way to confirm cable-borne common-mode current.',
+          ],
+          bestPractices: [
+            'Always include input-side common-mode filtering on any switching converter with an external cable.',
+            'Test pre-compliance with the actual production cable, not a bench jumper.',
+            'Consider shielded cable for any power input carrying switching-converter noise.',
+          ],
+          emitTitle: '🔌 Unfiltered Input Cable as Radiator',
+          emitDesc:
+            'With no input-side filtering, switching noise rides straight onto the input cable as common-mode current, and the cable — not the PCB — becomes the dominant antenna.',
+        },
+        {
+          id: 'gan-gate-ringing',
+          category: 'Power Supply',
+          title: 'GaN Power Stage Gate-Drive Ringing Above 1 GHz',
+          mechanism: 'loop',
+          freqMHz: 1200,
+          freqLabel: '1.2 GHz (sub-nanosecond switching edge ringing)',
+          problem:
+            'A high-efficiency GaN-based power stage failed the microwave-band (horn antenna) RE test at 1.2 GHz — far above the switching frequency itself.',
+          investigation: [
+            'Captured the GaN switch node with a high-bandwidth oscilloscope probe and measured sub-nanosecond edges with significant ringing.',
+            "Correlated the ringing frequency directly to 1.2 GHz using the scope's FFT function.",
+            'Found no gate resistor or snubber network damping the fast edges.',
+          ],
+          rootCause:
+            'The extremely fast switching edges of the GaN device rang at a frequency set by parasitic inductance/capacitance in the gate drive and switch-node loop, radiating well above 1 GHz.',
+          fix: [
+            'Added a gate resistor to slow the edge rate to the minimum needed for efficiency targets.',
+            'Added an RC snubber directly across the switch node.',
+            'Reduced parasitic loop inductance by shortening the gate drive loop layout.',
+          ],
+          before: {
+            floor: 22,
+            peaks: [
+              { center: 800, width: 0.02, peak: 14 },
+              { center: 1200, width: 0.02, peak: 27 },
+              { center: 1600, width: 0.02, peak: 18 },
+              { center: 2400, width: 0.02, peak: 10 },
+            ],
+          },
+          after: {
+            floor: 20,
+            peaks: [
+              { center: 800, width: 0.02, peak: 9 },
+              { center: 1200, width: 0.02, peak: 22 },
+              { center: 1600, width: 0.02, peak: 13 },
+              { center: 2400, width: 0.02, peak: 6 },
+            ],
+          },
+          marginBefore: '+2 dB over limit',
+          subBefore: 'Failed at 1.2 GHz (edge-rate ringing, not switching frequency)',
+          marginAfter: '−5 dB margin',
+          subAfter: 'Gate resistor + snubber passed with 5 dB margin',
+          takeaways: [
+            'Wide-bandgap devices (GaN/SiC) can push emissions into frequency ranges traditional silicon designs never reached.',
+            'A failure far above the switching frequency strongly indicates edge-rate-driven ringing.',
+            'Gate drive loop layout is now as EMC-critical as the main power loop.',
+          ],
+          bestPractices: [
+            'Budget gate resistor / snubber tuning time into every GaN or SiC power stage design.',
+            'Keep gate drive loops physically as small as possible.',
+            'Test wide-bandgap power designs against the full horn-antenna frequency range, not just traditional CISPR bands.',
+          ],
+          emitTitle: '⚡ Sub-Nanosecond Edge Ringing',
+          emitDesc:
+            'Extremely fast GaN switching edges excite a resonance in the parasitic inductance/capacitance of the gate-drive and switch-node loop, radiating at a frequency far above the actual switching rate.',
+        },
+        {
+          id: 'enclosure-grounding',
+          category: 'Power Supply',
+          title: 'PSU Enclosure Grounding/Bonding Failure',
+          mechanism: 'seam',
+          freqMHz: 88,
+          freqLabel: '88 MHz (internal switching harmonic re-radiated through the enclosure)',
+          problem:
+            'A metal-enclosed power supply failed RE testing at 88 MHz despite the internal PCB passing a pre-compliance bench scan without its enclosure installed.',
+          investigation: [
+            'Retested with the enclosure removed and the failure disappeared, showing the enclosure was involved, not just the PCB.',
+            'Inspected the enclosure grounding and found a single-point ground strap with a long, high-impedance path to the chassis.',
+            'Measured RF current on the ground strap and found significant current at 88 MHz.',
+          ],
+          rootCause:
+            'A single, high-impedance ground bonding strap let internal switching noise develop a voltage across the chassis, which then re-radiated through gaps around the enclosure seams.',
+          fix: [
+            'Added multiple low-impedance bonding points between the PCB ground and the chassis.',
+            'Added conductive gasket material along the main enclosure seam.',
+            'Verified bonding impedance with a milliohm meter at multiple frequencies before retesting.',
+          ],
+          before: {
+            floor: 18,
+            peaks: [
+              { center: 44, width: 0.03, peak: 16 },
+              { center: 88, width: 0.03, peak: 26 },
+              { center: 132, width: 0.03, peak: 14 },
+              { center: 176, width: 0.03, peak: 10 },
+            ],
+          },
+          after: {
+            floor: 16,
+            peaks: [
+              { center: 44, width: 0.03, peak: 10 },
+              { center: 88, width: 0.03, peak: 19 },
+              { center: 132, width: 0.03, peak: 9 },
+              { center: 176, width: 0.03, peak: 6 },
+            ],
+          },
+          marginBefore: '+4 dB over limit',
+          subBefore: 'Failed at 88 MHz only with the enclosure installed',
+          marginAfter: '−5 dB margin',
+          subAfter: 'Improved bonding + gasketing passed with 5 dB margin',
+          takeaways: [
+            'A PCB that passes without its enclosure can still fail once fully assembled — always test in final production configuration.',
+            'Chassis bonding impedance, not just presence of a ground wire, determines shielding effectiveness.',
+            'Enclosure seams and bonding points deserve the same EMC scrutiny as the PCB itself.',
+          ],
+          bestPractices: [
+            'Always retest in the full production enclosure, not just on the bare board.',
+            'Use multiple low-impedance bonding points rather than a single ground strap.',
+            'Add conductive gasketing at enclosure seams for any product with a metal chassis.',
+          ],
+          emitTitle: '🏠 Enclosure Re-Radiation Through Seams',
+          emitDesc:
+            'A high-impedance chassis bond lets internal noise develop a voltage on the enclosure itself, which then leaks out and radiates through unavoidable seams and gaps around the housing.',
+        },
+        {
+          id: 'motor-pwm',
+          category: 'Other',
+          title: 'Motor Drive PWM Commutation Cable Radiation',
+          mechanism: 'cable',
+          freqMHz: 36,
+          freqLabel: '36 MHz (harmonic of the PWM commutation frequency)',
+          problem:
+            'A BLDC motor drive failed RE testing at 36 MHz, with emissions tracing to the motor phase cables.',
+          investigation: [
+            'Ran the motor at different speeds and found the failing frequency tracked a fixed multiple of the PWM switching frequency, not the mechanical RPM.',
+            'Measured common-mode current on the three motor phase cables with a clamp probe — high common-mode content despite balanced differential switching.',
+            'Found no common-mode choke or shielding on the motor cable assembly.',
+          ],
+          rootCause:
+            'Fast PWM edges driving the motor phases produced common-mode current on the phase cables, which radiated efficiently since the cable run was several meters long.',
+          fix: [
+            'Added a common-mode choke on the motor cable bundle near the driver output.',
+            'Slowed the PWM edge rate slightly using gate resistor tuning, balanced against motor efficiency.',
+            'Recommended shielded motor cable with the shield bonded at both ends for production installs.',
+          ],
+          before: {
+            floor: 17,
+            peaks: [
+              { center: 12, width: 0.03, peak: 16 },
+              { center: 24, width: 0.03, peak: 13 },
+              { center: 36, width: 0.03, peak: 24 },
+              { center: 48, width: 0.03, peak: 11 },
+              { center: 60, width: 0.03, peak: 8 },
+            ],
+          },
+          after: {
+            floor: 15,
+            peaks: [
+              { center: 12, width: 0.03, peak: 12 },
+              { center: 24, width: 0.03, peak: 9 },
+              { center: 36, width: 0.03, peak: 20 },
+              { center: 48, width: 0.03, peak: 7 },
+              { center: 60, width: 0.03, peak: 5 },
+            ],
+          },
+          marginBefore: '+1 dB over limit',
+          subBefore: 'Failed at 36 MHz with production-length motor cable',
+          marginAfter: '−5 dB margin',
+          subAfter: 'CM choke + shielded cable passed with 5 dB margin',
+          takeaways: [
+            'Motor cable length in the field is often much longer than the bench test setup, so worst-case cable length should be used for compliance testing.',
+            'PWM commutation frequency and its harmonics — not motor RPM — determine the emission frequency.',
+            'Common-mode chokes on motor cables are a standard, effective, low-cost mitigation.',
+          ],
+          bestPractices: [
+            'Test with worst-case (longest expected) motor cable length.',
+            'Add common-mode chokes on motor phase cables as a default design element.',
+            'Specify shielded motor cable with both-ends shield bonding for EMC-sensitive installations.',
+          ],
+          emitTitle: '🔌 PWM Common-Mode Current on Motor Cables',
+          emitDesc:
+            'Fast PWM switching edges on the motor phases drive common-mode current onto the phase cables, and a several-meter motor cable run radiates that current efficiently.',
+        },
+        {
+          id: 'lcd-backlight',
+          category: 'Other',
+          title: 'LCD Backlight Driver PWM Harmonic on Ribbon Cable',
+          mechanism: 'cable',
+          freqMHz: 210,
+          freqLabel: '210 MHz (harmonic of the backlight PWM dimming frequency)',
+          problem:
+            'A display module failed RE testing at 210 MHz only when the backlight was dimmed to a specific duty cycle.',
+          investigation: [
+            'Varied backlight brightness and found the failure only appeared at certain PWM duty cycles, pointing at the backlight driver.',
+            'Traced the display ribbon cable routing and found it ran directly alongside the backlight driver PWM trace with no separation.',
+            'Measured coupling from the PWM trace onto adjacent ribbon cable conductors with a near-field probe.',
+          ],
+          rootCause:
+            'The backlight PWM trace ran in close parallel proximity to the display ribbon cable, capacitively coupling switching harmonics onto the cable, which then radiated.',
+          fix: [
+            'Rerouted the backlight PWM trace away from the ribbon cable path.',
+            'Added a small RC filter on the backlight PWM output to slow its edge rate.',
+            'Added ground traces between the PWM trace and the ribbon cable connector to shield the coupling path.',
+          ],
+          before: {
+            floor: 19,
+            peaks: [
+              { center: 70, width: 0.03, peak: 15 },
+              { center: 140, width: 0.03, peak: 13 },
+              { center: 210, width: 0.03, peak: 23 },
+              { center: 280, width: 0.03, peak: 10 },
+            ],
+          },
+          after: {
+            floor: 17,
+            peaks: [
+              { center: 70, width: 0.03, peak: 9 },
+              { center: 140, width: 0.03, peak: 8 },
+              { center: 210, width: 0.03, peak: 17 },
+              { center: 280, width: 0.03, peak: 6 },
+            ],
+          },
+          marginBefore: '+2 dB over limit',
+          subBefore: 'Failed at 210 MHz at a specific backlight duty cycle',
+          marginAfter: '−6 dB margin',
+          subAfter: 'Rerouted PWM trace passed with 6 dB margin across all duty cycles',
+          takeaways: [
+            'A failure that only appears at specific operating settings (like a duty cycle) is a strong clue pointing to that subsystem.',
+            'Physical trace proximity/coupling can turn an unrelated cable into an unintended radiator.',
+            'Backlight and other "cosmetic" subsystems need the same EMC layout discipline as core digital logic.',
+          ],
+          bestPractices: [
+            'Keep PWM traces physically separated from ribbon cables and other cable harnesses.',
+            'Add slew-rate limiting (RC filtering) on PWM outputs that do not need fast edges.',
+            'Test displays across their full brightness/duty-cycle range during pre-compliance.',
+          ],
+          emitTitle: '🔌 Capacitive Coupling Onto an Adjacent Cable',
+          emitDesc:
+            'A PWM trace routed too close to a ribbon cable capacitively couples its switching harmonics onto the cable conductors, which then radiate the coupled energy.',
+        },
+        {
+          id: 'usb3-ssc',
+          category: 'Other',
+          title: 'USB 3.0 Spread-Spectrum Clocking Misconfiguration',
+          mechanism: 'cable',
+          freqMHz: 5000,
+          freqLabel: '5 GHz (USB 3.0 SuperSpeed fundamental band)',
+          problem:
+            'A USB 3.0 host port failed RE testing with a narrowband peak near 5 GHz, even though similar designs from the same team normally passed comfortably.',
+          investigation: [
+            "Compared the failing board's firmware/BIOS configuration against a passing reference design and found spread-spectrum clocking (SSC) disabled.",
+            'Re-enabled SSC in a test build and saw the narrowband peak spread out and drop well below the limit.',
+            'Confirmed with the USB PHY vendor that SSC modulation is expected to be enabled for compliance.',
+          ],
+          rootCause:
+            'Spread-spectrum clocking was disabled (a configuration regression), leaving all the SuperSpeed signal energy concentrated in a narrow band instead of spread across a wider bandwidth, raising the peak measured field strength.',
+          fix: [
+            'Re-enabled spread-spectrum clocking in the USB PHY configuration.',
+            'Added an automated configuration check to the firmware build/release process to catch this regression.',
+            'Verified compliance margin at 5 GHz on the corrected build.',
+          ],
+          before: {
+            floor: 24,
+            peaks: [
+              { center: 2500, width: 0.02, peak: 6 },
+              { center: 4950, width: 0.01, peak: 8 },
+              { center: 5000, width: 0.008, peak: 20 },
+              { center: 5050, width: 0.01, peak: 8 },
+            ],
+          },
+          after: {
+            floor: 22,
+            peaks: [
+              { center: 2500, width: 0.02, peak: 4 },
+              { center: 4950, width: 0.015, peak: 6 },
+              { center: 5000, width: 0.03, peak: 14 },
+              { center: 5050, width: 0.015, peak: 6 },
+            ],
+          },
+          marginBefore: '+3 dB over limit',
+          subBefore: 'Failed with a narrow, tall peak at 5 GHz',
+          marginAfter: '−4 dB margin',
+          subAfter: 'SSC re-enabled: peak spread and dropped 4 dB below limit',
+          takeaways: [
+            'A configuration regression, not a hardware defect, can cause an RE failure — check firmware/BIOS settings first.',
+            'Spread-spectrum clocking is a legitimate, standard EMC mitigation technique, not just a "nice to have".',
+            'A narrow, very tall peak (versus a broad hump) often points to a missing spreading/modulation feature.',
+          ],
+          bestPractices: [
+            'Always verify spread-spectrum clocking settings are correct in the shipping configuration.',
+            'Add automated configuration checks to catch EMC-relevant regressions before a compliance lab visit.',
+            'Keep a known-good reference configuration to diff against when a design unexpectedly fails.',
+          ],
+          emitTitle: '📡 Concentrated Energy Without Spectrum Spreading',
+          emitDesc:
+            'Without spread-spectrum modulation, all the SuperSpeed signal energy stays concentrated in a narrow band, producing a tall peak instead of a wider, lower-amplitude spread.',
+        },
+        {
+          id: 'enclosure-seam',
+          category: 'Other',
+          title: 'Enclosure Seam/Slot Leakage Above 1 GHz',
+          mechanism: 'seam',
+          freqMHz: 2400,
+          freqLabel: '2.4 GHz (leakage through an enclosure ventilation slot)',
+          problem:
+            'A well-designed PCB with clean signal integrity still failed the microwave-band (horn antenna) RE test at 2.4 GHz.',
+          investigation: [
+            'Confirmed the internal PCB had no obvious 2.4 GHz source, ruling out a component-level emission.',
+            'Used a near-field probe scan around the enclosure exterior and found the strongest signal directly over a ventilation slot.',
+            "Calculated the slot's longest dimension and found it close to a half-wavelength at 2.4 GHz, making it an efficient slot antenna.",
+          ],
+          rootCause:
+            'Internal broadband noise leaked through a ventilation slot whose dimensions happened to resonate near 2.4 GHz, turning the enclosure opening itself into an efficient radiator.',
+          fix: [
+            'Added a honeycomb waveguide-below-cutoff vent panel to maintain airflow while blocking RF leakage.',
+            "Reduced the slot's longest dimension below a quarter-wavelength where full honeycomb venting was not feasible.",
+            'Added conductive gasketing around the vent panel frame.',
+          ],
+          before: {
+            floor: 26,
+            peaks: [
+              { center: 1200, width: 0.02, peak: 12 },
+              { center: 2400, width: 0.01, peak: 23 },
+              { center: 3600, width: 0.015, peak: 14 },
+              { center: 4800, width: 0.015, peak: 9 },
+            ],
+          },
+          after: {
+            floor: 24,
+            peaks: [
+              { center: 1200, width: 0.02, peak: 8 },
+              { center: 2400, width: 0.01, peak: 18 },
+              { center: 3600, width: 0.015, peak: 9 },
+              { center: 4800, width: 0.015, peak: 5 },
+            ],
+          },
+          marginBefore: '+2 dB over limit',
+          subBefore: 'Failed at 2.4 GHz despite a clean PCB design',
+          marginAfter: '−5 dB margin',
+          subAfter: 'Honeycomb vent + gasketing passed with 5 dB margin',
+          takeaways: [
+            'A clean PCB design does not guarantee a passing RE test — the enclosure itself is part of the EMC design.',
+            'Slot and seam dimensions relative to wavelength determine whether an opening becomes an efficient antenna.',
+            'Near-field probing around the exterior of the enclosure (not just the PCB) can localize this class of failure.',
+          ],
+          bestPractices: [
+            'Treat enclosure vents, seams, and cutouts as part of the EMC design from the start, especially above 1 GHz.',
+            'Use honeycomb waveguide-below-cutoff vents where airflow and shielding are both required.',
+            'Keep any unavoidable slot dimension well below a quarter-wavelength at the highest frequency of concern.',
+          ],
+          emitTitle: '🏠 Slot Antenna Formed by a Ventilation Cutout',
+          emitDesc:
+            'An enclosure opening whose longest dimension approaches a half-wavelength at the frequency of concern behaves like a slot antenna, radiating internal noise efficiently even with a perfectly clean PCB.',
+        },
+        {
+          id: 'bms-balancing',
+          category: 'Other',
+          title: 'BMS Cell-Balancing Switch Noise on Battery Harness',
+          mechanism: 'cable',
+          freqMHz: 14,
+          freqLabel: '14 MHz (cell-balancing switching harmonic)',
+          problem:
+            'A battery management system (BMS) failed the low-frequency (loop antenna) RE test at 14 MHz, only while active cell balancing was running.',
+          investigation: [
+            'Disabled cell balancing during a retest and the failure disappeared, isolating the balancing circuit as the source.',
+            'Measured the cell-balancing FET switching frequency and found the failing frequency was a harmonic of it.',
+            'Traced the battery harness routing and found the balancing FET switch node routed close to the harness connector with no filtering.',
+          ],
+          rootCause:
+            'Switching noise from the cell-balancing FETs coupled onto the battery harness with no filtering, and the multi-cell harness acted as an efficient loop/cable radiator at the balancing harmonic.',
+          fix: [
+            'Added an RC filter directly at each balancing FET switch node.',
+            'Added a small ferrite bead on the battery harness near the BMS connector.',
+            'Adjusted balancing FET switching frequency to move harmonics away from the most sensitive test frequencies where possible.',
+          ],
+          before: {
+            floor: 13,
+            peaks: [
+              { center: 7, width: 0.02, peak: 18 },
+              { center: 14, width: 0.02, peak: 28 },
+              { center: 21, width: 0.02, peak: 20 },
+              { center: 28, width: 0.02, peak: 14 },
+            ],
+          },
+          after: {
+            floor: 11,
+            peaks: [
+              { center: 7, width: 0.02, peak: 14 },
+              { center: 14, width: 0.02, peak: 25 },
+              { center: 21, width: 0.02, peak: 16 },
+              { center: 28, width: 0.02, peak: 10 },
+            ],
+          },
+          marginBefore: '+1 dB over limit',
+          subBefore: 'Failed at 14 MHz only during active cell balancing',
+          marginAfter: '−4 dB margin',
+          subAfter: 'RC filtering + ferrite bead passed with 4 dB margin',
+          takeaways: [
+            'A failure that only appears during a specific operating mode (like active balancing) points directly at that subsystem.',
+            'Battery harnesses are long, low-impedance loops that can radiate efficiently at relatively low frequencies.',
+            'Balancing circuits are often designed for thermal/electrical performance only, with EMC as an afterthought.',
+          ],
+          bestPractices: [
+            'Add RC filtering at every switching FET in a cell-balancing circuit as a standard practice.',
+            'Add ferrite beads on battery harness connectors near the BMS.',
+            'Test BMS designs with active balancing running, not just in a static/idle state.',
+          ],
+          emitTitle: '🔌 Balancing FET Noise on the Battery Harness',
+          emitDesc:
+            'Unfiltered switching noise from the balancing FETs couples onto the multi-cell battery harness, which acts as a long, low-impedance loop that radiates efficiently at the switching harmonic.',
+        },
+        {
+          id: 'shield-discontinuity',
+          category: 'Other',
+          title: 'Intermittent Cable Shield Ground Discontinuity',
+          mechanism: 'cable',
+          freqMHz: 130,
+          freqLabel: '130 MHz (resonant leakage point, height- and orientation-dependent)',
+          problem:
+            'A product intermittently failed RE testing at 130 MHz — passing on some test runs and failing on others with identical hardware and firmware.',
+          investigation: [
+            'Noted the emission only appeared at specific antenna mast heights and turntable angles, pointing to a resonance-dependent issue.',
+            'Inspected the cable shield termination and found a pigtail connection instead of a full 360-degree shield termination.',
+            'Wiggled the cable during a bench scan and saw the emission level change significantly, confirming a marginal shield connection.',
+          ],
+          rootCause:
+            'A pigtailed cable shield termination created a high-impedance, resonance-dependent leakage point, so radiated field strength depended on the exact cable position and orientation.',
+          fix: [
+            'Replaced the pigtail termination with a full 360-degree shield termination at the connector backshell.',
+            'Added strain relief to prevent the connector from being reseated at a slightly different angle in production.',
+            'Added a cable-wiggle test step to the pre-compliance checklist to catch marginal shield terminations early.',
+          ],
+          before: {
+            floor: 18,
+            peaks: [
+              { center: 65, width: 0.02, peak: 14 },
+              { center: 130, width: 0.02, peak: 24 },
+              { center: 195, width: 0.02, peak: 16 },
+              { center: 260, width: 0.02, peak: 10 },
+            ],
+          },
+          after: {
+            floor: 16,
+            peaks: [
+              { center: 65, width: 0.02, peak: 10 },
+              { center: 130, width: 0.02, peak: 19 },
+              { center: 195, width: 0.02, peak: 11 },
+              { center: 260, width: 0.02, peak: 6 },
+            ],
+          },
+          marginBefore: '+2 dB over limit (intermittent)',
+          subBefore: 'Failed inconsistently at 130 MHz depending on cable orientation',
+          marginAfter: '−5 dB margin',
+          subAfter: '360° shield termination passed consistently with 5 dB margin',
+          takeaways: [
+            'An intermittent or orientation-dependent failure is a strong signature of a marginal shield termination.',
+            'Pigtail shield terminations are a common, avoidable root cause of exactly this kind of inconsistent result.',
+            'A simple cable-wiggle test during pre-compliance can catch this class of defect cheaply.',
+          ],
+          bestPractices: [
+            'Always use full 360-degree shield termination at cable connectors instead of pigtails.',
+            'Add strain relief so connectors cannot be reseated at an inconsistent angle in production.',
+            'Include a cable-wiggle/reseat test step in every pre-compliance EMC checklist.',
+          ],
+          emitTitle: '🔌 Resonant Leakage From a Pigtail Shield',
+          emitDesc:
+            'A pigtail shield termination behaves like a small, high-impedance antenna stub whose radiation efficiency depends heavily on cable position and orientation, unlike a solid 360° termination.',
+        },
+      ];
+
+      /* ─── Antenna image bucket by frequency ─────────────────────────── */
+      function pickAntenna(freqMHz) {
+        if (freqMHz < 30) {
+          return {
+            src: 'https://commons.wikimedia.org/wiki/Special:FilePath/IEC_loop_antenna.svg',
+            style: 'background:#fff;object-fit:contain;padding:12px',
+            name: 'Loop Antenna (9 kHz–30 MHz)',
+            desc: 'Shielded loop, sensitive to the magnetic field component — the correct antenna for this failure’s frequency.',
+            link: 'https://commons.wikimedia.org/wiki/File:IEC_loop_antenna.svg',
+          };
+        } else if (freqMHz < 1000) {
+          return {
+            src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Rotatable_log-periodic_antenna.jpg',
+            style: '',
+            name: 'Log-Periodic Dipole Array (30 MHz–1 GHz)',
+            desc: 'Wideband directional array — the standard antenna that captured this failure’s frequency.',
+            link: 'https://commons.wikimedia.org/wiki/File:Rotatable_log-periodic_antenna.jpg',
+          };
+        }
+        return {
+          src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Horn_antenna_types.svg',
+          style: 'background:#fff;object-fit:contain;padding:12px',
+          name: 'Horn Antenna (1 GHz–40 GHz)',
+          desc: 'Compact, high-gain waveguide horn — used for this failure’s microwave-band frequency.',
+          link: 'https://commons.wikimedia.org/wiki/File:Horn_antenna_types.svg',
+        };
+      }
+
+      /* ─── Representative real hardware image per case ────────────────── */
+      var HW_IMAGES = {
+        fpga: {
+          file: 'ALTERA_DE2_FPGA_Board.jpg',
+          name: 'FPGA Development Board',
+          desc: 'A representative FPGA board of the same class used in this case study — memory interface, transceivers, and clock distribution all live on a board like this.',
+        },
+        smps: {
+          file: 'ATX_power_supply_unit-open.jpg',
+          name: 'Switch-Mode Power Supply Board',
+          desc: 'A representative opened SMPS board showing the transformer, switch node, and input/output filtering typical of this failure type.',
+        },
+        usb3: {
+          file: 'Circuit_board_from_a_USB_3.0_external_2.5-inch_HDD_enclosure.jpg',
+          name: 'USB 3.0 Interface PCB',
+          desc: 'A representative USB 3.0 host/device PCB — the SuperSpeed differential pair and clocking circuitry are the same class of interface involved here.',
+        },
+        bms: {
+          file: 'Generic_Chinese_6S_BMS_board_for_lithium_batteries_02.jpg',
+          name: 'Battery Management System (BMS) Board',
+          desc: 'A representative multi-cell BMS board — cell-balancing FETs and the battery harness connector are visible on boards like this.',
+        },
+        motor: {
+          file: 'Floppy_brushless_motor.jpg',
+          name: 'Brushless DC Motor',
+          desc: 'A representative brushless DC motor — the commutation drive electronics for a motor like this are the source of the PWM harmonics in this case.',
+        },
+        enclosure: {
+          file: 'ATX_power_supply_interior.jpg',
+          name: 'Vented Metal Enclosure Interior',
+          desc: 'A representative metal enclosure interior showing internal wiring, bonding points, and ventilation openings — the same class of structure involved in this failure.',
+        },
+        pcb_generic: {
+          file: 'PCB_Prototypes.jpg',
+          name: 'Generic PCB / Cable Interface',
+          desc: 'A representative PCB and cable interface — illustrating the class of trace/cable proximity or connector termination involved in this failure.',
+        },
+      };
+      var CASE_HW = {
+        'ddr-bus': 'fpga',
+        'serdes-cable': 'fpga',
+        'config-clock': 'fpga',
+        'sso-noise': 'fpga',
+        'clock-tree-ringing': 'fpga',
+        'buck-noise': 'smps',
+        'flyback-cm': 'smps',
+        'boost-cable': 'smps',
+        'gan-gate-ringing': 'smps',
+        'enclosure-grounding': 'enclosure',
+        'motor-pwm': 'motor',
+        'lcd-backlight': 'pcb_generic',
+        'usb3-ssc': 'usb3',
+        'enclosure-seam': 'enclosure',
+        'bms-balancing': 'bms',
+        'shield-discontinuity': 'pcb_generic',
+      };
+      function pickHw(caseId) {
+        var key = CASE_HW[caseId] || 'pcb_generic';
+        var hw = HW_IMAGES[key];
+        return {
+          src: 'https://commons.wikimedia.org/wiki/Special:FilePath/' + hw.file,
+          name: hw.name,
+          desc: hw.desc,
+          link: 'https://commons.wikimedia.org/wiki/File:' + hw.file,
+        };
+      }
+
+      /* ─── Populate dropdown ──────────────────────────────────────────── */
+      var CAT_LABELS = {
+        FPGA: 'FPGA-Based',
+        'Power Supply': 'Power Supply',
+        Other: 'Other / Mixed Issues',
+      };
+      var CAT_BADGE_CLASS = {
+        FPGA: 'badge-blue',
+        'Power Supply': 'badge-orange',
+        Other: 'badge-green',
+      };
+      function populateSelect() {
+        var sel = document.getElementById('caseSelect');
+        var groups = {};
+        CASES.forEach(function (c) {
+          if (!groups[c.category]) groups[c.category] = document.createElement('optgroup');
+          groups[c.category].label = CAT_LABELS[c.category];
+        });
+        ['FPGA', 'Power Supply', 'Other'].forEach(function (cat) {
+          if (groups[cat]) sel.appendChild(groups[cat]);
+        });
+        CASES.forEach(function (c) {
+          var opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.title + ' (' + c.freqMHz + ' MHz)';
+          groups[c.category].appendChild(opt);
+        });
+      }
+
+      /* ─── Render a case into the fixed template ──────────────────────── */
+      var currentCase = null;
+      function renderCase(id) {
+        var c = CASES.filter(function (x) {
+          return x.id === id;
+        })[0];
+        if (!c) return;
+        currentCase = c;
+
+        document.getElementById('caseCatBadge').textContent = CAT_LABELS[c.category];
+        document.getElementById('caseCatBadge').className = 'badge ' + CAT_BADGE_CLASS[c.category];
+        document.getElementById('caseTitle').textContent = c.title;
+        document.getElementById('caseFreqLabel').textContent = c.freqLabel;
+        document.getElementById('caseProblem').textContent = c.problem;
+
+        var invEl = document.getElementById('caseInvestigation');
+        invEl.innerHTML = '';
+        c.investigation.forEach(function (t) {
+          var li = document.createElement('li');
+          li.textContent = t;
+          invEl.appendChild(li);
+        });
+
+        document.getElementById('caseRootCause').textContent = c.rootCause;
+
+        var fixEl = document.getElementById('caseFix');
+        fixEl.innerHTML = '';
+        c.fix.forEach(function (t) {
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="check-icon">✓</span> ';
+          li.appendChild(document.createTextNode(t));
+          fixEl.appendChild(li);
+        });
+
+        document.getElementById('caseMarginBefore').textContent = c.marginBefore;
+        document.getElementById('caseSubBefore').textContent = c.subBefore;
+        document.getElementById('caseMarginAfter').textContent = c.marginAfter;
+        document.getElementById('caseSubAfter').textContent = c.subAfter;
+
+        document.getElementById('caseEmitTitle').textContent = c.emitTitle;
+        document.getElementById('caseEmitDesc').textContent = c.emitDesc;
+
+        var ant = pickAntenna(c.freqMHz);
+        var antImg = document.getElementById('caseAntennaImg');
+        antImg.src = ant.src;
+        antImg.alt = ant.name;
+        antImg.style.cssText = ant.style;
+        document.getElementById('caseAntennaName').textContent = ant.name;
+        document.getElementById('caseAntennaDesc').textContent = ant.desc;
+        document.getElementById('caseAntennaLink').href = ant.link;
+
+        var hw = pickHw(c.id);
+        var hwImg = document.getElementById('caseHwImg');
+        hwImg.src = hw.src;
+        hwImg.alt = hw.name + ' (representative)';
+        document.getElementById('caseHwName').textContent = hw.name;
+        document.getElementById('caseHwDesc').textContent = hw.desc;
+        document.getElementById('caseHwLink').href = hw.link;
+
+        var takeEl = document.getElementById('caseTakeaways');
+        takeEl.innerHTML = '';
+        c.takeaways.forEach(function (t) {
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="check-icon">✓</span> ';
+          li.appendChild(document.createTextNode(t));
+          takeEl.appendChild(li);
+        });
+
+        var bpEl = document.getElementById('caseBestPractices');
+        bpEl.innerHTML = '';
+        c.bestPractices.forEach(function (t) {
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="check-icon">✓</span> ';
+          li.appendChild(document.createTextNode(t));
+          bpEl.appendChild(li);
+        });
+
+        drawCaseChart();
+      }
+
+      /* ─── Plotly: per-case before/after spectrum vs. limit ───────────── */
+      function gaussianBump(f, center, widthOctaves, peakDb) {
+        var ratio = Math.log2(f / center);
+        return peakDb * Math.exp(-(ratio * ratio) / (2 * widthOctaves * widthOctaves));
+      }
+      function buildTrace(freqs, spec) {
+        return freqs.map(function (f) {
+          var v = spec.floor;
+          spec.peaks.forEach(function (p) {
+            v += gaussianBump(f, p.center, p.width, p.peak);
+          });
+          return v;
+        });
+      }
+      function drawCaseChart() {
+        var el = document.getElementById('plotlyCase');
+        if (!el || typeof Plotly === 'undefined' || !currentCase) return;
+        var c = currentCase;
+
+        // Coarse background grid across the full range...
+        var freqs = [];
+        for (var i = 0; i <= 160; i++) {
+          freqs.push(0.009 * Math.pow(6000 / 0.009, i / 160));
+        }
+        // ...plus a dense grid around every peak center (including both harmonic
+        // context peaks and the primary failure), since narrow peaks (some as
+        // little as 0.008 octaves wide) fall between coarse grid points and
+        // would otherwise be invisible even though the math is correct.
+        var allPeaks = c.before.peaks.concat(c.after.peaks);
+        allPeaks.forEach(function (p) {
+          var span = Math.max(p.width * 6, 0.01);
+          for (var j = -40; j <= 40; j++) {
+            freqs.push(p.center * Math.pow(2, (j / 40) * span));
+          }
+        });
+        freqs = freqs.filter(function (f) {
+          return f >= 0.009 && f <= 6000;
+        });
+        freqs.sort(function (a, b) {
+          return a - b;
+        });
+
+        var beforeY = buildTrace(freqs, c.before);
+        var afterY = buildTrace(freqs, c.after);
+
+        var limitX = [0.009, 30, 30, 230, 230, 1000, 1000, 6000];
+        var limitY = [40, 40, 40, 40, 47, 47, 47, 47];
+
+        var traces = [
+          {
+            x: freqs,
+            y: beforeY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Before fix',
+            line: { color: '#ef4444', width: 2.5 },
+          },
+          {
+            x: freqs,
+            y: afterY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'After fix',
+            line: { color: '#10b981', width: 2.5 },
+          },
+          {
+            x: limitX,
+            y: limitY,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Representative Class B limit',
+            line: { color: '#f59e0b', width: 2, dash: 'dash', shape: 'hv' },
+          },
+        ];
+
+        var layout = Object.assign(getPlotlyLayoutBase(), {
+          xaxis: {
+            type: 'log',
+            title: 'Frequency (MHz)',
+            gridcolor: inkColor(0.08),
+            zerolinecolor: inkColor(0.15),
+          },
+          yaxis: {
+            title: 'Field Strength (dBµV/m, quasi-peak)',
+            gridcolor: inkColor(0.08),
+            zerolinecolor: inkColor(0.15),
+          },
+          legend: { orientation: 'h', y: -0.25 },
+          annotations: [
+            {
+              x: Math.log10(c.freqMHz),
+              y: buildTrace([c.freqMHz], c.before)[0] + 4,
+              xref: 'x',
+              yref: 'y',
+              text: c.marginBefore + ' (before)',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 30,
+              ay: -30,
+              font: { color: '#ef4444', size: 10 },
+            },
+            {
+              x: Math.log10(c.freqMHz),
+              y: buildTrace([c.freqMHz], c.after)[0] - 4,
+              xref: 'x',
+              yref: 'y',
+              text: c.marginAfter + ' (after)',
+              showarrow: true,
+              arrowhead: 2,
+              ax: 40,
+              ay: 30,
+              font: { color: '#10b981', size: 10 },
+            },
+          ],
+        });
+
+        Plotly.newPlot(el, traces, layout, { displayModeBar: false, responsive: true });
+      }
+
+      /* ─── Canvas: mechanism animations (loop / cable / seam) ─────────── */
+      var animStart = null;
+      function drawMechAnim(ts) {
+        var canvas = document.getElementById('caseAnimCanvas');
+        if (!canvas || !currentCase) {
+          requestAnimationFrame(drawMechAnim);
+          return;
+        }
+        var rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) {
+          requestAnimationFrame(drawMechAnim);
+          return;
+        }
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        var ctx = canvas.getContext('2d');
+        if (animStart === null) animStart = ts;
+        var elapsed = (ts - animStart) / 1000;
+        var w = canvas.width,
+          h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.font = '11px Inter, sans-serif';
+
+        if (currentCase.mechanism === 'loop') {
+          drawLoopAnim(ctx, w, h, elapsed);
+        } else if (currentCase.mechanism === 'cable') {
+          drawCableAnim(ctx, w, h, elapsed);
+        } else {
+          drawSeamAnim(ctx, w, h, elapsed);
+        }
+
+        requestAnimationFrame(drawMechAnim);
+      }
+
+      function drawLoopAnim(ctx, w, h, elapsed) {
+        var traceY = h * 0.32;
+        var planeY = h * 0.62;
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Signal trace (current →)', 8, traceY - 10);
+        ctx.strokeStyle = inkColor(0.85);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(20, traceY);
+        ctx.lineTo(w - 20, traceY);
+        ctx.stroke();
+
+        var gapStart = w * 0.42;
+        var gapEnd = w * 0.58;
+        ctx.strokeStyle = 'rgba(239,68,68,0.85)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(20, planeY);
+        ctx.lineTo(gapStart, planeY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(gapEnd, planeY);
+        ctx.lineTo(w - 20, planeY);
+        ctx.stroke();
+        ctx.fillText('Reference plane (split / hot loop)', 8, planeY + 18);
+
+        var sigX = 20 + ((elapsed * 90) % (w - 40));
+        ctx.fillStyle = '#22d3ee';
+        ctx.beginPath();
+        ctx.arc(sigX, traceY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        var retProgress = ((elapsed * 90) % (w - 40)) + 20;
+        if (retProgress < gapStart || retProgress > gapEnd) {
+          ctx.fillStyle = 'rgba(245,158,11,0.9)';
+          ctx.beginPath();
+          ctx.arc(retProgress, planeY, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = 'rgba(245,158,11,0.9)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(gapStart, planeY);
+          ctx.quadraticCurveTo((gapStart + gapEnd) / 2, planeY - h * 0.28, gapEnd, planeY);
+          ctx.stroke();
+          var detourAlpha = 0.4 + 0.4 * Math.sin(elapsed * 6);
+          ctx.strokeStyle = 'rgba(239,68,68,' + detourAlpha + ')';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(
+            (gapStart + gapEnd) / 2,
+            (traceY + planeY) / 2 - h * 0.1,
+            (gapEnd - gapStart) / 1.6,
+            h * 0.22,
+            0,
+            0,
+            Math.PI * 2
+          );
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Detour/loop enlargement = more radiated field', 8, h - 10);
+      }
+
+      function drawCableAnim(ctx, w, h, elapsed) {
+        var midY = h / 2;
+        ctx.strokeStyle = inkColor(0.7);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(20, midY - 25, 60, 50);
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Board', 32, midY + 4);
+
+        var cableEndX = w - 40;
+        ctx.strokeStyle = inkColor(0.85);
+        ctx.beginPath();
+        ctx.moveTo(80, midY);
+        ctx.lineTo(cableEndX, midY);
+        ctx.stroke();
+        ctx.fillText('Cable / harness', 90, midY - 14);
+
+        for (var i = 0; i < 4; i++) {
+          var prog = (elapsed * 0.6 + i * 0.25) % 1;
+          var x = 80 + prog * (cableEndX - 80);
+          var alpha = 0.15 + 0.5 * Math.sin(prog * Math.PI);
+          ctx.strokeStyle = 'rgba(239,68,68,' + alpha + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(x, midY, 6, 22, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        for (var j = 0; j < 3; j++) {
+          var rp = (elapsed * 1.1 + j * 0.33) % 1;
+          ctx.strokeStyle = 'rgba(34,211,238,' + 0.5 * (1 - rp) + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cableEndX, midY, 10 + rp * 40, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Common-mode current → cable radiates like a monopole antenna', 8, h - 10);
+      }
+
+      function drawSeamAnim(ctx, w, h, elapsed) {
+        var boxX = w * 0.25,
+          boxY = h * 0.2,
+          boxW = w * 0.5,
+          boxH = h * 0.5;
+        ctx.strokeStyle = inkColor(0.75);
+        ctx.lineWidth = 3;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Enclosure', boxX, boxY - 8);
+
+        var slotY = boxY + boxH * 0.5;
+        var slotX1 = boxX + boxW * 0.35;
+        var slotX2 = boxX + boxW * 0.65;
+        ctx.clearRect(slotX1, slotY - 3, slotX2 - slotX1, 6);
+        ctx.strokeStyle = 'rgba(239,68,68,0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(slotX1, slotY);
+        ctx.lineTo(slotX2, slotY);
+        ctx.stroke();
+        ctx.fillText('Seam / vent slot', slotX1, slotY + 16);
+
+        // Internal noise bouncing inside
+        var bounceX = boxX + boxW / 2 + Math.sin(elapsed * 3) * boxW * 0.25;
+        ctx.fillStyle = 'rgba(99,102,241,0.7)';
+        ctx.beginPath();
+        ctx.arc(bounceX, boxY + boxH * 0.3, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Escaping field arcs through the slot
+        for (var k = 0; k < 3; k++) {
+          var rp2 = (elapsed * 1 + k * 0.33) % 1;
+          ctx.strokeStyle = 'rgba(34,211,238,' + 0.5 * (1 - rp2) + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc((slotX1 + slotX2) / 2, slotY, 8 + rp2 * 50, Math.PI, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = inkColor(0.55);
+        ctx.fillText('Internal noise leaks through a resonant seam/slot opening', 8, h - 10);
+      }
+
+      requestAnimationFrame(drawMechAnim);
+
+      /* ─── Wire up dropdown + resize/theme redraw ─────────────────────── */
+      populateSelect();
+      document.getElementById('caseSelect').addEventListener('change', function (e) {
+        animStart = null;
+        renderCase(e.target.value);
+      });
+      renderCase(CASES[0].id);
+
+      window.addEventListener('resize', drawCaseChart);
+
+      var themeObserver = new MutationObserver(function () {
+        drawCaseChart();
+      });
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>
