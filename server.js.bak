@@ -1,0 +1,2618 @@
+/**
+ * Rising Edge Technologies â€” Express Server
+ * Stack: Express Â· PostgreSQL (pg) Â· bcrypt Â· JWT Â· Nodemailer
+ */
+
+'use strict';
+
+require('dotenv').config();
+
+const path = require('path');
+const crypto = require('crypto');
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const { Pool } = require('pg');
+
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${PORT}`;
+const BCRYPT_ROUNDS = 12;
+const ACCESS_TTL = '15m';
+const REFRESH_TTL_DAYS = 7;
+
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 10,
+  idleTimeoutMillis: 30000,
+});
+
+db.on('error', err => console.error('[pg] unexpected pool error', err));
+
+async function initDB() {
+  // â”€â”€ Extensions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`).catch(() => {});
+  await db.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).catch(() => {});
+  await db.query(`CREATE SEQUENCE IF NOT EXISTS invoice_number_seq START 1000`).catch(() => {});
+
+  // â”€â”€ Core auth tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id                    TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      full_name             TEXT NOT NULL,
+      email                 TEXT UNIQUE NOT NULL,
+      password_hash         TEXT NOT NULL,
+      role                  TEXT NOT NULL DEFAULT 'USER',
+      status                TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION',
+      email_verified        BOOLEAN NOT NULL DEFAULT FALSE,
+      avatar_url            TEXT,
+      mobile                TEXT,
+      location              TEXT,
+      "current_role"        TEXT,
+      org                   TEXT,
+      job_title             TEXT,
+      linkedin_url          TEXT,
+      bio                   TEXT,
+      failed_login_attempts INT NOT NULL DEFAULT 0,
+      locked_until          TIMESTAMPTZ,
+      last_login_at         TIMESTAMPTZ,
+      email_verify_token    TEXT,
+      email_verify_expiry   TIMESTAMPTZ,
+      password_reset_token  TEXT,
+      password_reset_expiry TIMESTAMPTZ,
+      created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+      id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token_hash  TEXT UNIQUE NOT NULL,
+      ip_address  TEXT,
+      device_info TEXT,
+      expires_at  TIMESTAMPTZ NOT NULL,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS login_history (
+      id         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ip_address TEXT,
+      user_agent TEXT,
+      success    BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Subscription & payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS subscription_plans (
+      id            TEXT PRIMARY KEY,
+      name          TEXT NOT NULL,
+      price_monthly NUMERIC(10,2) NOT NULL DEFAULT 0,
+      price_yearly  NUMERIC(10,2) NOT NULL DEFAULT 0,
+      description   TEXT,
+      features      JSONB NOT NULL DEFAULT '[]',
+      max_courses   INT NOT NULL DEFAULT 0,
+      badge_color   TEXT NOT NULL DEFAULT 'gray',
+      is_popular    BOOLEAN NOT NULL DEFAULT FALSE,
+      is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+      sort_order    INT NOT NULL DEFAULT 0,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS user_subscriptions (
+      id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id       TEXT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      plan_id       TEXT NOT NULL DEFAULT 'basic',
+      status        TEXT NOT NULL DEFAULT 'ACTIVE',
+      billing_cycle TEXT NOT NULL DEFAULT 'monthly',
+      start_date    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      end_date      TIMESTAMPTZ,
+      cancelled_at  TIMESTAMPTZ,
+      cancel_reason TEXT,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS coupons (
+      id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      code        TEXT UNIQUE NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'percent',
+      val         NUMERIC(10,2) NOT NULL DEFAULT 0,
+      used        INT NOT NULL DEFAULT 0,
+      limit_count INT NOT NULL DEFAULT 100,
+      expires     TEXT NOT NULL DEFAULT 'No expiry',
+      active      BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // Idempotent column additions for coupon scoping & per-user limits
+  await db.query(
+    `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS applies_to TEXT NOT NULL DEFAULT 'all'`
+  );
+  await db.query(`ALTER TABLE coupons ADD COLUMN IF NOT EXISTS applicable_ids TEXT[] DEFAULT NULL`);
+  await db.query(
+    `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS per_user_limit INT NOT NULL DEFAULT 1`
+  );
+  // Add coupon tracking to tool_payments
+  await db.query(
+    `ALTER TABLE tool_payments ADD COLUMN IF NOT EXISTS coupon_id TEXT REFERENCES coupons(id)`
+  );
+  await db.query(
+    `ALTER TABLE tool_payments ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0`
+  );
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS coupon_usage (
+      id         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      coupon_id  TEXT NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      order_id   TEXT,
+      used_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await db.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_coupon_usage_order ON coupon_usage(order_id) WHERE order_id IS NOT NULL`
+  );
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS payment_orders (
+      id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      order_id        TEXT UNIQUE NOT NULL,
+      user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      plan_id         TEXT,
+      product_type    TEXT NOT NULL DEFAULT 'subscription',
+      billing_cycle   TEXT NOT NULL DEFAULT 'monthly',
+      amount          NUMERIC(10,2) NOT NULL,
+      gst_amount      NUMERIC(10,2) NOT NULL DEFAULT 0,
+      discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+      currency        TEXT NOT NULL DEFAULT 'INR',
+      status          TEXT NOT NULL DEFAULT 'pending',
+      gateway         TEXT NOT NULL DEFAULT 'cashfree',
+      gateway_order_id TEXT,
+      created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS payments (
+      id               TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      order_id         TEXT NOT NULL REFERENCES payment_orders(id) ON DELETE CASCADE,
+      user_id          TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      payment_id       TEXT UNIQUE,
+      gateway          TEXT NOT NULL DEFAULT 'cashfree',
+      amount           NUMERIC(10,2) NOT NULL,
+      currency         TEXT NOT NULL DEFAULT 'INR',
+      status           TEXT NOT NULL DEFAULT 'pending',
+      payment_method   TEXT,
+      gateway_response JSONB,
+      paid_at          TIMESTAMPTZ,
+      created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS invoices (
+      id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      invoice_number TEXT UNIQUE NOT NULL DEFAULT ('INV-' || LPAD(nextval('invoice_number_seq')::text, 6, '0')),
+      order_id       TEXT NOT NULL REFERENCES payment_orders(id) ON DELETE CASCADE,
+      user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      amount         NUMERIC(10,2) NOT NULL,
+      gst_amount     NUMERIC(10,2) NOT NULL DEFAULT 0,
+      total          NUMERIC(10,2) NOT NULL,
+      status         TEXT NOT NULL DEFAULT 'issued',
+      issued_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Legacy tool payment tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tool_subscriptions (
+      id                TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id           TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      plan_id           TEXT NOT NULL,
+      billing_cycle     TEXT NOT NULL DEFAULT 'monthly',
+      status            TEXT NOT NULL DEFAULT 'active',
+      start_date        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expiry_date       TIMESTAMPTZ,
+      auto_renew        BOOLEAN NOT NULL DEFAULT TRUE,
+      remaining_credits INT NOT NULL DEFAULT 10,
+      credits_used      INT NOT NULL DEFAULT 0,
+      transaction_id    TEXT,
+      payment_id        TEXT,
+      cashfree_order_id TEXT,
+      amount            NUMERIC(10,2) NOT NULL DEFAULT 0,
+      created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tool_payments (
+      id             TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      order_id       TEXT UNIQUE NOT NULL,
+      payment_id     TEXT,
+      user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      plan_id        TEXT NOT NULL,
+      billing_cycle  TEXT NOT NULL,
+      amount         NUMERIC(10,2) NOT NULL,
+      gst_amount     NUMERIC(10,2) NOT NULL DEFAULT 0,
+      status         TEXT NOT NULL DEFAULT 'pending',
+      gateway        TEXT NOT NULL DEFAULT 'cashfree',
+      invoice_number TEXT,
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Learning platform â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS course_categories (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      slug        TEXT UNIQUE NOT NULL,
+      description TEXT,
+      sort_order  INT NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS courses (
+      id            TEXT PRIMARY KEY,
+      title         TEXT NOT NULL,
+      slug          TEXT UNIQUE,
+      category      TEXT NOT NULL,
+      category_id   TEXT REFERENCES course_categories(id),
+      description   TEXT,
+      thumbnail_url TEXT,
+      status        TEXT NOT NULL DEFAULT 'draft',
+      modules_count INT NOT NULL DEFAULT 0,
+      href          TEXT,
+      gradient      TEXT,
+      badge_color   TEXT,
+      required_plan TEXT NOT NULL DEFAULT 'basic',
+      price_inr     NUMERIC(10,2) NOT NULL DEFAULT 0,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS plan_course_access (
+      plan_id   TEXT NOT NULL,
+      course_id TEXT NOT NULL,
+      PRIMARY KEY (plan_id, course_id)
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS course_enrollments (
+      id               TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id          TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      course_id        TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+      status           TEXT NOT NULL DEFAULT 'active',
+      progress         INT NOT NULL DEFAULT 0,
+      last_accessed_at TIMESTAMPTZ,
+      enrolled_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      completed_at     TIMESTAMPTZ,
+      UNIQUE(user_id, course_id)
+    )
+  `);
+
+  // â”€â”€ Certificates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS certificate_issues (
+      id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      course_id     TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+      cert_number   TEXT UNIQUE NOT NULL DEFAULT ('CERT-' || UPPER(SUBSTRING(gen_random_uuid()::text, 1, 8))),
+      issued_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at    TIMESTAMPTZ,
+      revoked       BOOLEAN NOT NULL DEFAULT FALSE,
+      revoked_at    TIMESTAMPTZ,
+      revoke_reason TEXT,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Tools & Resources â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tools (
+      id          TEXT PRIMARY KEY,
+      title       TEXT NOT NULL,
+      category    TEXT NOT NULL DEFAULT 'calculator',
+      plan        TEXT NOT NULL DEFAULT 'basic',
+      description TEXT,
+      url         TEXT NOT NULL DEFAULT '#',
+      status      TEXT NOT NULL DEFAULT 'active',
+      sort_order  INT NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS resources (
+      id          TEXT PRIMARY KEY,
+      title       TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'guide',
+      plan        TEXT NOT NULL DEFAULT 'basic',
+      description TEXT,
+      url         TEXT NOT NULL DEFAULT '#',
+      downloads   INT NOT NULL DEFAULT 0,
+      sort_order  INT NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Admin & audit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id     TEXT REFERENCES users(id) ON DELETE SET NULL,
+      action      TEXT NOT NULL,
+      entity_type TEXT,
+      entity_id   TEXT,
+      old_data    JSONB,
+      new_data    JSONB,
+      ip_address  TEXT,
+      user_agent  TEXT,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS contact_requests (
+      id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      name        TEXT NOT NULL,
+      email       TEXT NOT NULL,
+      phone       TEXT,
+      company     TEXT,
+      subject     TEXT,
+      message     TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'general',
+      status      TEXT NOT NULL DEFAULT 'new',
+      assigned_to TEXT REFERENCES users(id) ON DELETE SET NULL,
+      resolved_at TIMESTAMPTZ,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type       TEXT NOT NULL,
+      title      TEXT NOT NULL,
+      message    TEXT,
+      data       JSONB,
+      read       BOOLEAN NOT NULL DEFAULT FALSE,
+      read_at    TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS system_settings (
+      key         TEXT PRIMARY KEY,
+      value       TEXT,
+      description TEXT,
+      is_public   BOOLEAN NOT NULL DEFAULT FALSE,
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  // â”€â”€ Indexes (individual, each safe to fail) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const indexes = [
+    `CREATE INDEX IF NOT EXISTS idx_users_email          ON users(email)`,
+    `CREATE INDEX IF NOT EXISTS idx_users_status         ON users(status)`,
+    `CREATE INDEX IF NOT EXISTS idx_refresh_token_hash   ON refresh_tokens(token_hash)`,
+    `CREATE INDEX IF NOT EXISTS idx_refresh_user         ON refresh_tokens(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_usub_user            ON user_subscriptions(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_usub_plan            ON user_subscriptions(plan_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_orders_user          ON payment_orders(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_payments_order       ON payments(order_id)`,
+    // Migrate: add original-price columns to subscription_plans if not present
+    `ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS mrp_monthly NUMERIC(10,2) NOT NULL DEFAULT 0`,
+    `ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS mrp_yearly  NUMERIC(10,2) NOT NULL DEFAULT 0`,
+    `CREATE INDEX IF NOT EXISTS idx_enroll_user          ON course_enrollments(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_enroll_course        ON course_enrollments(course_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tool_sub_user        ON tool_subscriptions(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tool_sub_status      ON tool_subscriptions(status)`,
+    `CREATE INDEX IF NOT EXISTS idx_tool_pay_order       ON tool_payments(order_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tool_pay_user        ON tool_payments(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_audit_user           ON audit_logs(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_notif_user           ON notifications(user_id)`,
+  ];
+  for (const sql of indexes) {
+    await db.query(sql).catch(() => {});
+  }
+
+  // â”€â”€ updated_at trigger function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await db
+    .query(
+      `
+    CREATE OR REPLACE FUNCTION set_updated_at()
+    RETURNS TRIGGER AS $func$
+    BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+    $func$ LANGUAGE plpgsql
+  `
+    )
+    .catch(() => {});
+
+  const triggeredTables = [
+    'users',
+    'user_subscriptions',
+    'subscription_plans',
+    'payment_orders',
+    'payments',
+    'tool_subscriptions',
+    'tool_payments',
+    'courses',
+    'course_enrollments',
+    'tools',
+    'resources',
+    'coupons',
+  ];
+  for (const t of triggeredTables) {
+    await db
+      .query(
+        `
+      DROP TRIGGER IF EXISTS trg_updated_at ON ${t};
+      CREATE TRIGGER trg_updated_at BEFORE UPDATE ON ${t}
+        FOR EACH ROW EXECUTE FUNCTION set_updated_at()
+    `
+      )
+      .catch(() => {});
+  }
+
+  console.log('[db] schema ready');
+
+  // â”€â”€ Seed subscription plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const plans = [
+    {
+      id: 'basic',
+      name: 'Basic',
+      price_monthly: 0,
+      price_yearly: 0,
+      badge_color: 'gray',
+      is_popular: false,
+      max_courses: 1,
+      sort_order: 1,
+      description: 'Free access to Signal Integrity Academy and community resources.',
+      features: [
+        'Signal Integrity Academy (full access)',
+        'Community discussion forum',
+        '4 free engineering tools',
+        'Public whitepapers & guides',
+        'Email support (72 h response)',
+      ],
+    },
+    {
+      id: 'advanced',
+      name: 'Advanced',
+      price_monthly: 299,
+      price_yearly: 2999,
+      mrp_monthly: 699,
+      mrp_yearly: 6999,
+      badge_color: 'blue',
+      is_popular: true,
+      max_courses: 2,
+      sort_order: 2,
+      description: 'Unlock PCB Design Mastery + SI Academy with priority support.',
+      features: [
+        'Everything in Basic',
+        'PCB Design Mastery (full access)',
+        'All engineering tools (unlimited)',
+        'Reference design downloads',
+        'Priority email support (24 h)',
+        'Monthly live Q&A session',
+        'Course completion certificate',
+      ],
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price_monthly: 999,
+      price_yearly: 9999,
+      mrp_monthly: 1999,
+      mrp_yearly: 19999,
+      badge_color: 'purple',
+      is_popular: false,
+      max_courses: 0,
+      sort_order: 3,
+      description: 'All courses, 1-on-1 mentoring, and custom training for teams.',
+      features: [
+        'Everything in Advanced',
+        'Embedded Systems & RTOS (full access)',
+        'EMC & Compliance (full access)',
+        'Unlimited course access (all future courses)',
+        '2x monthly 1-on-1 mentoring sessions',
+        'Custom team training (up to 5 seats)',
+        'Priority Slack support (4 h response)',
+        'Early access to new content',
+      ],
+    },
+  ];
+  for (const p of plans) {
+    await db.query(
+      `INSERT INTO subscription_plans (id,name,price_monthly,price_yearly,mrp_monthly,mrp_yearly,description,features,max_courses,badge_color,is_popular,sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       ON CONFLICT (id) DO UPDATE SET
+         name=EXCLUDED.name, description=EXCLUDED.description,
+         features=EXCLUDED.features, max_courses=EXCLUDED.max_courses,
+         badge_color=EXCLUDED.badge_color, is_popular=EXCLUDED.is_popular,
+         sort_order=EXCLUDED.sort_order, updated_at=NOW()`,
+      [
+        p.id,
+        p.name,
+        p.price_monthly,
+        p.price_yearly,
+        p.mrp_monthly || 0,
+        p.mrp_yearly || 0,
+        p.description,
+        JSON.stringify(p.features),
+        p.max_courses,
+        p.badge_color,
+        p.is_popular,
+        p.sort_order,
+      ]
+    );
+  }
+
+  // â”€â”€ Seed course categories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const cats = [
+    { id: 'si', name: 'Signal Integrity', slug: 'signal-integrity', sort_order: 1 },
+    { id: 'hw', name: 'PCB Design', slug: 'pcb-design', sort_order: 2 },
+    { id: 'fw', name: 'Embedded Systems', slug: 'embedded-systems', sort_order: 3 },
+    { id: 'emc', name: 'EMC & Compliance', slug: 'emc-compliance', sort_order: 4 },
+  ];
+  for (const c of cats) {
+    await db.query(
+      `INSERT INTO course_categories (id,name,slug,sort_order) VALUES ($1,$2,$3,$4)
+       ON CONFLICT (id) DO NOTHING`,
+      [c.id, c.name, c.slug, c.sort_order]
+    );
+  }
+
+  // â”€â”€ Seed courses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const courses = [
+    {
+      id: 'si',
+      title: 'Signal Integrity Academy',
+      slug: 'signal-integrity-academy',
+      category: 'si',
+      status: 'published',
+      modules_count: 18,
+      href: 'Trainings/SI/',
+      gradient: 'linear-gradient(135deg,#0f2040,#0e3a5c)',
+      badge_color: 'cyan',
+      required_plan: 'basic',
+      price_inr: 0,
+      description:
+        'Master SI from fundamentals to advanced simulation. Eye diagrams, impedance, via modelling, DDR/SerDes.',
+    },
+    {
+      id: 'hw',
+      title: 'PCB Design Mastery',
+      slug: 'pcb-design-mastery',
+      category: 'hw',
+      status: 'draft',
+      modules_count: 0,
+      href: 'Trainings/trainings.html',
+      gradient: 'linear-gradient(135deg,#1a0a30,#2d1060)',
+      badge_color: 'blue',
+      required_plan: 'advanced',
+      price_inr: 1999,
+      description:
+        'High-density multi-layer PCB design from schematic capture to Gerber. DFM, DFT, power delivery.',
+    },
+    {
+      id: 'fw',
+      title: 'Embedded Systems & RTOS',
+      slug: 'embedded-systems-rtos',
+      category: 'fw',
+      status: 'draft',
+      modules_count: 0,
+      href: 'Trainings/trainings.html',
+      gradient: 'linear-gradient(135deg,#012010,#033a1a)',
+      badge_color: 'green',
+      required_plan: 'premium',
+      price_inr: 3999,
+      description:
+        'Bare-metal and RTOS development for industrial embedded systems. FreeRTOS, memory safety, bootloaders.',
+    },
+    {
+      id: 'emc',
+      title: 'EMC & Compliance',
+      slug: 'emc-compliance',
+      category: 'emc',
+      status: 'draft',
+      modules_count: 0,
+      href: 'Trainings/trainings.html',
+      gradient: 'linear-gradient(135deg,#1a0a00,#3a1500)',
+      badge_color: 'orange',
+      required_plan: 'premium',
+      price_inr: 3999,
+      description:
+        'Radiated/conducted emissions, immunity testing, FCC/CE pre-compliance, shielding design.',
+    },
+  ];
+  for (const c of courses) {
+    await db.query(
+      `INSERT INTO courses (id,title,slug,category,description,status,modules_count,href,gradient,badge_color,required_plan,price_inr)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       ON CONFLICT (id) DO UPDATE SET
+         title=EXCLUDED.title, slug=EXCLUDED.slug, description=EXCLUDED.description,
+         status=EXCLUDED.status, modules_count=EXCLUDED.modules_count,
+         required_plan=EXCLUDED.required_plan, price_inr=EXCLUDED.price_inr, updated_at=NOW()`,
+      [
+        c.id,
+        c.title,
+        c.slug,
+        c.category,
+        c.description,
+        c.status,
+        c.modules_count,
+        c.href,
+        c.gradient,
+        c.badge_color,
+        c.required_plan,
+        c.price_inr,
+      ]
+    );
+  }
+
+  // â”€â”€ Seed plan â†’ course access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const access = [
+    ['basic', 'si'],
+    ['advanced', 'si'],
+    ['advanced', 'hw'],
+    ['premium', 'si'],
+    ['premium', 'hw'],
+    ['premium', 'fw'],
+    ['premium', 'emc'],
+  ];
+  for (const [plan_id, course_id] of access) {
+    await db.query(
+      `INSERT INTO plan_course_access (plan_id,course_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+      [plan_id, course_id]
+    );
+  }
+
+  // â”€â”€ Seed system settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const settings = [
+    ['site_name', 'Rising Edge Technologies', 'Platform display name', true],
+    ['support_email', 'support@risingedgetech.com', 'Support email address', true],
+    ['gst_rate', '18', 'GST percentage on payments', false],
+    ['maintenance_mode', 'false', 'Enable maintenance mode', false],
+    ['registration_open', 'true', 'Allow new registrations', false],
+    ['cashfree_env', 'production', 'Cashfree environment', false],
+  ];
+  for (const [key, value, description, is_public] of settings) {
+    await db.query(
+      `INSERT INTO system_settings (key,value,description,is_public)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`,
+      [key, value, description, is_public]
+    );
+  }
+
+  console.log('[db] seed complete');
+}
+
+const mailer = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: Number(process.env.EMAIL_PORT) === 465,
+  auth: { user: process.env.EMAIL_USER || '', pass: process.env.EMAIL_PASS || '' },
+});
+
+const FROM = process.env.EMAIL_FROM || 'Rising Edge <no-reply@risingedge.in>';
+
+async function sendMail({ to, subject, html }) {
+  if (!process.env.EMAIL_USER) {
+    console.warn('[email] EMAIL_USER not set');
+    return;
+  }
+  await mailer.sendMail({ from: FROM, to, subject, html });
+}
+
+async function sendVerificationEmail({ email, fullName, token }) {
+  const link = `${FRONTEND_URL}/Login-pages/verify-email.html?token=${token}`;
+  await sendMail({
+    to: email,
+    subject: 'Verify your Rising Edge account',
+    html: `<p>Hi ${fullName},</p><p>Thanks for registering!</p><p><a href="${link}" style="background:#1a56db;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">Verify Email</a></p><p>Link expires in 24 hours.</p><p>Rising Edge Team</p>`,
+  });
+}
+
+async function sendPasswordResetEmail({ email, fullName, token }) {
+  const link = `${FRONTEND_URL}/Login-pages/forgot-password.html?token=${token}`;
+  await sendMail({
+    to: email,
+    subject: 'Reset your Rising Edge password',
+    html: `<p>Hi ${fullName},</p><p><a href="${link}" style="background:#1a56db;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">Reset Password</a></p><p>Link expires in 1 hour.</p><p>Rising Edge Team</p>`,
+  });
+}
+
+function issueAccessToken(userId, role) {
+  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: ACCESS_TTL });
+}
+function issueRefreshToken() {
+  return crypto.randomBytes(64).toString('hex');
+}
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+async function verifyAccessToken(req, res, next) {
+  const auth = req.headers.authorization;
+  const token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ success: false, error: 'Access token required' });
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    const { rows } = await db.query(
+      `SELECT u.*, COALESCE(ts.plan_id, us.plan_id, 'basic') AS plan,
+              COALESCE(us.status,'ACTIVE') AS sub_status
+         FROM users u
+         LEFT JOIN user_subscriptions us ON us.user_id = u.id
+         LEFT JOIN tool_subscriptions ts ON ts.user_id = u.id AND ts.status = 'active'
+         WHERE u.id = $1`,
+      [payload.userId]
+    );
+    const user = rows[0];
+    if (!user) return res.status(401).json({ success: false, error: 'User not found' });
+    if (user.status === 'SUSPENDED')
+      return res.status(403).json({ success: false, error: 'Account suspended' });
+    if (user.status === 'DEACTIVATED')
+      return res.status(403).json({ success: false, error: 'Account deactivated' });
+    req.user = user;
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError')
+      return res
+        .status(401)
+        .json({ success: false, error: 'Token expired', code: 'TOKEN_EXPIRED' });
+    return res.status(401).json({ success: false, error: 'Invalid token' });
+  }
+}
+
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, error: 'Insufficient permissions' });
+    }
+    next();
+  };
+}
+
+const app = express();
+app.set('trust proxy', 1);
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, '.')));
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many login attempts.' },
+});
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { success: false, error: 'Too many registration attempts.' },
+});
+const forgotPwdLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { success: false, error: 'Too many reset requests.' },
+});
+
+const auth = express.Router();
+
+auth.post('/register', registerLimiter, async (req, res) => {
+  try {
+    const { fullName, email, password, mobile, location, currentRole } = req.body;
+    if (!fullName || !email || !password)
+      return res
+        .status(422)
+        .json({ success: false, error: 'fullName, email and password are required.' });
+    if (password.length < 8)
+      return res
+        .status(422)
+        .json({ success: false, error: 'Password must be at least 8 characters.' });
+    const existing = await db.query('SELECT id FROM users WHERE email=$1', [email.toLowerCase()]);
+    if (existing.rows.length)
+      return res.status(409).json({ success: false, error: 'Email already registered.' });
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const emailVerifyToken = crypto.randomBytes(32).toString('hex');
+    const emailVerifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const { rows } = await db.query(
+      `INSERT INTO users (full_name,email,password_hash,email_verify_token,email_verify_expiry,mobile,location,"current_role")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+      [
+        fullName,
+        email.toLowerCase(),
+        passwordHash,
+        emailVerifyToken,
+        emailVerifyExpiry,
+        mobile || null,
+        location || null,
+        currentRole || null,
+      ]
+    );
+    await db.query(
+      `INSERT INTO user_subscriptions (user_id,plan_id) VALUES ($1,'basic') ON CONFLICT DO NOTHING`,
+      [rows[0].id]
+    );
+    if (!process.env.EMAIL_USER) {
+      // No email server â€” auto-verify immediately
+      await db.query(
+        `UPDATE users SET email_verified=true, status='ACTIVE', email_verify_token=NULL, email_verify_expiry=NULL WHERE id=$1`,
+        [rows[0].id]
+      );
+      return res
+        .status(201)
+        .json({ success: true, message: 'Account created. You can now sign in.' });
+    }
+    // Try to send verification email; if SMTP fails, auto-verify so user isn't locked out
+    try {
+      await sendVerificationEmail({
+        email: email.toLowerCase(),
+        fullName,
+        token: emailVerifyToken,
+      });
+      res
+        .status(201)
+        .json({ success: true, message: 'Account created. Check your email to verify.' });
+    } catch (emailErr) {
+      console.warn('[register] SMTP failed, auto-verifying:', emailErr.message);
+      await db.query(
+        `UPDATE users SET email_verified=true, status='ACTIVE', email_verify_token=NULL, email_verify_expiry=NULL WHERE id=$1`,
+        [rows[0].id]
+      );
+      res.status(201).json({ success: true, message: 'Account created. You can now sign in.' });
+    }
+  } catch (err) {
+    console.error('[register]', err);
+    res.status(500).json({ success: false, error: 'Registration failed.' });
+  }
+});
+
+auth.post('/login', loginLimiter, async (req, res) => {
+  const ip = req.ip;
+  const ua = req.headers['user-agent'] || '';
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(422).json({ success: false, error: 'Email and password are required.' });
+    const { rows } = await db.query(
+      `SELECT u.*, COALESCE(ts.plan_id, us.plan_id, 'basic') AS plan
+         FROM users u
+         LEFT JOIN user_subscriptions us ON us.user_id = u.id
+         LEFT JOIN tool_subscriptions ts ON ts.user_id = u.id AND ts.status = 'active'
+         WHERE u.email = $1`,
+      [email.toLowerCase()]
+    );
+    const user = rows[0];
+    const hashToCompare = user?.password_hash || '$2b$12$invalid.hash.for.timing.attack.prevention';
+    const match = await bcrypt.compare(password, hashToCompare);
+    if (!user || !match) {
+      if (user) {
+        const attempts = (user.failed_login_attempts || 0) + 1;
+        const lockUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+        await db.query('UPDATE users SET failed_login_attempts=$1,locked_until=$2 WHERE id=$3', [
+          attempts,
+          lockUntil,
+          user.id,
+        ]);
+        await db.query(
+          'INSERT INTO login_history (user_id,ip_address,user_agent,success) VALUES ($1,$2,$3,false)',
+          [user.id, ip, ua]
+        );
+      }
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      const mins = Math.ceil((new Date(user.locked_until) - Date.now()) / 60000);
+      return res
+        .status(429)
+        .json({ success: false, error: `Account locked. Try again in ${mins} minute(s).` });
+    }
+    if (!user.email_verified) {
+      // Auto-verify â€” either no email server configured, or SMTP is not yet set up
+      await db.query(
+        `UPDATE users SET email_verified=true, status='ACTIVE', email_verify_token=NULL, email_verify_expiry=NULL, updated_at=NOW() WHERE id=$1`,
+        [user.id]
+      );
+      user.email_verified = true;
+    }
+    if (user.status === 'SUSPENDED')
+      return res.status(403).json({ success: false, error: 'Account suspended.' });
+    const accessToken = issueAccessToken(user.id, user.role);
+    const refreshToken = issueRefreshToken();
+    const tokenHash = hashToken(refreshToken);
+    const expiresAt = new Date(Date.now() + REFRESH_TTL_DAYS * 86400 * 1000);
+    await db.query(
+      `INSERT INTO refresh_tokens (user_id,token_hash,ip_address,device_info,expires_at) VALUES ($1,$2,$3,$4,$5)`,
+      [user.id, tokenHash, ip, ua, expiresAt]
+    );
+    await db.query(
+      'UPDATE users SET failed_login_attempts=0,locked_until=NULL,last_login_at=NOW() WHERE id=$1',
+      [user.id]
+    );
+    await db.query(
+      'INSERT INTO login_history (user_id,ip_address,user_agent,success) VALUES ($1,$2,$3,true)',
+      [user.id, ip, ua]
+    );
+    res.json({
+      success: true,
+      accessToken,
+      refreshToken,
+      expiresIn: 15 * 60,
+      user: {
+        id: user.id,
+        fullName: user.full_name,
+        email: user.email,
+        role: user.role,
+        plan: user.plan || 'basic',
+        avatarUrl: user.avatar_url,
+      },
+    });
+  } catch (err) {
+    console.error('[login]', err);
+    res.status(500).json({ success: false, error: 'Login failed: ' + err.message });
+  }
+});
+
+auth.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken)
+      return res.status(401).json({ success: false, error: 'Refresh token required.' });
+    const tokenHash = hashToken(refreshToken);
+    const { rows } = await db.query(
+      `SELECT rt.*, u.role, u.status, u.full_name, u.email,
+              COALESCE(ts.plan_id, us.plan_id, 'basic') AS plan
+         FROM refresh_tokens rt
+         JOIN users u ON u.id=rt.user_id
+         LEFT JOIN user_subscriptions us ON us.user_id=u.id
+         LEFT JOIN tool_subscriptions ts ON ts.user_id=u.id AND ts.status='active'
+         WHERE rt.token_hash=$1`,
+      [tokenHash]
+    );
+    const record = rows[0];
+    if (!record || new Date(record.expires_at) < new Date()) {
+      if (record) await db.query('DELETE FROM refresh_tokens WHERE token_hash=$1', [tokenHash]);
+      return res
+        .status(401)
+        .json({ success: false, error: 'Session expired.', code: 'SESSION_EXPIRED' });
+    }
+    if (record.status !== 'ACTIVE')
+      return res.status(403).json({ success: false, error: 'Account is no longer active.' });
+    const newRefreshToken = issueRefreshToken();
+    const newHash = hashToken(newRefreshToken);
+    const expiresAt = new Date(Date.now() + REFRESH_TTL_DAYS * 86400 * 1000);
+    await db.query('DELETE FROM refresh_tokens WHERE token_hash=$1', [tokenHash]);
+    await db.query(
+      `INSERT INTO refresh_tokens (user_id,token_hash,ip_address,device_info,expires_at) VALUES ($1,$2,$3,$4,$5)`,
+      [record.user_id, newHash, req.ip, req.headers['user-agent'] || '', expiresAt]
+    );
+    const accessToken = issueAccessToken(record.user_id, record.role);
+    res.json({
+      success: true,
+      accessToken,
+      refreshToken: newRefreshToken,
+      expiresIn: 15 * 60,
+      user: {
+        id: record.user_id,
+        fullName: record.full_name,
+        email: record.email,
+        role: record.role,
+        plan: record.plan || 'basic',
+      },
+    });
+  } catch (err) {
+    console.error('[refresh]', err);
+    res.status(500).json({ success: false, error: 'Could not refresh session.' });
+  }
+});
+
+auth.post('/logout', verifyAccessToken, async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (refreshToken)
+      await db.query('DELETE FROM refresh_tokens WHERE token_hash=$1', [hashToken(refreshToken)]);
+    res.json({ success: true, message: 'Logged out.' });
+  } catch (err) {
+    console.error('[logout]', err);
+    res.status(500).json({ success: false, error: 'Logout failed.' });
+  }
+});
+
+auth.post('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(422).json({ success: false, error: 'Token required.' });
+    const { rows } = await db.query(
+      `SELECT id FROM users WHERE email_verify_token=$1 AND email_verify_expiry > NOW()`,
+      [token]
+    );
+    if (!rows.length)
+      return res
+        .status(400)
+        .json({ success: false, error: 'Verification link is invalid or expired.' });
+    await db.query(
+      `UPDATE users SET email_verified=true, status='ACTIVE', email_verify_token=NULL, email_verify_expiry=NULL, updated_at=NOW() WHERE id=$1`,
+      [rows[0].id]
+    );
+    res.json({ success: true, message: 'Email verified. You can now log in.' });
+  } catch (err) {
+    console.error('[verifyEmail]', err);
+    res.status(500).json({ success: false, error: 'Verification failed.' });
+  }
+});
+
+auth.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { rows } = await db.query('SELECT * FROM users WHERE email=$1', [email?.toLowerCase()]);
+    const user = rows[0];
+    if (!user || user.email_verified)
+      return res.json({ success: true, message: 'If registered, a new link has been sent.' });
+    if (!process.env.EMAIL_USER) {
+      await db.query(
+        `UPDATE users SET email_verified=true, status='ACTIVE', email_verify_token=NULL, email_verify_expiry=NULL, updated_at=NOW() WHERE id=$1`,
+        [user.id]
+      );
+      return res.json({ success: true, message: 'Email verified. You can now log in.' });
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await db.query(
+      'UPDATE users SET email_verify_token=$1,email_verify_expiry=$2,updated_at=NOW() WHERE id=$3',
+      [token, expiry, user.id]
+    );
+    await sendVerificationEmail({ email: user.email, fullName: user.full_name, token });
+    res.json({ success: true, message: 'If registered, a new link has been sent.' });
+  } catch (err) {
+    console.error('[resendVerification]', err);
+    res.status(500).json({ success: false, error: 'Could not resend verification.' });
+  }
+});
+
+auth.post('/forgot-password', forgotPwdLimiter, async (req, res) => {
+  const silentOK = { success: true, message: 'If registered, a reset link has been sent.' };
+  try {
+    const { email } = req.body;
+    const { rows } = await db.query('SELECT * FROM users WHERE email=$1', [email?.toLowerCase()]);
+    const user = rows[0];
+    if (!user) return res.json(silentOK);
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000);
+    await db.query(
+      'UPDATE users SET password_reset_token=$1,password_reset_expiry=$2,updated_at=NOW() WHERE id=$3',
+      [token, expiry, user.id]
+    );
+    await sendPasswordResetEmail({ email: user.email, fullName: user.full_name, token });
+    res.json(silentOK);
+  } catch (err) {
+    console.error('[forgotPassword]', err);
+    res.status(500).json({ success: false, error: 'Request failed.' });
+  }
+});
+
+auth.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword)
+      return res.status(422).json({ success: false, error: 'Token and newPassword required.' });
+    if (newPassword.length < 8)
+      return res
+        .status(422)
+        .json({ success: false, error: 'Password must be at least 8 characters.' });
+    const { rows } = await db.query(
+      `SELECT id FROM users WHERE password_reset_token=$1 AND password_reset_expiry > NOW()`,
+      [token]
+    );
+    if (!rows.length) {
+      return res.status(400).json({ success: false, error: 'Reset link is invalid or expired.' });
+    }
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await db.query(
+      `UPDATE users SET password_hash=$1,password_reset_token=NULL,password_reset_expiry=NULL,updated_at=NOW() WHERE id=$2`,
+      [passwordHash, rows[0].id]
+    );
+    await db.query('DELETE FROM refresh_tokens WHERE user_id=$1', [rows[0].id]);
+    res.json({ success: true, message: 'Password reset. Please log in.' });
+  } catch (err) {
+    console.error('[resetPassword]', err);
+    res.status(500).json({ success: false, error: 'Password reset failed.' });
+  }
+});
+
+auth.post('/change-password', verifyAccessToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(422)
+        .json({ success: false, error: 'currentPassword and newPassword required.' });
+    }
+    const match = await bcrypt.compare(currentPassword, req.user.password_hash);
+    if (!match) {
+      return res.status(401).json({ success: false, error: 'Current password is incorrect.' });
+    }
+    if (newPassword.length < 8) {
+      return res
+        .status(422)
+        .json({ success: false, error: 'New password must be at least 8 characters.' });
+    }
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await db.query('UPDATE users SET password_hash=$1,updated_at=NOW() WHERE id=$2', [
+      passwordHash,
+      req.user.id,
+    ]);
+    res.json({ success: true, message: 'Password changed.' });
+  } catch (err) {
+    console.error('[changePassword]', err);
+    res.status(500).json({ success: false, error: 'Password change failed.' });
+  }
+});
+
+auth.get('/me', verifyAccessToken, (req, res) => {
+  const u = req.user;
+  res.json({
+    success: true,
+    user: {
+      id: u.id,
+      fullName: u.full_name,
+      email: u.email,
+      role: u.role,
+      plan: u.plan || 'basic',
+      avatarUrl: u.avatar_url,
+      status: u.status,
+      mobile: u.mobile || null,
+      location: u.location || null,
+      currentRole: u.current_role || null,
+      org: u.org || null,
+      jobTitle: u.job_title || null,
+      linkedinUrl: u.linkedin_url || null,
+    },
+  });
+});
+
+auth.put('/profile', verifyAccessToken, async (req, res) => {
+  const { fullName, org, jobTitle, linkedinUrl, mobile, location, currentRole } = req.body;
+  try {
+    const { rows } = await db.query(
+      `UPDATE users SET
+         full_name    = COALESCE(NULLIF($1,''), full_name),
+         org          = $2,
+         job_title    = $3,
+         linkedin_url = $4,
+         mobile       = COALESCE(NULLIF($5,''), mobile),
+         location     = COALESCE(NULLIF($6,''), location),
+         "current_role" = COALESCE(NULLIF($7,''), "current_role"),
+         updated_at   = NOW()
+       WHERE id=$8
+       RETURNING id,full_name,email,role,org,job_title,linkedin_url,mobile,location,"current_role"`,
+      [
+        fullName || null,
+        org || null,
+        jobTitle || null,
+        linkedinUrl || null,
+        mobile || null,
+        location || null,
+        currentRole || null,
+        req.user.id,
+      ]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'User not found.' });
+    const u = rows[0];
+    res.json({
+      success: true,
+      user: {
+        id: u.id,
+        fullName: u.full_name,
+        email: u.email,
+        role: u.role,
+        org: u.org || null,
+        jobTitle: u.job_title || null,
+        linkedinUrl: u.linkedin_url || null,
+        mobile: u.mobile || null,
+        location: u.location || null,
+        currentRole: u.current_role || null,
+      },
+    });
+  } catch (err) {
+    console.error('[auth/profile]', err);
+    res.status(500).json({ success: false, error: 'Could not update profile.' });
+  }
+});
+
+app.use('/api/auth', auth);
+
+// Public catalogue
+app.get('/api/plans', async (_req, res) => {
+  try {
+    const { rows: plans } = await db.query(
+      `SELECT id,name,price_monthly,price_yearly,description,features,max_courses,badge_color,is_popular FROM subscription_plans ORDER BY price_monthly`
+    );
+    const { rows: access } = await db.query(
+      `SELECT a.plan_id,c.id,c.title,c.category,c.status,c.badge_color FROM plan_course_access a JOIN courses c ON c.id=a.course_id ORDER BY c.price_inr`
+    );
+    plans.forEach(p => {
+      p.courses = access
+        .filter(a => a.plan_id === p.id)
+        .map(a => ({
+          id: a.id,
+          title: a.title,
+          category: a.category,
+          status: a.status,
+          badge_color: a.badge_color,
+        }));
+    });
+    res.json({ success: true, data: plans });
+  } catch (err) {
+    console.error('[api/plans]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch plans.' });
+  }
+});
+
+app.get('/api/tools', async (_req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM tools ORDER BY sort_order, created_at`);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not fetch tools.' });
+  }
+});
+
+app.get('/api/resources', async (_req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM resources ORDER BY sort_order, created_at`);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not fetch resources.' });
+  }
+});
+
+app.get('/api/coupons/active', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id,code,type,val,expires FROM coupons WHERE active=true ORDER BY created_at`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not fetch coupons.' });
+  }
+});
+
+/* POST /api/coupons/validate
+   Validates a coupon for a given context without consuming it.
+   Body: { code, context: 'subscription'|'course'|'tool', contextId, amount }
+   Requires: Bearer token (user must be logged in) */
+app.post('/api/coupons/validate', verifyAccessToken, async (req, res) => {
+  try {
+    const { code, context, contextId, amount } = req.body;
+    if (!code) return res.status(400).json({ success: false, error: 'Coupon code required.' });
+
+    const { rows } = await db.query(`SELECT * FROM coupons WHERE code=$1`, [
+      code.toUpperCase().trim(),
+    ]);
+    if (!rows.length) return res.json({ success: false, error: 'Invalid coupon code.' });
+    const c = rows[0];
+
+    if (!c.active) return res.json({ success: false, error: 'This coupon is no longer active.' });
+
+    // Expiry check
+    if (c.expires && c.expires !== 'No expiry') {
+      if (new Date(c.expires) < new Date()) {
+        return res.json({ success: false, error: 'This coupon has expired.' });
+      }
+    }
+
+    // Global usage limit
+    if (c.used >= c.limit_count) {
+      return res.json({ success: false, error: 'This coupon has reached its usage limit.' });
+    }
+
+    // Context check
+    if (c.applies_to !== 'all') {
+      const contextMap = {
+        subscription: 'subscriptions',
+        subscriptions: 'subscriptions',
+        course: 'courses',
+        courses: 'courses',
+        tool: 'tools',
+        tools: 'tools',
+      };
+      const mapped = contextMap[context] || context;
+      if (c.applies_to !== mapped) {
+        return res.json({
+          success: false,
+          error: `This coupon is only valid for ${c.applies_to}.`,
+        });
+      }
+      // Specific ID check
+      if (c.applicable_ids && c.applicable_ids.length && contextId) {
+        if (!c.applicable_ids.includes(String(contextId))) {
+          return res.json({
+            success: false,
+            error: 'This coupon is not valid for the selected item.',
+          });
+        }
+      }
+    }
+
+    // Per-user limit check
+    const { rows: usageRows } = await db.query(
+      `SELECT COUNT(*) as cnt FROM coupon_usage WHERE coupon_id=$1 AND user_id=$2`,
+      [c.id, req.user.id]
+    );
+    const userUsed = parseInt(usageRows[0].cnt) || 0;
+    if (userUsed >= (c.per_user_limit || 1)) {
+      return res.json({
+        success: false,
+        error: 'You have already used this coupon the maximum number of times.',
+      });
+    }
+
+    // Calculate discount
+    const base = parseFloat(amount) || 0;
+    let discount = 0;
+    if (c.type === 'percent') {
+      discount = Math.round(base * (parseFloat(c.val) / 100) * 100) / 100;
+    } else {
+      discount = Math.min(parseFloat(c.val), base);
+    }
+    const discountedAmount = Math.max(0, Math.round((base - discount) * 100) / 100);
+
+    res.json({
+      success: true,
+      coupon: { id: c.id, code: c.code, type: c.type, val: c.val, applies_to: c.applies_to },
+      discount,
+      discountedAmount,
+    });
+  } catch (err) {
+    console.error('[coupons/validate]', err);
+    res.status(500).json({ success: false, error: 'Could not validate coupon.' });
+  }
+});
+
+app.get('/api/courses', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id,title,category,description,status,modules_count,href,gradient,badge_color,required_plan,price_inr,created_at FROM courses ORDER BY price_inr,created_at`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[api/courses]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch courses.' });
+  }
+});
+
+// Enrollment
+app.get('/api/enroll', verifyAccessToken, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT e.id,e.course_id,c.title,c.category,c.badge_color,c.href,c.gradient,e.status,e.progress,e.enrolled_at,e.completed_at
+         FROM course_enrollments e JOIN courses c ON c.id=e.course_id WHERE e.user_id=$1 ORDER BY e.enrolled_at DESC`,
+      [req.user.id]
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[enroll/get]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch enrollments.' });
+  }
+});
+
+app.post('/api/enroll', verifyAccessToken, async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) return res.status(422).json({ success: false, error: 'courseId required.' });
+    const { rows: subRows } = await db.query(
+      `SELECT plan_id FROM user_subscriptions WHERE user_id=$1`,
+      [req.user.id]
+    );
+    const planId = subRows[0]?.plan_id || 'basic';
+    const { rows: accessRows } = await db.query(
+      `SELECT 1 FROM plan_course_access WHERE plan_id=$1 AND course_id=$2`,
+      [planId, courseId]
+    );
+    if (!accessRows.length) {
+      return res.status(403).json({
+        success: false,
+        error: 'Your plan does not include this course. Please upgrade.',
+        code: 'PLAN_UPGRADE_REQUIRED',
+      });
+    }
+    await db.query(
+      `INSERT INTO course_enrollments (user_id,course_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+      [req.user.id, courseId]
+    );
+    const { rows } = await db.query(
+      `SELECT e.*,c.title,c.href FROM course_enrollments e JOIN courses c ON c.id=e.course_id WHERE e.user_id=$1 AND e.course_id=$2`,
+      [req.user.id, courseId]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[enroll/post]', err);
+    res.status(500).json({ success: false, error: 'Enrollment failed.' });
+  }
+});
+
+app.patch('/api/enroll/:courseId/progress', verifyAccessToken, async (req, res) => {
+  try {
+    const { progress } = req.body;
+    if (progress === undefined || progress < 0 || progress > 100) {
+      return res.status(422).json({ success: false, error: 'progress must be 0-100.' });
+    }
+    const completedAt = progress === 100 ? new Date() : null;
+    const status = progress === 100 ? 'completed' : 'active';
+    const { rows } = await db.query(
+      `UPDATE course_enrollments SET progress=$1,status=$2,completed_at=$3 WHERE user_id=$4 AND course_id=$5 RETURNING *`,
+      [progress, status, completedAt, req.user.id, req.params.courseId]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ success: false, error: 'Enrollment not found.' });
+    }
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[enroll/progress]', err);
+    res.status(500).json({ success: false, error: 'Could not update progress.' });
+  }
+});
+
+// Admin
+const admin = express.Router();
+admin.use(verifyAccessToken, requireRole('ADMIN', 'SUPER_ADMIN'));
+
+admin.get('/users', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT u.id,u.full_name,u.email,u.role,u.status,u.email_verified,u.last_login_at,u.created_at,
+              COALESCE(ts.plan_id, us.plan_id, 'basic') AS plan,
+              COALESCE(us.status,'ACTIVE') AS sub_status
+         FROM users u
+         LEFT JOIN user_subscriptions   us ON us.user_id = u.id
+         LEFT JOIN tool_subscriptions   ts ON ts.user_id = u.id AND ts.status='active'
+         ORDER BY u.created_at DESC LIMIT 200`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/users]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch users.' });
+  }
+});
+
+admin.patch('/users/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const allowed = ['ACTIVE', 'SUSPENDED', 'DEACTIVATED'];
+    if (!allowed.includes(status)) {
+      return res
+        .status(422)
+        .json({ success: false, error: `status must be one of: ${allowed.join(', ')}` });
+    }
+    const { rows } = await db.query(
+      `UPDATE users SET status=$1,updated_at=NOW() WHERE id=$2 RETURNING id,full_name,email,status`,
+      [status, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'User not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[admin/status]', err);
+    res.status(500).json({ success: false, error: 'Could not update status.' });
+  }
+});
+
+admin.get('/stats', async (_req, res) => {
+  try {
+    const [total, active, pending, { rows: planRows }] = await Promise.all([
+      db.query('SELECT COUNT(*) FROM users'),
+      db.query("SELECT COUNT(*) FROM users WHERE status='ACTIVE'"),
+      db.query("SELECT COUNT(*) FROM users WHERE status='PENDING_VERIFICATION'"),
+      db.query('SELECT plan_id AS plan, COUNT(*) FROM user_subscriptions GROUP BY plan_id'),
+    ]);
+    res.json({
+      success: true,
+      data: {
+        totalUsers: Number(total.rows[0].count),
+        activeUsers: Number(active.rows[0].count),
+        pendingUsers: Number(pending.rows[0].count),
+        planBreakdown: planRows,
+      },
+    });
+  } catch (err) {
+    console.error('[admin/stats]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch stats.' });
+  }
+});
+
+admin.get('/subscriptions', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT s.id,s.user_id,u.full_name,u.email,s.plan_id AS plan,s.status,s.start_date,s.end_date,s.created_at,s.updated_at
+         FROM user_subscriptions s JOIN users u ON u.id=s.user_id ORDER BY s.created_at DESC LIMIT 500`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/subscriptions]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch subscriptions.' });
+  }
+});
+
+admin.get('/login-history', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT lh.id,lh.user_id,u.full_name,u.email,lh.ip_address,lh.user_agent,lh.success,lh.created_at
+         FROM login_history lh JOIN users u ON u.id=lh.user_id ORDER BY lh.created_at DESC LIMIT 500`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/login-history]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch login history.' });
+  }
+});
+
+admin.get('/refresh-tokens', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT rt.id,rt.user_id,u.full_name,u.email,rt.ip_address,rt.device_info,rt.expires_at,rt.created_at
+         FROM refresh_tokens rt JOIN users u ON u.id=rt.user_id ORDER BY rt.created_at DESC LIMIT 500`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/refresh-tokens]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch refresh tokens.' });
+  }
+});
+
+admin.delete('/refresh-tokens/:id', async (req, res) => {
+  try {
+    const { rowCount } = await db.query('DELETE FROM refresh_tokens WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ success: false, error: 'Token not found.' });
+    res.json({ success: true, message: 'Token revoked.' });
+  } catch (err) {
+    console.error('[admin/revoke-token]', err);
+    res.status(500).json({ success: false, error: 'Could not revoke token.' });
+  }
+});
+
+// Course CRUD (admin)
+admin.post('/courses', async (req, res) => {
+  const {
+    title,
+    category,
+    description,
+    status,
+    modules_count,
+    href,
+    gradient,
+    badge_color,
+    price_inr,
+  } = req.body;
+  if (!title || !category) {
+    return res.status(400).json({ success: false, error: 'title and category are required.' });
+  }
+  const id =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) +
+    '-' +
+    Date.now().toString(36);
+  try {
+    const { rows } = await db.query(
+      `INSERT INTO courses (id,title,category,description,status,modules_count,href,gradient,badge_color,required_plan,price_inr)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'basic',$10) RETURNING *`,
+      [
+        id,
+        title,
+        category,
+        description || '',
+        status || 'draft',
+        modules_count || 0,
+        href || 'Trainings/trainings.html',
+        gradient || 'linear-gradient(135deg,#0f2040,#0e3a5c)',
+        badge_color || 'cyan',
+        parseFloat(price_inr) || 0,
+      ]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[admin/courses/create]', err);
+    res.status(500).json({ success: false, error: 'Could not create course.' });
+  }
+});
+
+admin.patch('/courses/:id', async (req, res) => {
+  const {
+    title,
+    category,
+    description,
+    status,
+    modules_count,
+    href,
+    gradient,
+    badge_color,
+    price_inr,
+  } = req.body;
+  try {
+    const { rows } = await db.query(
+      `UPDATE courses SET title=$1,category=$2,description=$3,status=$4,modules_count=$5,
+         href=$6,gradient=$7,badge_color=$8,price_inr=$9,updated_at=NOW()
+       WHERE id=$10 RETURNING *`,
+      [
+        title,
+        category,
+        description || '',
+        status || 'draft',
+        modules_count || 0,
+        href || 'Trainings/trainings.html',
+        gradient || '',
+        badge_color || 'cyan',
+        parseFloat(price_inr) || 0,
+        req.params.id,
+      ]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'Course not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[admin/courses/update]', err);
+    res.status(500).json({ success: false, error: 'Could not update course.' });
+  }
+});
+
+admin.delete('/courses/:id', async (req, res) => {
+  try {
+    const { rowCount } = await db.query('DELETE FROM courses WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ success: false, error: 'Course not found.' });
+    res.json({ success: true, message: 'Course deleted.' });
+  } catch (err) {
+    console.error('[admin/courses/delete]', err);
+    res.status(500).json({ success: false, error: 'Could not delete course.' });
+  }
+});
+
+// Update subscription plan prices
+admin.put('/plans/:id', async (req, res) => {
+  const { id } = req.params;
+  const { price_monthly, price_yearly, mrp_monthly, mrp_yearly } = req.body;
+  if (price_monthly == null || price_yearly == null) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'price_monthly and price_yearly are required.' });
+  }
+  const m = parseFloat(price_monthly);
+  const y = parseFloat(price_yearly);
+  const mm = parseFloat(mrp_monthly ?? m);
+  const my = parseFloat(mrp_yearly ?? y);
+  if ([m, y, mm, my].some(v => isNaN(v) || v < 0)) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'All prices must be non-negative numbers.' });
+  }
+  try {
+    const { rows } = await db.query(
+      `UPDATE subscription_plans
+       SET price_monthly=$1, price_yearly=$2, mrp_monthly=$3, mrp_yearly=$4, updated_at=NOW()
+       WHERE id=$5
+       RETURNING id, name, price_monthly, price_yearly, mrp_monthly, mrp_yearly`,
+      [m, y, mm, my, id]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'Plan not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error('[admin/plans/update]', err);
+    res.status(500).json({ success: false, error: 'Could not update plan.' });
+  }
+});
+
+// â”€â”€ Coupons (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+admin.get('/coupons', async (_req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM coupons ORDER BY created_at`);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not fetch coupons.' });
+  }
+});
+
+admin.post('/coupons', async (req, res) => {
+  const { code, type, val, limit_count, expires, applies_to, applicable_ids, per_user_limit } =
+    req.body;
+  if (!code || !val) {
+    return res.status(400).json({ success: false, error: 'code and val are required.' });
+  }
+  const appliesto = ['all', 'subscriptions', 'courses', 'tools'].includes(applies_to)
+    ? applies_to
+    : 'all';
+  const ids = Array.isArray(applicable_ids) && applicable_ids.length ? applicable_ids : null;
+  try {
+    const { rows } = await db.query(
+      `INSERT INTO coupons (code,type,val,limit_count,expires,applies_to,applicable_ids,per_user_limit)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [
+        code.toUpperCase().trim(),
+        type || 'percent',
+        parseFloat(val),
+        parseInt(limit_count) || 100,
+        expires || 'No expiry',
+        appliesto,
+        ids,
+        parseInt(per_user_limit) || 1,
+      ]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ success: false, error: 'Coupon code already exists.' });
+    }
+    res.status(500).json({ success: false, error: 'Could not create coupon.' });
+  }
+});
+
+admin.patch('/coupons/:id', async (req, res) => {
+  const allowed = [
+    'type',
+    'val',
+    'limit_count',
+    'expires',
+    'active',
+    'used',
+    'applies_to',
+    'per_user_limit',
+  ];
+  const updates = [];
+  const vals = [];
+  allowed.forEach(f => {
+    if (req.body[f] !== undefined) {
+      updates.push(`${f}=$${vals.length + 1}`);
+      vals.push(req.body[f]);
+    }
+  });
+  // applicable_ids is an array — handle separately
+  if (req.body.applicable_ids !== undefined) {
+    const ids =
+      Array.isArray(req.body.applicable_ids) && req.body.applicable_ids.length
+        ? req.body.applicable_ids
+        : null;
+    updates.push(`applicable_ids=$${vals.length + 1}`);
+    vals.push(ids);
+  }
+  if (!updates.length) return res.status(400).json({ success: false, error: 'Nothing to update.' });
+  vals.push(req.params.id);
+  try {
+    const { rows } = await db.query(
+      `UPDATE coupons SET ${updates.join(',')},updated_at=NOW() WHERE id=$${vals.length} RETURNING *`,
+      vals
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'Coupon not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not update coupon.' });
+  }
+});
+
+admin.delete('/coupons/:id', async (req, res) => {
+  try {
+    const { rowCount } = await db.query('DELETE FROM coupons WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ success: false, error: 'Coupon not found.' });
+    res.json({ success: true, message: 'Coupon deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not delete coupon.' });
+  }
+});
+
+// â”€â”€ Tools (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+admin.get('/tools', async (_req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM tools ORDER BY sort_order, created_at`);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/tools/get]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch tools.' });
+  }
+});
+
+admin.post('/tools', async (req, res) => {
+  const { title, category, plan, description, url, status } = req.body;
+  if (!title) return res.status(400).json({ success: false, error: 'title is required.' });
+  const id =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) +
+    '-' +
+    Date.now().toString(36);
+  try {
+    const { rows } = await db.query(
+      `INSERT INTO tools (id,title,category,plan,description,url,status,sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,(SELECT COALESCE(MAX(sort_order),0)+1 FROM tools)) RETURNING *`,
+      [
+        id,
+        title,
+        category || 'calculator',
+        plan || 'basic',
+        description || '',
+        url || '#',
+        status || 'active',
+      ]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not create tool.' });
+  }
+});
+
+admin.patch('/tools/:id', async (req, res) => {
+  const { title, category, plan, description, url, status } = req.body;
+  try {
+    const { rows } = await db.query(
+      `UPDATE tools SET title=$1,category=$2,plan=$3,description=$4,url=$5,status=$6,updated_at=NOW()
+       WHERE id=$7 RETURNING *`,
+      [
+        title,
+        category || 'calculator',
+        plan || 'basic',
+        description || '',
+        url || '#',
+        status || 'active',
+        req.params.id,
+      ]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'Tool not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not update tool.' });
+  }
+});
+
+admin.delete('/tools/:id', async (req, res) => {
+  try {
+    const { rowCount } = await db.query('DELETE FROM tools WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ success: false, error: 'Tool not found.' });
+    res.json({ success: true, message: 'Tool deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not delete tool.' });
+  }
+});
+
+// â”€â”€ Resources (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+admin.get('/resources', async (_req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM resources ORDER BY sort_order, created_at`);
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('[admin/resources/get]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch resources.' });
+  }
+});
+
+admin.post('/resources', async (req, res) => {
+  const { title, type, plan, description, url, downloads } = req.body;
+  if (!title) return res.status(400).json({ success: false, error: 'title is required.' });
+  const id =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) +
+    '-' +
+    Date.now().toString(36);
+  try {
+    const { rows } = await db.query(
+      `INSERT INTO resources (id,title,type,plan,description,url,downloads,sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,(SELECT COALESCE(MAX(sort_order),0)+1 FROM resources)) RETURNING *`,
+      [
+        id,
+        title,
+        type || 'guide',
+        plan || 'basic',
+        description || '',
+        url || '#',
+        parseInt(downloads) || 0,
+      ]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not create resource.' });
+  }
+});
+
+admin.patch('/resources/:id', async (req, res) => {
+  const { title, type, plan, description, url, downloads } = req.body;
+  try {
+    const { rows } = await db.query(
+      `UPDATE resources SET title=$1,type=$2,plan=$3,description=$4,url=$5,downloads=$6,updated_at=NOW()
+       WHERE id=$7 RETURNING *`,
+      [
+        title,
+        type || 'guide',
+        plan || 'basic',
+        description || '',
+        url || '#',
+        parseInt(downloads) || 0,
+        req.params.id,
+      ]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, error: 'Resource not found.' });
+    res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not update resource.' });
+  }
+});
+
+admin.delete('/resources/:id', async (req, res) => {
+  try {
+    const { rowCount } = await db.query('DELETE FROM resources WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ success: false, error: 'Resource not found.' });
+    res.json({ success: true, message: 'Resource deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not delete resource.' });
+  }
+});
+
+app.use('/api/admin', admin);
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TOOL SUBSCRIPTION & CASHFREE PAYMENT APIs
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* GET /api/subscription/plans â€” public */
+app.get('/api/subscription/plans', async (_req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id,name,price_monthly,price_yearly,mrp_monthly,mrp_yearly,description,features,max_courses,badge_color,is_popular,sort_order
+       FROM subscription_plans ORDER BY sort_order`
+    );
+    res.json({ success: true, plans: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Could not fetch plans.' });
+  }
+});
+
+/* GET /api/subscription/status â€” authenticated */
+app.get('/api/subscription/status', verifyAccessToken, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT * FROM tool_subscriptions WHERE user_id=$1 AND status='active' ORDER BY created_at DESC LIMIT 1`,
+      [req.user.id]
+    );
+    if (!rows.length) {
+      return res.json({
+        success: true,
+        subscription: {
+          planId: 'basic',
+          planName: 'Basic',
+          status: 'active',
+          creditsUsed: 0,
+          creditsTotal: 10,
+          billingCycle: null,
+          expiryDate: null,
+        },
+      });
+    }
+    const s = rows[0];
+    const { rows: spRows } = await db.query('SELECT name FROM subscription_plans WHERE id=$1', [
+      s.plan_id,
+    ]);
+    const plan = { name: (spRows[0] || {}).name || s.plan_id };
+    res.json({
+      success: true,
+      subscription: {
+        planId: s.plan_id,
+        planName: plan.name,
+        billingCycle: s.billing_cycle,
+        status: s.status,
+        startDate: s.start_date,
+        expiryDate: s.expiry_date,
+        autoRenew: s.auto_renew,
+        creditsUsed: s.credits_used,
+        creditsTotal: plan.reviewCredits > 100000 ? String.fromCharCode(8734) : plan.reviewCredits,
+        remainingCredits: s.remaining_credits,
+        transactionId: s.transaction_id,
+      },
+    });
+  } catch (err) {
+    console.error('[subscription/status]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch subscription status.' });
+  }
+});
+
+/* GET /api/subscription/history */
+app.get('/api/subscription/history', verifyAccessToken, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT * FROM tool_payments WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50`,
+      [req.user.id]
+    );
+    res.json({ success: true, payments: rows });
+  } catch (err) {
+    console.error('[subscription/history]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch payment history.' });
+  }
+});
+
+/* GET /api/subscription/invoices */
+app.get('/api/subscription/invoices', verifyAccessToken, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id,order_id,payment_id,plan_id,billing_cycle,amount,gst_amount,status,invoice_number,created_at
+         FROM tool_payments WHERE user_id=$1 AND status='paid' ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ success: true, invoices: rows });
+  } catch (err) {
+    console.error('[subscription/invoices]', err);
+    res.status(500).json({ success: false, error: 'Could not fetch invoices.' });
+  }
+});
+
+/* POST /api/subscription/cancel */
+app.post('/api/subscription/cancel', verifyAccessToken, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `UPDATE tool_subscriptions SET auto_renew=FALSE, updated_at=NOW()
+        WHERE user_id=$1 AND status='active' RETURNING id`,
+      [req.user.id]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ success: false, error: 'No active subscription found.' });
+    }
+    res.json({
+      success: true,
+      message: 'Auto-renew disabled. Access continues until expiry date.',
+    });
+  } catch (err) {
+    console.error('[subscription/cancel]', err);
+    res.status(500).json({ success: false, error: 'Could not cancel subscription.' });
+  }
+});
+
+/* POST /api/subscription/change-plan */
+app.post('/api/subscription/change-plan', verifyAccessToken, async (req, res) => {
+  try {
+    const { planId, billingCycle } = req.body;
+    const { rows: cpRows } = await db.query('SELECT id FROM subscription_plans WHERE id=$1', [
+      planId,
+    ]);
+    if (!cpRows.length) return res.status(400).json({ success: false, error: 'Invalid plan.' });
+    if (!['monthly', 'yearly'].includes(billingCycle)) {
+      return res.status(400).json({ success: false, error: 'Invalid billing cycle.' });
+    }
+    await db.query(
+      `UPDATE tool_subscriptions SET plan_id=$1, billing_cycle=$2, updated_at=NOW()
+        WHERE user_id=$3 AND status='active'`,
+      [planId, billingCycle, req.user.id]
+    );
+    res.json({ success: true, message: 'Plan change queued. Effective from next billing cycle.' });
+  } catch (err) {
+    console.error('[subscription/change-plan]', err);
+    res.status(500).json({ success: false, error: 'Could not change plan.' });
+  }
+});
+
+/* â”€â”€ Cashfree helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€ Cashfree HTTP helper (direct calls, stable API version) â”€â”€ */
+async function cashfree(method, path, body) {
+  const appId = (process.env.CASHFREE_APP_ID || '').trim();
+  const secret = (process.env.CASHFREE_SECRET_KEY || '').trim();
+  if (!appId || !secret) throw new Error('Cashfree credentials not set in environment variables.');
+  const base =
+    process.env.CASHFREE_ENV === 'production'
+      ? 'https://api.cashfree.com/pg'
+      : 'https://sandbox.cashfree.com/pg';
+  const res = await fetch(base + path, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-id': appId,
+      'x-client-secret': secret,
+      'x-api-version': '2022-09-01',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const msg = data.message || data.error || 'Cashfree error ' + res.status;
+    console.error('[cashfree] ' + method + ' ' + path + ' ->', res.status, JSON.stringify(data));
+    const e = new Error(msg);
+    e.status = res.status;
+    e.cfData = data;
+    throw e;
+  }
+  return data;
+}
+
+/* POST /api/cashfree/create-order */
+app.post('/api/cashfree/create-order', verifyAccessToken, async (req, res) => {
+  try {
+    const { planId, billingCycle, amount, couponCode } = req.body;
+    if (planId === 'basic') {
+      return res.status(400).json({ success: false, error: 'Basic plan is free.' });
+    }
+    if (!['monthly', 'yearly'].includes(billingCycle)) {
+      return res.status(400).json({ success: false, error: 'Invalid billing cycle.' });
+    }
+
+    const { rows: planRows } = await db.query('SELECT * FROM subscription_plans WHERE id=$1', [
+      planId,
+    ]);
+    if (!planRows.length) return res.status(400).json({ success: false, error: 'Invalid plan.' });
+    const plan = planRows[0];
+
+    const baseAmount =
+      billingCycle === 'yearly' ? Number(plan.price_yearly) : Number(plan.price_monthly);
+
+    // Resolve coupon
+    let couponId = null;
+    let discountAmount = 0;
+    if (couponCode) {
+      const { rows: cRows } = await db.query(
+        `SELECT * FROM coupons WHERE code=$1 AND active=TRUE`,
+        [couponCode.toUpperCase().trim()]
+      );
+      if (!cRows.length) {
+        return res.status(400).json({ success: false, error: 'Invalid or inactive coupon code.' });
+      }
+      const c = cRows[0];
+
+      if (c.expires && c.expires !== 'No expiry' && new Date(c.expires) < new Date()) {
+        return res.status(400).json({ success: false, error: 'Coupon has expired.' });
+      }
+      if (c.used >= c.limit_count) {
+        return res.status(400).json({ success: false, error: 'Coupon usage limit reached.' });
+      }
+      if (c.applies_to !== 'all' && c.applies_to !== 'subscriptions') {
+        return res
+          .status(400)
+          .json({ success: false, error: `Coupon is not valid for subscriptions.` });
+      }
+      if (
+        c.applicable_ids &&
+        c.applicable_ids.length &&
+        !c.applicable_ids.includes(String(planId))
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Coupon is not valid for this plan.' });
+      }
+
+      const { rows: uRows2 } = await db.query(
+        `SELECT COUNT(*) as cnt FROM coupon_usage WHERE coupon_id=$1 AND user_id=$2`,
+        [c.id, req.user.id]
+      );
+      if (parseInt(uRows2[0].cnt) >= (c.per_user_limit || 1)) {
+        return res.status(400).json({
+          success: false,
+          error: 'You have already used this coupon the maximum number of times.',
+        });
+      }
+
+      couponId = c.id;
+      if (c.type === 'percent') {
+        discountAmount = Math.round(baseAmount * (parseFloat(c.val) / 100) * 100) / 100;
+      } else {
+        discountAmount = Math.min(parseFloat(c.val), baseAmount);
+      }
+    }
+
+    const discountedBase = Math.max(0, Math.round((baseAmount - discountAmount) * 100) / 100);
+
+    // Validate amount sent from frontend (allow small float tolerance)
+    console.log(
+      '[create-order] amount check — received:',
+      amount,
+      'expected after discount:',
+      discountedBase,
+      'plan:',
+      planId,
+      'cycle:',
+      billingCycle
+    );
+    if (Math.abs(Number(amount) - discountedBase) > 0.01) {
+      return res
+        .status(400)
+        .json({ success: false, error: `Amount mismatch. Expected ₹${discountedBase}.` });
+    }
+
+    const gstAmount = Math.round(discountedBase * 0.18 * 100) / 100;
+    const totalAmount = discountedBase + gstAmount;
+    const orderId = 'RE-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+
+    const { rows: uRows } = await db.query('SELECT full_name,email,mobile FROM users WHERE id=$1', [
+      req.user.id,
+    ]);
+    const u = uRows[0] || {};
+
+    await db.query(
+      `INSERT INTO tool_payments (order_id,user_id,plan_id,billing_cycle,amount,gst_amount,status,gateway,coupon_id,discount_amount)
+       VALUES ($1,$2,$3,$4,$5,$6,'pending','cashfree',$7,$8)`,
+      [
+        orderId,
+        req.user.id,
+        planId,
+        billingCycle,
+        discountedBase,
+        gstAmount,
+        couponId,
+        discountAmount,
+      ]
+    );
+
+    // Increment coupon used counter
+    if (couponId) {
+      await db.query(`UPDATE coupons SET used=used+1,updated_at=NOW() WHERE id=$1`, [couponId]);
+      await db.query(`INSERT INTO coupon_usage (coupon_id,user_id,order_id) VALUES ($1,$2,$3)`, [
+        couponId,
+        req.user.id,
+        orderId,
+      ]);
+    }
+
+    if (
+      !(process.env.CASHFREE_APP_ID || '').trim() ||
+      !(process.env.CASHFREE_SECRET_KEY || '').trim()
+    ) {
+      return res.status(503).json({
+        success: false,
+        error: 'Payment gateway credentials not configured. Contact support.',
+      });
+    }
+    const cfRes = await cashfree('POST', '/orders', {
+      order_id: orderId,
+      order_amount: totalAmount,
+      order_currency: 'INR',
+      order_note: 'Rising Edge ' + (plan.name || planId) + ' Plan - ' + billingCycle,
+      customer_details: {
+        customer_id: String(req.user.id),
+        customer_name: u.full_name || 'Customer',
+        customer_email: u.email || '',
+        customer_phone: u.mobile || '9999999999',
+      },
+      order_meta: {
+        return_url:
+          (process.env.APP_URL || 'https://www.risingedgetech.com') +
+          '/subscription/success.html?order_id=' +
+          orderId,
+        notify_url:
+          (process.env.APP_URL || 'https://www.risingedgetech.com') + '/api/cashfree/webhook',
+      },
+    });
+    const paymentSessionId = cfRes.payment_session_id;
+    if (!paymentSessionId) {
+      console.error(
+        '[cashfree/create-order] No payment_session_id. CF response:',
+        JSON.stringify(cfRes)
+      );
+      return res.status(502).json({
+        success: false,
+        error: cfRes.message || 'Payment gateway error. Check credentials and try again.',
+      });
+    }
+
+    res.json({
+      success: true,
+      order_id: orderId,
+      payment_session_id: paymentSessionId,
+      env: process.env.CASHFREE_ENV || 'sandbox',
+    });
+  } catch (err) {
+    const cfData = err.response && err.response.data;
+    const cfMsg = cfData && (cfData.message || cfData.error || JSON.stringify(cfData));
+    console.error('[cashfree/create-order]', cfMsg || err.message, cfData || '');
+    const status = (err.response && err.response.status) || 500;
+    res
+      .status(status)
+      .json({ success: false, error: cfMsg || err.message || 'Could not create order.' });
+  }
+});
+
+// Helper: write/overwrite the subscription row using UPDATE-then-INSERT
+// (avoids ON CONFLICT (user_id) which needs a UNIQUE constraint on tool_subscriptions)
+async function upsertSubscription(
+  userId,
+  planId,
+  billingCycle,
+  txnId,
+  paymentId,
+  cfOrderId,
+  amount,
+  startDate,
+  expiryDate,
+  credits
+) {
+  const upd = await db.query(
+    `UPDATE tool_subscriptions
+        SET plan_id=$2, billing_cycle=$3, status='active', start_date=$4, expiry_date=$5,
+            auto_renew=TRUE, remaining_credits=$6, credits_used=0,
+            txn_id=$7, payment_id=$8, cf_order_id=$9, amount_paid=$10, updated_at=NOW()
+      WHERE user_id=$1`,
+    [
+      userId,
+      planId,
+      billingCycle,
+      startDate,
+      expiryDate,
+      credits,
+      txnId,
+      paymentId,
+      cfOrderId,
+      amount,
+    ]
+  );
+  if (upd.rowCount === 0) {
+    await db.query(
+      `INSERT INTO tool_subscriptions
+         (user_id, plan_id, billing_cycle, status, start_date, expiry_date,
+          auto_renew, remaining_credits, credits_used, txn_id, payment_id, cf_order_id, amount_paid)
+         VALUES ($1,$2,$3,'active',$4,$5,TRUE,$6,0,$7,$8,$9,$10)`,
+      [
+        userId,
+        planId,
+        billingCycle,
+        startDate,
+        expiryDate,
+        credits,
+        txnId,
+        paymentId,
+        cfOrderId,
+        amount,
+      ]
+    );
+  }
+  // Sync user_subscriptions so login / admin / dashboard all see the correct plan immediately
+  await db.query(
+    `INSERT INTO user_subscriptions (user_id,plan_id,status,billing_cycle,start_date,end_date,updated_at)
+     VALUES ($1,$2,'ACTIVE',$3,$4,$5,NOW())
+     ON CONFLICT (user_id) DO UPDATE
+       SET plan_id=$2, status='ACTIVE', billing_cycle=$3, start_date=$4, end_date=$5, updated_at=NOW()`,
+    [userId, planId, billingCycle, startDate, expiryDate]
+  );
+}
+
+/* POST /api/cashfree/verify
+   – No JWT required: the order_id is cryptographically unguessable (RE-{ts}-{6hex})
+     and Cashfree only redirects here after a genuine payment attempt.
+     Requiring a JWT caused failures when the 15-min access token expired
+     during the Cashfree checkout flow (UPI / 3D Secure / net banking). */
+app.post('/api/cashfree/verify', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) return res.status(400).json({ success: false, error: 'orderId required.' });
+
+    const { rows: payRows } = await db.query('SELECT * FROM tool_payments WHERE order_id=$1', [
+      orderId,
+    ]);
+    if (!payRows.length) return res.status(404).json({ success: false, error: 'Order not found.' });
+    const pay = payRows[0];
+
+    // If already confirmed, return cached result
+    if (pay.status === 'paid') {
+      return res.json({ success: true, status: 'paid', order_id: orderId });
+    }
+
+    // Query Cashfree for current order status
+    let cfOrder;
+    try {
+      cfOrder = await cashfree('GET', `/orders/${orderId}`);
+    } catch (cfErr) {
+      console.error('[cashfree/verify] CF fetch error:', cfErr.message);
+      return res.status(502).json({ success: false, error: 'Could not reach payment gateway.' });
+    }
+
+    const cfStatus = (cfOrder.order_status || '').toUpperCase();
+
+    if (cfStatus === 'PAID') {
+      // Fetch payment details
+      let cfPayments = [];
+      try {
+        const cfPayRes = await cashfree('GET', `/orders/${orderId}/payments`);
+        cfPayments = Array.isArray(cfPayRes) ? cfPayRes : cfPayRes.data || [];
+      } catch (_) {
+        /* non-fatal */
+      }
+
+      const latestPay = cfPayments[0] || {};
+      const txnId = latestPay.cf_payment_id ? String(latestPay.cf_payment_id) : null;
+      const paymentId = latestPay.payment_method ? JSON.stringify(latestPay.payment_method) : null;
+
+      // Calculate subscription dates
+      const planRow = (
+        await db.query('SELECT * FROM subscription_plans WHERE id=$1', [pay.plan_id])
+      ).rows[0];
+      const credits = planRow
+        ? (pay.billing_cycle === 'yearly' ? planRow.yearly_credits : planRow.monthly_credits) || 0
+        : 0;
+      const startDate = new Date();
+      const expiryDate = new Date(startDate);
+      if (pay.billing_cycle === 'yearly') {
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      } else {
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
+      }
+
+      await upsertSubscription(
+        pay.user_id,
+        pay.plan_id,
+        pay.billing_cycle,
+        txnId,
+        paymentId,
+        orderId,
+        pay.amount,
+        startDate.toISOString(),
+        expiryDate.toISOString(),
+        credits
+      );
+
+      await db.query(
+        `UPDATE tool_payments SET status='paid', txn_id=$1, payment_id=$2, updated_at=NOW() WHERE order_id=$3`,
+        [txnId, paymentId, orderId]
+      );
+
+      return res.json({ success: true, status: 'paid', order_id: orderId });
+    }
+
+    if (cfStatus === 'EXPIRED' || cfStatus === 'CANCELLED') {
+      await db.query(
+        `UPDATE tool_payments SET status='failed', updated_at=NOW() WHERE order_id=$1`,
+        [orderId]
+      );
+      return res.json({ success: false, status: cfStatus.toLowerCase(), order_id: orderId });
+    }
+
+    // Still pending
+    return res.json({
+      success: true,
+      status: cfStatus.toLowerCase() || 'pending',
+      order_id: orderId,
+    });
+  } catch (err) {
+    console.error('[cashfree/verify]', err);
+    res.status(500).json({ success: false, error: err.message || 'Verification failed.' });
+  }
+});
+
+/* POST /api/cashfree/webhook — Cashfree server-to-server notification */
+app.post('/api/cashfree/webhook', express.json(), async (req, res) => {
+  try {
+    const event = req.body;
+    if (!event || !event.data) return res.sendStatus(200);
+
+    const { order } = event.data;
+    if (!order || !order.order_id) return res.sendStatus(200);
+
+    const orderId = order.order_id;
+    const { rows: payRows } = await db.query('SELECT * FROM tool_payments WHERE order_id=$1', [
+      orderId,
+    ]);
+    if (!payRows.length) return res.sendStatus(200);
+    const pay = payRows[0];
+
+    if ((order.order_status || '').toUpperCase() === 'PAID' && pay.status !== 'paid') {
+      const payment = event.data.payment || {};
+      const txnId = payment.cf_payment_id ? String(payment.cf_payment_id) : null;
+      const paymentId = payment.payment_method ? JSON.stringify(payment.payment_method) : null;
+
+      const planRow = (
+        await db.query('SELECT * FROM subscription_plans WHERE id=$1', [pay.plan_id])
+      ).rows[0];
+      const credits = planRow
+        ? (pay.billing_cycle === 'yearly' ? planRow.yearly_credits : planRow.monthly_credits) || 0
+        : 0;
+      const startDate = new Date();
+      const expiryDate = new Date(startDate);
+      if (pay.billing_cycle === 'yearly') {
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      } else {
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
+      }
+
+      // Upsert tool_subscriptions
+      const upd = await db.query(
+        `UPDATE tool_subscriptions
+            SET plan_id=$2, billing_cycle=$3, status='active', start_date=$4, expiry_date=$5,
+                auto_renew=TRUE, remaining_credits=$6, credits_used=0,
+                txn_id=$7, payment_id=$8, cf_order_id=$9, amount_paid=$10, updated_at=NOW()
+          WHERE user_id=$1`,
+        [
+          pay.user_id,
+          pay.plan_id,
+          pay.billing_cycle,
+          startDate,
+          expiryDate,
+          credits,
+          txnId,
+          paymentId,
+          orderId,
+          pay.amount,
+        ]
+      );
+      if (upd.rowCount === 0) {
+        await db.query(
+          `INSERT INTO tool_subscriptions
+             (user_id, plan_id, billing_cycle, status, start_date, expiry_date,
+              auto_renew, remaining_credits, credits_used, txn_id, payment_id, cf_order_id, amount_paid)
+             VALUES ($1,$2,$3,'active',$4,$5,TRUE,$6,0,$7,$8,$9,$10)`,
+          [
+            pay.user_id,
+            pay.plan_id,
+            pay.billing_cycle,
+            startDate,
+            expiryDate,
+            credits,
+            txnId,
+            paymentId,
+            orderId,
+            pay.amount,
+          ]
+        );
+      }
+      // Sync user_subscriptions
+      await db.query(
+        `INSERT INTO user_subscriptions (user_id,plan_id,status,billing_cycle,start_date,end_date,updated_at)
+         VALUES ($1,$2,'ACTIVE',$3,$4,$5,NOW())
+         ON CONFLICT (user_id) DO UPDATE
+           SET plan_id=$2, status='ACTIVE', billing_cycle=$3, start_date=$4, end_date=$5, updated_at=NOW()`,
+        [pay.user_id, pay.plan_id, pay.billing_cycle, startDate, expiryDate]
+      );
+
+      await db.query(
+        `UPDATE tool_payments SET status='paid', txn_id=$1, payment_id=$2, updated_at=NOW() WHERE order_id=$3`,
+        [txnId, paymentId, orderId]
+      );
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('[cashfree/webhook]', err);
+    res.sendStatus(200); // always 200 to prevent Cashfree retries
+  }
+});
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Rising Edge API on :${PORT}`));
+  initDB().catch(err => {
+    console.error('[initDB] Non-fatal migration warning:', err.message);
+  });
+}
