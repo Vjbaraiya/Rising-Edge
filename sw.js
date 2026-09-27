@@ -6,7 +6,7 @@
  *   - /api/*: Network-only (never cache live data)
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = 're-static-' + CACHE_VERSION;
 const PAGE_CACHE = 're-pages-' + CACHE_VERSION;
 

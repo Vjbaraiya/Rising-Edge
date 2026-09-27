@@ -5028,106 +5028,29 @@ app.get(
 );
 
 /* ════════════════════════════════════════════════════════════════════
-   TRAINING SOCIAL API — likes & feedback
-   Public: like counts. Auth: toggle like, my likes, send feedback.
+   TRAINING SOCIAL API — feedback (likes removed)
 ════════════════════════════════════════════════════════════════════ */
 
 const TRAINING_SLUG_RE = /^[A-Za-z0-9/_-]{1,80}$/;
 
-// Derives the same training slug the front end uses (trainingSlugFromHref in
-// Trainings/trainings.html, trainingSlug() in assets/js/training-social.js)
-// from a course's stored href, e.g. "Trainings/EMI/RE/index.html" → "EMI/RE".
-function trainingSlugFromHref(href) {
-  const m = String(href || '').match(/Trainings\/(.+?)\/?(index\.html)?$/);
-  return m ? m[1].replace(/\/+$/, '') : null;
-}
-
-// Public: views + unique visitors for every training, keyed by the same
-// slug used by /api/trainings/likes → { "SI": {views, visitors}, … }.
-// Reuses the existing generic page_views table (populated by /api/track on
-// every page load) rather than a new tracking table — a "view" of a
-// training counts any page load anywhere under its Trainings/<slug>/
-// directory, not just the index page, since students land on lesson pages
-// directly from bookmarks/certificates too.
-app.get('/api/trainings/views', async (_req, res) => {
-  try {
-    const { rows: courseRows } = await db.query('SELECT href FROM courses');
-    const slugs = [...new Set(courseRows.map(r => trainingSlugFromHref(r.href)).filter(Boolean))];
-    const data = {};
-    for (const slug of slugs) {
-      const { rows } = await db.query(
-        `SELECT COUNT(*)::int AS views,
-                COUNT(DISTINCT COALESCE(session_id, ip_address))::int AS visitors
-           FROM page_views
-          WHERE path LIKE $1`,
-        ['/Trainings/' + slug + '/%']
-      );
-      data[slug] = { views: rows[0].views, visitors: rows[0].visitors };
-    }
-    res.json({ success: true, data });
-  } catch (err) {
-    console.error('[trainings/views]', err);
-    res.status(500).json({ success: false, error: 'Could not load view stats.' });
-  }
+// Views, visitors and likes were removed (no longer recorded or shown). The
+// endpoints below stay as no-database stubs so older cached pages don't error.
+app.get('/api/trainings/views', (_req, res) => {
+  // Views/visitors are no longer recorded or shown.
+  res.json({ success: true, data: {} });
 });
 
-// Public: like counts for all trainings → { "SI": 12, "EMI/ESD": 4, … }
-app.get('/api/trainings/likes', async (_req, res) => {
-  try {
-    const { rows } = await db.query(
-      `SELECT training_slug, COUNT(*)::int AS n FROM training_likes GROUP BY training_slug`
-    );
-    const counts = {};
-    for (const r of rows) counts[r.training_slug] = r.n;
-    res.json({ success: true, data: counts });
-  } catch (err) {
-    console.error('[trainings/likes]', err);
-    res.status(500).json({ success: false, error: 'Could not load likes.' });
-  }
+app.get('/api/trainings/likes', (_req, res) => {
+  // Likes are no longer recorded or shown.
+  res.json({ success: true, data: {} });
 });
 
-// Auth: slugs the current user has liked
-app.get('/api/me/training-likes', verifyAccessToken, async (req, res) => {
-  try {
-    const { rows } = await db.query(`SELECT training_slug FROM training_likes WHERE user_id = $1`, [
-      req.user.id,
-    ]);
-    res.json({ success: true, data: rows.map(r => r.training_slug) });
-  } catch (err) {
-    console.error('[trainings/my-likes]', err);
-    res.status(500).json({ success: false, error: 'Could not load your likes.' });
-  }
+app.get('/api/me/training-likes', (_req, res) => {
+  res.json({ success: true, data: [] });
 });
 
-// Auth: toggle like → { liked, count }
-app.post('/api/trainings/like', verifyAccessToken, async (req, res) => {
-  try {
-    const slug = String((req.body || {}).slug || '').trim();
-    if (!TRAINING_SLUG_RE.test(slug)) {
-      return res.status(422).json({ success: false, error: 'Invalid training slug.' });
-    }
-    const ins = await db.query(
-      `INSERT INTO training_likes (user_id, training_slug) VALUES ($1,$2)
-       ON CONFLICT DO NOTHING RETURNING user_id`,
-      [req.user.id, slug]
-    );
-    let liked = true;
-    if (!ins.rows.length) {
-      await db.query(`DELETE FROM training_likes WHERE user_id=$1 AND training_slug=$2`, [
-        req.user.id,
-        slug,
-      ]);
-      liked = false;
-    }
-    const { rows } = await db.query(
-      `SELECT COUNT(*)::int AS n FROM training_likes WHERE training_slug=$1`,
-      [slug]
-    );
-    res.json({ success: true, data: { liked, count: rows[0].n } });
-  } catch (err) {
-    console.error('[trainings/like]', err);
-    res.status(500).json({ success: false, error: 'Could not save like.' });
-  }
+app.post('/api/trainings/like', (_req, res) => {
+  res.status(410).json({ success: false, error: 'Likes are no longer available.' });
 });
 
 // Auth: submit feedback for a training
@@ -5274,115 +5197,27 @@ function feedbackEmailHtml({ kind, label, fromName, fromEmail, message }) {
 
 // Public: views/visitors/likes for every resource or tool of a given kind
 // → { "<id>": { views, visitors, likes }, … }
-app.get('/api/content/:kind/social', async (req, res) => {
-  const kind = req.params.kind;
-  if (!validKind(kind)) return res.status(404).json({ success: false, error: 'Unknown kind.' });
-  try {
-    const table = kind === 'resource' ? 'resources' : 'tools';
-    const { rows: items } = await db.query(`SELECT id FROM ${table}`);
-    const { rows: viewRows } = await db.query(
-      `SELECT content_id,
-              COUNT(*)::int AS views,
-              COUNT(DISTINCT COALESCE(session_id, ip_address))::int AS visitors
-         FROM content_views WHERE kind=$1 GROUP BY content_id`,
-      [kind]
-    );
-    const { rows: likeRows } = await db.query(
-      `SELECT content_id, COUNT(*)::int AS likes FROM content_likes WHERE kind=$1 GROUP BY content_id`,
-      [kind]
-    );
-    const viewMap = {};
-    for (const r of viewRows) viewMap[r.content_id] = r;
-    const likeMap = {};
-    for (const r of likeRows) likeMap[r.content_id] = r.likes;
-    const data = {};
-    for (const item of items) {
-      data[item.id] = {
-        views: (viewMap[item.id] && viewMap[item.id].views) || 0,
-        visitors: (viewMap[item.id] && viewMap[item.id].visitors) || 0,
-        likes: likeMap[item.id] || 0,
-      };
-    }
-    res.json({ success: true, data });
-  } catch (err) {
-    console.error('[content/social]', err);
-    res.status(500).json({ success: false, error: 'Could not load stats.' });
-  }
+app.get('/api/content/:kind/social', (_req, res) => {
+  // Views/visitors/likes are no longer recorded or shown.
+  res.json({ success: true, data: {} });
 });
 
 // Public: record a view (click-through from the catalogue card). Works the
 // same whether the card's url is an internal page or an external link.
-app.post('/api/content/:kind/:id/view', async (req, res) => {
-  const kind = req.params.kind;
-  const id = req.params.id;
-  if (!validKind(kind) || !CONTENT_ID_RE.test(id)) return res.status(204).end();
-  try {
-    let userId = null;
-    const auth = req.headers.authorization;
-    if (auth && auth.startsWith('Bearer ')) {
-      try {
-        userId = jwt.verify(auth.slice(7), JWT_SECRET).userId || null;
-      } catch (e) {
-        userId = null;
-      }
-    }
-    await db.query(
-      `INSERT INTO content_views (kind, content_id, user_id, session_id, ip_address)
-       VALUES ($1,$2,$3,$4,$5)`,
-      [kind, id, userId, String((req.body || {}).sessionId || '').slice(0, 64) || null, req.ip]
-    );
-    res.status(204).end();
-  } catch (err) {
-    console.error('[content/view]', err);
-    res.status(204).end(); // never fail the client over a view beacon
-  }
+app.post('/api/content/:kind/:id/view', (_req, res) => {
+  // Views are no longer recorded (kept for older cached pages).
+  res.status(204).end();
 });
 
 // Auth: content ids (with kind) the current user has liked, across both
 // resources and tools → [{ kind, content_id }, …]
-app.get('/api/me/content-likes', verifyAccessToken, async (req, res) => {
-  try {
-    const { rows } = await db.query(`SELECT kind, content_id FROM content_likes WHERE user_id=$1`, [
-      req.user.id,
-    ]);
-    res.json({ success: true, data: rows });
-  } catch (err) {
-    console.error('[content/my-likes]', err);
-    res.status(500).json({ success: false, error: 'Could not load your likes.' });
-  }
+app.get('/api/me/content-likes', (_req, res) => {
+  res.json({ success: true, data: [] });
 });
 
 // Auth: toggle like → { liked, count }
-app.post('/api/content/:kind/:id/like', verifyAccessToken, async (req, res) => {
-  const kind = req.params.kind;
-  const id = req.params.id;
-  if (!validKind(kind) || !CONTENT_ID_RE.test(id)) {
-    return res.status(404).json({ success: false, error: 'Unknown content.' });
-  }
-  try {
-    const ins = await db.query(
-      `INSERT INTO content_likes (kind, content_id, user_id) VALUES ($1,$2,$3)
-       ON CONFLICT DO NOTHING RETURNING user_id`,
-      [kind, id, req.user.id]
-    );
-    let liked = true;
-    if (!ins.rows.length) {
-      await db.query(`DELETE FROM content_likes WHERE kind=$1 AND content_id=$2 AND user_id=$3`, [
-        kind,
-        id,
-        req.user.id,
-      ]);
-      liked = false;
-    }
-    const { rows } = await db.query(
-      `SELECT COUNT(*)::int AS n FROM content_likes WHERE kind=$1 AND content_id=$2`,
-      [kind, id]
-    );
-    res.json({ success: true, data: { liked, count: rows[0].n } });
-  } catch (err) {
-    console.error('[content/like]', err);
-    res.status(500).json({ success: false, error: 'Could not save like.' });
-  }
+app.post('/api/content/:kind/:id/like', (_req, res) => {
+  res.status(410).json({ success: false, error: 'Likes are no longer available.' });
 });
 
 // Auth: submit feedback for a resource or tool — emails info@risingedgetech.com
@@ -6223,39 +6058,9 @@ admin.delete('/resources/:id', async (req, res) => {
 /* ── Website analytics: page-view tracking + visit stats ─── */
 
 /* POST /api/track — public beacon, called from core.js on every page load */
-app.post('/api/track', async (req, res) => {
-  try {
-    const { sessionId, path: pagePath, referrer, token } = req.body || {};
-    if (!pagePath || typeof pagePath !== 'string') {
-      return res.status(400).json({ success: false });
-    }
-    let userId = null;
-    const auth = req.headers.authorization;
-    const bearer = auth && auth.startsWith('Bearer ') ? auth.slice(7) : token || null;
-    if (bearer) {
-      try {
-        userId = jwt.verify(bearer, JWT_SECRET).userId || null;
-      } catch (e) {
-        userId = null;
-      }
-    }
-    await db.query(
-      `INSERT INTO page_views (user_id, session_id, path, referrer, user_agent, ip_address)
-       VALUES ($1,$2,$3,$4,$5,$6)`,
-      [
-        userId,
-        String(sessionId || '').slice(0, 64) || null,
-        String(pagePath).slice(0, 300),
-        String(referrer || '').slice(0, 300) || null,
-        (req.headers['user-agent'] || '').slice(0, 300),
-        req.ip,
-      ]
-    );
-    res.status(204).end();
-  } catch (err) {
-    // Tracking must never break the site — swallow errors.
-    res.status(204).end();
-  }
+app.post('/api/track', (_req, res) => {
+  // Page views/visitors are no longer recorded (kept for older cached pages).
+  res.status(204).end();
 });
 
 /* POST /api/newsletter/subscribe — public signup from the site footer */

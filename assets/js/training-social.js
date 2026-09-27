@@ -108,37 +108,6 @@
     bar.className = 'ts-bar';
     bar.id = 'training-social';
 
-    /* Like */
-    var likeBtn = document.createElement('button');
-    likeBtn.className = 'ts-btn';
-    likeBtn.id = 'ts-like';
-    likeBtn.innerHTML = '♥ Like · <span id="ts-like-count">0</span>';
-    likeBtn.onclick = function () {
-      if (!isLoggedIn()) {
-        goLogin();
-        return;
-      }
-      likeBtn.disabled = true;
-      reApiFetch('/api/trainings/like', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: SLUG }),
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (d) {
-          likeBtn.disabled = false;
-          if (!d.success) return;
-          likeBtn.classList.toggle('ts-liked', d.data.liked);
-          document.getElementById('ts-like-count').textContent = d.data.count;
-          toast(d.data.liked ? 'Thanks for the like!' : 'Like removed');
-        })
-        .catch(function () {
-          likeBtn.disabled = false;
-        });
-    };
-
     /* Share */
     var shareWrap = document.createElement('div');
     shareWrap.style.position = 'relative';
@@ -185,7 +154,6 @@
       document.getElementById('ts-fb-overlay').classList.add('open');
     };
 
-    bar.appendChild(likeBtn);
     bar.appendChild(shareWrap);
     bar.appendChild(fbBtn);
     return bar;
@@ -277,34 +245,6 @@
         window.open('https://www.instagram.com/', '_blank', 'noopener');
       });
     };
-
-    /* load counts + my-like state */
-    fetch('/api/trainings/likes')
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (d) {
-        if (d.success && d.data[SLUG]) {
-          document.getElementById('ts-like-count').textContent = d.data[SLUG];
-        }
-      })
-      .catch(function () {
-        /* server offline — bar still works for share */
-      });
-    if (isLoggedIn()) {
-      reApiFetch('/api/me/training-likes')
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (d) {
-          if (d.success && d.data.indexOf(SLUG) !== -1) {
-            document.getElementById('ts-like').classList.add('ts-liked');
-          }
-        })
-        .catch(function () {
-          /* ignore */
-        });
-    }
   }
 
   if (document.readyState === 'loading') {

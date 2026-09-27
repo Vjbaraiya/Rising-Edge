@@ -36,13 +36,6 @@
       })();
     </script>
     <style>
-      .content-views-chip,
-      .content-like-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-
       /* ── View switcher (Grid / List) ── */
       .view-toggle {
         display: inline-flex;
@@ -315,9 +308,6 @@
             (r.url || '#') +
             '" class="btn btn-secondary btn-sm rc-action"' +
             (r.url && r.url !== '#' ? ' target="_blank" rel="noopener"' : '') +
-            " onclick=\"reRecordContentView('resource','" +
-            r.id +
-            '\')"' +
             '>' +
             (type === 'guide' ? 'Read Guide' : 'Download') +
             '</a>'
@@ -329,10 +319,9 @@
            can't be used to bypass the plan gate. */
         var titleHref = hasAccess ? r.url || '#' : '../subscription/plans.html';
         var titleExtra = hasAccess
-          ? (r.url && r.url !== '#' ? ' target="_blank" rel="noopener"' : '') +
-            " onclick=\"reRecordContentView('resource','" +
-            r.id +
-            '\')"'
+          ? r.url && r.url !== '#'
+            ? ' target="_blank" rel="noopener"'
+            : ''
           : '';
         var titleLink =
           '<a class="rc-title-link" href="' +
@@ -400,12 +389,6 @@
           label +
           '</span>' +
           planBadge +
-          '<span class="badge badge-gray content-views-chip" data-kind="resource" data-id="' +
-          r.id +
-          '">👁 0 views · 0 visitors</span>' +
-          '<span class="badge badge-gray content-like-chip" data-kind="resource" data-id="' +
-          r.id +
-          '">♥ 0 likes</span>' +
           '</div>' +
           '<h3 class="rc-title" style="font-size:var(--text-sm);font-weight:var(--weight-semi);margin-bottom:var(--sp-2)">' +
           titleLink +
@@ -425,8 +408,7 @@
         );
       }
 
-      /* ── Table renderer (List view) — Title / Type / Views & Visitors /
-         Likes / Action, one row per resource ──────────────────────────── */
+      /* ── Table renderer (List view) — Title / Type /  Action, one row per resource ──────────────────────────── */
       function renderResourceTableRow(r, userPlan) {
         var acc = getResourceAccess(r, userPlan);
         var type = acc.type;
@@ -448,16 +430,6 @@
           acc.planBadge +
           '</td>' +
           '<td>' +
-          '<span class="badge badge-gray content-views-chip" data-kind="resource" data-id="' +
-          r.id +
-          '">👁 0 views · 0 visitors</span>' +
-          '</td>' +
-          '<td>' +
-          '<span class="badge badge-gray content-like-chip" data-kind="resource" data-id="' +
-          r.id +
-          '">♥ 0 likes</span>' +
-          '</td>' +
-          '<td>' +
           acc.actionBtn +
           '</td>' +
           '</tr>'
@@ -469,7 +441,7 @@
           '<div class="table-wrap">' +
           '<table class="data-table rv-table">' +
           '<thead><tr>' +
-          '<th>Title</th><th>Type</th><th>Views &amp; Visitors</th><th>Likes</th><th>Action</th>' +
+          '<th>Title</th><th>Type</th><th>Action</th>' +
           '</tr></thead>' +
           '<tbody>' +
           resources
@@ -505,7 +477,6 @@
                 })
                 .join('');
         applyCurrentFilterAndSearch();
-        if (typeof loadContentSocialChips === 'function') loadContentSocialChips('resource');
         if (empty) empty.style.display = 'none';
       }
 

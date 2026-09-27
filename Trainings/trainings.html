@@ -82,15 +82,6 @@
         padding: 1px 6px;
       }
 
-      /* Views + likes chips on each course card (populated after render by
-         loadTrainingViews()/loadTrainingLikes()) */
-      .tl-views-chip,
-      .tl-like-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-
       /* Payment modal — centered overlay */
       .modal-backdrop {
         position: fixed;
@@ -576,79 +567,6 @@
         return '<span class="validity-badge ' + cls + '">Valid till ' + label + '</span>';
       }
 
-      /* ── Training views + likes (slug derived from course href) ──────
-         Likes: existing per-user toggle system (training_likes table,
-         POST /api/trainings/like — see assets/js/training-social.js on
-         each training's own page). This catalogue only *displays* the
-         aggregate counts.
-         Views/visitors: derived from the existing page_views table
-         (populated by /api/track on every page load) — no new tracking
-         table needed. Both counts always render, including zero, so every
-         training shows a total rather than hiding untouched ones. ── */
-      function trainingSlugFromHref(href) {
-        var m = String(href || '').match(/Trainings\/(.+?)\/?(index\.html)?$/);
-        return m ? m[1].replace(/\/+$/, '') : null;
-      }
-
-      function fmtCount(n) {
-        n = Number(n) || 0;
-        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-        return String(n);
-      }
-
-      function applyLikesToChips(data) {
-        document.querySelectorAll('.tl-like-chip').forEach(function (chip) {
-          var n = data[chip.getAttribute('data-slug')] || 0;
-          chip.textContent = '♥ ' + fmtCount(n) + (n === 1 ? ' like' : ' likes');
-        });
-      }
-      function applyViewsToChips(data) {
-        document.querySelectorAll('.tl-views-chip').forEach(function (chip) {
-          var stat = data[chip.getAttribute('data-slug')] || { views: 0, visitors: 0 };
-          chip.textContent =
-            '👁 ' + fmtCount(stat.views) + ' views · ' + fmtCount(stat.visitors) + ' visitors';
-        });
-      }
-
-      function loadTrainingLikes() {
-        if (Object.keys(_likesData).length) {
-          applyLikesToChips(_likesData);
-          return;
-        }
-        fetch('/api/trainings/likes')
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (d) {
-            if (!d.success) return;
-            _likesData = d.data || {};
-            applyLikesToChips(_likesData);
-          })
-          .catch(function () {
-            /* optional */
-          });
-      }
-
-      function loadTrainingViews() {
-        if (Object.keys(_viewsData).length) {
-          applyViewsToChips(_viewsData);
-          return;
-        }
-        fetch('/api/trainings/views')
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (d) {
-            if (!d.success) return;
-            _viewsData = d.data || {};
-            applyViewsToChips(_viewsData);
-          })
-          .catch(function () {
-            /* optional */
-          });
-      }
-
       /* ── Shared action/price logic (grid, detail and table views all use
          the same buy/start-learning/coming-soon rules) ─────────────────── */
       function getCourseAction(c, ownedMap) {
@@ -727,7 +645,6 @@
         var cat = c.category || 'custom';
         var badgeClass = CAT_BADGE[cat] || 'badge-gray';
         var catLabel = CAT_LABEL[cat] || cat;
-        var trainingSlug = trainingSlugFromHref(c.href);
         var gradient = c.gradient || 'linear-gradient(135deg,#0f2040,#0e3a5c)';
         var act = getCourseAction(c, ownedMap);
         var isPublished = act.isPublished;
@@ -756,14 +673,6 @@
           (c.modules_count
             ? '<span class="badge badge-gray">' + c.modules_count + ' Modules</span>'
             : '') +
-          (trainingSlug
-            ? '<span class="badge badge-gray tl-views-chip" data-slug="' +
-              trainingSlug +
-              '">👁 0 views · 0 visitors</span>' +
-              '<span class="badge badge-gray tl-like-chip" data-slug="' +
-              trainingSlug +
-              '">♥ 0 likes</span>'
-            : '') +
           (!isPublished ? '<span class="badge badge-gray">Coming Soon</span>' : '') +
           (isOwned ? '<span class="badge badge-green">Purchased</span>' : '') +
           '</div>' +
@@ -787,13 +696,11 @@
         );
       }
 
-      /* ── Table renderer (List view) — Title / Category / Views & Visitors
-         / Likes / Action, one row per course ─────────────────────────── */
+      /* ── Table renderer (List view) — Title / Category / Action, one row per course ─────────────────────────── */
       function renderCourseTableRow(c, ownedMap) {
         var cat = c.category || 'custom';
         var badgeClass = CAT_BADGE[cat] || 'badge-gray';
         var catLabel = CAT_LABEL[cat] || cat;
-        var trainingSlug = trainingSlugFromHref(c.href);
         var act = getCourseAction(c, ownedMap);
 
         return (
@@ -814,20 +721,6 @@
           catLabel +
           '</span></td>' +
           '<td>' +
-          (trainingSlug
-            ? '<span class="badge badge-gray tl-views-chip" data-slug="' +
-              trainingSlug +
-              '">👁 0 views · 0 visitors</span>'
-            : '—') +
-          '</td>' +
-          '<td>' +
-          (trainingSlug
-            ? '<span class="badge badge-gray tl-like-chip" data-slug="' +
-              trainingSlug +
-              '">♥ 0 likes</span>'
-            : '—') +
-          '</td>' +
-          '<td>' +
           act.actionCompactHtml +
           '</td>' +
           '</tr>'
@@ -839,7 +732,7 @@
           '<div class="table-wrap">' +
           '<table class="data-table tv-table">' +
           '<thead><tr>' +
-          '<th>Title</th><th>Category</th><th>Views &amp; Visitors</th><th>Likes</th><th>Action</th>' +
+          '<th>Title</th><th>Category</th><th>Action</th>' +
           '</tr></thead>' +
           '<tbody>' +
           courses
@@ -854,26 +747,17 @@
       }
 
       /* ── Course sort ─────────────────────────────────────────────── */
-      /* Paid courses always first; within each tier sort by engagement
-         (likes + views) descending so the most popular rise to the top. */
+      /* Paid courses always first; within each tier keep the server's order. */
       var _allCourses = [];
       var _ownedMap = {};
-      var _likesData = {};
-      var _viewsData = {};
 
       function sortCourses(courses) {
         return courses.slice().sort(function (a, b) {
           // Paid = discounted_price > 0 → slot 0; free/coming-soon → slot 1
           var aPaid = (parseFloat(a.discounted_price) || 0) > 0 ? 0 : 1;
           var bPaid = (parseFloat(b.discounted_price) || 0) > 0 ? 0 : 1;
-          if (aPaid !== bPaid) return aPaid - bPaid;
-
-          // Within the same tier, rank by total engagement score
-          var aSlug = trainingSlugFromHref(a.href);
-          var bSlug = trainingSlugFromHref(b.href);
-          var aScore = (_likesData[aSlug] || 0) + ((_viewsData[aSlug] || {}).views || 0);
-          var bScore = (_likesData[bSlug] || 0) + ((_viewsData[bSlug] || {}).views || 0);
-          return bScore - aScore;
+          // Within the same tier, keep the server's order (stable sort)
+          return aPaid - bPaid;
         });
       }
 
@@ -1125,8 +1009,6 @@
                 })
                 .join('');
         applyCurrentFilterAndSearch();
-        loadTrainingLikes();
-        loadTrainingViews();
       }
 
       function applyTrainingsView(view) {
@@ -1190,31 +1072,9 @@
               })
           : Promise.resolve(null);
 
-        /* Fetch engagement data upfront so we can sort before first render */
-        var likesP = fetch('/api/trainings/likes')
-          .then(function (r) {
-            return r.json();
-          })
-          .catch(function () {
-            return null;
-          });
-        var viewsP = fetch('/api/trainings/views')
-          .then(function (r) {
-            return r.json();
-          })
-          .catch(function () {
-            return null;
-          });
-
-        Promise.all([coursesP, purchasesP, likesP, viewsP]).then(function (results) {
+        Promise.all([coursesP, purchasesP]).then(function (results) {
           var coursesRes = results[0];
           var purchasesRes = results[1];
-          var likesRes = results[2];
-          var viewsRes = results[3];
-
-          /* Cache engagement data (loadTrainingLikes/Views reuse it) */
-          if (likesRes && likesRes.success) _likesData = likesRes.data || {};
-          if (viewsRes && viewsRes.success) _viewsData = viewsRes.data || {};
 
           /* Build owned-course map: courseId -> purchase record */
           var ownedMap = {};
@@ -1225,7 +1085,7 @@
           }
 
           var courses = coursesRes && coursesRes.success && coursesRes.data ? coursesRes.data : [];
-          /* Sort: paid first, then by engagement within each tier */
+          /* Sort: paid first, server order within each tier */
           _allCourses = sortCourses(courses);
           _ownedMap = ownedMap;
 

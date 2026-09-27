@@ -36,13 +36,6 @@
       })();
     </script>
     <style>
-      .content-views-chip,
-      .content-like-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-
       /* ── View switcher (Grid / List) ── */
       .view-toggle {
         display: inline-flex;
@@ -281,15 +274,13 @@
         var actionBtn = hasAccess
           ? '<a href="' +
             (t.url || '#') +
-            '" class="btn btn-secondary btn-sm rc-action" onclick="reRecordContentView(\'tool\',\'' +
-            t.id +
-            '\')">Open Tool</a>'
+            '" class="btn btn-secondary btn-sm rc-action">Open Tool</a>'
           : '<a href="../subscription/plans.html" class="btn btn-primary btn-sm rc-action">Upgrade to Access</a>';
 
         /* Title link — access-gated the same way the action button is, so
            the compact list view can't bypass the plan gate. */
         var titleHref = hasAccess ? t.url || '#' : '../subscription/plans.html';
-        var titleExtra = hasAccess ? " onclick=\"reRecordContentView('tool','" + t.id + '\')"' : '';
+        var titleExtra = '';
         var titleLink =
           '<a class="rc-title-link" href="' +
           titleHref +
@@ -370,12 +361,6 @@
           catLabel +
           '</span>' +
           planBadge +
-          '<span class="badge badge-gray content-views-chip" data-kind="tool" data-id="' +
-          t.id +
-          '">👁 0 views · 0 visitors</span>' +
-          '<span class="badge badge-gray content-like-chip" data-kind="tool" data-id="' +
-          t.id +
-          '">♥ 0 likes</span>' +
           '</div>' +
           '<h3 class="rc-title" style="font-size:var(--text-sm);font-weight:var(--weight-semi);margin-bottom:var(--sp-2)">' +
           titleLink +
@@ -390,8 +375,7 @@
         );
       }
 
-      /* ── Table renderer (List view) — Title / Category / Views & Visitors
-         / Likes / Action, one row per tool ─────────────────────────────── */
+      /* ── Table renderer (List view) — Title / Category / Action, one row per tool ─────────────────────────────── */
       function renderToolTableRow(t, userPlan) {
         var catLabel =
           (typeof CATEGORY_LABEL !== 'undefined' && CATEGORY_LABEL[t.category]) ||
@@ -422,16 +406,6 @@
           acc.planBadge +
           '</td>' +
           '<td>' +
-          '<span class="badge badge-gray content-views-chip" data-kind="tool" data-id="' +
-          t.id +
-          '">👁 0 views · 0 visitors</span>' +
-          '</td>' +
-          '<td>' +
-          '<span class="badge badge-gray content-like-chip" data-kind="tool" data-id="' +
-          t.id +
-          '">♥ 0 likes</span>' +
-          '</td>' +
-          '<td>' +
           acc.actionBtn +
           '</td>' +
           '</tr>'
@@ -443,7 +417,7 @@
           '<div class="table-wrap">' +
           '<table class="data-table rv-table">' +
           '<thead><tr>' +
-          '<th>Title</th><th>Category</th><th>Views &amp; Visitors</th><th>Likes</th><th>Action</th>' +
+          '<th>Title</th><th>Category</th><th>Action</th>' +
           '</tr></thead>' +
           '<tbody>' +
           tools
@@ -479,7 +453,6 @@
                 })
                 .join('');
         applyCurrentFilterAndSearch();
-        if (typeof loadContentSocialChips === 'function') loadContentSocialChips('tool');
         if (empty) empty.style.display = 'none';
       }
 

@@ -993,122 +993,27 @@ function reNewsletterSubmit(form) {
   return false;
 }
 
-/* ── 19. PAGE-VIEW TRACKING ──────────────────────────────────────── */
-function trackPageView() {
-  try {
-    if (location.protocol === 'file:') return;
-    var vid = localStorage.getItem('re_vid');
-    if (!vid) {
-      vid =
-        Date.now().toString(36) +
-        '-' +
-        Math.random().toString(36).slice(2, 10) +
-        Math.random().toString(36).slice(2, 10);
-      localStorage.setItem('re_vid', vid);
-    }
-    // Include the access token in the body so the beacon (which cannot set an
-    // Authorization header) can still attribute the view to the logged-in user.
-    var _tok = '';
-    try {
-      var _s = JSON.parse(localStorage.getItem('re_session') || '{}');
-      _tok = _s.accessToken || _s.token || '';
-    } catch (e) {
-      _tok = '';
-    }
-    var payload = JSON.stringify({
-      sessionId: vid,
-      path: location.pathname,
-      referrer: document.referrer || '',
-      token: _tok || undefined,
-    });
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }));
-    } else {
-      fetch('/api/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
-        keepalive: true,
-      }).catch(function () {});
-    }
-  } catch (e) {
-    /* tracking must never break the page */
-  }
-}
+/* ── 19. PAGE-VIEW TRACKING — removed: page views/visitors are no longer recorded. */
 
 /* ── 20. INIT ────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
   injectComponents();
   initFilters();
   Theme.init();
-  trackPageView();
 });
 
 /* ── 21. CONTENT SOCIAL (resources/tools) ─────────────────────────────
-   Resource/tool "views" are counted on click-through from the catalogue
-   (resources.html / tools.html) via reRecordContentView() below — this
-   works the same whether the card's link is an internal page or an
-   external one. The Like/Share/Feedback bar, though, only makes sense on
+   The Share/Feedback bar only makes sense on
    a page we actually control, so instead of hand-wiring it onto every
    internal resource/tool page (like training-social.js requires on each
    training lesson), it's auto-injected here: match the current page's
    path against every resource's/tool's stored `url` and, on a hit, load
    content-social.js. This keeps working for any internal page an admin
    points a resource/tool at later, with no per-page script tag needed. */
-function reFmtCount(n) {
-  n = Number(n) || 0;
-  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  return String(n);
-}
-
-/* Populates every .content-views-chip / .content-like-chip[data-kind="…"]
-   badge on a catalogue page (resources.html / tools.html) with live counts.
-   Cards should carry data-id="<resource/tool id>" on each chip. */
-window.loadContentSocialChips = function (kind) {
-  fetch('/api/content/' + encodeURIComponent(kind) + '/social')
-    .then(function (r) {
-      return r.json();
-    })
-    .then(function (d) {
-      if (!d.success) return;
-      document
-        .querySelectorAll('.content-views-chip[data-kind="' + kind + '"]')
-        .forEach(function (chip) {
-          var stat = d.data[chip.getAttribute('data-id')] || { views: 0, visitors: 0 };
-          chip.textContent =
-            '👁 ' + reFmtCount(stat.views) + ' views · ' + reFmtCount(stat.visitors) + ' visitors';
-        });
-      document
-        .querySelectorAll('.content-like-chip[data-kind="' + kind + '"]')
-        .forEach(function (chip) {
-          var n = (d.data[chip.getAttribute('data-id')] || {}).likes || 0;
-          chip.textContent = '♥ ' + reFmtCount(n) + (n === 1 ? ' like' : ' likes');
-        });
-    })
-    .catch(function () {
-      /* stats are optional — cards still render fine without them */
-    });
-};
-
-window.reRecordContentView = function (kind, id) {
-  try {
-    var payload = JSON.stringify({ sessionId: localStorage.getItem('re_vid') || '' });
-    var url = '/api/content/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id) + '/view';
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
-    } else {
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
-        keepalive: true,
-      }).catch(function () {});
-    }
-  } catch (e) {
-    /* view tracking must never break navigation */
-  }
-};
+/* View/visitor/like counts are no longer recorded or shown. These stay as
+   no-ops so older cached catalogue pages that still call them keep working. */
+window.loadContentSocialChips = function () {};
+window.reRecordContentView = function () {};
 
 (function () {
   var path = window.location.pathname;
