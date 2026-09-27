@@ -3915,21 +3915,36 @@ app.get('/api/challenges/next', async (req, res) => {
   }
 });
 
-// GET per-challenge leaderboard (public; ranks update live as attempts are
-// submitted — NOT frozen until the challenge closes. `no-store` here so no
-// browser/proxy cache can make the widget look stale between polls.)
+// Public leaderboards are served from an in-memory cache that refreshes once a
+// day, so page views do not hit the database. Ranks from new submissions show
+// up at the next daily refresh (or after a server restart/deploy).
+const LEADERBOARD_TTL_MS = 24 * 60 * 60 * 1000;
+const leaderboardCache = new Map(); // key -> { at, data }
+async function cachedLeaderboard(key, load) {
+  const hit = leaderboardCache.get(key);
+  if (hit && Date.now() - hit.at < LEADERBOARD_TTL_MS) return hit.data;
+  const data = await load();
+  leaderboardCache.set(key, { at: Date.now(), data });
+  if (leaderboardCache.size > 500) leaderboardCache.delete(leaderboardCache.keys().next().value);
+  return data;
+}
+
+// GET per-challenge leaderboard (public, refreshed daily)
 app.get('/api/challenges/:id/leaderboard', async (req, res) => {
-  res.set('Cache-Control', 'no-store');
+  res.set('Cache-Control', 'public, max-age=3600');
   try {
-    const { rows } = await db.query(
-      `SELECT u.full_name, u."current_role" AS role, a.final_score AS score, a.time_taken_sec,
+    const rows = await cachedLeaderboard('challenge:' + req.params.id, async () => {
+      const { rows } = await db.query(
+        `SELECT u.full_name, u."current_role" AS role, a.final_score AS score, a.time_taken_sec,
               RANK() OVER (ORDER BY a.final_score DESC, a.time_taken_sec ASC) AS rank
          FROM challenge_attempts a JOIN users u ON u.id=a.user_id
         WHERE a.challenge_id=$1 AND a.is_practice=FALSE AND a.status<>'in_progress'
           AND u.role <> 'SUPER_ADMIN'
         ORDER BY rank LIMIT 100`,
-      [req.params.id]
-    );
+        [req.params.id]
+      );
+      return rows;
+    });
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('[whdc/leaderboard]', err);
@@ -3939,14 +3954,18 @@ app.get('/api/challenges/:id/leaderboard', async (req, res) => {
 
 // GET all-time points leaderboard (public)
 app.get('/api/leaderboard', async (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=3600');
   try {
-    const { rows } = await db.query(
-      `SELECT u.full_name, u."current_role" AS role, p.lifetime_points AS score, p.tier,
-              RANK() OVER (ORDER BY p.lifetime_points DESC) AS rank
-         FROM user_points p JOIN users u ON u.id=p.user_id
-        WHERE u.role <> 'SUPER_ADMIN'
-        ORDER BY rank LIMIT 100`
-    );
+    const rows = await cachedLeaderboard('alltime', async () => {
+      const { rows } = await db.query(
+        `SELECT u.full_name, u."current_role" AS role, p.lifetime_points AS score, p.tier,
+                RANK() OVER (ORDER BY p.lifetime_points DESC) AS rank
+           FROM user_points p JOIN users u ON u.id=p.user_id
+          WHERE u.role <> 'SUPER_ADMIN'
+          ORDER BY rank LIMIT 100`
+      );
+      return rows;
+    });
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('[whdc/leaderboard-all]', err);
@@ -8666,7 +8685,7 @@ async function getEmailFlag(key, def = true) {
 // ── WHDC weekly lifecycle scheduler ─────────────────────────────────────────
 // Idempotent tick: opens scheduled challenges whose time has come, closes live
 // challenges past their deadline, freezes ranks, and notifies participants.
-// Safe to run every minute; each transition happens once (guarded by status).
+// Runs daily (see startWhdcScheduler); each transition happens once (guarded by status).
 async function whdcRunLifecycle() {
   try {
     const opened = await db.query(
@@ -8779,10 +8798,13 @@ async function whdcRunLifecycle() {
 }
 
 function startWhdcScheduler() {
-  const everyMs = 60 * 1000; // check each minute
+  // Runs once at startup and then once a day. A per-minute tick kept the Neon
+  // database awake around the clock; daily runs let it scale to zero. Trade-off:
+  // challenges open/close up to 24 h after their opens_at / closes_at.
+  const everyMs = 24 * 60 * 60 * 1000; // once a day
   whdcRunLifecycle();
   setInterval(whdcRunLifecycle, everyMs);
-  console.log('[whdc] weekly lifecycle scheduler started');
+  console.log('[whdc] weekly lifecycle scheduler started (daily)');
 }
 
 // ── Jobs Board: auto-remove postings past their removal date ─────────────────
@@ -8805,8 +8827,8 @@ async function jobsRemovalSweep() {
 
 function startJobsSweep() {
   jobsRemovalSweep();
-  setInterval(jobsRemovalSweep, 60 * 60 * 1000); // hourly check
-  console.log('[jobs] removal sweep started');
+  setInterval(jobsRemovalSweep, 24 * 60 * 60 * 1000); // once a day (lets Neon scale to zero)
+  console.log('[jobs] removal sweep started (daily)');
 }
 
 module.exports = { app, whdcRunLifecycle };

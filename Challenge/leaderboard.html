@@ -358,13 +358,11 @@
       document.getElementById('roleSelect').addEventListener('change', render);
       render();
 
-      // ── Load live data from the public API ──
-      // Ranks update the instant a participant submits — the backend never
-      // waits for the whole week's challenge to close. But this page used to
-      // fetch once on load and never again, so an already-open tab looked
-      // "frozen" until manually reloaded. Poll so it stays live.
+      // ── Load data from the public API ──
+      // Leaderboards are refreshed once a day on the server (see
+      // LEADERBOARD_TTL_MS in server.js), so the page fetches once on load
+      // and does not poll.
       if (window.WHDC) {
-        var LB_POLL_MS = 30000;
         var weekInFlight = false;
 
         function loadWeek() {
@@ -416,22 +414,6 @@
 
         loadWeek();
         loadAllTime();
-        var lbPollTimer = setInterval(function () {
-          loadWeek();
-          loadAllTime();
-        }, LB_POLL_MS);
-        document.addEventListener('visibilitychange', function () {
-          if (document.hidden) {
-            clearInterval(lbPollTimer);
-          } else {
-            loadWeek();
-            loadAllTime();
-            lbPollTimer = setInterval(function () {
-              loadWeek();
-              loadAllTime();
-            }, LB_POLL_MS);
-          }
-        });
       } else {
         loaded.week = true;
         loaded.alltime = true;

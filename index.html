@@ -36,7 +36,7 @@
       })();
     </script>
     <style>
-      /* Homepage weekly-challenge leaderboard widget */
+      /* Homepage weekly-challenge promo panel */
       .hp-wc-panel {
         position: relative;
         overflow: hidden;
@@ -101,19 +101,6 @@
         .hp-wc-grid {
           grid-template-columns: 1fr;
           perspective: none;
-        }
-      }
-      /* Parallel per-track leaderboards (Basic / Advanced HW / PCB Design) */
-      .hp-wc-tracks {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--sp-5);
-        margin-top: var(--sp-8);
-        position: relative;
-      }
-      @media (max-width: 980px) {
-        .hp-wc-tracks {
-          grid-template-columns: 1fr;
         }
       }
       .hp-live-pill {
@@ -303,7 +290,7 @@
   <body>
     <div id="global-nav"></div>
 
-    <!-- WEEKLY CHALLENGE + LEADERBOARD -->
+    <!-- WEEKLY CHALLENGE -->
     <section class="section" style="padding-top: 0">
       <div class="container">
         <div class="hp-wc-panel">
@@ -340,90 +327,6 @@
               ></a>
               <a href="Challenge/leaderboard.html" class="btn btn-outline">Full leaderboard</a>
             </div>
-          </div>
-
-          <!-- Parallel per-track leaderboards -->
-          <div class="hp-wc-tracks">
-            <aside class="hp-lb-card" aria-label="Basic Hardware Design leaderboard">
-              <div class="hp-lb-head">
-                <div>
-                  <div class="hp-lb-title">Basic Hardware Design</div>
-                  <div class="hp-lb-sub" id="hpLbSub-basic">Live rankings</div>
-                </div>
-                <span class="badge badge-green hp-live-pill" id="hpLbLive-basic"
-                  ><span class="hp-live-dot"></span>Live</span
-                >
-              </div>
-              <table class="hp-lb">
-                <tbody id="hpLbBody-basic">
-                  <tr>
-                    <td
-                      colspan="3"
-                      style="color: var(--text-muted); padding: 14px; font-size: 0.85rem"
-                    >
-                      Loading leaderboard…
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="Challenge/leaderboard.html?category=BASIC_HW" class="hp-lb-foot"
-                >View full leaderboard →</a
-              >
-            </aside>
-
-            <aside class="hp-lb-card" aria-label="Advanced Hardware Design leaderboard">
-              <div class="hp-lb-head">
-                <div>
-                  <div class="hp-lb-title">Advanced Hardware Design</div>
-                  <div class="hp-lb-sub" id="hpLbSub-adv">Live rankings</div>
-                </div>
-                <span class="badge badge-green hp-live-pill" id="hpLbLive-adv"
-                  ><span class="hp-live-dot"></span>Live</span
-                >
-              </div>
-              <table class="hp-lb">
-                <tbody id="hpLbBody-adv">
-                  <tr>
-                    <td
-                      colspan="3"
-                      style="color: var(--text-muted); padding: 14px; font-size: 0.85rem"
-                    >
-                      Loading leaderboard…
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="Challenge/leaderboard.html?category=ADVANCED_HW" class="hp-lb-foot"
-                >View full leaderboard →</a
-              >
-            </aside>
-
-            <aside class="hp-lb-card" aria-label="PCB Design leaderboard">
-              <div class="hp-lb-head">
-                <div>
-                  <div class="hp-lb-title">PCB Design</div>
-                  <div class="hp-lb-sub" id="hpLbSub-pcb">Live rankings</div>
-                </div>
-                <span class="badge badge-green hp-live-pill" id="hpLbLive-pcb"
-                  ><span class="hp-live-dot"></span>Live</span
-                >
-              </div>
-              <table class="hp-lb">
-                <tbody id="hpLbBody-pcb">
-                  <tr>
-                    <td
-                      colspan="3"
-                      style="color: var(--text-muted); padding: 14px; font-size: 0.85rem"
-                    >
-                      Loading leaderboard…
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="Challenge/leaderboard.html?category=PCB_DESIGN" class="hp-lb-foot"
-                >View full leaderboard →</a
-              >
-            </aside>
           </div>
         </div>
       </div>
@@ -827,134 +730,6 @@
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape') {
             if (typeof closeModal === 'function') closeModal('modal-site-promo');
-          }
-        });
-      })();
-    </script>
-    <script src="Challenge/challenge-api.js"></script>
-    <script>
-      /* Weekly leaderboard widgets — one per track, loaded in parallel, live data only */
-      (function () {
-        var TRACKS = [
-          { id: 'BASIC_HW', suffix: 'basic' },
-          { id: 'ADVANCED_HW', suffix: 'adv' },
-          { id: 'PCB_DESIGN', suffix: 'pcb' },
-        ];
-        function initials(n) {
-          return (n || '?')
-            .split(/\s+/)
-            .map(function (w) {
-              return w[0] || '';
-            })
-            .join('')
-            .slice(0, 2)
-            .toUpperCase();
-        }
-        function empty(suffix, msg) {
-          var body = document.getElementById('hpLbBody-' + suffix);
-          if (body)
-            body.innerHTML =
-              '<tr><td colspan="3" style="color:var(--text-muted);padding:16px;font-size:0.85rem;text-align:center">' +
-              msg +
-              '</td></tr>';
-        }
-        function render(suffix, rows) {
-          var body = document.getElementById('hpLbBody-' + suffix);
-          if (!body) return;
-          body.innerHTML = rows
-            .slice(0, 3)
-            .map(function (u, i) {
-              var r = i + 1;
-              var rc = r <= 3 ? ' r' + r : '';
-              return (
-                '<tr><td class="hp-lb-rank' +
-                rc +
-                '">' +
-                r +
-                '</td>' +
-                '<td><div class="hp-lb-user"><div class="hp-lb-av">' +
-                initials(u.name) +
-                '</div>' +
-                '<div><div class="hp-lb-name">' +
-                u.name +
-                '</div>' +
-                '<div class="hp-lb-role">' +
-                (u.role || '') +
-                '</div></div></div></td>' +
-                '<td class="hp-lb-score">' +
-                Math.round(u.score) +
-                '</td></tr>'
-              );
-            })
-            .join('');
-        }
-        if (!window.WHDC) {
-          TRACKS.forEach(function (t) {
-            empty(t.suffix, 'Leaderboard unavailable.');
-          });
-          return;
-        }
-
-        // Ranks update the instant a participant submits — the backend never
-        // waits for the whole week's challenge to close. But this widget used
-        // to fetch once on page load and never again, so an already-open tab
-        // looked "frozen" until manually reloaded. Poll so it stays live.
-        var POLL_MS = 30000;
-        var inFlight = {};
-
-        function loadTrack(t) {
-          if (inFlight[t.suffix]) return;
-          inFlight[t.suffix] = true;
-          WHDC.current(t.id)
-            .then(function (ch) {
-              var sub = document.getElementById('hpLbSub-' + t.suffix);
-              var badge = document.getElementById('hpLbLive-' + t.suffix);
-              if (!ch) {
-                if (sub) sub.textContent = 'No challenge running right now';
-                if (badge) badge.style.display = 'none';
-                empty(t.suffix, 'No live challenge this week — check back soon.');
-                return;
-              }
-              if (sub)
-                sub.textContent =
-                  (ch.week_number ? 'Week ' + ch.week_number + ' · ' : '') + ch.title;
-              if (badge) badge.style.display = ch.status === 'live' ? '' : 'none';
-              return WHDC.challengeLeaderboard(ch.id).then(function (rows) {
-                if (rows && rows.length) {
-                  render(
-                    t.suffix,
-                    rows.map(function (r) {
-                      return { name: r.full_name, role: r.role || '', score: Number(r.score) };
-                    })
-                  );
-                } else {
-                  empty(t.suffix, 'No entries yet — be the first to take this challenge.');
-                }
-              });
-            })
-            .catch(function () {
-              empty(t.suffix, 'Leaderboard will appear once a challenge is live.');
-            })
-            .finally(function () {
-              inFlight[t.suffix] = false;
-            });
-        }
-
-        function loadAll() {
-          TRACKS.forEach(loadTrack);
-        }
-
-        loadAll();
-        var pollTimer = setInterval(loadAll, POLL_MS);
-        // Pause polling when the tab is hidden, refresh immediately when it
-        // becomes visible again, so we don't keep firing requests in
-        // background tabs but still show fresh data the moment you look back.
-        document.addEventListener('visibilitychange', function () {
-          if (document.hidden) {
-            clearInterval(pollTimer);
-          } else {
-            loadAll();
-            pollTimer = setInterval(loadAll, POLL_MS);
           }
         });
       })();
