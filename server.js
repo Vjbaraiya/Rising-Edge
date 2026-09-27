@@ -3989,7 +3989,55 @@ app.get('/api/challenges/:slug', async (req, res) => {
 // Site-wide AdSense kill switch, stored in the (previously unused)
 // system_settings table. Defaults to enabled if the row is missing or the
 // query fails — a settings hiccup should never silently kill ad revenue.
+// ── Ads cache ────────────────────────────────────────────────────────────────
+// /api/ads is called twice on every page load, so the AdSense flag and each
+// slot's active campaign are kept in memory for ADS_CACHE_TTL_MS instead of
+// being queried per request. Admin edits clear the cache immediately.
+// Impressions and clicks are counted in memory and written in one batch
+// (flushAdCounters): once a day with the jobs sweep, before the admin ads list
+// loads, and on shutdown — so serving an ad never wakes the database.
+const ADS_CACHE_TTL_MS = 15 * 60 * 1000;
+const adsCache = { adsense: null, slots: new Map() }; // slots: slot -> { at, campaign }
+const pendingAdCounts = new Map(); // campaignId -> { impressions, clicks }
+
+function clearAdsCache() {
+  adsCache.adsense = null;
+  adsCache.slots.clear();
+}
+
+function bumpAdCount(id, field) {
+  if (!id) return;
+  const c = pendingAdCounts.get(id) || { impressions: 0, clicks: 0 };
+  c[field] += 1;
+  pendingAdCounts.set(id, c);
+}
+
+async function flushAdCounters() {
+  if (!pendingAdCounts.size) return;
+  const batch = [...pendingAdCounts.entries()];
+  pendingAdCounts.clear();
+  for (const [id, c] of batch) {
+    try {
+      await db.query(
+        `UPDATE ad_campaigns SET impressions = impressions + $2, clicks = clicks + $3 WHERE id=$1`,
+        [id, c.impressions, c.clicks]
+      );
+    } catch (err) {
+      console.error('[ads/flush]', err.message);
+    }
+  }
+}
+
 async function getAdsenseEnabled() {
+  if (adsCache.adsense && Date.now() - adsCache.adsense.at < ADS_CACHE_TTL_MS) {
+    return adsCache.adsense.value;
+  }
+  const value = await getAdsenseEnabledFromDb();
+  adsCache.adsense = { at: Date.now(), value };
+  return value;
+}
+
+async function getAdsenseEnabledFromDb() {
   try {
     const { rows } = await db.query(
       `SELECT value FROM system_settings WHERE key='ads_adsense_enabled'`
@@ -4013,21 +4061,23 @@ app.get('/api/ads', async (req, res) => {
   const adsenseEnabled = await getAdsenseEnabled();
   if (!slot) return res.json({ success: true, data: null, adsenseEnabled });
   try {
-    const { rows } = await db.query(
-      `SELECT id, slot_id, advertiser_name, image_url, target_url, alt_text
-         FROM ad_campaigns
-        WHERE slot_id=$1 AND active=TRUE
-          AND (starts_at IS NULL OR starts_at <= NOW())
-          AND (ends_at IS NULL OR ends_at >= NOW())
-        ORDER BY created_at DESC LIMIT 1`,
-      [slot]
-    );
-    const campaign = rows[0] || null;
-    if (campaign) {
-      db.query(`UPDATE ad_campaigns SET impressions = impressions + 1 WHERE id=$1`, [
-        campaign.id,
-      ]).catch(() => {});
+    let cached = adsCache.slots.get(slot);
+    if (!cached || Date.now() - cached.at >= ADS_CACHE_TTL_MS) {
+      const { rows } = await db.query(
+        `SELECT id, slot_id, advertiser_name, image_url, target_url, alt_text
+           FROM ad_campaigns
+          WHERE slot_id=$1 AND active=TRUE
+            AND (starts_at IS NULL OR starts_at <= NOW())
+            AND (ends_at IS NULL OR ends_at >= NOW())
+          ORDER BY created_at DESC LIMIT 1`,
+        [slot]
+      );
+      cached = { at: Date.now(), campaign: rows[0] || null };
+      if (adsCache.slots.size > 100) adsCache.slots.clear();
+      adsCache.slots.set(slot, cached);
     }
+    const campaign = cached.campaign;
+    if (campaign) bumpAdCount(campaign.id, 'impressions');
     res.json({
       success: true,
       data: campaign && {
@@ -4049,9 +4099,7 @@ app.get('/api/ads', async (req, res) => {
 // POST best-effort click counter — fire-and-forget from the front end, never
 // blocks navigation to the advertiser's target URL.
 app.post('/api/ads/:id/click', async (req, res) => {
-  db.query(`UPDATE ad_campaigns SET clicks = clicks + 1 WHERE id=$1`, [req.params.id]).catch(
-    () => {}
-  );
+  bumpAdCount(String(req.params.id || '').slice(0, 64), 'clicks');
   res.json({ success: true });
 });
 
@@ -7203,6 +7251,7 @@ admin.put('/popup-settings', async (req, res) => {
 
 admin.get('/ads', async (_req, res) => {
   try {
+    await flushAdCounters(); // so impression/click totals are current
     const slots = (await db.query(`SELECT * FROM ad_slots ORDER BY label`)).rows;
     const campaigns = (
       await db.query(
@@ -7211,7 +7260,7 @@ admin.get('/ads', async (_req, res) => {
           ORDER BY c.created_at DESC`
       )
     ).rows;
-    const adsenseEnabled = await getAdsenseEnabled();
+    const adsenseEnabled = await getAdsenseEnabledFromDb();
     res.json({ success: true, data: { slots, campaigns, adsenseEnabled } });
   } catch (err) {
     console.error('[admin/ads/list]', err);
@@ -7232,6 +7281,7 @@ admin.patch('/ads/config', async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`,
       [String(enabled)]
     );
+    clearAdsCache();
     res.json({ success: true, data: { adsenseEnabled: enabled } });
   } catch (err) {
     console.error('[admin/ads/config]', err);
@@ -7290,6 +7340,7 @@ admin.post('/ads', async (req, res) => {
         b.active ?? null,
       ]
     );
+    clearAdsCache();
     res.status(201).json({ success: true, data: rows[0] });
   } catch (err) {
     console.error('[admin/ads/create]', err);
@@ -7350,6 +7401,7 @@ admin.patch('/ads/:id', async (req, res) => {
       vals
     );
     if (!rows.length) return res.status(404).json({ success: false, error: 'Campaign not found.' });
+    clearAdsCache();
     res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error('[admin/ads/update]', err);
@@ -7360,8 +7412,10 @@ admin.patch('/ads/:id', async (req, res) => {
 // Delete a campaign
 admin.delete('/ads/:id', async (req, res) => {
   try {
+    pendingAdCounts.delete(String(req.params.id));
     const { rowCount } = await db.query(`DELETE FROM ad_campaigns WHERE id=$1`, [req.params.id]);
     if (!rowCount) return res.status(404).json({ success: false, error: 'Campaign not found.' });
+    clearAdsCache();
     res.json({ success: true });
   } catch (err) {
     console.error('[admin/ads/delete]', err);
@@ -8628,6 +8682,7 @@ async function jobsRemovalSweep() {
   } catch (err) {
     console.error('[jobs/sweep]', err.message);
   }
+  await flushAdCounters(); // daily batch write of ad impressions/clicks
 }
 
 function startJobsSweep() {
@@ -8641,6 +8696,15 @@ module.exports = { app, whdcRunLifecycle };
 // -- Boot ---------------------------------------------------------------------
 if (require.main === module) {
   app.listen(PORT, () => console.log(`Rising Edge API on :${PORT}`));
+  // Write buffered ad impressions/clicks before the process exits (deploys).
+  for (const sig of ['SIGTERM', 'SIGINT']) {
+    process.once(sig, () => {
+      // eslint-disable-next-line no-process-exit
+      const exit = () => process.exit(0);
+      flushAdCounters().finally(exit);
+      setTimeout(exit, 5000).unref();
+    });
+  }
   initDB()
     .then(() => {
       startWhdcScheduler();
