@@ -6980,7 +6980,6 @@ admin.post('/challenges/:id/close', async (req, res) => {
       [id]
     );
     await awardWhdcTopBadges(id);
-    await whdcSendResultsEmail(id);
     res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error('[admin/whdc/close]', err);
@@ -8530,20 +8529,9 @@ async function whdcSendReminders(challengeId, opts) {
   }
 }
 
-// Returns true/false for a system_settings key; falls back to `def` if absent.
-async function getEmailFlag(key, def = true) {
-  try {
-    const { rows } = await db.query(`SELECT value FROM system_settings WHERE key=$1`, [key]);
-    if (!rows.length) return def;
-    return rows[0].value === 'true';
-  } catch (_) {
-    return def;
-  }
-}
-
 // ── WHDC weekly lifecycle scheduler ─────────────────────────────────────────
 // Idempotent tick: opens scheduled challenges whose time has come, closes live
-// challenges past their deadline, freezes ranks, and notifies participants.
+// challenges past their deadline, freezes ranks and awards badges (no emails).
 // Runs daily (see startWhdcScheduler); each transition happens once (guarded by status).
 async function whdcRunLifecycle() {
   try {
@@ -8554,28 +8542,6 @@ async function whdcRunLifecycle() {
     );
     for (const ch of opened.rows) {
       console.log(`[whdc] opened challenge ${ch.id} (${ch.title})`);
-      // Announcement email — gated by DB flag (default off to avoid accidental mass sends).
-      // Legacy env var WHDC_ANNOUNCE_EMAILS is superseded by the DB flag.
-      if (await getEmailFlag('whdc.email.announce', false)) {
-        try {
-          const audience = await getBroadcastRecipients('newsletter');
-          const challengeLink = `${FRONTEND_URL}/Challenge/index.html`;
-          let sent = 0;
-          for (const r of audience) {
-            const { subject, html } = renderEmailTemplate('announcement', {
-              name: r.name || 'there',
-              challengeTitle: ch.title,
-              challengeLink,
-            });
-            await sendMail({ to: r.email, subject, html }).catch(() => {});
-            sent++;
-            await new Promise(rs => setTimeout(rs, 120));
-          }
-          console.log(`[whdc] announced ${ch.id} to ${sent} subscriber(s)`);
-        } catch (e) {
-          console.error('[whdc/announce-email]', e.message);
-        }
-      }
     }
 
     const toClose = (
@@ -8628,29 +8594,12 @@ async function whdcRunLifecycle() {
           )
           .catch(() => {});
       }
-      // Results email to every participant (top-10 list + their own rank).
-      if (await getEmailFlag('whdc.email.results')) {
-        await whdcSendResultsEmail(ch.id);
-      }
       console.log(
         `[whdc] closed challenge ${ch.id} (${ch.title}); froze ranks, notified ${parts.length} participants`
       );
     }
 
-    // Reminder emails — every 2 days while a challenge is live, nudge
-    // registered users who haven't submitted an attempt yet.
-    const dueForReminder = (
-      await db.query(
-        `SELECT id FROM challenges
-          WHERE status='live'
-            AND (last_reminder_sent_at IS NULL OR last_reminder_sent_at <= NOW() - INTERVAL '2 days')`
-      )
-    ).rows;
-    if (await getEmailFlag('whdc.email.reminder')) {
-      for (const ch of dueForReminder) {
-        await whdcSendReminders(ch.id);
-      }
-    }
+    // Automatic challenge emails (announcement, results, reminders) are turned off.
   } catch (err) {
     console.error('[whdc/scheduler]', err.message);
   }
