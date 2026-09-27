@@ -599,18 +599,12 @@
           </div>
         </div>
 
-        <!-- Weekly Challenge Emails -->
+        <!-- Newsletter Digest -->
         <div class="panel" style="margin-top: var(--sp-6)">
-          <div class="panel-head"><span class="panel-title">Weekly Challenge Emails</span></div>
+          <div class="panel-head"><span class="panel-title">Newsletter Digest</span></div>
           <div class="panel-body">
             <!-- One-shot newsletter digest -->
-            <div
-              style="
-                margin-bottom: var(--sp-5);
-                padding-bottom: var(--sp-5);
-                border-bottom: 1px solid var(--border-base);
-              "
-            >
+            <div>
               <p
                 class="bc-count"
                 style="
@@ -636,46 +630,6 @@
               </div>
               <div class="bc-result" id="nl-result"></div>
             </div>
-            <p class="bc-count" style="text-align: left; margin-bottom: var(--sp-4)">
-              Weekly challenges no longer issue certificates. When a challenge closes, the top 3
-              finishers automatically get the Champion/Podium badges (and their weekly podium count
-              goes up), and results + reminder emails are sent as before. Use these buttons to
-              (re)trigger things manually for a specific challenge. The two emails are built from
-              the templates in <code>Challenge/email-templates/*.md</code>.
-            </p>
-            <div class="bc-field" style="max-width: 420px">
-              <label for="wc-challenge">Challenge</label>
-              <select id="wc-challenge">
-                <option value="">Loading…</option>
-              </select>
-            </div>
-            <div style="display: flex; gap: var(--sp-3); flex-wrap: wrap; margin-top: var(--sp-2)">
-              <button class="btn btn-outline btn-sm" id="btn-wc-badges">Award Top-3 Badges</button>
-              <button class="btn btn-outline btn-sm" id="btn-wc-results">
-                Send Results Email (All Participants)
-              </button>
-              <button class="btn btn-outline btn-sm" id="btn-wc-reminders">
-                Send Reminder (Not Submitted)
-              </button>
-            </div>
-            <div
-              style="
-                margin-top: var(--sp-4);
-                padding-top: var(--sp-4);
-                border-top: 1px solid var(--border-base);
-              "
-            >
-              <p class="bc-count" style="text-align: left; margin-bottom: var(--sp-2)">
-                Test mode sends preview copies of the results + reminder emails to SUPER_ADMIN
-                accounts only — nothing goes to real participants, and the reminder is sent as one
-                merged email rather than one per admin. Badge awarding has no test mode since it's a
-                direct action, not a broadcast.
-              </p>
-              <button class="btn btn-secondary btn-sm" id="btn-wc-test">
-                Send Test to Super Admins
-              </button>
-            </div>
-            <div class="bc-result" id="wc-result"></div>
           </div>
         </div>
       </main>
@@ -1228,157 +1182,6 @@
       });
       document.getElementById('btn-nl-test').addEventListener('click', function () {
         nlSend(true, this);
-      });
-
-      /* ── Weekly Challenge Emails ───
-         Lets the admin (re)trigger the top-3 badge award, the all-participant
-         results email, and the "you haven't submitted" reminder — for a
-         chosen challenge, on top of the automatic actions that already
-         happen on close / every 2 days. Weekly challenges no longer issue
-         certificates. */
-      function loadWcChallenges() {
-        var sel = document.getElementById('wc-challenge');
-        reApiFetch('/api/admin/challenges')
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (j) {
-            if (!j.success) throw new Error(j.error || 'Failed');
-            var rows = j.data || [];
-            if (!rows.length) {
-              sel.innerHTML = '<option value="">No challenges yet</option>';
-              return;
-            }
-            sel.innerHTML = rows
-              .map(function (c) {
-                var label =
-                  (c.week_number ? 'Week ' + c.week_number + ' — ' : '') +
-                  c.title +
-                  ' (' +
-                  c.status +
-                  ')';
-                return '<option value="' + c.id + '">' + esc(label) + '</option>';
-              })
-              .join('');
-            // Default to the most recently closed challenge, since that's
-            // the usual reason an admin opens this panel.
-            var closed = rows.find(function (c) {
-              return c.status === 'closed';
-            });
-            if (closed) sel.value = closed.id;
-          })
-          .catch(function () {
-            sel.innerHTML = '<option value="">Could not load challenges</option>';
-          });
-      }
-      loadWcChallenges();
-
-      function wcSend(action, btn, label, confirmMsg) {
-        var id = document.getElementById('wc-challenge').value;
-        if (!id) return showResult('wc-result', false, 'Choose a challenge first.');
-        if (!confirm(confirmMsg)) return;
-        btn.disabled = true;
-        var original = btn.textContent;
-        btn.textContent = 'Sending…';
-        reApiFetch('/api/admin/challenges/' + id + '/' + action, { method: 'POST' })
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (j) {
-            if (!j.success) throw new Error(j.error || 'Send failed.');
-            var d = j.data;
-            var msg =
-              d && typeof d.sent === 'number'
-                ? 'Sent ' + d.sent + ' of ' + d.total + ' emails.'
-                : 'Done.';
-            showResult('wc-result', true, label + ': ' + msg);
-          })
-          .catch(function (e) {
-            showResult('wc-result', false, e.message);
-          })
-          .finally(function () {
-            btn.disabled = false;
-            btn.textContent = original;
-          });
-      }
-      document.getElementById('btn-wc-badges').addEventListener('click', function () {
-        wcSend(
-          'award-badges',
-          this,
-          'Badges',
-          'Award the Champion/Podium badges (and bump the weekly podium count) for the top-3 finishers of this challenge? Already-processed winners are skipped, not double-counted.'
-        );
-      });
-      document.getElementById('btn-wc-results').addEventListener('click', function () {
-        wcSend(
-          'send-results',
-          this,
-          'Results email',
-          'Send the results email (top-10 leaderboard + their own rank) to every participant of this challenge?'
-        );
-      });
-      document.getElementById('btn-wc-reminders').addEventListener('click', function () {
-        wcSend(
-          'send-reminders',
-          this,
-          'Reminder email',
-          "Send a reminder email to everyone who hasn't submitted this challenge yet?"
-        );
-      });
-
-      /* Test mode — fires both email sends with { test: true }, which the
-         server redirects to SUPER_ADMIN accounts only (see the send-*
-         endpoints). The reminder send is merged into a single email
-         server-side, so this never spams one admin inbox per recipient.
-         Badge awarding isn't included — it's a direct DB action with no
-         email to preview. */
-      document.getElementById('btn-wc-test').addEventListener('click', function () {
-        var id = document.getElementById('wc-challenge').value;
-        if (!id) return showResult('wc-result', false, 'Choose a challenge first.');
-        if (
-          !confirm(
-            'Send test versions of both emails (results, reminder) to SUPER_ADMIN accounts only?'
-          )
-        )
-          return;
-        var btn = this;
-        btn.disabled = true;
-        var original = btn.textContent;
-        btn.textContent = 'Sending test…';
-        var actions = [
-          { action: 'send-results', label: 'Results' },
-          { action: 'send-reminders', label: 'Reminder (merged)' },
-        ];
-        Promise.all(
-          actions.map(function (a) {
-            return reApiFetch('/api/admin/challenges/' + id + '/' + a.action, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ test: true }),
-            })
-              .then(function (r) {
-                return r.json();
-              })
-              .then(function (j) {
-                if (!j.success) throw new Error(a.label + ': ' + (j.error || 'failed'));
-                var d = j.data || {};
-                var total = typeof d.total === 'number' ? d.total : 0;
-                return total
-                  ? a.label + ' ' + (d.sent || 0) + '/' + total
-                  : a.label + ' — no super admins found';
-              });
-          })
-        )
-          .then(function (parts) {
-            showResult('wc-result', true, 'Test sent — ' + parts.join(' · ') + '.');
-          })
-          .catch(function (e) {
-            showResult('wc-result', false, e.message);
-          })
-          .finally(function () {
-            btn.disabled = false;
-            btn.textContent = original;
-          });
       });
 
       /* ── Sidebar user count ─── */
