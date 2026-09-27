@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Failure Mechanisms — Module 12 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="How optocouplers fail: LED ageing, CTR degradation signatures, thermal and moisture stress, ESD, barrier breakdown and treeing, with an FMEA tool and diagnosis game."
     />
     <title>Failure Mechanisms | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -189,69 +890,202 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2 → Q1,TF1,TF8; 2: S3,S9 → Q2,Q6,TF2,Scen2; 3: S4-S6 → Q3-Q5,Q10,TF4,TF5,Scen1,Scen3; 4: S7 → Q7,TF3,TF6; 5: S1,S8 → Q8,Q9,TF7 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">Explain LED aging physics and acceleration factors</div>
-                  <div class="metric-card">
-                    Recognize CTR degradation signatures in returned units
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Explain LED aging physics and acceleration factors</div><div class="objective-card metric-card">Recognize CTR degradation signatures in returned units</div><div class="objective-card metric-card">Assess thermal, moisture, and ESD stress risks</div><div class="objective-card metric-card">Analyze isolation breakdown causes and precursors</div><div class="objective-card metric-card">Define screening and prevention measures</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> Module 9 showed how to design with margin against ageing. This module looks at what actually goes wrong in the field: each mechanism, the symptom it leaves behind, how to tell mechanisms apart on a returned unit, and how to prevent them. It builds on Module 3 (construction) and prepares for Module 13 (testing).
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; Failure-Mode Overview (FMEA)</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Optocouplers fail in a small number of well-understood ways. Most are slow drifts (LED ageing, leakage growth) that a margin-based design absorbs. A few are sudden (reverse breakdown, cracked packages). One, barrier breakdown, is a <strong>safety</strong> failure that must be prevented by design rather than detected in service.</p>
+<figure class="m3-fig"><img src="images/12/failure-site-map.png" alt="Cross-section of an optocoupler with seven numbered failure sites: LED degradation, wire-bond lift, barrier partial discharge and treeing, package crack and popcorning, detector damage and leakage, surface tracking between pins, and LED reverse or ESD damage" loading="lazy" width="1060" height="540" /><figcaption><strong>Figure 1.</strong> The seven failure sites covered in this module.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: FMEA Table and RPN Calculator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Filter by area, click a row to load its Severity/Occurrence/Detection ratings, then adjust them for your application. The table re-sorts by RPN. Ratings are illustrative starting points.</p><div class="cmp-controls" id="m12FmeaFilters"><button class="cmp-btn active" type="button" data-f="all">All</button><button class="cmp-btn" type="button" data-f="led">LED</button><button class="cmp-btn" type="button" data-f="det">Detector</button><button class="cmp-btn" type="button" data-f="pkg">Package</button><button class="cmp-btn" type="button" data-f="bar">Isolation barrier</button></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Area</th><th>Failure mode / mechanism</th><th>Cause</th><th>Detection</th><th>Prevention</th><th>S/O/D</th><th>RPN</th></tr></thead><tbody id="m12FmeaBody"></tbody></table></div>
+<div class="m3-calc"><div><div class="m3-field"><label for="m12FmS"><span>Severity S</span> <output id="m12FmSOut"></output></label><input type="range" id="m12FmS" min="1" max="10" step="1" value="7" /></div><div class="m3-field"><label for="m12FmO"><span>Occurrence O</span> <output id="m12FmOOut"></output></label><input type="range" id="m12FmO" min="1" max="10" step="1" value="5" /></div><div class="m3-field"><label for="m12FmD"><span>Detection D (10 = undetectable)</span> <output id="m12FmDOut"></output></label><input type="range" id="m12FmD" min="1" max="10" step="1" value="6" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Selected mode</span><b id="m12FmMode">&ndash;</b></div><div class="m3-res-row"><span>RPN = S &times; O &times; D</span><b id="m12FmRpn">&ndash;</b></div><div style="margin-top: 8px"><span id="m12FmVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m12FmNote"></p></div></div>
+</div>
+<p class="m3-note">RPN (risk priority number) is a ranking aid, not an absolute measure. Many organisations now also use action priority (AP) tables (AIAG&ndash;VDA FMEA), where high severity demands action regardless of RPN.</p>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; LED Ageing Physics</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">The infrared LED is the only component that wears out under normal operation. Its light output falls because <strong>non-radiative recombination</strong> centres (crystal defects) multiply during operation:</p>
+<div class="adv-grid"><div class="adv-card"><h5>Defect growth</h5><p>Dislocations and point defects in and near the active layer grow, fed by recombination energy and current. Each defect is a site where carriers recombine without emitting light.</p></div><div class="adv-card"><h5>Current density</h5><p>More carriers per unit area means faster defect generation: degradation rises super-linearly with I<sub>F</sub>.</p></div><div class="adv-card"><h5>Temperature</h5><p>Defect migration is thermally activated (Arrhenius). Junction temperature includes the LED&rsquo;s own heating.</p></div><div class="adv-card"><h5>Low-current sensitivity</h5><p>Non-radiative losses matter most at low current, so an aged LED loses proportionally more light at low I<sub>F</sub>.</p></div></div>
+<div class="m3-eq"><div class="m3-eq-main">Rate of light loss &prop; J<sup>n</sup> &middot; exp(&minus;E<sub>a</sub>/kT<sub>J</sub>) &nbsp;&nbsp; (J = current density, n &gt; 1; see Module 9 for the time dependence)</div></div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> AlGaAs and GaAs:Si LEDs age differently, and vendors&rsquo; processes differ even more. Use each vendor&rsquo;s own degradation data; do not transfer curves between manufacturers of &ldquo;the same&rdquo; part number.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; CTR Degradation Signatures in Returned Units</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">A returned part rarely comes with a diagnosis. Measuring CTR at several currents, leakage at temperature and barrier resistance tells mechanisms apart:</p>
+<figure class="m3-fig"><img src="images/12/degradation-signatures.png" alt="Three charts: CTR versus forward current for a new part, an LED-degraded part with more loss at low current, and a detector-damaged part with uniform loss; dark current versus temperature for a new and a contaminated part; and barrier resistance for new, humidity-stressed and partial-discharge-damaged parts" loading="lazy" width="1200" height="420" /><figcaption><strong>Figure 2.</strong> Signatures that discriminate LED ageing, detector damage, contamination and barrier damage.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Mechanism</th><th>CTR signature</th><th>Other clues</th></tr></thead><tbody><tr><td>LED degradation</td><td>Lower, and much lower at low I<sub>F</sub></td><td>V<sub>F</sub> normal; history of high I<sub>F</sub>/T<sub>J</sub></td></tr><tr><td>Detector damage (ESD/EOS)</td><td>Lower at all currents, gain shape changed</td><td>Output leakage or V<sub>CE(sat)</sub> abnormal</td></tr><tr><td>Contamination / moisture</td><td>Often normal at 25 &deg;C</td><td>I<sub>CEO</sub> high when hot/humid; residue visible</td></tr><tr><td>Encapsulant darkening</td><td>Uniformly lower</td><td>Long high-temperature exposure; yellowed clear mould after decap</td></tr><tr><td>Barrier damage</td><td>May be normal!</td><td>R<sub>IO</sub> low, hi-pot or PD test fails</td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; assuming normal CTR means a healthy barrier.</strong> Barrier damage is electrically invisible in CTR. Only insulation-resistance, PD or hi-pot tests reveal it, and repeated hi-pot testing can itself cause damage.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Thermal Stress</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">Temperature swings stress the package mechanically because silicon, GaAs, copper lead frames, gold wires and epoxy all expand at different rates:</p>
+<div class="adv-grid"><div class="adv-card limit"><h5>Wire-bond heel fatigue</h5><p>The bond wire flexes each cycle; cracks grow at the heel until the wire opens. First symptom: temperature-dependent intermittents.</p></div><div class="adv-card limit"><h5>Die-attach fatigue</h5><p>Voids and cracks in the die attach raise thermal resistance, which raises T<sub>J</sub> and accelerates LED ageing.</p></div><div class="adv-card limit"><h5>Package cracking</h5><p>Large &Delta;T or thermal shock cracks the mould, opening paths for moisture.</p></div><div class="adv-card"><h5>Mitigation</h5><p>Qualified parts (JEDEC/AEC temperature cycling), reduced &Delta;T (placement away from heat sources), conformal coating that does not stress the package.</p></div></div>
+<figure class="m3-fig"><img src="images/12/thermal-cycling-bond-fatigue.gif" alt="Animation: a temperature waveform cycling between minus 40 and plus 125 degrees and a wire bond whose heel crack grows with cycle count until it opens" loading="lazy" width="850" height="357" /><figcaption><strong>Animation 1.</strong> Bond-heel fatigue under thermal cycling (illustrative). Damage accumulates silently, then shows as intermittent failures.</figcaption></figure>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Moisture: MSL, Popcorning and Leakage</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">Mould compounds absorb water. Moisture causes two separate problems:</p>
+<div class="adv-grid"><div class="adv-card limit"><h5>Popcorning in reflow</h5><p>Absorbed moisture flashes to steam at reflow temperature and delaminates or cracks the package. Controlled by the MSL rating, dry-pack, floor-life tracking and baking (J-STD-020/033).</p></div><div class="adv-card limit"><h5>Leakage and ion migration in service</h5><p>Humidity plus ionic contamination (flux residue, salt) raises surface leakage and dark current; under bias, metal ions can migrate between pins (dendrites).</p></div></div>
+<figure class="m3-fig"><img src="images/12/popcorning-moisture.png" alt="Four-stage diagram: moisture absorption during storage, vaporisation during the reflow ramp, steam pressure causing delamination at peak temperature, and a cracked package" loading="lazy" width="1100" height="400" /><figcaption><strong>Figure 3.</strong> Popcorning. Delamination near the barrier can create new partial-discharge sites even when the part still works electrically.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; floor life</h5>An MSL-3 part has a floor life of 168 h at &le; 30 &deg;C / 60 % RH (J-STD-033 representative). A reel sat open for two weeks before a rework campaign.<ol><li>Two weeks = 336 h &gt; 168 h &rarr; the parts must be baked before reflow (per J-STD-033 tables for package thickness).</li><li>Skipping the bake risks cracks and delamination that pass functional test but weaken the barrier.</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; ESD and Electrical Overstress</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">Electrostatic discharge and electrical overstress hit both sides of the coupler:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Where</th><th>Mechanism</th><th>Protection</th></tr></thead><tbody><tr><td>LED (input)</td><td>Reverse ESD or reverse EOS exceeds V<sub>R</sub> (&asymp; 5&ndash;6 V): junction damage, sometimes gradual</td><td>Anti-parallel diode, TVS on field inputs, handling controls</td></tr><tr><td>Output transistor</td><td>ESD on long output lines; inductive kick above V<sub>CEO</sub></td><td>Clamps, flyback diodes, V<sub>CEO</sub> margin</td></tr><tr><td>Across the barrier</td><td>ESD between input and output (e.g. a user touching isolated I/O)</td><td>Barrier rating, Y-cap or spark gap paths, clearance</td></tr><tr><td>Latent damage</td><td>A partially damaged junction works, but with higher leakage and faster ageing</td><td>ESD-safe handling; screen suspect lots</td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; latent ESD damage.</strong> A part that survived an ESD event can pass test and fail months later. If an ESD incident is suspected in production, quarantine and screen (leakage, CTR at low I<sub>F</sub>) rather than ship.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Isolation Barrier Breakdown</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p">Barrier failure is rare but hazardous: it can put mains voltage on touchable circuits. It almost always develops over time from one of four precursors:</p>
+<div class="adv-grid"><div class="adv-card limit"><h5>Partial discharge &amp; treeing</h5><p>Voids or delaminated interfaces discharge each half-cycle once the local field exceeds inception. Erosion channels (trees) grow until they bridge the barrier.</p></div><div class="adv-card limit"><h5>Surface tracking</h5><p>Contamination plus humidity on too-short creepage paths forms carbon tracks between pins (external) or along internal interfaces.</p></div><div class="adv-card limit"><h5>Overvoltage events</h5><p>Surges beyond V<sub>IOSM</sub> or sustained operation above V<sub>IORM</sub> punch through or accelerate PD.</p></div><div class="adv-card limit"><h5>Mechanical damage</h5><p>Cracks from popcorning, thermal shock or board flex create new discharge paths.</p></div></div>
+<figure class="m3-fig"><img src="images/12/electrical-treeing.gif" alt="Animation of branching electrical tree channels growing from a void at the top electrode through the insulation until the barrier is bridged" loading="lazy" width="900" height="480" /><figcaption><strong>Animation 2.</strong> Electrical treeing (illustrative). Each discharge erodes a little more insulation; once started, the process accelerates.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Partial-Discharge Ageing Simulator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Set the peak voltage relative to the void&rsquo;s PD inception voltage and press Play. Below inception nothing grows; above it, growth rate rises steeply (and humidity accelerates it). A qualitative model of why V<sub>IORM</sub> sits far below breakdown.</p><div class="m3-calc"><div><div class="m3-field"><label for="m12PdV"><span>Peak voltage relative to PD inception</span> <output id="m12PdVOut"></output></label><input type="range" id="m12PdV" min="0.5" max="2" step="0.01" value="0.7" /></div><div class="m3-field"><label for="m12PdH"><span>Humidity</span> <output id="m12PdHOut"></output></label><input type="range" id="m12PdH" min="20" max="95" step="1" value="50" /></div><div class="m3-controls"><button class="btn btn-secondary" type="button" id="m12PdPlay">&#9654; Play</button><button class="btn btn-secondary" type="button" id="m12PdReset">Reset</button></div></div><div class="m3-results"><div class="m3-res-row"><span>Partial discharge</span><b id="m12PdPd">&ndash;</b></div><div class="m3-res-row"><span>Relative life</span><b id="m12PdLife">&ndash;</b></div><div style="margin-top: 8px"><span id="m12PdVerdict" class="m3-verdict">&ndash;</span></div></div></div>
+<div class="m3-canvas-wrap" style="height: 220px"><canvas id="m12PdCanvas" role="img" aria-label="Animated insulation cross-section showing tree growth from a void"></canvas></div>
+</div>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Precursor you can measure</th><th>What it indicates</th></tr></thead><tbody><tr><td>PD level rising (pC)</td><td>Active voids; tree initiation</td></tr><tr><td>R<sub>IO</sub> falling</td><td>Moisture ingress, tracking, carbonised paths</td></tr><tr><td>Hi-pot leakage current rising</td><td>Degraded insulation</td></tr><tr><td>Visible tracks / discolouration between pins</td><td>Surface tracking</td></tr></tbody></table></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Screening and Prevention</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p">Prevention is mostly design discipline; screening catches manufacturing escapes:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Mechanism</th><th>Prevention (design)</th><th>Screening (production)</th></tr></thead><tbody><tr><td>LED ageing</td><td>I<sub>F</sub> &le; 50 % derated, CTR margin, T<sub>J</sub> control</td><td>Vendor lot data; incoming CTR sampling</td></tr><tr><td>Reverse / ESD</td><td>Anti-parallel diode, TVS, ESD process control</td><td>I<sub>R</sub>/V<sub>F</sub> test</td></tr><tr><td>Thermal fatigue</td><td>Qualified parts, reduced &Delta;T, placement</td><td>Temperature-cycling qualification</td></tr><tr><td>Moisture / popcorning</td><td>MSL handling, dry-pack, bake, clean process</td><td>C-SAM sampling after changes</td></tr><tr><td>Contamination leakage</td><td>No-clean flux residue control, coating, pull-up sizing</td><td>Hot functional test, I<sub>CEO</sub> at T</td></tr><tr><td>Barrier breakdown</td><td>V<sub>IORM</sub> &ge; peak working voltage, PD-tested parts, creepage per real PD</td><td>Component PD test (vendor), end-of-line hi-pot at appropriate level</td></tr></tbody></table></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Failure-Analysis Workflow and Diagnosis</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<p class="m3-p">A disciplined workflow preserves evidence: non-destructive tests first, destructive analysis last.</p>
+<figure class="m3-fig"><img src="images/12/failure-analysis-workflow.png" alt="Flow of seven failure-analysis steps from history and visual inspection through electrical tests, X-ray, acoustic microscopy and decapsulation to SEM/EDX, with a table mapping electrical signatures to likely mechanisms" loading="lazy" width="1100" height="470" /><figcaption><strong>Figure 4.</strong> Failure-analysis workflow and signature table.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Game: Diagnose the Return</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Six returned units with their symptoms and measurements. Pick the most likely mechanism for each.</p><div id="m12Diag"></div><p class="m3-note" id="m12DiagScore">Diagnosed: 0 / 6</p></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<div class="adv-grid"><div class="adv-card"><h5>The LED wears out</h5><p>Defect growth, accelerated by current density and temperature, hits low-current CTR hardest.</p></div><div class="adv-card"><h5>Signatures discriminate</h5><p>CTR vs I<sub>F</sub>, hot I<sub>CEO</sub>, and R<sub>IO</sub> separate LED, detector, contamination and barrier problems.</p></div><div class="adv-card"><h5>Heat cycles break bonds</h5><p>Temperature-dependent intermittents point to bond or die-attach fatigue.</p></div><div class="adv-card"><h5>Moisture has two faces</h5><p>Popcorning in reflow; leakage and migration in service.</p></div><div class="adv-card"><h5>Protect the LED in reverse</h5><p>V<sub>R</sub> is only a few volts.</p></div><div class="adv-card"><h5>Barrier failures grow</h5><p>PD, tracking, overvoltage and cracks are precursors; design them out.</p></div><div class="adv-card"><h5>CTR hides barrier damage</h5><p>Only R<sub>IO</sub>, PD and hi-pot reveal it.</p></div><div class="adv-card"><h5>Preserve evidence</h5><p>Non-destructive analysis first.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body" aria-expanded="false" aria-controls="sec11body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 11 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; The field failures that only happen in winter</div><div class="scenario-body">Units in unheated warehouses fail intermittently at night and recover during the day.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> Cold-dependent intermittents suggest mechanical opens (bond heel cracks, die-attach cracks) that close when warm, or condensation leakage at dawn. Measure at &minus;20 &deg;C, X-ray the bonds and check for condensation residue. Fix: qualified parts for the temperature range, reduce thermal cycling amplitude, conformal coating against condensation.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; A good CTR, a bad barrier</div><div class="scenario-body">A returned power-supply board has a coupler with normal CTR but a customer reported a tingle from the enclosure. What do you test, and why is CTR irrelevant?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> CTR measures the optical path, not the insulation. Test R<sub>IO</sub> at 500 V DC and, under controlled conditions, PD/hi-pot at a <em>reduced</em> level. Inspect for tracking between pins and cracks. Review the working voltage vs V<sub>IORM</sub> and the creepage for the real pollution degree. This is a safety investigation: quarantine the lot.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Rework campaign aftermath</div><div class="scenario-body">After a large rework campaign, CTR looks fine but R<sub>IO</sub> on sampled parts is 100&times; lower than on untouched boards. Parts had been out of dry-pack for weeks.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> Likely moisture-induced delamination (popcorning) during rework heating, creating internal paths and PD sites. Confirm with C-SAM. Fix: bake per J-STD-033 before rework, control floor life, and consider replacing the reworked couplers because barrier integrity cannot be proven by a functional test.</div></div></div></div>
                   </div>
-                  <div class="metric-card">Assess thermal, moisture, and ESD stress risks</div>
-                  <div class="metric-card">Analyze isolation breakdown causes and precursors</div>
-                  <div class="metric-card">Define screening and prevention measures</div>
                 </div>
               </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>LED aging</div>
-                  <div class="topic-card"><span class="topic-dot"></span>CTR degradation</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Thermal stress</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Moisture effects</div>
-                  <div class="topic-card"><span class="topic-dot"></span>ESD damage</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Isolation breakdown</div>
-                </div>
-              </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
-                </div>
-              </div>
-
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
-              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Standards and methods</h5><p>J-STD-020 / J-STD-033 (moisture sensitivity) &bull; JEDEC JESD22 test methods (temperature cycling, humidity) &bull; IEC 60270 (partial-discharge measurement) &bull; AIAG&ndash;VDA FMEA handbook.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Vendor data</h5><p>Reliability reports, qualification summaries and CTR degradation data for your parts; failure-analysis support from the vendor for field returns.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 13 turns these mechanisms into test plans; Module 9 turns ageing into margins; Module 11 prevents tracking at board level.</p></div></div></div>
 
               <div
                 style="
@@ -283,6 +1117,601 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '12';
+      window.M_QUIZ = [{"q": "Why does an aged LED lose proportionally more light at low I_F?", "opts": ["The LED gets hotter at low current", "Non-radiative recombination through defects dominates at low carrier density", "V_F rises", "The detector saturates"], "correct": 1, "exp": "Defect-assisted recombination is most significant at low injection."}, {"q": "A returned part has normal CTR at 25 °C but very high I_CEO when hot and humid, with visible residue. Most likely cause?", "opts": ["LED ageing", "Ionic contamination / moisture leakage", "Wire-bond lift", "Barrier treeing"], "correct": 1, "exp": "Leakage with residue is contamination."}, {"q": "Temperature-dependent intermittent opens most likely indicate…", "opts": ["LED degradation", "Bond heel or die-attach fatigue", "ESD", "Dark current"], "correct": 1, "exp": "Mechanical cracks open and close with temperature."}, {"q": "Popcorning is caused by…", "opts": ["LED overcurrent", "Absorbed moisture vaporising during reflow", "Excessive CTR", "ESD"], "correct": 1, "exp": "Steam pressure delaminates or cracks the package."}, {"q": "An MSL-3 part (168 h floor life) was open for 336 h. Before reflow you must…", "opts": ["Nothing", "Bake per J-STD-033", "Increase reflow temperature", "Apply conformal coating"], "correct": 1, "exp": "Floor life exceeded → bake."}, {"q": "Which measurement reveals barrier damage that CTR cannot?", "opts": ["V_F", "R_IO / PD / hi-pot", "Rise time", "h_FE"], "correct": 1, "exp": "Only insulation tests see the barrier."}, {"q": "Electrical treeing starts from…", "opts": ["Surface dust", "Voids or delaminations where partial discharge occurs", "LED current", "Lead plating"], "correct": 1, "exp": "PD erodes channels from the void."}, {"q": "In FMEA, RPN =", "opts": ["S + O + D", "S × O × D", "S × O", "O × D"], "correct": 1, "exp": "Risk priority number is the product."}, {"q": "The best first step with a returned unit is…", "opts": ["Decapsulate it immediately", "Collect history and do non-destructive tests", "Hi-pot it at full level repeatedly", "Throw it away"], "correct": 1, "exp": "Preserve evidence."}, {"q": "Latent ESD damage typically shows as…", "opts": ["Immediate total failure", "Higher leakage and faster degradation later", "Higher CTR", "Lower V_F only"], "correct": 1, "exp": "Partially damaged junctions degrade over time."}];
+      window.M_TF = [{"s": "The LED is the main wear-out element in a phototransistor optocoupler.", "a": true, "exp": "The rest ages far more slowly under normal conditions."}, {"s": "A part with normal CTR must have an intact isolation barrier.", "a": false, "exp": "Barrier damage is invisible in CTR."}, {"s": "Repeated full-level hi-pot testing can damage an isolation barrier.", "a": true, "exp": "Each test is a stress; use reduced levels for retests."}, {"s": "Flux residue plus humidity can increase dark current.", "a": true, "exp": "Ionic contamination creates leakage paths."}, {"s": "Popcorning only happens with through-hole parts.", "a": false, "exp": "It is a problem mainly for SMD parts in reflow."}, {"s": "Partial discharge is harmless as long as the part passes functional test.", "a": false, "exp": "PD erodes insulation over time."}, {"s": "High severity failure modes may require action even when their RPN is low.", "a": true, "exp": "Safety first; AP tables formalise this."}, {"s": "Die-attach voids can accelerate LED ageing by raising junction temperature.", "a": true, "exp": "Higher thermal resistance, higher T_J."}];
+      window.M_DD = [{"t": "Treeing", "d": "Branching erosion channels grown by partial discharge", "h": "Inside the insulation."}, {"t": "Popcorning", "d": "Package damage from steam during reflow", "h": "Moisture + heat."}, {"t": "Heel crack", "d": "Fatigue crack where a bond wire leaves the bond", "h": "Thermal cycling."}, {"t": "Latent damage", "d": "Partial damage that causes failure later", "h": "Often ESD."}, {"t": "RPN", "d": "Severity × occurrence × detection", "h": "FMEA ranking."}, {"t": "C-SAM", "d": "Acoustic microscopy that reveals delamination", "h": "Non-destructive."}];
+      // ---------- Module 12 ----------
+      var FMEA = [
+        { c: 'led', m: 'CTR drift below design limit', mech: 'LED light-output degradation', cause: 'High I_F, high T_J, long life', det: 'CTR trending, EOL margin check', prev: 'I_F ≤ 50 % derated, rank margin, k_age', s: 7, o: 5, d: 6 },
+        { c: 'led', m: 'LED open / no light', mech: 'Reverse breakdown or ESD, bond lift', cause: 'Reversed wiring, missing clamp diode, handling', det: 'V_F / I_R test, functional test', prev: 'Anti-parallel diode, ESD handling, TVS', s: 8, o: 3, d: 3 },
+        { c: 'det', m: 'Output stuck partly ON when hot', mech: 'Dark current rise, contamination', cause: 'Moisture, ionic residue, high T', det: 'I_CEO at max T, hot functional test', prev: 'Cleaning, conformal coat, R_BE, smaller pull-up', s: 6, o: 3, d: 5 },
+        { c: 'det', m: 'Reduced gain after transient', mech: 'Output ESD / EOS damage', cause: 'Unprotected output line, inductive kick', det: 'CTR/h_FE test, curve comparison', prev: 'Output clamp, V_CEO margin, flyback diodes', s: 6, o: 2, d: 5 },
+        { c: 'pkg', m: 'Intermittent with temperature', mech: 'Wire-bond heel fatigue, delamination', cause: 'Thermal cycling, CTE mismatch', det: 'Temperature cycling test, X-ray, C-SAM', prev: 'Qualified part, reduce ΔT, avoid hot spots', s: 7, o: 2, d: 7 },
+        { c: 'pkg', m: 'Cracked package after reflow', mech: 'Popcorning (moisture + reflow)', cause: 'MSL floor life exceeded, no bake', det: 'Visual, C-SAM, PD test', prev: 'J-STD-033 handling, dry-pack, bake', s: 9, o: 2, d: 6 },
+        { c: 'bar', m: 'Barrier breakdown (shock hazard)', mech: 'Partial discharge / treeing', cause: 'Voids, V_IORM exceeded, delamination', det: 'Production PD test, R_IO, hi-pot', prev: 'Correct V_IORM, PD-tested parts, avoid reflow damage', s: 10, o: 1, d: 8 },
+        { c: 'bar', m: 'Leakage / tracking between pins', mech: 'Surface tracking under pollution', cause: 'Creepage too small for real PD', det: 'Hi-pot after damp heat, inspection', prev: 'Creepage per PD3, coating, slots (Module 11)', s: 10, o: 2, d: 6 },
+        { c: 'bar', m: 'Barrier damaged by testing', mech: 'Cumulative hi-pot stress', cause: 'Repeated full-level hi-pot tests', det: 'PD test, R_IO trend', prev: 'Limit repeated hi-pot, use reduced retest levels', s: 9, o: 2, d: 7 },
+      ];
+      (function () {
+        var body = document.getElementById('m12FmeaBody');
+        if (!body) return;
+        var filt = 'all', sel = 0;
+        var CAT = { led: 'LED', det: 'Detector', pkg: 'Package/assembly', bar: 'Isolation barrier' };
+        function render() {
+          body.innerHTML = '';
+          var rows = FMEA.map(function (r, i) { return [r, i]; }).filter(function (x) { return filt === 'all' || x[0].c === filt; });
+          rows.sort(function (a, b) { return b[0].s * b[0].o * b[0].d - a[0].s * a[0].o * a[0].d; });
+          rows.forEach(function (x) {
+            var r = x[0], tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            if (x[1] === sel) tr.className = 'm3-pass';
+            tr.innerHTML = '<td>' + CAT[r.c] + '</td><td><strong>' + r.m + '</strong><br><span class="m3-note">' + r.mech + '</span></td><td>' + r.cause + '</td><td>' + r.det + '</td><td>' + r.prev + '</td><td>' + r.s + '/' + r.o + '/' + r.d + '</td><td><strong>' + r.s * r.o * r.d + '</strong></td>';
+            tr.addEventListener('click', function () { sel = x[1]; load(); render(); });
+            body.appendChild(tr);
+          });
+        }
+        function load() {
+          var r = FMEA[sel];
+          ['S', 'O', 'D'].forEach(function (k) { document.getElementById('m12Fm' + k).value = r[k.toLowerCase()]; });
+          calc();
+        }
+        function calc() {
+          var s = bindOut('m12FmS', function (v) { return v; }), o = bindOut('m12FmO', function (v) { return v; }), d = bindOut('m12FmD', function (v) { return v; });
+          var rpn = s * o * d;
+          document.getElementById('m12FmMode').textContent = FMEA[sel].m;
+          document.getElementById('m12FmRpn').textContent = rpn;
+          var v = document.getElementById('m12FmVerdict'), n = document.getElementById('m12FmNote');
+          if (s >= 9) { M3.setVerdict(v, 'bad', 'Severity 9–10: action required regardless of RPN'); n.textContent = 'Safety-related modes (barrier breakdown) need design controls and verification even when occurrence is low.'; }
+          else if (rpn >= 150) { M3.setVerdict(v, 'bad', 'High RPN: define corrective actions'); n.textContent = 'Reduce occurrence (derating, better part) or improve detection (test coverage).'; }
+          else if (rpn >= 80) { M3.setVerdict(v, 'warn', 'Moderate RPN: review'); n.textContent = 'Consider cheap improvements to detection or occurrence.'; }
+          else { M3.setVerdict(v, 'ok', 'Low RPN'); n.textContent = 'Document the controls that justify these ratings.'; }
+          FMEA[sel].s = s; FMEA[sel].o = o; FMEA[sel].d = d;
+        }
+        document.querySelectorAll('#m12FmeaFilters .cmp-btn').forEach(function (b) {
+          b.addEventListener('click', function () {
+            document.querySelectorAll('#m12FmeaFilters .cmp-btn').forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active'); filt = b.getAttribute('data-f'); render();
+          });
+        });
+        ['m12FmS', 'm12FmO', 'm12FmD'].forEach(function (i) { document.getElementById(i).addEventListener('input', function () { calc(); render(); }); });
+        load(); render();
+      })();
+      // Diagnose the return
+      (function () {
+        var host = document.getElementById('m12Diag');
+        if (!host) return;
+        var CASES = [
+          { t: 'PLC input, 6 years in a 60 °C cabinet, I_F = 18 mA. Input no longer switches at 15 V.', meas: 'V_F normal. CTR at 5 mA: 45 % (rank C, originally ≥ 200 %). CTR loss much larger at 1 mA than at 20 mA. I_CEO normal.', o: ['LED degradation', 'Barrier breakdown', 'Wire-bond lift', 'ESD on the output'], a: 0, e: 'High I_F and temperature for years, normal V_F and leakage, and a loss that is worst at low current: the classic LED-ageing signature (Module 9).' },
+          { t: 'New boards fail in the field within weeks after a rework campaign on a reflow line.', meas: 'Some parts show hairline mould cracks; C-SAM shows delamination at the lead frame; CTR erratic; R_IO lower than new.', o: ['LED degradation', 'Popcorning (moisture + reflow)', 'Dark-current rise from temperature', 'Detector ESD'], a: 1, e: 'Cracks plus delamination after reflow/rework point to moisture-induced popcorning: MSL floor life was probably exceeded without a bake.' },
+          { t: 'Industrial controller output line glitches only when the cabinet is hot and humid.', meas: 'I_CEO at 85 °C is 40× a new part; board shows flux residue around the coupler; CTR normal at 25 °C.', o: ['LED degradation', 'Contamination / moisture leakage', 'Barrier treeing', 'Bond fatigue'], a: 1, e: 'Normal CTR but huge hot leakage with visible residue: ionic contamination plus humidity. Clean, coat, and reduce the pull-up value.' },
+          { t: 'A 24 V input unit is dead after commissioning; technicians report swapped field wires.', meas: 'LED open (no V_F), output transistor fine, no visual damage.', o: ['LED reverse breakdown', 'Popcorning', 'Barrier breakdown', 'Wire-bond fatigue'], a: 0, e: 'Reversed 24 V across an unprotected LED exceeds V_R: reverse breakdown. Add an anti-parallel or series diode (Module 10).' },
+          { t: 'Motor-drive feedback coupler fails a routine safety test: R_IO dropped from 10¹² Ω to 10⁷ Ω after 3 years.', meas: 'Decap shows branched carbonised channels from a void near the film edge; the DC bus exceeded V_IORM during regeneration.', o: ['LED degradation', 'Electrical treeing from partial discharge', 'Surface tracking between pins', 'ESD'], a: 1, e: 'Branched channels inside the insulation, growing from a void, with a history above V_IORM: PD-driven treeing. A hazardous failure: correct the V_IORM selection.' },
+          { t: 'Automotive module: intermittent input only during cold-start tests; works when warm.', meas: 'Resistance of the LED path jumps open below −20 °C; X-ray shows a heel crack on the LED bond wire.', o: ['Wire-bond heel fatigue', 'LED degradation', 'Contamination', 'Barrier breakdown'], a: 0, e: 'Temperature-dependent opens with an X-ray-visible heel crack: thermal-cycling fatigue of the bond wire.' },
+        ];
+        var score = 0, done = 0;
+        CASES.forEach(function (c, i) {
+          var d = document.createElement('div');
+          d.className = 'tf-item';
+          d.innerHTML = '<div class="tf-q">Case ' + (i + 1) + ': ' + c.t + '</div><p class="m3-note" style="margin:0 0 8px"><strong>Measurements:</strong> ' + c.meas + '</p>';
+          var row = document.createElement('div'); row.className = 'm-opt-row';
+          var exp = document.createElement('div'); exp.className = 'tf-exp';
+          var answered = false;
+          c.o.forEach(function (o, k) {
+            var b = document.createElement('button'); b.type = 'button'; b.className = 'tf-btn'; b.textContent = o;
+            b.addEventListener('click', function () {
+              if (answered) return; answered = true; done++;
+              var ok = k === c.a; if (ok) score++;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) row.children[c.a].classList.add('correct');
+              exp.textContent = (ok ? '✓ ' : '✗ ') + c.e; exp.classList.add('show');
+              document.getElementById('m12DiagScore').textContent = 'Diagnosed: ' + score + ' / ' + CASES.length + (done === CASES.length ? (score >= 5 ? ' — excellent failure analyst!' : ' — review Sections 3–8 and retry after reload.') : '');
+            });
+            row.appendChild(b);
+          });
+          d.appendChild(row); d.appendChild(exp); host.appendChild(d);
+        });
+      })();
+      // PD / treeing simulator
+      (function () {
+        var canvas = document.getElementById('m12PdCanvas');
+        if (!canvas) return;
+        var btn = document.getElementById('m12PdPlay');
+        var prog = 0, playing = false, last = 0, seed = [];
+        for (var i = 0; i < 40; i++) seed.push([Math.random() - 0.5, Math.random()]);
+        function rate() {
+          var r = +document.getElementById('m12PdV').value, h = +document.getElementById('m12PdH').value;
+          return r <= 1 ? 0 : Math.pow(r - 1, 2) * (1 + h / 50);
+        }
+        function upd() {
+          var r = bindOut('m12PdV', function (v) { return M3.fmt(v, 2) + ' × V_inception'; });
+          bindOut('m12PdH', function (v) { return v + ' % RH'; });
+          var k = rate();
+          document.getElementById('m12PdPd').textContent = r <= 1 ? 'none (below inception)' : 'every half-cycle';
+          document.getElementById('m12PdLife').textContent = k === 0 ? 'no PD ageing (other mechanisms still apply)' : '≈ ' + M3.fmt(Math.min(999, 2 / k), 1) + ' time units to breakdown';
+          var v = document.getElementById('m12PdVerdict');
+          if (r <= 0.8) M3.setVerdict(v, 'ok', 'Well below inception: this is why V_IORM is low');
+          else if (r <= 1) M3.setVerdict(v, 'warn', 'Close to inception: tolerances, humidity and ageing erode margin');
+          else M3.setVerdict(v, 'bad', 'PD active: the tree grows with every cycle');
+          draw();
+        }
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var top = 40, bot = H - 40, cx = W / 2;
+          ctx.fillStyle = 'rgba(234,179,8,0.25)'; ctx.fillRect(W * 0.15, top, W * 0.7, bot - top);
+          ctx.fillStyle = p.muted; ctx.fillRect(W * 0.15, top - 12, W * 0.7, 12); ctx.fillRect(W * 0.15, bot, W * 0.7, 12);
+          ctx.fillStyle = '#0b1220'; ctx.beginPath(); ctx.ellipse(cx, top + 6, 12, 6, 0, 0, 6.283); ctx.fill();
+          var depth = Math.min(1, prog) * (bot - top - 6);
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+          seed.forEach(function (s, i) {
+            var d = depth * (0.4 + 0.6 * s[1]);
+            ctx.beginPath(); ctx.moveTo(cx, top + 6); ctx.lineTo(cx + s[0] * d * 0.9, top + 6 + d); ctx.stroke();
+          });
+          ctx.fillStyle = p.text; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+          ctx.fillText('bridged: ' + Math.round(Math.min(1, prog) * 100) + ' %', W * 0.15, H - 8);
+          if (prog >= 1) { ctx.fillStyle = p.bad; ctx.fillText('BREAKDOWN', W * 0.7, H - 8); }
+          if (playing && rate() > 0 && Math.floor(Date.now() / 120) % 2) { ctx.fillStyle = 'rgba(254,249,195,0.6)'; ctx.beginPath(); ctx.ellipse(cx, top + 6, 20, 10, 0, 0, 6.283); ctx.fill(); }
+        }
+        function loop(ts) {
+          if (!playing) return;
+          var dt = last ? (ts - last) / 1000 : 0; last = ts;
+          prog = Math.min(1.05, prog + rate() * dt * 0.25);
+          draw();
+          if (prog >= 1.05) { playing = false; btn.innerHTML = '&#9654; Play'; return; }
+          requestAnimationFrame(loop);
+        }
+        btn.addEventListener('click', function () {
+          if (playing) { playing = false; btn.innerHTML = '&#9654; Play'; return; }
+          if (prog >= 1) prog = 0;
+          playing = true; last = 0; btn.innerHTML = '&#10074;&#10074; Pause';
+          if (M3.reduceMotion) { prog = rate() > 0 ? 1 : 0; playing = false; btn.innerHTML = '&#9654; Play'; draw(); return; }
+          requestAnimationFrame(loop);
+        });
+        document.getElementById('m12PdReset').addEventListener('click', function () { prog = 0; draw(); });
+        ['m12PdV', 'm12PdH'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        M3.onRedraw(draw);
+        upd();
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m12-check-', ["FMEA covers LED ageing, reverse/ESD, thermal fatigue, moisture, contamination and barrier modes.", "LED reverse protection present on every input that can see reverse voltage.", "I_F and T_J derated per Module 9.", "MSL handling (dry-pack, floor life, bake) specified for production and rework.", "Cleaning/coating strategy for contamination-sensitive, high-impedance outputs.", "V_IORM ≥ peak working voltage; PD-tested parts where reinforced.", "Creepage for the real pollution degree; tracking risk assessed.", "Hi-pot retest policy avoids cumulative barrier stress.", "Field-return FA workflow defined (non-destructive first).", "Signature measurements (CTR vs I_F, hot I_CEO, R_IO) in the FA procedure."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

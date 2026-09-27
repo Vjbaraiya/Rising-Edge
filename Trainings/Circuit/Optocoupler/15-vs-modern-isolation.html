@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Optocouplers vs Modern Isolation Technologies — Module 15 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Optocouplers vs capacitive and magnetic digital isolators, transformers and fibre: speed, power, CMTI, lifetime, EMI and cost, with a decision-tree wizard."
     />
     <title>
       Optocouplers vs Modern Isolation Technologies | Optocoupler Design Academy | Rising Edge
@@ -43,66 +43,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -192,73 +893,243 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2,S3 → Q1-Q3,TF1,TF3; 2: S1,S4-S8 → Q4-Q6,TF4-TF7,Scen1,Scen2; 3: S9 → Q9,TF2,Scen3; 4: S10,S11 → Q7,Q8,Q10; 5: S12 → TF8 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Explain how capacitive and magnetic digital isolators work
-                  </div>
-                  <div class="metric-card">Benchmark all isolation technologies quantitatively</div>
-                  <div class="metric-card">Weigh EMI emission and susceptibility differences</div>
-                  <div class="metric-card">Apply a structured technology selection methodology</div>
-                  <div class="metric-card">Defend technology choices in design reviews</div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Explain how capacitive and magnetic digital isolators work</div><div class="objective-card metric-card">Benchmark all isolation technologies quantitatively</div><div class="objective-card metric-card">Weigh EMI emission and susceptibility differences</div><div class="objective-card metric-card">Apply a structured technology selection methodology</div><div class="objective-card metric-card">Defend technology choices in design reviews</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> You now know the optocoupler in depth. Before choosing one, you should know its competitors. This module compares optocouplers with capacitive and magnetic digital isolators, isolation transformers and fibre-optic links, using numbers rather than marketing, and ends with a decision method you can defend in a design review. It builds on <a href="05-types.html">Module 5</a> (families), <a href="06-parameters.html">Module 6</a> (parameters) and <a href="09-derating.html">Module 9</a> (ageing). The standards that certify each technology are in <a href="16-standards.html">Module 16</a>.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; The Technology Landscape</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Every isolator does the same job: move information (and sometimes power) across an insulation barrier that blocks DC and low-frequency current. They differ in <strong>what carries the signal</strong> (light, electric field, magnetic field) and <strong>what the barrier is made of</strong>, and those two choices drive almost every performance difference.</p>
+<figure class="m3-fig"><img src="images/15/isolation-landscape.png" alt="Five cards comparing optocoupler, capacitive isolator, magnetic isolator, isolation transformer and fibre-optic link by signal carrier and barrier material" loading="lazy" width="1200" height="520" /><figcaption><strong>Figure 1.</strong> The isolation technology landscape.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Technology</th><th>Typical parts (examples)</th><th>Sweet spot</th></tr></thead><tbody><tr><td>Phototransistor optocoupler</td><td>PC817, TLP185, 4N35</td><td>Low-speed logic, PLC inputs, SMPS feedback, lowest cost</td></tr><tr><td>High-speed / gate-drive optocoupler</td><td>6N137, TLP2361, ACPL-064L, HCPL-3120, ACPL-332J</td><td>1&ndash;25 Mbps logic, IGBT gate drive</td></tr><tr><td>Capacitive digital isolator</td><td>TI ISO77xx family, Silicon Labs (Skyworks) Si86xx family</td><td>SPI/UART/CAN/I<sup>2</sup>C, many channels, high CMTI</td></tr><tr><td>Magnetic digital isolator</td><td>Analog Devices iCoupler ADuM14xx/ADuM12xx; isoPower ADuM5xxx</td><td>Many channels, integrated isolated power</td></tr><tr><td>Isolation transformer</td><td>Ethernet magnetics, gate-drive transformers, flyback transformers</td><td>AC signals, power transfer</td></tr><tr><td>Fibre-optic link</td><td>Industrial plastic-fibre or glass-fibre transceivers</td><td>Very high voltage, long distance, extreme EMI</td></tr></tbody></table></div>
+<p class="m3-note">Part families are examples of widely used devices; vendors and part numbers change, so confirm current availability and ratings.</p>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>Digital isolators</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Capacitive isolation</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Magnetic isolation</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Isolation transformers
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>Fiber-optic isolation</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Technology selection guidelines
-                  </div>
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; Capacitive Digital Isolators</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">A capacitive isolator puts two silicon dies in one package. The transmitter drives a signal across a pair of series capacitors built from thick <span class="gloss" data-tip="Silicon dioxide: the same glass used as gate oxide in CMOS, deposited here in layers totalling tens of micrometres.">SiO<sub>2</sub></span> layers on the die; the receiver detects it. A capacitor blocks DC, so the data must be <em>encoded</em> as an AC signal.</p>
+<div class="adv-grid"><div class="adv-card"><h5>On-off keying (OOK)</h5><p>Used by e.g. TI ISO77xx: one logic state sends a high-frequency carrier, the other sends nothing. The receiver rectifies the envelope. DC-correct by design: a steady HIGH is a steady carrier.</p></div><div class="adv-card"><h5>Edge / differential encoding</h5><p>Other designs send edge information differentially and use refresh or state-keeping logic to hold DC levels.</p></div><div class="adv-card"><h5>SiO<sub>2</sub> barrier</h5><p>Very high dielectric strength (hundreds of V/&micro;m), so a thin layer withstands kV. Its wear-out mechanism is TDDB, which vendors model to predict barrier life at the working voltage (Section 8).</p></div><div class="adv-card"><h5>Default output</h5><p>With the input side unpowered, the output goes to a defined default (HIGH or LOW, selected by part suffix). Choose the safe state for your system.</p></div></div>
+<figure class="m3-fig"><img src="images/15/capacitive-ook.gif" alt="Animation of on-off keying: the data input, a carrier burst across the barrier whenever data is high, the detected envelope and the recovered data output" loading="lazy" width="980" height="420" /><figcaption><strong>Figure 2 (animation).</strong> On-off keying across a capacitive barrier.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; replacing four 6N137s on an SPI bus</h5><p>An isolated ADC uses SPI at 8 MHz: SCLK, MOSI and CS forward, MISO back.</p><ol><li>6N137 max 10 Mbps with t<sub>PHL</sub>/t<sub>PLH</sub> up to about 75 ns: round-trip SCLK&rarr;MISO delay &asymp; 2 &times; 75 = 150 ns, more than one 125 ns clock period. SPI timing fails unless you slow the clock.</li><li>A 3-forward/1-reverse capacitive isolator (ISO7741-class): delay about 10&ndash;16 ns per direction, so the round trip is about 30 ns. That fits easily.</li><li>Supply: 4 &times; 6N137 &asymp; 4 &times; (10 mA I<sub>CC</sub> + 5 mA average LED) = 60 mA; the quad isolator needs a few mA in total.</li></ol></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; forgetting the second supply.</strong> A digital isolator needs V<sub>DD</sub> on <em>both</em> sides. On a PLC input with no field-side supply, that means adding an isolated DC-DC converter, which can erase the cost advantage.</div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; Magnetic Isolators (iCoupler and isoPower)</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">Magnetic isolators (Analog Devices&rsquo; iCoupler is the best-known family) use micro-transformers: planar coils on the die separated by a thick <strong>polyimide</strong> layer. Because a transformer only passes changes, the input is edge-encoded into short current pulses.</p>
+<figure class="m3-fig"><img src="images/15/magnetic-edge-encoding.png" alt="Timing diagram: data input, coil pulses (one pulse for a rising edge, two for a falling edge, plus periodic refresh pulses) and the reconstructed data output" loading="lazy" width="1100" height="400" /><figcaption><strong>Figure 3.</strong> Edge encoding with refresh pulses.</figcaption></figure>
+<figure class="m3-fig"><img src="images/15/barrier-structures.png" alt="Cross-sections: optocoupler with a thick silicone gap, capacitive isolator with SiO2 capacitors on two dies, and magnetic isolator with coils separated by polyimide" loading="lazy" width="1200" height="440" /><figcaption><strong>Figure 4.</strong> Barrier construction: distance (opto) versus thin, high-quality dielectrics (digital isolators).</figcaption></figure>
+<div class="adv-grid"><div class="adv-card"><h5>Power efficiency</h5><p>Energy is spent only on edges (plus refresh), so current scales with data rate: very low at low rates.</p></div><div class="adv-card"><h5>isoPower</h5><p>The same micro-transformer technology transfers <em>power</em> (tens to hundreds of mW) with an on-chip oscillator, removing the external DC-DC. The price is efficiency (often well below 50 %) and radiated emissions that need careful layout (stitching capacitance across the barrier).</p></div><div class="adv-card"><h5>Magnetic field immunity</h5><p>The tiny coils are very small loops, so external fields induce little voltage. Datasheets quote immunity in A/m or tesla; check it near welders, large motors or induction heaters.</p></div><div class="adv-card"><h5>Missed-pulse recovery</h5><p>Refresh pulses (about every microsecond) and a watchdog restore the correct state or force the default after loss of input power.</p></div></div>
+
                 </div>
               </div>
 
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Isolation Transformers (Signal and Power)</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">Discrete transformers are the oldest isolation technology and still the only one that moves significant <strong>power</strong>. As signal isolators they pass AC only, so DC levels need encoding (Manchester, pulse trains) or a DC-free protocol (Ethernet).</p>
+<div class="adv-grid"><div class="adv-card"><h5>Signal transformers</h5><p>Ethernet magnetics isolate every wired Ethernet port: typically 1.5 kV<sub>rms</sub> functional isolation (IEEE 802.3). Gate-drive transformers pass PWM pulses to high-side switches without a separate supply.</p></div><div class="adv-card"><h5>Power transformers</h5><p>Flyback and forward transformers provide both power and safety insulation, using triple-insulated wire, tape layers and bobbin creepage. In an SMPS, the optocoupler in the feedback loop and the transformer share the same barrier.</p></div><div class="adv-card limit"><h5>Weaknesses</h5><p>Size, interwinding capacitance (tens of pF: poor CMTI unless shielded), no DC, magnetic-field sensitivity and custom design effort.</p></div></div>
+<div class="m3-eq"><div class="m3-eq-main">I<sub>CM</sub> = C<sub>IO</sub> &times; dV/dt</div><ul><li>I<sub>CM</sub>: common-mode displacement current through the barrier (A)</li><li>C<sub>IO</sub>: barrier capacitance (F): &asymp; 0.5&ndash;1 pF for an opto or digital isolator, 5&ndash;50 pF for a transformer</li><li>dV/dt: common-mode slew rate (V/s)</li></ul></div>
+<div class="m3-example"><h5>Worked example &mdash; why transformers struggle with CMTI</h5><ol><li>At 50 kV/&micro;s, a 1 pF barrier passes 1 pF &times; 50 &times; 10<sup>9</sup> V/s = <strong>50 mA</strong> for the duration of the edge.</li><li>A 20 pF signal transformer passes <strong>1 A</strong>, which is enough to disturb nearly any receiver unless the winding is shielded and the return path is designed.</li></ol></div>
+
+                </div>
               </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Fibre-Optic Links</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">A fibre-optic link is an optocoupler stretched out: an LED or laser, a length of fibre and a photodiode receiver. Because the insulation is the fibre length itself, the isolation voltage is limited only by the fibre surface and routing, and the barrier capacitance is effectively zero.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Where it wins</h5><p>HV converters (MV drives, HVDC, traction), test halls, pulsed-power systems, and long links between separately earthed buildings.</p></div><div class="adv-card"><h5>Media</h5><p>Plastic optical fibre (POF) for short industrial links (tens of metres, tens of Mbps); glass fibre for long distances and Gbps.</p></div><div class="adv-card limit"><h5>Costs</h5><p>Transceivers, connectors, a transmitter LED current of tens of mA, and handling (bend radius, dirt on connectors).</p></div><div class="adv-card"><h5>Ageing</h5><p>The transmitter LED ages like an opto LED: the link budget must include end-of-life optical power margin, the same idea as the CTR budget in Module 9.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Quantitative Benchmark</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">The table below uses <strong>representative</strong> values for common parts in each class. Individual grades vary by an order of magnitude, so use it to choose a class, then design with the actual datasheet.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Metric</th><th>Phototransistor opto</th><th>High-speed opto</th><th>Capacitive isolator</th><th>Magnetic isolator</th><th>Fibre link</th></tr></thead><tbody><tr><td>Max data rate</td><td>~10&ndash;50 kbps</td><td>1&ndash;25 Mbps</td><td>100&ndash;150 Mbps</td><td>25&ndash;150 Mbps</td><td>10 Mbps &ndash; Gbps</td></tr><tr><td>Propagation delay</td><td>3&ndash;20 &micro;s</td><td>20&ndash;100 ns</td><td>7&ndash;20 ns</td><td>20&ndash;60 ns</td><td>20&ndash;100 ns</td></tr><tr><td>PWD</td><td>&micro;s (load-dependent)</td><td>5&ndash;35 ns</td><td>&lt; 5 ns</td><td>&lt; 5 ns</td><td>ns</td></tr><tr><td>Supply per channel</td><td>5&ndash;10 mA (LED + pull-up)</td><td>10&ndash;20 mA</td><td>~1&ndash;3 mA</td><td>~0.5&ndash;3 mA (rate-dependent)</td><td>10&ndash;50 mA</td></tr><tr><td>CMTI (min)</td><td>1&ndash;15 kV/&micro;s</td><td>10&ndash;50 kV/&micro;s</td><td>50&ndash;150 kV/&micro;s</td><td>25&ndash;150 kV/&micro;s</td><td>very high</td></tr><tr><td>Isolation rating</td><td>to ~5 kV<sub>rms</sub></td><td>to ~5 kV<sub>rms</sub></td><td>to ~5.7 kV<sub>rms</sub></td><td>to ~5 kV<sub>rms</sub></td><td>limited by distance</td></tr><tr><td>Wear-out</td><td>LED &rarr; CTR drift</td><td>LED &rarr; threshold drift</td><td>TDDB of SiO<sub>2</sub></td><td>polyimide ageing</td><td>TX LED output</td></tr><tr><td>Temperature</td><td>&minus;30/&minus;55 &hellip; +100/+125 &deg;C</td><td>&minus;40 &hellip; +85/+105 &deg;C</td><td>&minus;40 &hellip; +125 &deg;C</td><td>&minus;40 &hellip; +125 &deg;C</td><td>&minus;40 &hellip; +85 &deg;C</td></tr><tr><td>Relative cost</td><td>lowest</td><td>low&ndash;medium</td><td>medium, low per channel</td><td>medium, low per channel</td><td>high</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/15/benchmark-bars.png" alt="Three bar charts on log scales comparing max data rate, propagation delay and minimum CMTI for phototransistor optos, high-speed optos, capacitive isolators, magnetic isolators and fibre links" loading="lazy" width="1300" height="440" /><figcaption><strong>Figure 5.</strong> Speed, delay and CMTI on log scales (representative).</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Technology Benchmark</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Toggle technologies and metrics. Scores are 1&ndash;5 (5 = best) derived from the representative table above; they are a teaching summary, not vendor data. Deselect metrics that don&rsquo;t matter to your application and watch the ranking change.</p><div class="cmp-controls" id="m15BmTechs"></div><div id="m15BmMetrics" style="margin: 8px 0"></div><div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end"><div class="m3-field"><label for="m15BmMode"><span>View</span></label><select id="m15BmMode"><option value="radar" selected>Radar</option><option value="bar">Bars</option></select></div><div class="m3-results"><div class="m3-res-row"><span>Highest total score (selected metrics)</span><b id="m15BmTop">&ndash;</b></div></div></div><div class="m3-canvas-wrap" style="height: 400px"><canvas id="m15BmCanvas" role="img" aria-label="Radar or bar chart comparing isolation technologies on selected metrics"></canvas></div>
+</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Power Consumption Compared</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p">Optocoupler power is dominated by the LED, and it is spent whether you send 1 bit/s or 10 kbit/s. Digital isolator power is mostly quiescent plus a term proportional to data rate. The crossover depends strongly on channel count.</p>
+<div class="m3-eq"><div class="m3-eq-main">P<sub>opto</sub> &asymp; N &times; V<sub>DD</sub> &times; (D &times; I<sub>F</sub> + I<sub>CC</sub> + I<sub>PU</sub>) &nbsp;&nbsp; P<sub>iso</sub> &asymp; N &times; V<sub>DD</sub> &times; (I<sub>Q</sub> + k &times; f<sub>data</sub>)</div><ul><li>N: channels; V<sub>DD</sub>: supply (V); D: duty cycle of LED-on state</li><li>I<sub>F</sub>: LED current; I<sub>CC</sub>: detector supply current (high-speed optos); I<sub>PU</sub>: average pull-up current (A)</li><li>I<sub>Q</sub>: quiescent current per channel (both sides); k: dynamic current per Mbps (A/Mbps); f<sub>data</sub>: data rate (Mbps)</li></ul></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Power vs Data Rate and Channel Count</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Representative current models: PC817 at I<sub>F</sub> = 5 mA with a 1 k&Omega; pull-up; 6N137 at I<sub>F</sub> = 10 mA; capacitive 1.6 mA + 0.03 mA/Mbps per channel; magnetic 0.6 mA + 0.1 mA/Mbps per channel; fibre TX 30 mA at 50 % duty + RX 5 mA. Check your part&rsquo;s supply-current curves.</p><div class="m3-calc"><div><div class="m3-field"><label for="m15PwRate"><span>Data rate (log slider)</span> <output id="m15PwRateOut"></output></label><input type="range" id="m15PwRate" min="0" max="100" step="1" value="60" /></div><div class="m3-field"><label for="m15PwCh"><span>Channels</span> <output id="m15PwChOut"></output></label><input type="range" id="m15PwCh" min="1" max="8" step="1" value="4" /></div><div class="m3-field"><label for="m15PwV"><span>Supply voltage</span></label><select id="m15PwV"><option value="3.3">3.3 V</option><option value="5" selected>5 V</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Lowest-power feasible technology</span><b id="m15PwBest">&ndash;</b></div><div class="m3-res-row"><span>Optocoupler total</span><b id="m15PwOpto">&ndash;</b></div><div class="m3-res-row"><span>Capacitive isolator total</span><b id="m15PwDig">&ndash;</b></div><div style="margin-top: 8px"><span id="m15PwVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m15PwNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 230px"><canvas id="m15PwCanvas" role="img" aria-label="Bar chart of total supply power per technology at the selected data rate and channel count"></canvas></div>
+</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> For battery or 4&ndash;20 mA loop-powered sensors, magnetic isolators at low data rates can draw tens of &micro;A per channel in some low-power variants, which is impossible with an LED. Conversely, for a single 1 Hz status signal, a PC817 driven at 1 mA may be the simplest low-power answer.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Isolation Quality and Lifetime</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p">Both technologies can be certified to <strong>reinforced</strong> insulation, but they wear out differently, and the certification standards differ: IEC 60747-5-5 for optocouplers, IEC 60747-17 for capacitive and magnetic couplers (<a href="16-standards.html">Module 16</a>).</p>
+<figure class="m3-fig"><img src="images/15/ageing-vs-tddb.png" alt="Left: optocoupler CTR falling over operating hours, faster at higher temperature. Right: predicted digital-isolator barrier life falling exponentially with working voltage, with the rated working voltage giving a life well above a typical design life" loading="lazy" width="1200" height="430" /><figcaption><strong>Figure 6.</strong> Two wear-out mechanisms: LED light loss (function) versus TDDB (insulation). Conceptual shapes.</figcaption></figure>
+<div class="adv-grid"><div class="adv-card"><h5>Opto: function ages, insulation robust</h5><p>The thick polymer barrier has large margin; the <em>LED</em> ages. A degraded opto usually fails safe (the signal stops) rather than unsafe (the insulation breaks down).</p></div><div class="adv-card"><h5>Digital isolator: function stable, insulation modelled</h5><p>No LED to age, so timing and thresholds barely drift. The thin barrier has a voltage-dependent lifetime, and vendors publish TDDB curves showing the working voltage for 20&ndash;40+ years with margin.</p></div><div class="adv-card"><h5>Surge capability</h5><p>Both are tested with a surge (V<sub>IOSM</sub>, 1.2/50 &micro;s). Check the value for your overvoltage category and whether it applies to basic or reinforced insulation.</p></div><div class="adv-card limit"><h5>Distance through insulation</h5><p>Some end-product standards require a minimum DTI (e.g. 0.4 mm) for reinforced solid insulation, unless the component standard route is used. Thin-film isolators rely on the component certification (Module 16).</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; EMI Emission, Susceptibility and Magnetic Immunity</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<p class="m3-p">EMI cuts both ways: what the isolator emits, and what disturbs it.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Aspect</th><th>Optocoupler</th><th>Capacitive</th><th>Magnetic</th><th>Design response</th></tr></thead><tbody><tr><td>Radiated emission</td><td>Negligible (no RF carrier)</td><td>Carrier harmonics can radiate via the barrier</td><td>Low for data; high for isoPower DC-DC</td><td>Stitching capacitance across the barrier (PCB-embedded), short return paths, vendor layout guides</td></tr><tr><td>Common-mode transients</td><td>Weakest (low CMTI), especially phototransistors</td><td>Strong</td><td>Strong</td><td>Choose CMTI &ge; 2&times; application dV/dt</td></tr><tr><td>Magnetic fields</td><td>Immune</td><td>Immune</td><td>Highly immune; check rating</td><td>Keep away from high-current loops anyway</td></tr><tr><td>RF immunity (conducted/radiated)</td><td>Good; slow parts filter naturally</td><td>Good; check datasheet EMC results</td><td>Good</td><td>Filter inputs; test per IEC 61000-4-3/-4-6 (Module 13)</td></tr><tr><td>ESD on I/O</td><td>Depends on the circuit, not the barrier</td><td>Same</td><td>Same</td><td>TVS on the cable side</td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; assuming a digital isolator passes radiated emissions because the evaluation board did.</strong> Evaluation boards use four-layer stack-ups with embedded stitching capacitance. A two-layer board with a wide slot can radiate the carrier or DC-DC switching harmonics. Budget for emission pre-scans early.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Where Optocouplers Still Win</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<p class="m3-p">Digital isolators have taken most high-speed digital sockets, but optocouplers remain the best answer in several places. Knowing them lets you defend an opto choice instead of apologising for it.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Simplicity and cost at low speed</h5><p>A PC817 and two resistors: no second supply, no decoupling, cents in cost, dozens of second sources.</p></div><div class="adv-card"><h5>No active supply on one side</h5><p>The output side needs only a pull-up, and photovoltaic/PhotoMOS outputs need no supply at all. Ideal for PLC inputs and contact outputs.</p></div><div class="adv-card"><h5>Linear / analog</h5><p>IL300 and HCNR201 servo-linearised couplers give simple, low-cost analog isolation (Module 5).</p></div><div class="adv-card"><h5>SSR and TRIAC functions</h5><p>MOC3041-class zero-cross TRIAC drivers and AQY210/TLP222 PhotoMOS relays have no drop-in digital-isolator equivalent.</p></div><div class="adv-card"><h5>SMPS feedback</h5><p>TL431 + PC817 is the lowest-cost, well-understood loop (Module 10); isolated error amplifiers exist but cost more.</p></div><div class="adv-card"><h5>Fail-safe behaviour</h5><p>An aged LED fades toward &ldquo;off&rdquo;; many safety interlocks exploit this with a dynamic (pulsed) signal.</p></div><div class="adv-card"><h5>Robust thick barrier</h5><p>Large DTI and a long track record in field-proven designs simplify some certification arguments.</p></div><div class="adv-card"><h5>Wide input tolerance</h5><p>AC-input (H11AA1) and wide-range inputs with a series resistor accept 5&ndash;240 V signals directly.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body" aria-expanded="false" aria-controls="sec11body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 11 &mdash; Technology Selection Decision Tree</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+<p class="m3-p">Use a structured method so the same inputs always lead to the same answer, and so reviewers can check your reasoning. Start with <em>function</em> (analog, switching, digital), then speed, channel count, supplies and environment.</p>
+<figure class="m3-fig"><img src="images/15/decision-tree.png" alt="Decision tree: analog to linear opto or isolated amplifier; AC switching to TRIAC opto or PhotoMOS; distance or very high voltage to fibre; over 10 Mbps to digital isolator; three or more channels to multi-channel isolator; isolated power to integrated DC-DC; otherwise an optocoupler, with a list of checks" loading="lazy" width="1200" height="700" /><figcaption><strong>Figure 7.</strong> First-pass decision tree.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Decision-Tree Wizard</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Answer the questions for your interface. The wizard follows the same logic as Figure 7 with a gate-drive branch, and explains its recommendation.</p><div id="m15Dt"></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 12 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec12body" aria-expanded="false" aria-controls="sec12body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 12 &mdash; Defending the Choice in a Design Review</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+<p class="m3-p">In a design review, &ldquo;we always use PC817s&rdquo; and &ldquo;digital isolators are modern&rdquo; are both weak arguments. A defensible choice states the requirements, the alternatives considered, and the numbers that decided it.</p>
+<div class="m3-example"><h5>Template &mdash; isolation technology justification</h5><ol><li><strong>Requirement:</strong> signal type, data rate/bandwidth, channels and directions, insulation class and working voltage, CMTI (application dV/dt &times; 2), temperature range, lifetime, supplies available on each side, cost target.</li><li><strong>Alternatives:</strong> at least two technologies, with representative parts.</li><li><strong>Comparison:</strong> the three to five metrics that matter here, with numbers (speed and delay, power, CMTI, lifetime, cost per channel, BOM impact).</li><li><strong>Decision and risks:</strong> the choice, its weak points and how they are mitigated (e.g. &ldquo;opto: CTR ageing covered by k<sub>age</sub> = 0.5 in the margin calculation&rdquo;).</li><li><strong>Evidence:</strong> certificates (UL 1577, IEC 60747-5-5 or -17), test results (Module 13), second sources.</li></ol></div>
+<div class="m3-example"><h5>Worked example &mdash; 24 V PLC digital input card, 16 channels</h5><ol><li>Requirements: 16 inputs, 1 kHz max, 24 V field side with no logic supply, basic insulation 50 V to logic (functional in practice, but specified as basic), &minus;25 to +70 &deg;C, lowest cost.</li><li>Option A: 4 &times; quad-channel PC817-type (PC847 class) couplers, field side supplied by the input signal itself, about 3&ndash;5 mA per input at the threshold; no field-side supply.</li><li>Option B: 2 &times; 8-channel digital isolators + a field-side DC-DC (or loop-derived supply) + input comparators.</li><li>Decision: A, because speed and CMTI needs are trivial, there is no field-side supply and the cost is lowest. Risk: CTR ageing, covered by an end-of-life design at 15 V threshold (Module 10, example 2).</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 13 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec13body" aria-expanded="false" aria-controls="sec13body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 13 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec13body">
+<div class="adv-grid"><div class="adv-card"><h5>Carrier and barrier</h5><p>Light/field/magnetism and polymer/SiO<sub>2</sub>/polyimide explain most differences.</p></div><div class="adv-card"><h5>Speed</h5><p>Digital isolators win above ~1&ndash;10 Mbps with ns-level delay and PWD.</p></div><div class="adv-card"><h5>Power</h5><p>Opto power is LED-dominated and rate-independent; isolator power scales with rate and channels.</p></div><div class="adv-card"><h5>CMTI</h5><p>Low barrier capacitance and differential receivers give digital isolators 50&ndash;150 kV/&micro;s; fibre is effectively immune.</p></div><div class="adv-card"><h5>Lifetime</h5><p>Opto function ages (LED); thin-film barriers have TDDB-modelled insulation life.</p></div><div class="adv-card"><h5>EMI</h5><p>Optos emit nothing; OOK carriers and isoPower need layout care.</p></div><div class="adv-card"><h5>Opto strongholds</h5><p>Low speed and cost, no receive-side supply, linear, TRIAC/SSR, SMPS feedback.</p></div><div class="adv-card"><h5>Method</h5><p>Function &rarr; speed &rarr; channels &rarr; supplies &rarr; environment, then verify with numbers.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 14 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec14body" aria-expanded="false" aria-controls="sec14body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 14 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec14body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; Motor-drive encoder interface</div><div class="scenario-body">An inverter reads an RS-485 encoder at 10 Mbps across reinforced isolation. The SiC stage switches at 60 kV/&micro;s. The original design used a 6N137-class opto (10 Mbps, CMTI 10 kV/&micro;s min) and sees occasional CRC errors.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> Data rate is at the opto limit (PWD eats the bit time: 100 ns bits vs up to ~35 ns PWD), and the CMTI is 6&times; below the application dV/dt. <strong>Fix:</strong> an isolated RS-485 transceiver or a capacitive/magnetic isolator with &ge; 100 kV/&micro;s CMTI and &lt; 5 ns PWD. Power per channel also falls. Re-verify creepage for reinforced insulation at the DC-link voltage.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; Battery-powered sensor node</div><div class="scenario-body">A wireless sensor (2 &times; AA cells) must isolate one 1 Hz status input and a 100 kbps UART pair. The designer proposes three PC817s at I<sub>F</sub> = 5 mA.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> Each opto draws ~2.5 mA average (50 % duty) plus pull-up current: roughly 10 mA in total, which drains AA cells (~2500 mAh) in about 10 days. <strong>Fix:</strong> a low-power dual magnetic/capacitive isolator for the UART (tens of &micro;A at 100 kbps in low-power variants), and for the status input either the same isolator or a pulsed opto (sample 1 ms every second: 5 &micro;A average).</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; The emission surprise</div><div class="scenario-body">A product using an isolator with integrated isoPower-style DC-DC fails radiated emissions by 8 dB at 300&ndash;400 MHz. The layout is two-layer with a 6 mm slot under the part.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> The integrated DC-DC switches at high frequency; common-mode current across the barrier has no low-impedance return, so the slot and cables become an antenna. <strong>Fixes:</strong> a four-layer stack with overlapping internal planes forming stitching capacitance across the barrier (keeping creepage and DTI), or a discrete isolated DC-DC with a Y-cap, ferrites on I/O, and following the vendor&rsquo;s EMC layout guide. Alternatively, an opto-based design without the integrated power stage.</div></div></div></div>
+                  </div>
+                </div>
+              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Vendor technical material</h5><p>Texas Instruments, Analog Devices and Skyworks/Silicon Labs application notes and white papers on digital-isolator barrier lifetime (TDDB), EMC layout and isoPower emissions; Broadcom, Toshiba, Vishay optocoupler application notes on CMTI and LED ageing.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Standards</h5><p>IEC 60747-5-5 (optocouplers) &bull; IEC 60747-17 / VDE 0884-17 (magnetic and capacitive couplers) &bull; UL 1577 &bull; IEEE 802.3 (Ethernet isolation). See Module 16.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 14 shows where each technology is used by sector; Module 17 includes selection challenges that apply this decision method.</p></div></div></div>
 
               <div
                 style="
@@ -288,6 +1159,637 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '15';
+      window.M_QUIZ = [{"q": "Why must a capacitive isolator encode the data (OOK or edges)?", "opts": ["To save power", "A capacitor cannot pass DC levels", "To increase isolation voltage", "Because SiO₂ is optical"], "correct": 1, "exp": "Series capacitors block DC, so levels are sent as AC."}, {"q": "In an OOK isolator, a steady logic HIGH is transmitted as…", "opts": ["Nothing", "A continuous carrier (for the carrier-on state)", "One pulse", "A DC current"], "correct": 1, "exp": "One state is carrier-on, the other carrier-off."}, {"q": "Magnetic isolators keep the output correct at DC using…", "opts": ["A DC current in the coil", "Refresh pulses and a watchdog", "An LED", "A large capacitor"], "correct": 1, "exp": "Periodic refresh re-sends the state."}, {"q": "The main wear-out mechanism of an optocoupler is…", "opts": ["TDDB", "LED light-output degradation", "Polyimide cracking", "Coil electromigration"], "correct": 1, "exp": "The LED ages; CTR falls."}, {"q": "The barrier-life concern specific to thin-film SiO₂ isolators is…", "opts": ["CTR drift", "Time-dependent dielectric breakdown (TDDB)", "LED droop", "Popcorning"], "correct": 1, "exp": "Vendors publish TDDB-based lifetime curves."}, {"q": "A 20 pF transformer sees 50 kV/µs. The common-mode current is…", "opts": ["1 mA", "50 mA", "1 A", "20 A"], "correct": 2, "exp": "20 pF × 50 V/ns = 1 A."}, {"q": "Which is a strong remaining optocoupler application?", "opts": ["100 Mbps LVDS", "Zero-cross TRIAC driving", "Multi-channel SPI at 50 MHz", "Gbps Ethernet PHY"], "correct": 1, "exp": "MOC30xx-type TRIAC drivers have no simple isolator equivalent."}, {"q": "Which component standard covers capacitive and magnetic couplers?", "opts": ["IEC 60747-5-5", "IEC 60747-17", "IEC 60664-1", "UL 508"], "correct": 1, "exp": "IEC 60747-17 (VDE 0884-17); optocouplers use 60747-5-5."}, {"q": "Integrated isoPower-style DC-DC converters mainly raise concern about…", "opts": ["CTR", "Radiated emissions", "LED ageing", "Creepage"], "correct": 1, "exp": "High-frequency switching across the barrier radiates without careful layout."}, {"q": "For a single 1 kHz input on a PLC card with no field-side supply, the usual best choice is…", "opts": ["Fibre link", "Phototransistor optocoupler", "Capacitive isolator with DC-DC", "Signal transformer"], "correct": 1, "exp": "No supply needed on the field side, lowest cost."}];
+      window.M_TF = [{"s": "Digital isolators need a supply on both sides of the barrier.", "a": true, "exp": "Transmitter and receiver dies are both active."}, {"s": "Optocouplers emit significant RF because of their carrier.", "a": false, "exp": "Optos have no RF carrier."}, {"s": "Magnetic isolator supply current rises with data rate.", "a": true, "exp": "Energy is spent per edge."}, {"s": "Fibre links have essentially no barrier capacitance.", "a": true, "exp": "Hence very high CMTI."}, {"s": "An aged optocoupler LED typically causes insulation breakdown.", "a": false, "exp": "It reduces CTR (function), not insulation."}, {"s": "Phototransistor optos have lower CMTI than typical digital isolators.", "a": true, "exp": "Often only a few kV/µs."}, {"s": "A transformer can pass DC logic levels directly.", "a": false, "exp": "It passes only AC; DC needs encoding."}, {"s": "A structured selection method should consider at least two alternatives with numbers.", "a": true, "exp": "That is what makes it defensible."}];
+      window.M_DD = [{"t": "OOK", "d": "Carrier on for one logic state, off for the other", "h": "Capacitive isolators."}, {"t": "TDDB", "d": "Wear-out of thin oxide under sustained field", "h": "Barrier lifetime."}, {"t": "Refresh pulse", "d": "Periodic re-send of the current logic state", "h": "Magnetic isolators."}, {"t": "isoPower", "d": "Power transfer through on-chip micro-transformers", "h": "Integrated DC-DC."}, {"t": "Default output", "d": "Output state when the input side is unpowered", "h": "Choose the safe state."}, {"t": "Stitching capacitance", "d": "Deliberate capacitance across the barrier to return RF currents", "h": "EMI fix."}];
+      // ---------- Module 15 ----------
+      var M15T = [
+        { k: 'pt', n: 'Phototransistor opto', c: '#f472b6', s: [1, 1, 2, 1, 3, 5, 5, 5, 5, 3] },
+        { k: 'hs', n: 'High-speed opto', c: '#fb923c', s: [3, 3, 1, 2, 3, 5, 5, 3, 3, 3] },
+        { k: 'cap', n: 'Capacitive isolator', c: '#22d3ee', s: [5, 5, 5, 5, 5, 3, 5, 4, 3, 5] },
+        { k: 'mag', n: 'Magnetic isolator', c: '#818cf8', s: [5, 5, 4, 5, 5, 3, 4, 4, 3, 5] },
+        { k: 'xfmr', n: 'Signal transformer', c: '#fbbf24', s: [4, 3, 3, 3, 4, 3, 2, 2, 2, 4] },
+        { k: 'fib', n: 'Fibre link', c: '#4ade80', s: [5, 4, 1, 5, 5, 5, 5, 1, 1, 3] },
+      ];
+      var M15S = ['Rate', 'Delay/PWD', 'Power', 'CMTI', 'Lifetime', 'Low EMI', 'Mag. immunity', 'Low cost', 'Simplicity', 'Temp range'];
+      var M15M = ['Data rate', 'Delay / PWD', 'Power efficiency', 'CMTI', 'Isolation & lifetime', 'Low EMI emission', 'Magnetic-field immunity', 'Low cost', 'Simplicity', 'Temperature range'];
+      (function () {
+        var canvas = document.getElementById('m15BmCanvas');
+        if (!canvas) return;
+        var onT = { pt: true, hs: false, cap: true, mag: true, xfmr: false, fib: false };
+        var onM = M15M.map(function () { return true; });
+        var tb = document.getElementById('m15BmTechs'), mb = document.getElementById('m15BmMetrics');
+        M15T.forEach(function (t) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'cmp-btn' + (onT[t.k] ? ' active' : ''); b.textContent = t.n;
+          b.style.borderLeft = '4px solid ' + t.c; b.setAttribute('aria-pressed', onT[t.k] ? 'true' : 'false');
+          b.addEventListener('click', function () { onT[t.k] = !onT[t.k]; b.classList.toggle('active', onT[t.k]); b.setAttribute('aria-pressed', onT[t.k] ? 'true' : 'false'); draw(); });
+          tb.appendChild(b);
+        });
+        M15M.forEach(function (m, i) {
+          var l = document.createElement('label'); l.className = 'm3-check'; l.style.display = 'inline-flex'; l.style.marginRight = '10px';
+          var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
+          cb.addEventListener('change', function () { onM[i] = cb.checked; draw(); });
+          var sp = document.createElement('span'); sp.textContent = m; l.appendChild(cb); l.appendChild(sp); mb.appendChild(l);
+        });
+        document.getElementById('m15BmMode').addEventListener('change', draw);
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var idx = []; onM.forEach(function (v, i) { if (v) idx.push(i); });
+          var techs = M15T.filter(function (t) { return onT[t.k]; });
+          ctx.font = '11px sans-serif'; ctx.fillStyle = p.sub; ctx.textAlign = 'center';
+          if (idx.length < 3 && m15mode() === 'radar') { ctx.fillText('Select at least 3 metrics for the radar view (or switch to bars).', W / 2, H / 2); return; }
+          if (!techs.length) { ctx.fillText('Select at least one technology.', W / 2, H / 2); return; }
+          var tot = techs.reduce(function (a, t) { return a.concat([[t.n, idx.reduce(function (s, i) { return s + t.s[i]; }, 0)]]); }, []);
+          tot.sort(function (a, b) { return b[1] - a[1]; });
+          m15set('m15BmTop', tot[0][0] + ' (' + tot[0][1] + ' / ' + idx.length * 5 + ')');
+          if (m15mode() === 'radar') {
+            var cx = W / 2, cy = H / 2 + 6, r = Math.min(W, H) / 2 - (W < 500 ? 48 : 70), n = idx.length;
+            ctx.strokeStyle = p.border; ctx.lineWidth = 1;
+            for (var g = 1; g <= 5; g++) {
+              ctx.beginPath();
+              for (var j = 0; j <= n; j++) { var a = -Math.PI / 2 + (j % n) * 2 * Math.PI / n, rr = r * g / 5; j ? ctx.lineTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)) : ctx.moveTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)); }
+              ctx.stroke();
+            }
+            ctx.fillStyle = p.text; ctx.font = (W < 500 ? '9px' : '11px') + ' sans-serif';
+            idx.forEach(function (mi, j) {
+              var a = -Math.PI / 2 + j * 2 * Math.PI / n;
+              ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); ctx.stroke();
+              var lx = cx + (r + 14) * Math.cos(a), ly = cy + (r + 14) * Math.sin(a);
+              ctx.textAlign = Math.abs(Math.cos(a)) < 0.2 ? 'center' : Math.cos(a) > 0 ? 'left' : 'right';
+              ctx.fillText((W < 500 ? M15S : M15M)[mi], lx, ly + 4);
+            });
+            techs.forEach(function (t) {
+              ctx.strokeStyle = t.c; ctx.fillStyle = t.c + '22'; ctx.lineWidth = 2; ctx.beginPath();
+              idx.forEach(function (mi, j) { var a = -Math.PI / 2 + j * 2 * Math.PI / n, rr = r * t.s[mi] / 5; j ? ctx.lineTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)) : ctx.moveTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)); });
+              ctx.closePath(); ctx.fill(); ctx.stroke();
+            });
+          } else {
+            var L = W < 500 ? 96 : 150, R = 10, T = 10, B = 24, rowH = (H - T - B) / idx.length, bh = Math.max(2, (rowH - 6) / techs.length);
+            ctx.font = (W < 500 ? '9px' : '11px') + ' sans-serif';
+            idx.forEach(function (mi, j) {
+              var y0 = T + j * rowH;
+              ctx.fillStyle = p.text; ctx.textAlign = 'right'; ctx.fillText((W < 500 ? M15S : M15M)[mi], L - 6, y0 + rowH / 2 + 4);
+              techs.forEach(function (t, k) { ctx.fillStyle = t.c; ctx.fillRect(L, y0 + 3 + k * bh, (W - L - R) * t.s[mi] / 5, bh - 1); });
+            });
+            ctx.fillStyle = p.muted; ctx.textAlign = 'center';
+            for (var s = 0; s <= 5; s++) ctx.fillText(s, L + (W - L - R) * s / 5, H - 8);
+          }
+        }
+        function m15mode() { return document.getElementById('m15BmMode').value; }
+        draw(); M3.onRedraw(draw);
+      })();
+      function m15set(id, t) { var e = document.getElementById(id); if (e) e.textContent = t; }
+      // Decision-tree wizard
+      (function () {
+        var host = document.getElementById('m15Dt');
+        if (!host) return;
+        var N = {
+          q1: { q: 'Do you need to transfer an analog signal linearly (sensor voltage, current shunt, feedback)?', y: 'rLin', n: 'q2' },
+          q2: { q: 'Are you switching an AC load or replacing a small relay (valve, heater, lamp, contact output)?', y: 'rSsr', n: 'q3' },
+          q3: { q: 'Is the link longer than a few metres, the potential difference above ~10 kV, or the EMI environment extreme?', y: 'rFib', n: 'q4' },
+          q4: { q: 'Do you need more than ~10 Mbps, or pulse-width distortion / channel matching below ~10 ns?', y: 'rDig', n: 'q5' },
+          q5: { q: 'Is the drive a power switch gate (IGBT/MOSFET/SiC) needing amps of gate current?', y: 'q5b', n: 'q6' },
+          q5b: { q: 'Is the application dV/dt above ~50 kV/µs (fast SiC/GaN), or is the gate-driver supply budget very tight?', y: 'rDigGd', n: 'rOptoGd' },
+          q6: { q: 'Three or more channels in the same direction group, or a tight power budget (battery, loop-powered)?', y: 'rMulti', n: 'q7' },
+          q7: { q: 'Is there a supply available on the receiving side of the barrier?', y: 'q8', n: 'rNoSup' },
+          q8: { q: 'Is the equipment near strong magnetic fields (motors, welders, MRI, big transformers)?', y: 'rMag', n: 'rOpto' },
+        };
+        var RES = {
+          rLin: ['Linear optocoupler or isolated amplifier', 'IL300 / HCNR201 give a servo-linearised optical path at low cost and moderate accuracy (Module 5). For high accuracy and bandwidth (current shunts in drives), an isolated amplifier or delta-sigma modulator (capacitive barrier) usually wins.'],
+          rSsr: ['TRIAC-output opto or PhotoMOS SSR', 'Optocoupler-based functions such as zero-cross TRIAC drivers (MOC3041/MOC3063) and PhotoMOS relays (AQY210/TLP222) have no digital-isolator equivalent in the same simplicity and cost. This remains a strong opto domain.'],
+          rFib: ['Fibre-optic link', 'Distance itself becomes the insulation, and there is no barrier capacitance, so CMTI is effectively unlimited. Cost, connectors and transmitter power are the price.'],
+          rDig: ['Digital isolator (capacitive or magnetic)', 'Data rates to 100+ Mbps with a few ns of PWD and channel-to-channel matching. Check EMI emissions, default output state, and that both sides are powered.'],
+          rDigGd: ['Isolated gate driver with a digital-isolator barrier', 'High-CMTI (≥ 100 kV/µs class) digital isolator gate drivers suit SiC/GaN edges and often integrate protection (desat, Miller clamp).'],
+          rOptoGd: ['Optocoupler gate driver', 'Opto gate drivers (HCPL-3120 / ACPL-332J / TLP250 class) remain robust, well-understood choices for IGBT and slower MOSFET drives at 35–50 kV/µs CMTI. Budget LED ageing (Module 9).'],
+          rMulti: ['Multi-channel digital isolator', 'Quad-channel digital isolators typically cost less per channel than four high-speed optos and draw a few mA in total instead of tens of mA.'],
+          rNoSup: ['Optocoupler (receiver side needs no active supply)', 'A phototransistor opto only needs a pull-up to whatever the receiving logic already has, or a photovoltaic/PhotoMOS output needs no supply at all. Digital isolators need power on both sides.'],
+          rMag: ['Optocoupler or capacitive isolator', 'Both are inherently immune to external magnetic fields. Magnetic isolators are highly immune too, but check the datasheet field-immunity rating for your field strength and frequency.'],
+          rOpto: ['Optocoupler (PC817 / TLP185 class)', 'Low speed, 1–2 channels, cost-driven: the simplest and cheapest solution. Design the CTR margin for end-of-life (Modules 6 and 9).'],
+        };
+        var path = ['q1'], ans = [];
+        function render() {
+          var cur = path[path.length - 1];
+          host.innerHTML = '';
+          var trail = document.createElement('p'); trail.className = 'm3-note';
+          trail.textContent = ans.length ? 'Your answers: ' + ans.map(function (a, i) { return 'Q' + (i + 1) + ' ' + a; }).join(' · ') : 'Answer each question; the first matching branch gives the recommendation.';
+          host.appendChild(trail);
+          if (RES[cur]) {
+            var d = document.createElement('div'); d.className = 'm3-results';
+            d.innerHTML = '<div class="m3-res-row"><span>Recommended technology</span><b id="m15DtRec"></b></div><p class="m3-note" id="m15DtWhy"></p>';
+            host.appendChild(d);
+            document.getElementById('m15DtRec').textContent = RES[cur][0];
+            document.getElementById('m15DtWhy').textContent = RES[cur][1] + ' Then verify with the benchmark (Section 6): CMTI, insulation rating, lifetime and EMI.';
+          } else {
+            var q = document.createElement('p'); q.className = 'm3-p'; q.style.fontWeight = '700'; q.textContent = N[cur].q; host.appendChild(q);
+            var row = document.createElement('div'); row.style.display = 'flex'; row.style.gap = '8px'; row.style.flexWrap = 'wrap';
+            [['Yes', 'y'], ['No', 'n']].forEach(function (o) {
+              var b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + (o[1] === 'y' ? 'btn-primary' : 'btn-secondary'); b.textContent = o[0];
+              b.setAttribute('data-ans', o[1]);
+              b.addEventListener('click', function () { ans.push(o[0]); path.push(N[cur][o[1]]); render(); });
+              row.appendChild(b);
+            });
+            host.appendChild(row);
+          }
+          var nav = document.createElement('div'); nav.style.marginTop = '10px'; nav.style.display = 'flex'; nav.style.gap = '8px';
+          var back = document.createElement('button'); back.type = 'button'; back.className = 'btn btn-secondary'; back.textContent = '← Back'; back.disabled = path.length < 2;
+          back.addEventListener('click', function () { if (path.length > 1) { path.pop(); ans.pop(); render(); } });
+          var rs = document.createElement('button'); rs.type = 'button'; rs.className = 'btn btn-secondary'; rs.textContent = 'Restart';
+          rs.addEventListener('click', function () { path = ['q1']; ans = []; render(); });
+          nav.appendChild(back); nav.appendChild(rs); host.appendChild(nav);
+        }
+        render();
+      })();
+      // Power vs data rate
+      (function () {
+        var canvas = document.getElementById('m15PwCanvas');
+        if (!canvas) return;
+        var MOD = [
+          { n: 'Phototransistor opto', c: '#f472b6', max: 0.02, i: function (r, v) { return 0.5 * (5 + v / 1); } },
+          { n: 'High-speed opto (6N137 class)', c: '#fb923c', max: 10, i: function (r, v) { return 10 + 0.5 * 10; } },
+          { n: 'Capacitive isolator (OOK)', c: '#22d3ee', max: 100, i: function (r, v) { return 1.6 + 0.03 * r; } },
+          { n: 'Magnetic isolator (edge)', c: '#818cf8', max: 150, i: function (r, v) { return 0.6 + 0.1 * r; } },
+          { n: 'Fibre link (TX + RX)', c: '#4ade80', max: 50, i: function (r, v) { return 0.5 * 30 + 5; } },
+        ];
+        function rateOf(v) { return 0.001 * Math.pow(10, v / 20); } // 1 kbps .. 100 Mbps
+        function calc() {
+          var r = rateOf(+document.getElementById('m15PwRate').value);
+          m15set('m15PwRateOut', r < 1 ? M3.fmt(r * 1000, r < 0.01 ? 1 : 0) + ' kbps' : M3.fmt(r, r < 10 ? 1 : 0) + ' Mbps');
+          var ch = bindOut('m15PwCh', function (v) { return v + (v > 1 ? ' channels' : ' channel'); });
+          var vdd = +document.getElementById('m15PwV').value;
+          var rows = MOD.map(function (m) { var ok = r <= m.max; return { n: m.n, c: m.c, ok: ok, p: ok ? m.i(r, vdd) * vdd * ch : NaN }; });
+          var best = rows.filter(function (x) { return x.ok; }).sort(function (a, b) { return a.p - b.p; });
+          m15set('m15PwBest', best.length ? best[0].n + ' ≈ ' + M3.fmt(best[0].p, 1) + ' mW' : 'none');
+          var opto = rows[0].ok ? rows[0] : rows[1].ok ? rows[1] : null, dig = rows[2];
+          m15set('m15PwOpto', opto ? M3.fmt(opto.p, 1) + ' mW (' + opto.n + ')' : 'not feasible at this rate');
+          m15set('m15PwDig', dig.ok ? M3.fmt(dig.p, 1) + ' mW' : 'not feasible');
+          var v = document.getElementById('m15PwVerdict'), n = document.getElementById('m15PwNote');
+          if (!opto) { M3.setVerdict(v, 'warn', 'Too fast for common optocouplers: use a digital isolator'); n.textContent = 'Above ~10 Mbps only very fast optos (e.g. 25–50 Mbps parts) remain, at high supply current.'; }
+          else if (opto.p > 3 * dig.p) { M3.setVerdict(v, 'ok', 'Digital isolator saves ≈ ' + M3.fmt(opto.p - dig.p, 0) + ' mW'); n.textContent = 'LED current dominates optocoupler power. With several channels, the difference often pays for the digital isolator in supply size and heat.'; }
+          else { M3.setVerdict(v, 'ok', 'Power is comparable: decide on cost, simplicity and CMTI'); n.textContent = 'At very low rates and 1–2 channels a phototransistor opto is often cheapest overall.'; }
+          draw(rows);
+        }
+        var last = [];
+        function draw(rows) {
+          rows = rows || last; last = rows;
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var L = W < 500 ? 120 : 200, R = 60, T = 10, rowH = (H - T - 20) / rows.length;
+          var pmax = 1; rows.forEach(function (x) { if (x.ok) pmax = Math.max(pmax, x.p); });
+          var lmax = Math.ceil(Math.log10(pmax) + 0.2), lmin = -1;
+          function X(v) { return L + (Math.log10(Math.max(v, 0.1)) - lmin) / (lmax - lmin) * (W - L - R); }
+          ctx.font = (W < 500 ? '9px' : '11px') + ' sans-serif';
+          for (var d = lmin; d <= lmax; d++) { ctx.strokeStyle = p.border; ctx.beginPath(); ctx.moveTo(X(Math.pow(10, d)), T); ctx.lineTo(X(Math.pow(10, d)), H - 18); ctx.stroke(); ctx.fillStyle = p.muted; ctx.textAlign = 'center'; ctx.fillText(Math.pow(10, d) + ' mW', X(Math.pow(10, d)), H - 4); }
+          rows.forEach(function (x, i) {
+            var y = T + i * rowH;
+            ctx.fillStyle = p.text; ctx.textAlign = 'right'; ctx.fillText(x.n, L - 6, y + rowH / 2 + 4);
+            if (x.ok) { ctx.fillStyle = x.c; ctx.fillRect(L, y + 4, X(x.p) - L, rowH - 8); ctx.fillStyle = p.text; ctx.textAlign = 'left'; ctx.fillText(M3.fmt(x.p, x.p < 10 ? 1 : 0) + ' mW', X(x.p) + 4, y + rowH / 2 + 4); }
+            else { ctx.fillStyle = p.bad; ctx.textAlign = 'left'; ctx.fillText('✕ exceeds max data rate', L + 4, y + rowH / 2 + 4); }
+          });
+        }
+        ['m15PwRate', 'm15PwCh', 'm15PwV'].forEach(function (i) { var e = document.getElementById(i); e.addEventListener('input', calc); e.addEventListener('change', calc); });
+        calc(); M3.onRedraw(function () { draw(); });
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m15-check-', ["Signal type identified (digital, analog, switching, power).", "Data rate, delay and PWD budget written down.", "Channel count and directions known.", "Supply availability on both sides checked.", "CMTI ≥ 2 × application dV/dt.", "Insulation class and working voltage vs component certification (IEC 60747-5-5 or -17).", "Lifetime mechanism addressed (CTR ageing or TDDB curve).", "EMI emission risk assessed (carrier, isoPower).", "Default output state on loss of input power is safe.", "At least two alternatives compared with numbers in the design review."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

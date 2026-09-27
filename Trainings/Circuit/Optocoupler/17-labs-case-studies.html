@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Interactive Labs and Case Studies — Module 17 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Optocoupler capstone: auto-checked design exercises, five LTspice labs, PCB reviews, troubleshooting stories, part-selection challenges and a full project."
     />
     <title>
       Interactive Labs and Case Studies | Optocoupler Design Academy | Rising Edge Technologies
@@ -42,67 +42,794 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
       }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
+      }
+    
+      .m17-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; background: var(--bg-alt); }
+      .m17-card-h { font-weight: 800; margin-bottom: 6px; }
+      .m17-tag { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--cyan, #22d3ee); color: var(--cyan, #22d3ee); margin-right: 6px; }
+      .m17-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+      .m17-mark { font-weight: 800; margin-left: 6px; }
+      .m17-mark.ok { color: var(--success, #4cdf8b); } .m17-mark.bad { color: var(--danger, #ff6b6b); }
+      .m17-btns { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; align-items: center; }
+      .m17-code { position: relative; margin: 10px 0; }
+      .m17-code pre { background: #0b1220; color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 0.74rem; line-height: 1.45; max-height: 360px; }
+      .m17-copy { margin-bottom: 6px; }
+      .m17-lab { border-left: 3px solid var(--cyan, #22d3ee); padding-left: 12px; margin: 18px 0; }
+      .m17-qs details { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+      .m17-qs summary { cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+      .m17-svg { width: 100%; height: auto; display: block; cursor: crosshair; border-radius: 10px; }
+      .m17-pcb-kb { max-width: 100%; }
+      .m17-opts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+      .m17-opt { text-align: left; white-space: normal; }
+      .m17-opt.best { border-color: var(--success, #4cdf8b); } .m17-opt.ok { border-color: var(--warning, #fbbf24); } .m17-opt.poor { border-color: var(--danger, #ff6b6b); }
+      .m17-radio { display: flex; gap: 8px; align-items: flex-start; font-size: 0.85rem; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+      .m17-course { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
+      .m17-mod { display: block; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-size: 0.72rem; color: var(--text-base); text-decoration: none; background: var(--bg-alt); }
+      .m17-mod b { display: block; font-size: 1rem; }
+      .m17-mod.done { border-color: var(--success, #4cdf8b); }
+      .m17-mod.done b::after { content: ' \2713'; color: var(--success, #4cdf8b); }
+      .m16-fb { margin-top: 8px; padding-left: 18px; font-size: 0.8rem; color: var(--text-sub); }
     </style>
   </head>
   <body>
@@ -191,77 +918,308 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2 → Q-scen1,TF3; 2: S3 → Q1-Q5,TF1; 3: S4 → Q6,Q10,TF2; 4: S5 → Q7,TF4,TF5; 5: S6,S7 → Q8,Q9,TF6,Scen2,Scen3 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Complete guided design exercises with instant feedback
-                  </div>
-                  <div class="metric-card">Simulate optocoupler circuits in LTspice</div>
-                  <div class="metric-card">Review PCB layouts against isolation checklists</div>
-                  <div class="metric-card">Troubleshoot realistic field-failure scenarios</div>
-                  <div class="metric-card">Deliver a full capstone isolation design</div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Complete guided design exercises with instant feedback</div><div class="objective-card metric-card">Simulate optocoupler circuits in LTspice</div><div class="objective-card metric-card">Review PCB layouts against isolation checklists</div><div class="objective-card metric-card">Troubleshoot realistic field-failure scenarios</div><div class="objective-card metric-card">Deliver a full capstone isolation design</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> This is the capstone. Every exercise refers back to the module that teaches it, so if you get stuck, follow the link, then return. Work in order or jump to what you need. The capstone project in Section 7 pulls everything together into a design you could take into a real design review.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; How to Use the Labs</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Six kinds of activity, each practising a different engineering skill:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Section</th><th>Activity</th><th>Skill</th><th>Time</th></tr></thead><tbody><tr><td>2</td><td>Design exercises (10, auto-checked)</td><td>Calculations with worst-case values</td><td>40 min</td></tr><tr><td>3</td><td>LTspice labs (5)</td><td>Simulation, reading waveforms and Bode plots</td><td>60&ndash;90 min</td></tr><tr><td>4</td><td>PCB review (3 layouts)</td><td>Spotting creepage, slot and bypass errors</td><td>20 min</td></tr><tr><td>5</td><td>Troubleshooting stories (5)</td><td>Systematic field-failure investigation</td><td>30 min</td></tr><tr><td>6</td><td>Selection challenges (3)</td><td>Choosing and justifying parts</td><td>15 min</td></tr><tr><td>7</td><td>Capstone project</td><td>Complete isolated I/O design with self-assessment</td><td>3&ndash;6 h</td></tr></tbody></table></div>
+<div class="info-box" style="margin-top: 1rem"><strong>Tools</strong> LTspice (free) for Section 3. The netlists use a <strong>teaching model</strong> of each coupler so they run anywhere; when you have the vendor&rsquo;s SPICE model, swap it in and compare. Expected results shown were produced by simulating the same netlists.</div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Hands-on design exercises
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>LTspice simulations</div>
-                  <div class="topic-card"><span class="topic-dot"></span>PCB review exercises</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Troubleshooting scenarios
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Component selection challenges
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Final capstone project
-                  </div>
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; Hands-on Design Exercises</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">Enter your answers. Each is checked against the reference within the stated tolerance; the solution explains the method. The module tag tells you where the topic is taught.</p>
+<div id="m17Ex"></div><p class="m3-note"><strong id="m17ExScore">0 / 10 exercises solved</strong></p>
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; LTspice Simulation Labs</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">Copy each netlist into a new LTspice schematic&rsquo;s <em>netlist</em> file (File &rarr; New Schematic, then paste into a <code>.cir</code> file and open it), run, and compare with the expected results. The teaching models are behavioural and deliberately simple; the <em>trends</em> match real parts.</p>
+<div class="info-box" style="margin-top: 1rem"><strong>.model guidance</strong> Vendor SPICE models (where available) replace <code>OPTO_PT</code>/<code>OPTO_HS</code> directly: keep the pin order A, K, C, E (or A, K, VO, VCC, GND) or edit the instance line. Many vendor models are encrypted or only valid at 25 &deg;C, so don&rsquo;t use them to predict ageing or temperature drift: use the margin methods of Module 9.</div>
+<div class="m17-lab"><h3 class="m3-h3">Lab 1 &mdash; PC817 switching speed vs R<sub>L</sub></h3>
+<p class="m3-p"><strong>Objective.</strong> See how the load resistor sets turn-off time through saturation and Miller capacitance (Modules 4, 6).</p>
+<div class="m17-code"><button type="button" class="btn btn-secondary m17-copy" data-copy="m17net_lab1">Copy netlist</button><pre id="m17net_lab1"><code>* Lab 1: PC817-class switching vs load resistor
+V1 IN 0 PULSE(0 5 10u 100n 100n 50u 100u)
+R1 IN A 680
+X1 A 0 C 0 OPTO_PT
+VCC VCC 0 5
+RL VCC C {RL}
+.param RL=2.2k
+.step param RL list 470 2.2k 10k
+.tran 0 300u 0 50n
+.meas tran tPHL TRIG V(IN) VAL=2.5 RISE=1 TARG V(C) VAL=2.5 FALL=1
+.meas tran tPLH TRIG V(IN) VAL=2.5 FALL=1 TARG V(C) VAL=2.5 RISE=1
+* Teaching phototransistor coupler (PC817-class behaviour, NOT a vendor model)
+.subckt OPTO_PT A K C E
+D1 A N1 DLED
+VS N1 K 0
+F1 C B VS 0.004
+Q1 C B E QPT
+.model DLED D(Is=1e-14 N=1.8 Rs=1.5 Cjo=30p BV=6)
+.model QPT NPN(Bf=350 Is=1e-14 Cjc=12p Cje=8p Tf=5n Tr=2u Vaf=80 Rb=100)
+.ends OPTO_PT
+.end</code></pre></div><p class="m3-p"><strong>What to measure.</strong> Plot V(IN) and V(C). Read the .meas results in the SPICE error log (View &rarr; SPICE Error Log).</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>R<sub>L</sub></th><th>t<sub>PHL</sub></th><th>t<sub>PLH</sub></th><th>V(C) low</th></tr></thead><tbody><tr><td>470 Ω</td><td>3.7 µs</td><td>1.2 µs</td><td>1.35 V (not saturated)</td></tr><tr><td>2.2 kΩ</td><td>1.4 µs</td><td>8.9 µs</td><td>0.13 V</td></tr><tr><td>10 kΩ</td><td>1.1 µs</td><td>30 µs</td><td>0.08 V</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/17/lab1-switching.png" alt="Simulated collector voltage for three load resistors: with 470 ohms the output does not saturate but turns off fast; with 10 kilohms it saturates deeply and takes about 30 microseconds to turn off" loading="lazy" width="1100" height="400" /><figcaption>Expected result (teaching model).</figcaption></figure>
+<div class="m17-qs"><details><summary>Why is t<sub>PLH</sub> 25&times; longer at 10 kΩ than at 470 Ω?</summary><p class="m3-p">Deep saturation stores charge in the base, and the Miller capacitance C<sub>CB</sub> is charged through R<sub>L</sub>: τ &asymp; h<sub>FE</sub>·C<sub>CB</sub>·R<sub>L</sub> (Module 4).</p></details><details><summary>Why does 470 Ω fail as a logic output?</summary><p class="m3-p">I<sub>C</sub> needed = 5 V/470 Ω &asymp; 10.6 mA but CTR &times; I<sub>F</sub> &asymp; 7.7 mA, so the output only reaches 1.35 V, which is not a valid LOW for many inputs.</p></details><details><summary>How would a 100 kΩ R<sub>BE</sub> (base-emitter) change t<sub>PLH</sub>?</summary><p class="m3-p">It removes stored base charge faster (the model has no base pin: add it as a resistor from B to E inside the subcircuit to try).</p></details></div></div><div class="m17-lab"><h3 class="m3-h3">Lab 2 &mdash; TL431 + PC817 loop Bode plot</h3>
+<p class="m3-p"><strong>Objective.</strong> Measure the crossover frequency and phase margin of an isolated SMPS feedback loop (Module 10, Example 4).</p>
+<div class="m17-code"><button type="button" class="btn btn-secondary m17-copy" data-copy="m17net_lab2">Copy netlist</button><pre id="m17net_lab2"><code>* Lab 2: TL431 + PC817 feedback loop, loop gain via voltage injection
+VREF5 V5 0 5
+RPU V5 COMP 4.7k
+CCOMP COMP 0 1n
+X1 LA LK COMP 0 OPTO_PT
+* averaged current-mode flyback: Iout = 0.5 A/V * (V(COMP) - 0.8 V)
+BPS 0 VOUT I=max(0, 0.5*(V(COMP)-0.8))
+COUT VOUT CE 470u
+RESR CE 0 50m
+RLOAD VOUT 0 12
+* loop break: inject between VOUT (x) and VFB (y)
+VINJ VFB VOUT 0 AC 1
+RLED VFB LA 1k
+RBIAS LA LK 1k
+RUP VFB REF 38.3k
+RDN REF 0 10k
+* behavioural TL431 (cathode sink current, needs K above ~2.5 V)
+BTL LK 0 I=max(0, 5*(V(REF)-2.495))*(1/(1+exp(-(V(LK)-2.6)*20)))
+RZ LK NZ 10k
+CZ NZ REF 22n
+CP LK REF 1n
+.ac dec 50 10 100k
+.meas AC fc WHEN mag(-V(VOUT)/V(VFB))=1
+.meas AC phT FIND ph(-V(VOUT)/V(VFB)) AT fc
+* Teaching phototransistor coupler (PC817-class behaviour, NOT a vendor model)
+.subckt OPTO_PT A K C E
+D1 A N1 DLED
+VS N1 K 0
+F1 C B VS 0.004
+Q1 C B E QPT
+.model DLED D(Is=1e-14 N=1.8 Rs=1.5 Cjo=30p BV=6)
+.model QPT NPN(Bf=350 Is=1e-14 Cjc=12p Cje=8p Tf=5n Tr=2u Vaf=80 Rb=100)
+.ends OPTO_PT
+.end</code></pre></div><p class="m3-p"><strong>What to measure.</strong> Plot the expression <code>-V(VOUT)/V(VFB)</code>. Phase margin = 180&deg; + phT. Check the operating point first: V(VOUT) &asymp; 12.05 V, V(REF) &asymp; 2.495 V.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Quantity</th><th>Expected</th></tr></thead><tbody><tr><td>Crossover f<sub>c</sub></td><td>&asymp; 1.1 kHz</td></tr><tr><td>Phase margin</td><td>&asymp; 85&deg;</td></tr><tr><td>Gain at 100 Hz</td><td>&asymp; 25 dB</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/17/lab2-bode.png" alt="Simulated loop gain magnitude falling through 0 dB near 1.1 kHz, and phase-margin curve reading about 85 degrees at crossover" loading="lazy" width="1100" height="520" /><figcaption>Expected result (teaching model).</figcaption></figure>
+<div class="m17-qs"><details><summary>Halve CTR (edit 0.004 &rarr; 0.002 in F1). What happens to f<sub>c</sub>?</summary><p class="m3-p">Loop gain falls about 6 dB, so f<sub>c</sub> drops roughly by half. That is why the loop must be stable at end-of-life CTR too (Module 9).</p></details><details><summary>Increase CCOMP to 10 nF. Why does phase margin change?</summary><p class="m3-p">CCOMP with RPU forms the opto pole (f = 1/2&pi;R<sub>PU</sub>C); moving it down towards f<sub>c</sub> adds phase lag.</p></details><details><summary>What does RBIAS do?</summary><p class="m3-p">It keeps &ge; 1 mA in the TL431 even when the LED current is small (TL431 minimum cathode current).</p></details></div></div><div class="m17-lab"><h3 class="m3-h3">Lab 3 &mdash; 6N137 UART at speed</h3>
+<p class="m3-p"><strong>Objective.</strong> Measure propagation delays and pulse-width distortion versus baud rate (Modules 6, 10).</p>
+<div class="m17-code"><button type="button" class="btn btn-secondary m17-copy" data-copy="m17net_lab3">Copy netlist</button><pre id="m17net_lab3"><code>* Lab 3: 6N137-class coupler on a UART line
+.param baud=10e6
+V1 IN 0 PULSE(0 5 100n 5n 5n {1/baud-5n} {2/baud})
+RIN IN A 330
+X1 A 0 VO VCC 0 OPTO_HS
+VCC VCC 0 5
+RL VCC VO 350
+CL VO 0 15p
+.step param baud list 1e6 5e6 10e6 20e6
+.tran 0 {6/baud+100n} 0 0.2n
+.meas tran tPHL TRIG V(IN) VAL=2.5 RISE=2 TARG V(VO) VAL=1.5 FALL=2
+.meas tran tPLH TRIG V(IN) VAL=2.5 FALL=2 TARG V(VO) VAL=1.5 RISE=2
+.meas tran PWD PARAM abs(tPHL-tPLH)
+* Teaching high-speed logic coupler (6N137-class behaviour, NOT a vendor model)
+.subckt OPTO_HS A K VO VCC GND
+D1 A N1 DLED
+VS N1 K 0
+CLED A K 40p
+H1 PD GND VS 500
+BD PD PDF I=(V(PD)-V(PDF))/(2500-500*tanh(10*(V(PD)-V(PDF))))
+C2 PDF GND 20p
+BOUT X GND V=V(VCC,GND)*0.5*(1-tanh(8*(V(PDF,GND)-2.5)))
+RO X VO 30
+.model DLED D(Is=1e-14 N=1.8 Rs=2)
+.ends OPTO_HS
+.end</code></pre></div><p class="m3-p"><strong>What to measure.</strong> Plot V(IN) and V(VO) (inverted). Compare PWD with the bit time 1/baud.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Baud</th><th>t<sub>PHL</sub></th><th>t<sub>PLH</sub></th><th>PWD / bit</th></tr></thead><tbody><tr><td>1 M</td><td>29 ns</td><td>47 ns</td><td>18 ns / 1000 ns (1.8 %)</td></tr><tr><td>10 M</td><td>22 ns</td><td>42 ns</td><td>20 ns / 100 ns (20 %)</td></tr><tr><td>20 M</td><td>16 ns</td><td>31 ns</td><td>15 ns / 50 ns (29 %)</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/17/lab3-uart.png" alt="Simulated input and inverted output at 10 Mbps showing a fast high-to-low transition and a slower low-to-high transition" loading="lazy" width="1100" height="360" /><figcaption>Expected result (teaching model).</figcaption></figure>
+<div class="m17-qs"><details><summary>Why do the delays shrink at 20 Mbaud?</summary><p class="m3-p">The internal node no longer settles fully between bits: pattern-dependent timing (inter-symbol interference), which is worse than a fixed delay.</p></details><details><summary>Raise RL to 1 kΩ. What happens to t<sub>PLH</sub>?</summary><p class="m3-p">The output rise is slower (R<sub>L</sub>·C<sub>L</sub> grows), so t<sub>PLH</sub> and PWD increase. Size the pull-up for the baud rate (Module 10).</p></details><details><summary>What PWD budget would you accept?</summary><p class="m3-p">Typically &le; 10&ndash;15 % of the bit for a UART sampling at mid-bit; &gt; 20 % is marginal.</p></details></div></div><div class="m17-lab"><h3 class="m3-h3">Lab 4 &mdash; IL300 linear transfer</h3>
+<p class="m3-p"><strong>Objective.</strong> Verify V<sub>out</sub> = K3&middot;(R2/R1)&middot;V<sub>in</sub> and see how K3 error appears (Module 5).</p>
+<div class="m17-code"><button type="button" class="btn btn-secondary m17-copy" data-copy="m17net_lab4">Copy netlist</button><pre id="m17net_lab4"><code>* Lab 4: IL300-class servo-linear coupler (behavioural)
+.param K1=0.007 K3=1.0 R1=80k R2=80k
+VIN IN 0 DC 1
+RIN IN SUM {R1}
+EAMP AO 0 SUM 0 1e5
+ROA AO AOR 10
+RLED AOR A 100
+D1 A N1 DLED
+VS N1 0 0
+F1 SUM 0 VS {K1}
+CSUM SUM 0 10p
+F2 0 PO VS {K1*K3}
+ROUT PO 0 {R2}
+.model DLED D(Is=1e-14 N=1.8 Rs=2)
+.dc VIN 0 5 0.5
+.step param K3 list 0.9 1.0 1.1
+.end</code></pre></div><p class="m3-p"><strong>What to measure.</strong> Plot V(PO) vs V(IN) and I(VS). The servo sets I<sub>LED</sub> = V<sub>in</sub>/(K1&middot;R1).</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>K3</th><th>V<sub>out</sub> at V<sub>in</sub> = 5 V</th><th>I<sub>LED</sub> at 5 V</th></tr></thead><tbody><tr><td>0.9</td><td>4.50 V</td><td>8.9 mA</td></tr><tr><td>1.0</td><td>5.00 V</td><td>8.9 mA</td></tr><tr><td>1.1</td><td>5.50 V</td><td>8.9 mA</td></tr></tbody></table></div>
+<div class="m17-qs"><details><summary>Why does I<sub>LED</sub> not depend on K3?</summary><p class="m3-p">The servo loop closes around the input photodiode (K1) only. K3 affects the output side, which is why it appears directly as a gain error.</p></details><details><summary>What happens for negative V<sub>in</sub>?</summary><p class="m3-p">The LED cannot carry negative current: the circuit is unipolar. Add an offset (bias current) for bipolar signals.</p></details><details><summary>How do you remove the K3 tolerance?</summary><p class="m3-p">Trim R2, or calibrate the gain in firmware; K3 drift over temperature remains (Module 14 instrumentation example).</p></details></div></div><div class="m17-lab"><h3 class="m3-h3">Lab 5 &mdash; Gate driver under a common-mode step</h3>
+<p class="m3-p"><strong>Objective.</strong> Watch how a fast switch-node edge couples into the detector and causes false turn-on: the mechanism behind CMTI (Modules 6, 14).</p>
+<div class="m17-code"><button type="button" class="btn btn-secondary m17-copy" data-copy="m17net_lab5">Copy netlist</button><pre id="m17net_lab5"><code>* Lab 5: CMTI mechanism in a gate-drive coupler (behavioural)
+.param trise=20n
+VIN IN 0 0
+RIN IN A 1k
+D1 A N1 DLED
+VS N1 0 0
+* 800 V switch-node step; dV/dt(10-90 %) = 0.8*800/trise
+VCM GND2 0 PULSE(0 800 1u {trise/0.8} {trise/0.8} 5u 20u)
+F1 GND2 DET VS 0.5
+RDET DET GND2 10k
+* residual coupling from GND1 into the detector node (shield leaves ~10 fF)
+CPAR 0 DET 10f
+BOUT GO GND2 V=7.5*(1+tanh(4*(V(DET,GND2)-2.5)))
+RG GO GATE 10
+CG GATE GND2 1n
+.model DLED D(Is=1e-14 N=1.8 Rs=2)
+.step param trise list 100n 40n 20n 10n
+.tran 0 9u 0 1n
+.meas tran VGmax MAX V(GATE,GND2) FROM 5.5u TO 8u
+.end</code></pre></div><p class="m3-p"><strong>What to measure.</strong> The LED is OFF (input LOW), so the gate must stay at 0 V. Plot V(GATE,GND2) and V(DET,GND2) around the falling edge at ~6 µs.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>t<sub>rise</sub></th><th>dV/dt</th><th>Peak V(DET) − GND2</th><th>Gate glitch</th></tr></thead><tbody><tr><td>100 ns</td><td>6.4 kV/µs</td><td>0.64 V</td><td>none</td></tr><tr><td>40 ns</td><td>16 kV/µs</td><td>1.6 V</td><td>none</td></tr><tr><td>20 ns</td><td>32 kV/µs</td><td>3.2 V</td><td>13.7 V — false turn-on</td></tr><tr><td>10 ns</td><td>64 kV/µs</td><td>6.4 V</td><td>false turn-on</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/17/lab5-cmti.png" alt="Two panels: at 16 kilovolts per microsecond the detector node stays below threshold and the gate stays off; at 32 kilovolts per microsecond it crosses the threshold and the gate turns on falsely" loading="lazy" width="1100" height="400" /><figcaption>Expected result (teaching model).</figcaption></figure>
+<div class="m17-qs"><details><summary>What CMTI does this model have?</summary><p class="m3-p">Threshold 2.5 V / (10 kΩ &times; 10 fF) = 25 kV/&micro;s: the glitch appears between 16 and 32 kV/&micro;s.</p></details><details><summary>Which two design changes raise it?</summary><p class="m3-p">A better internal shield (smaller CPAR) and a lower-impedance detector node (smaller RDET): exactly what high-CMTI parts do.</p></details><details><summary>Why does the glitch occur on the falling edge only?</summary><p class="m3-p">The coupled current&rsquo;s polarity pushes DET positive only for one edge direction; with the LED ON, the opposite edge would cause a false turn-off. Test both (Module 13).</p></details></div></div>
                 </div>
               </div>
 
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; PCB Review Exercises</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">Each layout hides three defects. Click (or tap) where you see a problem: green circles mark real defects, red crosses are false flags. Grid: 1 square = 2 mm. The red band is the required barrier keep-out. <strong>Reveal</strong> shows what you missed.</p>
+<div class="m17-pcb widget-container" data-k="fb"><h3 style="margin-bottom: 0.4rem">Layout 1 — flyback feedback: creepage</h3><svg viewBox="0 0 600 340" role="img" class="m17-svg" preserveAspectRatio="xMidYMid meet"><title>Flyback feedback layout with an isolation keep-out band</title><rect x="10" y="10" width="580" height="320" rx="10" fill="#0f2a1c" stroke="#1d4d33"/><line x1="20" y1="20" x2="20" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="40" y1="20" x2="40" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="60" y1="20" x2="60" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="80" y1="20" x2="80" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="100" y1="20" x2="100" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="120" y1="20" x2="120" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="140" y1="20" x2="140" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="160" y1="20" x2="160" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="180" y1="20" x2="180" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="200" y1="20" x2="200" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="220" y1="20" x2="220" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="240" y1="20" x2="240" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="260" y1="20" x2="260" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="280" y1="20" x2="280" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="300" y1="20" x2="300" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="320" y1="20" x2="320" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="340" y1="20" x2="340" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="360" y1="20" x2="360" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="380" y1="20" x2="380" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="400" y1="20" x2="400" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="420" y1="20" x2="420" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="440" y1="20" x2="440" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="460" y1="20" x2="460" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="480" y1="20" x2="480" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="500" y1="20" x2="500" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="520" y1="20" x2="520" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="540" y1="20" x2="540" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="560" y1="20" x2="560" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="580" y1="20" x2="580" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="20" x2="590" y2="20" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="40" x2="590" y2="40" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="60" x2="590" y2="60" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="80" x2="590" y2="80" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="100" x2="590" y2="100" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="120" x2="590" y2="120" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="140" x2="590" y2="140" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="160" x2="590" y2="160" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="180" x2="590" y2="180" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="200" x2="590" y2="200" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="220" x2="590" y2="220" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="240" x2="590" y2="240" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="260" x2="590" y2="260" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="280" x2="590" y2="280" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="300" x2="590" y2="300" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="320" x2="590" y2="320" stroke="#1f2a3d" stroke-width="1"/><rect x="268" y="20" width="64" height="310" fill="rgba(248,113,113,0.08)"/><line x1="300.0" y1="20" x2="300.0" y2="330" stroke="#f87171" stroke-dasharray="6 5" stroke-width="1.5"/><text x="24" y="36" fill="#f87171" font-size="12" font-family="sans-serif" text-anchor="start">PRIMARY</text><text x="576" y="36" fill="#22d3ee" font-size="12" font-family="sans-serif" text-anchor="end">SECONDARY (SELV)</text><rect x="20" y="230" width="248" height="95" fill="#b07a2a" opacity="0.45"/><rect x="290" y="230" width="290" height="95" fill="#b07a2a" opacity="0.45"/><rect x="262" y="30" width="76" height="60" rx="4" fill="#1b1f27" stroke="#6b7280"/><text x="300.0" y="64.0" fill="#cbd5e1" font-size="11" text-anchor="middle" font-family="sans-serif">T1</text><rect x="240" y="40" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="240" y="66" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="344" y="40" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="344" y="66" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="270" y="130" width="60" height="80" rx="4" fill="#1b1f27" stroke="#6b7280"/><text x="300.0" y="174.0" fill="#cbd5e1" font-size="11" text-anchor="middle" font-family="sans-serif">U1 opto</text><rect x="250" y="140" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="250" y="186" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="334" y="140" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="334" y="186" width="16" height="12" rx="2" fill="#d4a24c"/><polyline points="250,146 180,146" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="250,192 150,192 150,230" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="350,146 430,146" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="350,192 420,192 420,230" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="180,146 180,215 300,215" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="300" cy="215" r="6" fill="#d4a24c"/><circle cx="300" cy="215" r="2.5" fill="#0f2a1c"/><rect x="270" y="100" width="14" height="14" rx="2" fill="#d4a24c"/><rect x="316" y="100" width="14" height="14" rx="2" fill="#d4a24c"/><text x="300" y="94" fill="#fbbf24" font-size="10" font-family="sans-serif" text-anchor="middle">C_Y</text><polyline points="270,107 225,107 225,230" fill="none" stroke="#c7892f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="330,107 375,107 375,230" fill="none" stroke="#c7892f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="322" fill="#fca5a5" font-size="10" font-family="sans-serif" text-anchor="start">Required creepage 6.4 mm (64 px) — red band</text></svg><div class="m17-btns"><button type="button" class="btn btn-secondary m17-pcb-reveal">Reveal</button><button type="button" class="btn btn-secondary m17-pcb-reset">Reset</button><select class="m17-pcb-kb" aria-label="Flag a location (keyboard alternative)"><option value="">Keyboard: flag a location&hellip;</option><option value="150,192">LED trace on primary</option><option value="430,146">Output trace on secondary</option><option value="300,215">Primary via in the keep-out</option><option value="311,278">Secondary pour inside the keep-out</option><option value="300,60">Transformer body</option><option value="300,107">Y-cap footprint too short</option></select></div><p class="m3-note"><strong class="m17-pcb-res"></strong></p><ul class="m16-fb m17-pcb-list"></ul></div><div class="m17-pcb widget-container" data-k="slot"><h3 style="margin-bottom: 0.4rem">Layout 2 — isolation slot</h3><svg viewBox="0 0 600 340" role="img" class="m17-svg" preserveAspectRatio="xMidYMid meet"><title>Coupler with an isolation slot and nearby copper</title><rect x="10" y="10" width="580" height="320" rx="10" fill="#0f2a1c" stroke="#1d4d33"/><line x1="20" y1="20" x2="20" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="40" y1="20" x2="40" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="60" y1="20" x2="60" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="80" y1="20" x2="80" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="100" y1="20" x2="100" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="120" y1="20" x2="120" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="140" y1="20" x2="140" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="160" y1="20" x2="160" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="180" y1="20" x2="180" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="200" y1="20" x2="200" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="220" y1="20" x2="220" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="240" y1="20" x2="240" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="260" y1="20" x2="260" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="280" y1="20" x2="280" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="300" y1="20" x2="300" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="320" y1="20" x2="320" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="340" y1="20" x2="340" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="360" y1="20" x2="360" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="380" y1="20" x2="380" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="400" y1="20" x2="400" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="420" y1="20" x2="420" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="440" y1="20" x2="440" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="460" y1="20" x2="460" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="480" y1="20" x2="480" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="500" y1="20" x2="500" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="520" y1="20" x2="520" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="540" y1="20" x2="540" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="560" y1="20" x2="560" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="580" y1="20" x2="580" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="20" x2="590" y2="20" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="40" x2="590" y2="40" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="60" x2="590" y2="60" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="80" x2="590" y2="80" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="100" x2="590" y2="100" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="120" x2="590" y2="120" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="140" x2="590" y2="140" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="160" x2="590" y2="160" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="180" x2="590" y2="180" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="200" x2="590" y2="200" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="220" x2="590" y2="220" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="240" x2="590" y2="240" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="260" x2="590" y2="260" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="280" x2="590" y2="280" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="300" x2="590" y2="300" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="320" x2="590" y2="320" stroke="#1f2a3d" stroke-width="1"/><rect x="275" y="20" width="50" height="310" fill="rgba(248,113,113,0.08)"/><line x1="300.0" y1="20" x2="300.0" y2="330" stroke="#f87171" stroke-dasharray="6 5" stroke-width="1.5"/><text x="24" y="36" fill="#f87171" font-size="12" font-family="sans-serif" text-anchor="start">PRIMARY</text><text x="576" y="36" fill="#22d3ee" font-size="12" font-family="sans-serif" text-anchor="end">SECONDARY</text><rect x="296" y="110" width="8" height="120" rx="3" fill="#050a12" stroke="#475569"/><text x="310" y="125" fill="#94a3b8" font-size="9" font-family="sans-serif" text-anchor="start">slot 0.8 mm</text><rect x="262" y="120" width="76" height="100" rx="4" fill="#1b1f27" stroke="#6b7280"/><text x="300.0" y="174.0" fill="#cbd5e1" font-size="11" text-anchor="middle" font-family="sans-serif">U2</text><rect x="244" y="132" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="244" y="196" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="340" y="132" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="340" y="196" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="20" y="240" width="262" height="85" fill="#b07a2a" opacity="0.45"/><rect x="318" y="240" width="262" height="85" fill="#b07a2a" opacity="0.45"/><rect x="283" y="86" width="10" height="12" rx="2" fill="#d4a24c"/><rect x="307" y="86" width="10" height="12" rx="2" fill="#d4a24c"/><rect x="291" y="88" width="18" height="8" fill="#1b1f27"/><text x="300" y="80" fill="#cbd5e1" font-size="10" font-family="sans-serif" text-anchor="middle">R12</text><polyline points="244,138 160,138" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="356,138 440,138" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="283,92 200,92 200,138" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="317,92 400,92 400,138" fill="none" stroke="#c7892f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="322" fill="#fca5a5" font-size="10" font-family="sans-serif" text-anchor="start">Required creepage 5 mm; slot must be ≥ 1 mm wide to count</text></svg><div class="m17-btns"><button type="button" class="btn btn-secondary m17-pcb-reveal">Reveal</button><button type="button" class="btn btn-secondary m17-pcb-reset">Reset</button><select class="m17-pcb-kb" aria-label="Flag a location (keyboard alternative)"><option value="">Keyboard: flag a location&hellip;</option><option value="300,170">Coupler body</option><option value="160,138">Primary LED trace</option><option value="300,92">Resistor bridging the barrier</option><option value="440,138">Secondary output trace</option><option value="300,282">Slot stops short of the pours</option><option value="300,170">Slot too narrow</option></select></div><p class="m3-note"><strong class="m17-pcb-res"></strong></p><ul class="m16-fb m17-pcb-list"></ul></div><div class="m17-pcb widget-container" data-k="byp"><h3 style="margin-bottom: 0.4rem">Layout 3 — high-speed coupler bypassing</h3><svg viewBox="0 0 600 340" role="img" class="m17-svg" preserveAspectRatio="xMidYMid meet"><title>6N137 layout with a distant bypass capacitor</title><rect x="10" y="10" width="580" height="320" rx="10" fill="#0f2a1c" stroke="#1d4d33"/><line x1="20" y1="20" x2="20" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="40" y1="20" x2="40" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="60" y1="20" x2="60" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="80" y1="20" x2="80" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="100" y1="20" x2="100" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="120" y1="20" x2="120" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="140" y1="20" x2="140" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="160" y1="20" x2="160" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="180" y1="20" x2="180" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="200" y1="20" x2="200" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="220" y1="20" x2="220" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="240" y1="20" x2="240" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="260" y1="20" x2="260" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="280" y1="20" x2="280" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="300" y1="20" x2="300" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="320" y1="20" x2="320" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="340" y1="20" x2="340" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="360" y1="20" x2="360" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="380" y1="20" x2="380" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="400" y1="20" x2="400" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="420" y1="20" x2="420" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="440" y1="20" x2="440" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="460" y1="20" x2="460" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="480" y1="20" x2="480" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="500" y1="20" x2="500" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="520" y1="20" x2="520" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="540" y1="20" x2="540" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="560" y1="20" x2="560" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="580" y1="20" x2="580" y2="330" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="20" x2="590" y2="20" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="40" x2="590" y2="40" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="60" x2="590" y2="60" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="80" x2="590" y2="80" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="100" x2="590" y2="100" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="120" x2="590" y2="120" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="140" x2="590" y2="140" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="160" x2="590" y2="160" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="180" x2="590" y2="180" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="200" x2="590" y2="200" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="220" x2="590" y2="220" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="240" x2="590" y2="240" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="260" x2="590" y2="260" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="280" x2="590" y2="280" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="300" x2="590" y2="300" stroke="#1f2a3d" stroke-width="1"/><line x1="10" y1="320" x2="590" y2="320" stroke="#1f2a3d" stroke-width="1"/><rect x="150" y="20" width="40" height="310" fill="rgba(248,113,113,0.08)"/><line x1="170.0" y1="20" x2="170.0" y2="330" stroke="#f87171" stroke-dasharray="6 5" stroke-width="1.5"/><text x="24" y="36" fill="#f87171" font-size="12" font-family="sans-serif" text-anchor="start">PRIMARY</text><text x="576" y="36" fill="#22d3ee" font-size="12" font-family="sans-serif" text-anchor="end">SECONDARY (logic)</text><rect x="150" y="110" width="110" height="120" rx="4" fill="#1b1f27" stroke="#6b7280"/><text x="205.0" y="174.0" fill="#cbd5e1" font-size="11" text-anchor="middle" font-family="sans-serif">U3 6N137</text><rect x="132" y="120" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="262" y="120" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="132" y="146" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="262" y="146" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="132" y="172" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="262" y="172" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="132" y="198" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="262" y="198" width="16" height="12" rx="2" fill="#d4a24c"/><text x="290" y="128" fill="#cbd5e1" font-size="9" font-family="sans-serif" text-anchor="start">VCC</text><text x="290" y="154" fill="#cbd5e1" font-size="9" font-family="sans-serif" text-anchor="start">VE (enable)</text><text x="290" y="180" fill="#cbd5e1" font-size="9" font-family="sans-serif" text-anchor="start">VO</text><text x="290" y="206" fill="#cbd5e1" font-size="9" font-family="sans-serif" text-anchor="start">GND</text><polyline points="270,126 520,126 520,70" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="510" y="54" width="20" height="14" rx="2" fill="#d4a24c"/><rect x="510" y="74" width="20" height="14" rx="2" fill="#d4a24c"/><text x="540" y="70" fill="#fbbf24" font-size="10" font-family="sans-serif" text-anchor="start">C 100 nF</text><polyline points="270,178 400,178 400,260" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="392" y="260" width="16" height="12" rx="2" fill="#d4a24c"/><text x="420" y="272" fill="#94a3b8" font-size="9" font-family="sans-serif" text-anchor="start">R_L to 5 V</text><polyline points="270,204 330,204 330,300" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="530,88 560,88 560,300 330,300" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="132,152 70,152 70,240" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="132,178 40,178 40,240" fill="none" stroke="#c7892f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="62" y="240" width="16" height="12" rx="2" fill="#d4a24c"/><rect x="32" y="240" width="16" height="12" rx="2" fill="#d4a24c"/><text x="24" y="272" fill="#94a3b8" font-size="9" font-family="sans-serif" text-anchor="start">LED drive</text></svg><div class="m17-btns"><button type="button" class="btn btn-secondary m17-pcb-reveal">Reveal</button><button type="button" class="btn btn-secondary m17-pcb-reset">Reset</button><select class="m17-pcb-kb" aria-label="Flag a location (keyboard alternative)"><option value="">Keyboard: flag a location&hellip;</option><option value="520,71">Bypass capacitor far from VCC</option><option value="205,170">Coupler body</option><option value="271,153">Enable pin left floating</option><option value="330,252">Long ground return</option><option value="70,200">Primary LED trace</option><option value="400,250">Pull-up resistor</option></select></div><p class="m3-note"><strong class="m17-pcb-res"></strong></p><ul class="m16-fb m17-pcb-list"></ul></div><p class="m3-note">Keyboard users: the drop-down lists candidate locations (including correct ones and decoys) and flags them exactly like a click. Spacing rules are covered in <a href="11-pcb-guidelines.html">Module 11</a>.</p>
+
+                </div>
               </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Troubleshooting Scenarios</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">Five field failures told as stories. At each step choose the next action: the best move scores 2, a reasonable one 1. The root cause and fix appear at the end.</p>
+<div class="widget-container"><div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: end"><div class="m3-field"><label for="m17TsSel"><span>Scenario</span></label><select id="m17TsSel"></select></div><button class="btn btn-secondary" type="button" id="m17TsRestart">Restart scenario</button><p class="m3-note" style="margin: 0"><strong id="m17TsPts">0</strong></p></div><div id="m17Ts" aria-live="polite"></div></div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Component Selection Challenges</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">Pick one part from the mini-catalogue for each brief. Scoring: 3 = best, 1 = workable, 0 = unsuitable. Specs are representative class values.</p>
+<div id="m17Sel"></div><p class="m3-note">Selection score: <strong id="m17SelScore">0 / 9</strong></p>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Final Capstone Project</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p"><strong>Brief.</strong> You are the isolation engineer for a compact industrial controller (DIN-rail, &minus;25&hellip;+60 &deg;C, 3000 m altitude, 10-year life, pollution degree 2). Design three interfaces:</p>
+<figure class="m3-fig"><img src="images/17/capstone-system.png" alt="Capstone block diagram: 24 V field sensors into eight isolated digital inputs, an RS-485 bus into an isolated transceiver, and mains into a 12 V flyback supply with TL431 and PC817 feedback, all crossing isolation barriers into a 3.3 V controller" loading="lazy" width="1200" height="520" /><figcaption><strong>Figure 1.</strong> Capstone system.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Part</th><th>Requirement</th></tr></thead><tbody><tr><td>A &mdash; 8 digital inputs</td><td>IEC 61131-2 type 1 (ON 15&ndash;30 V, 2&ndash;15 mA; OFF &le; 5 V), reverse-polarity tolerant, 1 ms response, CTR budget for 10 years, functional isolation to logic</td></tr><tr><td>B &mdash; RS-485</td><td>1 Mbps half-duplex, DE control, 500 m cable, isolated bus power, surge-protected</td></tr><tr><td>C &mdash; 12 V / 1 A flyback feedback</td><td>85&ndash;264 V AC input, TL431 + optocoupler, reinforced insulation to SELV, loop PM &ge; 45&deg; over CTR life</td></tr></tbody></table></div>
+<h3 class="m3-h3">Deliverables</h3>
+<div id="m17Deliv"></div><button class="btn btn-secondary" type="button" id="m17DelivReset" style="margin-top: 8px">Reset deliverables</button><h3 class="m3-h3">Self-assessment rubric</h3>
+<div id="m17Rub" class="table-scroll"><table class="data-table"><thead><tr><th>Criterion</th><th>Modules</th><th>Score (0&ndash;3)</th></tr></thead><tbody><tr><td>Requirements captured and quantified</td><td>1, 8</td><td><select aria-label="Requirements captured and quantified score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Insulation diagram and barrier table correct</td><td>11, 16</td><td><select aria-label="Insulation diagram and barrier table correct score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Worst-case calculations (currents, CTR EOL, power)</td><td>6, 9, 10</td><td><select aria-label="Worst-case calculations (currents, CTR EOL, power) score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Part selection justified against two alternatives</td><td>8, 15</td><td><select aria-label="Part selection justified against two alternatives score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Layout and creepage plan (incl. altitude)</td><td>11</td><td><select aria-label="Layout and creepage plan (incl. altitude) score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Verification plan with numeric pass criteria</td><td>13</td><td><select aria-label="Verification plan with numeric pass criteria score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr><tr><td>Clarity of the design-review package</td><td>17</td><td><select aria-label="Clarity of the design-review package score"><option value="0">0 — missing</option><option value="1">1 — partial</option><option value="2" selected>2 — good</option><option value="3">3 — excellent</option></select></td></tr></tbody></table></div><div class="m3-results"><div class="m3-res-row"><span>Total</span><b id="m17RubTot">&ndash;</b></div><div style="margin-top: 8px"><span id="m17RubVerdict" class="m3-verdict">&ndash;</span></div></div><div class="scenario"><div class="scenario-head">Reference solution</div><div class="scenario-body">Attempt the design first. The reference is one good answer, not the only one.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m17sol" type="button">Reveal reference solution</button><div class="scenario-solution" id="m17sol"><p class="m3-p"><strong>Part A (per input).</strong> Series string: reverse-polarity diode (0.7 V) + 5.1 V zener (sets the OFF threshold: no current at &le; 5 V) + R = 3.9 kΩ (2 &times; 1.96 kΩ in series for creepage and single-fault tolerance) + PC817 rank C LED. At 15 V: I<sub>F</sub> = (15 &minus; 0.7 &minus; 5.1 &minus; 1.15)/3.9 k = 2.06 mA (&ge; 2 mA &#10003;). At 30 V: 5.9 mA (&le; 15 mA &#10003;), P<sub>R</sub> = 0.14 W total. CTR<sub>EOL</sub> = 200 % &times; 0.6 (2 mA) &times; 0.8 (60 &deg;C) &times; 0.5 (10 years) = 48 % &rarr; I<sub>C</sub> &ge; 0.99 mA; 10 kΩ pull-up to 3.3 V needs 0.29 mA: margin 3.4&times;. Response &asymp; 50&ndash;100 &micro;s &#10003; (1 ms). Add 1 nF across the input and a Schmitt-trigger MCU pin.</p><p class="m3-p"><strong>Part B.</strong> Isolated RS-485 transceiver, or a 3-channel digital isolator (TX, RX, DE) + transceiver: at 1 Mbps a 6N137-class coupler (PWD ~20&ndash;35 ns = 2&ndash;4 % of a bit) would also work but needs three parts and ~45 mA. Isolated 5 V/200 mW DC-DC for the bus side. TVS (SM712 class) + optional GDT to earth for surges; 120 Ω termination and fail-safe bias. Isolation class: functional/basic (bus is SELV but may see ground potential differences of hundreds of volts).</p><p class="m3-p"><strong>Part C.</strong> Divider 38.3 kΩ/10 kΩ &rarr; 12.05 V; R<sub>LED</sub> 1 kΩ, R<sub>BIAS</sub> 1 kΩ (&ge; 1 mA TL431). Coupler: reinforced per IEC 60747-5-5, V<sub>IORM</sub> &ge; 373 V<sub>pk</sub> (264 V &times; &radic;2), UL 1577 V<sub>ISO</sub> &ge; 5 kV<sub>rms</sub>, wide-lead package so the footprint keeps the creepage required by IEC 62368-1 for reinforced insulation, and clearance &times; 1.14 for 3000 m. Loop: f<sub>c</sub> &asymp; 1 kHz, PM &asymp; 85&deg; at nominal CTR (Lab 2); verify PM &ge; 45&deg; from 0.4&times; to 2&times; nominal CTR.</p><p class="m3-p"><strong>Verification.</strong> Hi-Pot type test (reinforced, 60 s) after damp heat; routine 1 s; IR at 500 V DC; input threshold test at 15 V/5 V and 60 &deg;C; RS-485 EFT &plusmn;1 kV and surge &plusmn;1 kV criterion B; loop-gain measurement on three boards; thermal survey at 60 &deg;C (Module 13).</p></div></div></div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Course Completion</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p">Your course progress. Completion is recorded when you use each module&rsquo;s Next button or tick <em>Mark as complete</em>; finishing this page with <em>Back to Course Home</em> records Module 17 and completes the course.</p>
+<div id="m17Course" class="m17-course"></div><p class="m3-note" id="m17CourseMsg"></p>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<div class="adv-grid"><div class="adv-card"><h5>Calculate</h5><p>Worst-case numbers, not typicals, at every threshold.</p></div><div class="adv-card"><h5>Simulate</h5><p>Use SPICE for trends and loops; margins come from datasheets and Module 9.</p></div><div class="adv-card"><h5>Review</h5><p>Creepage, slots and bypassing are checked on the layout, not the schematic.</p></div><div class="adv-card"><h5>Investigate</h5><p>Data before fixes; separate ageing, design and process causes.</p></div><div class="adv-card"><h5>Select</h5><p>Match function first, then speed, CMTI, insulation and cost.</p></div><div class="adv-card"><h5>Document</h5><p>Insulation diagram, barrier table, calculations and test plan make the design reviewable.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; Design review: PLC input</div><div class="scenario-body">A colleague proposes PC817 rank A (80–160 %), I<sub>F</sub> = 3 mA at 15 V, 4.7 kΩ pull-up to 3.3 V, 70 °C cabinet, 10-year life. Is it acceptable?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1">Required CTR = (3.3 − 0.4)/4.7 k / 3 mA = 20.6 %. Worst case: 80 % × 0.7 (3 mA) × 0.75 (70 °C) × 0.5 (EOL) = 21 %. Margin ≈ 1.02: <strong>not acceptable</strong> (no allowance for tolerances). Use rank C, or a 22 kΩ pull-up (required CTR 4.4 %), or both.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; Design review: gate driver</div><div class="scenario-body">A SiC half-bridge (800 V, 12 ns edges) uses a coupler rated 50 kV/µs min CMTI. Is it enough?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2">dV/dt = 0.8 × 800/12 ns = 53 kV/µs, already above the rating. <strong>Not acceptable.</strong> Choose ≥ 100 kV/µs CMTI, reduce the edge rate (larger R<sub>G</sub>), and verify in-system (Lab 5 mechanism).</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Design review: certification</div><div class="scenario-body">The safety file lists &ldquo;IEC 60747-17&rdquo; for the PC817 feedback coupler across a reinforced barrier in a 230 V product.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3">Wrong standard: optocouplers are certified to <strong>IEC 60747-5-5 / VDE 0884-5</strong> (plus UL 1577). Obtain the correct certificate showing reinforced insulation and V<sub>IORM</sub> ≥ 325 V<sub>pk</sub>, and correct the file (Module 16).</div></div></div></div>
+                  </div>
+                </div>
+              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Simulation</h5><p>LTspice (Analog Devices) and ngspice documentation; vendor SPICE models from coupler manufacturers where available.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Review references</h5><p>Modules 9 (margins), 11 (layout), 13 (tests) and 16 (standards) are the checklists behind the exercises.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Next steps</h5><p>Apply the capstone template to your own product and keep the isolation profile with its design file.</p></div></div></div>
 
               <div
                 style="
@@ -291,6 +1249,661 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '17';
+      window.M_QUIZ = [{"q": "Lab 1: increasing R_L from 470 Ω to 10 kΩ mainly…", "opts": ["Shortens t_PLH", "Lengthens t_PLH (slower turn-off)", "Raises CTR", "Removes saturation"], "correct": 1, "exp": "Deeper saturation and Miller effect."}, {"q": "Lab 2: halving CTR in the feedback loop mainly…", "opts": ["Doubles crossover", "Lowers loop gain by ~6 dB", "Changes V_OUT set-point", "Has no effect"], "correct": 1, "exp": "Loop gain ∝ CTR."}, {"q": "Lab 3: at 10 Mbps with PWD ≈ 20 ns, the PWD is what fraction of a bit?", "opts": ["2 %", "20 %", "50 %", "0.2 %"], "correct": 1, "exp": "20 ns / 100 ns."}, {"q": "Lab 4: in the IL300 servo circuit, the K3 tolerance appears as…", "opts": ["Offset", "Gain error", "Noise", "Nothing"], "correct": 1, "exp": "Vout = K3·(R2/R1)·Vin."}, {"q": "Lab 5: the model’s CMTI threshold is set by…", "opts": ["LED current only", "Residual coupling capacitance and detector impedance", "Gate resistor", "Supply voltage"], "correct": 1, "exp": "V = R·C·dV/dt at the detector."}, {"q": "A 0.8 mm slot under a coupler…", "opts": ["Always counts fully for creepage", "May not count because it is narrower than ~1 mm", "Is required by all standards", "Improves CTR"], "correct": 1, "exp": "Narrow grooves are bridged in the creepage measurement."}, {"q": "The first step in a field-failure investigation is…", "opts": ["Replace parts", "Collect data and correlate the symptom", "Change firmware", "Increase margins everywhere"], "correct": 1, "exp": "Evidence first."}, {"q": "For 10 MHz SPI with three forward and one reverse channel, the best part class is…", "opts": ["PC817", "Quad digital isolator", "IL300", "TRIAC driver"], "correct": 1, "exp": "Speed, delay and channel directions."}, {"q": "The capstone flyback coupler must be certified to…", "opts": ["IEC 60747-17", "IEC 60747-5-5 reinforced (plus UL 1577)", "IEC 61131-2", "AEC-Q100"], "correct": 1, "exp": "Optocoupler standard."}, {"q": "A 6N137 needs its bypass capacitor…", "opts": ["Anywhere on the board", "Directly at VCC–GND pins", "On the primary side", "Only above 10 Mbps"], "correct": 1, "exp": "Short loop to avoid glitches."}];
+      window.M_TF = [{"s": "SPICE teaching models can predict 10-year CTR ageing.", "a": false, "exp": "Use Module 9 margin methods."}, {"s": "A Y-capacitor across a reinforced barrier needs the full creepage between its pads.", "a": true, "exp": "It bridges the barrier."}, {"s": "Temperature-correlated input misses point towards CTR margin.", "a": true, "exp": "CTR falls with temperature and age."}, {"s": "Disabling DESAT is an acceptable fix for false trips.", "a": false, "exp": "It removes short-circuit protection."}, {"s": "Coating process changes can affect Hi-Pot results.", "a": true, "exp": "Voids and residues change the insulation system."}, {"s": "A reference solution is the only valid capstone answer.", "a": false, "exp": "Other justified designs are valid."}];
+      window.M_DD = [{"t": ".step", "d": "SPICE directive that repeats a simulation over parameter values", "h": "Lab 1."}, {"t": "Loop gain", "d": "−V(x)/V(y) measured around an injection source", "h": "Lab 2."}, {"t": "PWD", "d": "|t_PHL − t_PLH|", "h": "Lab 3."}, {"t": "K3", "d": "Output/servo photodiode gain ratio", "h": "Lab 4."}, {"t": "Keep-out", "d": "Copper-free band that preserves creepage", "h": "PCB review."}, {"t": "Rubric", "d": "Scored criteria for self-assessment", "h": "Capstone."}];
+window.M17_EX = [{"mod": "06", "title": "LED series resistor", "prompt": "A PC817 LED is driven from a 5.0 V GPIO (assume 0 V drop in the pin). V<sub>F</sub> = 1.2 V (typical). Target I<sub>F</sub> = 5 mA. What series resistor (Ω) do you calculate before choosing the nearest E-series value?", "fields": [["R (Ω)", "ohms"]], "ans": [760], "tol": 0.03, "sol": "R = (5.0 − 1.2) / 5 mA = <strong>760 Ω</strong> → 750 Ω (E24). Then check I<sub>F</sub> at max V<sub>F</sub> and min supply (Module 6)."}, {"mod": "06", "title": "Minimum CTR required", "prompt": "The output uses a 4.7 kΩ pull-up to 3.3 V and must pull down to V<sub>CE(sat)</sub> = 0.4 V with I<sub>F</sub> = 2 mA. What minimum CTR (%) does the coupler need at end of life?", "fields": [["CTR (%)", "percent"]], "ans": [30.85], "tol": 0.03, "sol": "I<sub>C</sub> = (3.3 − 0.4) / 4.7 kΩ = 0.617 mA; CTR = 0.617 / 2 = <strong>30.9 %</strong>. The end-of-life CTR must exceed this (Module 9)."}, {"mod": "09", "title": "CTR margin stack", "prompt": "Bin minimum CTR 50 %; temperature factor 0.8; ageing (end-of-life) factor 0.5; low-current factor 0.9. What worst-case CTR (%) do you design with?", "fields": [["CTR<sub>EOL</sub> (%)", "percent"]], "ans": [18], "tol": 0.02, "sol": "50 × 0.8 × 0.5 × 0.9 = <strong>18 %</strong>."}, {"mod": "16", "title": "Peak working voltage", "prompt": "A barrier sees 400 V<sub>rms</sub> sinusoidal. What V<sub>IORM</sub> (V<sub>peak</sub>) must the coupler have at least?", "fields": [["V<sub>peak</sub>", "volts"]], "ans": [565.7], "tol": 0.01, "sol": "√2 × 400 = <strong>566 V<sub>peak</sub></strong>, before adding transients or margin."}, {"mod": "13", "title": "Hi-Pot DC equivalent and Y-cap current", "prompt": "The product needs 3000 V<sub>rms</sub> AC Hi-Pot. (a) What is the equivalent DC test voltage? (b) With 4.7 nF of Y-capacitance, what AC current (mA) flows at 50 Hz?", "fields": [["(a) V DC", "volts"], ["(b) I (mA)", "mA"]], "ans": [4243, 4.43], "tol": 0.02, "sol": "(a) 1.414 × 3000 = <strong>4243 V DC</strong>. (b) 2π × 50 × 4.7 nF × 3000 = <strong>4.43 mA</strong>, close to a 5 mA trip."}, {"mod": "06", "title": "CMTI requirement", "prompt": "A switch node swings 600 V with a 30 ns 10–90 % edge. (a) What dV/dt (kV/µs)? (b) With a 2× design margin, what minimum CMTI (kV/µs)?", "fields": [["(a) kV/µs", ""], ["(b) kV/µs", ""]], "ans": [16, 32], "tol": 0.03, "sol": "(a) 0.8 × 600 / 30 ns = <strong>16 kV/µs</strong>; (b) <strong>32 kV/µs</strong>."}, {"mod": "08/11", "title": "Clearance at altitude", "prompt": "A design needs 3.0 mm clearance at sea level (≤ 2000 m). The product ships to 4000 m, where the representative altitude factor is 1.29. What clearance (mm) do you lay out?", "fields": [["clearance (mm)", "mm"]], "ans": [3.87], "tol": 0.02, "sol": "3.0 × 1.29 = <strong>3.87 mm</strong> (round up to 3.9 or 4.0 mm)."}, {"mod": "10", "title": "UART speed from PWD", "prompt": "A coupler has PWD<sub>max</sub> = 35 ns. You allow PWD ≤ 10 % of a bit. What maximum baud rate (Mbaud)?", "fields": [["Mbaud", ""]], "ans": [2.857], "tol": 0.02, "sol": "Bit ≥ 35 ns / 0.1 = 350 ns → <strong>2.86 Mbaud</strong>."}, {"mod": "09", "title": "Arrhenius acceleration", "prompt": "E<sub>a</sub> = 0.7 eV. What is the acceleration factor between 55 °C use and an 85 °C test? (k = 8.617 × 10<sup>−5</sup> eV/K)", "fields": [["AF", ""]], "ans": [7.95], "tol": 0.03, "sol": "AF = exp[(0.7 / 8.617e-5) × (1/328.15 − 1/358.15)] = exp(2.074) = <strong>7.95</strong>."}, {"mod": "05", "title": "Linear coupler gain", "prompt": "An IL300 photoconductive circuit has R1 = 100 kΩ (input), R2 = 50 kΩ (output) and K3 = 0.95. What is the overall gain V<sub>out</sub>/V<sub>in</sub>?", "fields": [["gain", "V/V"]], "ans": [0.475], "tol": 0.02, "sol": "G = K3 × R2 / R1 = 0.95 × 0.5 = <strong>0.475</strong>. Trim R2 (or calibrate in firmware) to remove the K3 tolerance."}];
+window.M17_PCB = {"fb": [{"r": [290, 230, 42, 95], "t": "Secondary pour inside the keep-out", "x": "The secondary ground pour starts at x = 29 mm, only 2.2 mm from the primary pour at 26.8 mm: creepage violation (needs 6.4 mm). Pull the pour back to the band edge."}, {"r": [292, 207, 16, 16], "t": "Primary via in the keep-out", "x": "A primary-side trace dives to a via in the middle of the barrier band. Any copper (including vias on inner layers) inside the band reduces creepage/clearance; reroute on the primary side."}, {"r": [266, 96, 68, 22], "t": "Y-cap footprint too short", "x": "The Y-cap pads are only ~3.2 mm apart. A Y1 capacitor across a reinforced barrier needs a body and footprint that keep the full creepage (use a Y1 part with ≥ 8 mm lead spacing)."}], "slot": [{"r": [294, 108, 12, 124], "t": "Slot too narrow", "x": "A 0.8 mm slot is narrower than the ~1 mm minimum (pollution degree 2) at which a groove counts for creepage, so the path is measured straight across the surface. Widen it to ≥ 1 mm (routed slots are commonly 1.5–2 mm)."}, {"r": [282, 240, 36, 85], "t": "Slot stops short of the pours", "x": "The slot ends at y = 23 mm but primary and secondary pours continue below it only 3.6 mm apart. Extend the slot past the copper or pull the pours back."}, {"r": [281, 84, 38, 16], "t": "Resistor bridging the barrier", "x": "R12 sits across the barrier with pads 1.4 mm apart. A component that bridges the barrier needs its own rating (e.g. a series string of high-voltage resistors) and the full creepage between pads."}], "byp": [{"r": [505, 50, 30, 42], "t": "Bypass capacitor far from VCC", "x": "The 100 nF bypass sits ~26 mm from VCC/GND with a long return loop. 6N137-class parts need 0.1 µF directly between VCC and GND pins (≤ 1–2 mm); otherwise supply glitches cause false outputs and CMTI failures."}, {"r": [260, 144, 22, 18], "t": "Enable pin left floating", "x": "VE (pin 7) has no connection. Leaving it open makes the part noise-sensitive; tie it to VCC (or drive it) as the datasheet recommends."}, {"r": [322, 200, 16, 104], "t": "Long ground return", "x": "GND leaves the part and returns around the board to the far bypass capacitor, forming a large loop. Keep the VCC–C–GND loop tiny, next to the pins."}]};
+window.M17_TS = [{"t": "The PLC input that forgets", "story": "A packaging line reports that an I/O card misses about 1 in 1000 sensor pulses, only on hot afternoons. The inputs use PC817s at the 15 V threshold; the fault started after two years.", "steps": [{"q": "What do you do first?", "o": [["Log input pulses vs cabinet temperature, and measure I<sub>F</sub> and output low level on a hot card", 2, "Data first: correlating the misses with temperature and measuring the margin tells you whether it is CTR, timing or noise."], ["Replace all optocouplers with a higher rank", 1, "It may fix it, but you learn nothing and may repeat the problem elsewhere."], ["Add software debouncing", 0, "Debouncing cannot recover a pulse that never appeared."]], "done": "Logged: misses at > 55 °C cabinet; output low level at 60 °C is 0.9 V (MCU V<sub>IL</sub> 0.8 V)."}, {"q": "The output barely reaches a valid LOW when hot. Next?", "o": [["Measure CTR of removed parts at 2 mA, 25 °C and 60 °C, and compare with new parts", 2, "This separates ageing from design margin."], ["Increase the pull-up resistor value", 1, "Right direction, but first confirm the cause."], ["Blame EMI and add ferrites", 0, "Temperature correlation points to CTR, not EMI."]], "done": "Aged parts: CTR 38 % (new: 90 %) at 2 mA, 60 °C."}, {"q": "Root cause?", "o": [["Design used typical CTR; end-of-life + temperature + low-current factors were not budgeted", 2, "Classic Module 9 failure."], ["Faulty batch of parts", 0, "All cards show the same trend: it is the design."], ["Firmware bug", 0, "Hardware levels already explain it."]], "done": "Cause confirmed."}], "root": "Worst-case CTR was not designed for (Module 9). <strong>Fix:</strong> raise the pull-up to 22&ndash;47 kΩ (checking speed), use a higher CTR rank, or raise I<sub>F</sub> at threshold; add a Schmitt-trigger input. Re-run the margin stack at 15 V, 70 °C and end of life."}, {"t": "The SMPS that oscillates after five years", "story": "A 12 V industrial supply starts to &ldquo;sing&rdquo; and its output ripple triples in older units. New units are fine.", "steps": [{"q": "First measurement?", "o": [["Loop-gain measurement (injection) on an old and a new unit", 2, "It directly shows the change in crossover and phase margin."], ["Replace output capacitors", 1, "ESR ageing can matter, but measure first."], ["Increase the load", 0, "That changes the operating point but does not diagnose."]], "done": "Old unit: crossover moved from 1.1 kHz to 450 Hz; phase margin 18° at a new low-frequency crossover."}, {"q": "Which component explains a lower loop gain?", "o": [["Optocoupler CTR has dropped (LED ageing)", 2, "Loop gain is proportional to CTR."], ["TL431 reference drift", 0, "That changes the output voltage, not the loop gain much."], ["Transformer ageing", 0, "Unlikely to change loop gain."]], "done": "CTR fell to ~45 % of its initial value."}, {"q": "Why does lower gain cause instability here?", "o": [["Crossover moved into a region with more phase lag (conditional stability)", 2, "Compensation was only tuned at the original gain."], ["Lower gain always makes loops unstable", 0, "Usually lower gain increases margin, but not with this compensation."], ["The TL431 oscillates on its own", 1, "Possible with bad bias, but the loop data shows otherwise."]], "done": "Conditional stability identified."}], "root": "The loop was compensated for new-part CTR only. <strong>Fix:</strong> check stability across CTR from end-of-life minimum to maximum rank (Lab 2 with F1 gain varied), reduce the LED current density, and choose compensation that is stable over a 3&ndash;4&times; gain range."}, {"t": "Drive faults with the new motor cable", "story": "A servo drive trips on &ldquo;desaturation fault&rdquo; only when the customer uses a 50 m motor cable. Short cables are fine.", "steps": [{"q": "What do you capture first?", "o": [["Switch-node dV/dt and the gate-driver fault output with a differential probe, long cable connected", 2, "Correlate the false DESAT with the edge rate."], ["Replace the IGBT module", 0, "No evidence of IGBT damage."], ["Lower the DESAT threshold", 0, "That makes false trips more likely."]], "done": "Reflected-wave ringing gives 25 kV/µs spikes; fault pin glitches on those edges."}, {"q": "Most likely mechanism?", "o": [["Common-mode transient exceeds the effective CMTI of the gate-driver board (coupler + layout)", 2, "Long cables increase ringing and dV/dt."], ["Motor insulation failure", 1, "Worth checking later, but the glitch timing matches edges."], ["Firmware timing", 0, "The hardware pin glitches."]], "done": "The coupler is rated 15 kV/µs min."}, {"q": "Best fix?", "o": [["Higher-CMTI gate driver, DESAT blanking filter per datasheet, output dV/dt filter or cable choke", 2, "Fix both the victim and the aggressor."], ["Shorter cable only", 1, "Works, but the customer needs 50 m."], ["Disable DESAT", 0, "Removes short-circuit protection: unsafe."]], "done": "Fix selected."}], "root": "Insufficient CMTI margin for real-world dV/dt (Modules 6, 13, 14). <strong>Fix:</strong> ≥ 50 kV/µs driver, correct DESAT blanking capacitor, dV/dt filter; verify with a CMTI bench test and in-system with the long cable."}, {"t": "The medical monitor that fails leakage", "story": "A BF patient monitor fails patient leakage (120 µA measured, 100 µA limit) at the test lab. The isolation parts are all certified.", "steps": [{"q": "Where do you look first?", "o": [["Sum the capacitances across the patient barrier: DC-DC, Y-caps, couplers, PCB", 2, "At mains frequency, leakage is almost always capacitive."], ["Replace the optocouplers with higher V<sub>ISO</sub> parts", 0, "V<sub>ISO</sub> does not change leakage."], ["Increase creepage", 0, "Creepage affects breakdown, not 50/60 Hz leakage."]], "done": "DC-DC 330 pF, Y-cap 100 pF, couplers 3 pF, PCB ~10 pF."}, {"q": "What current does 443 pF give at 264 V, 60 Hz?", "o": [["≈ 44 µA", 2, "2π × 60 × 443 pF × 264 V ≈ 44 µA: the barrier alone is not enough to explain 120 µA."], ["≈ 440 µA", 0, "Check the arithmetic."], ["≈ 4 µA", 0, "Check the arithmetic."]], "done": "Barrier accounts for ~44 µA."}, {"q": "Where can the remaining ~75 µA come from?", "o": [["A second path: e.g. the USB/PC connection or a shield bonded to the patient side", 2, "The test setup includes all connected equipment and cables."], ["Measurement error", 0, "Labs calibrate; investigate."], ["The optocouplers leak resistively", 0, "R<sub>IO</sub> > 10<sup>11</sup> Ω gives nA."]], "done": "An unisolated USB shield ties the patient side to the PC chassis."}], "root": "Barrier capacitance was large and an unintended path existed through the USB shield. <strong>Fix:</strong> low-capacitance medical DC-DC, remove the Y-cap across the patient barrier, isolate USB (or the shield) properly (Modules 13, 14, 16)."}, {"t": "Hi-Pot failures after a coating change", "story": "Production Hi-Pot failures jump from 0.1 % to 4 % after the factory switches to a new conformal-coating supplier. Failures are arcs at 3 kV.", "steps": [{"q": "First action?", "o": [["Quarantine, then inspect failed boards under magnification/UV for coating voids, bubbles and residue at the barrier", 2, "Find the physical failure site before changing anything else."], ["Lower the Hi-Pot voltage", 0, "That hides a safety defect."], ["Add a second Hi-Pot test", 0, "Repeated testing stresses good boards too."]], "done": "Arcs track under bubbles at the coupler pins."}, {"q": "Why do bubbles matter?", "o": [["Trapped air in high-field regions breaks down (PD) at lower voltage and the path follows the void", 2, "Coating can make things worse if it traps voids."], ["Coating is conductive", 0, "Normally not."], ["Bubbles change CTR", 0, "No link."]], "done": "Voids near the pins confirmed."}, {"q": "Fix?", "o": [["Process control: viscosity, cure profile, vacuum or spray settings; qualify the coating; re-run PD and Hi-Pot after damp heat", 2, "Treat the coating as part of the insulation system."], ["Remove coating entirely", 1, "Possible if creepage was designed for uncoated PD2, but check the design assumptions."], ["Use a higher V<sub>ISO</sub> coupler", 0, "The failure is on the board surface."]], "done": "Process fixed."}], "root": "Coating voids created weak high-field paths (Modules 11, 12, 13). <strong>Fix:</strong> qualify coating process changes like a design change, and include coating in the insulation evidence file (Module 16 change control)."}];
+window.M17_SEL = {"cat": [{"k": "a", "n": "A — PC817-class phototransistor, CTR 50–600 % (rank), ~10–20 kbps, V<sub>ISO</sub> 5 kV<sub>rms</sub>, lowest cost"}, {"k": "b", "n": "B — 6N137-class logic coupler, 10 Mbps, CMTI ~10 kV/µs (min, representative), 5 V"}, {"k": "c", "n": "C — Quad digital isolator (3 fwd / 1 rev), 100 Mbps, CMTI 100 kV/µs, needs supplies on both sides"}, {"k": "d", "n": "D — Opto gate driver with DESAT + Miller clamp, 2.5 A, CMTI ≥ 35–50 kV/µs, V<sub>IORM</sub> 1140 V<sub>pk</sub>"}, {"k": "e", "n": "E — IL300-class linear coupler, servo photodiode, K3 tolerance ±5 %"}, {"k": "f", "n": "F — Zero-cross TRIAC driver (MOC3063 class), 600 V"}, {"k": "g", "n": "G — PhotoMOS relay (AQY210 class), 350 V, 120 mA, R<sub>ON</sub> ~ 25 Ω"}], "briefs": [{"t": "Heater control", "brief": "Switch a 2 kW, 230 V resistive heater from an MCU, with minimal conducted EMI. A power TRIAC is on the board.", "score": {"f": 3, "g": 1}, "best": "F — zero-cross TRIAC driver", "why": {"f": "Zero-cross switching of a resistive load minimises inrush and EMI; the driver fires the power TRIAC near voltage zero.", "g": "A PhotoMOS could drive the TRIAC gate but gives no zero-cross synchronisation and adds cost.", "_": "This part cannot trigger a TRIAC on 230 V AC safely or efficiently."}}, {"t": "Isolated ADC link", "brief": "Connect an isolated 24-bit ADC to an MCU: SPI at 10 MHz, three signals forward (SCLK, MOSI, CS) and one back (MISO). Both sides have 3.3 V.", "score": {"c": 3, "b": 1}, "best": "C — quad digital isolator", "why": {"c": "Single part, ~10–20 ns delay per direction, low power, correct channel directions.", "b": "Four 6N137s at 10 MHz: round-trip delay ≈ 150 ns > one clock period, plus ~60 mA supply. Workable only at a lower SPI clock.", "_": "Far too slow or the wrong function for 10 MHz SPI."}}, {"t": "IGBT gate drive", "brief": "Drive a 1200 V IGBT on a 600 V DC link (switching at ~10 kV/µs) with short-circuit protection and a report back to the controller.", "score": {"d": 3, "c": 1}, "best": "D — opto gate driver with DESAT", "why": {"d": "Integrated 2.5 A output, DESAT short-circuit detection with fault feedback, Miller clamp, CMTI comfortably above 2 × 10 kV/µs, V<sub>IORM</sub> above 600 V plus overshoot.", "c": "An isolator could pass the PWM, but you would still need a separate driver stage and protection.", "_": "No gate-drive current capability or protection."}}]};
+window.M17_DELIV = ["Requirements table (Parts A–C) with numbers", "Insulation diagram + barrier table", "Part A: input stage calculations at 15/30/5 V and CTR EOL", "Part B: isolator/transceiver choice, power budget, surge protection", "Part C: feedback network, coupler certificate requirements, loop PM over CTR range", "Layout plan: creepage/clearance incl. 3000 m factor, slots, keep-outs", "Verification plan (Hi-Pot, IR, thresholds, EMC, loop, thermal)", "Design-review summary: alternatives and risks"];
+window.M17_LESSONS = [["01-introduction", "Introduction"], ["02-why-optocouplers", "Why optocouplers"], ["03-construction", "Construction"], ["04-working-principle", "Working principle"], ["05-types", "Types"], ["06-parameters", "Parameters"], ["07-datasheet", "Datasheet"], ["08-selection-criteria", "Selection"], ["09-derating", "Derating"], ["10-design-examples", "Design examples"], ["11-pcb-guidelines", "PCB guidelines"], ["12-failure-mechanisms", "Failure mechanisms"], ["13-testing-validation", "Testing"], ["14-applications", "Applications"], ["15-vs-modern-isolation", "vs modern isolation"], ["16-standards", "Standards"], ["17-labs-case-studies", "Labs & capstone"]];
+      // ---------- Module 17 ----------
+      function m17el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+      // Copy buttons for netlists
+      document.querySelectorAll('[data-copy]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var pre = document.getElementById(b.getAttribute('data-copy')), txt = pre ? pre.textContent : '';
+          function done(ok) { var o = b.textContent; b.textContent = ok ? 'Copied ✓' : 'Select and copy manually'; setTimeout(function () { b.textContent = o; }, 1600); }
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { sel(); });
+            else sel();
+          } catch (e) { sel(); }
+          function sel() { try { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); done(document.execCommand && document.execCommand('copy')); } catch (e) { done(false); } }
+        });
+      });
+      // Design exercises
+      (function () {
+        var host = document.getElementById('m17Ex');
+        if (!host || !window.M17_EX) return;
+        var solved = {};
+        function score() { var n = Object.keys(solved).filter(function (k) { return solved[k]; }).length; document.getElementById('m17ExScore').textContent = n + ' / ' + window.M17_EX.length + ' exercises solved'; }
+        window.M17_EX.forEach(function (x, i) {
+          var card = m17el('div', 'm17-card');
+          card.appendChild(m17el('div', 'm17-card-h', '<span class="m17-tag">Module ' + x.mod + '</span> Exercise ' + (i + 1) + ' &mdash; ' + x.title));
+          card.appendChild(m17el('p', 'm3-p', x.prompt));
+          var row = m17el('div', 'm17-fields');
+          x.fields.forEach(function (f, j) {
+            var id = 'm17ex' + i + '_' + j;
+            var d = m17el('div', 'm3-field', '<label for="' + id + '"><span>' + f[0] + '</span></label><input type="number" step="any" id="' + id + '" inputmode="decimal" /><span class="m3-note">' + f[1] + '</span><span class="m17-mark" id="' + id + 'M"></span>');
+            row.appendChild(d);
+          });
+          card.appendChild(row);
+          var btns = m17el('div', 'm17-btns');
+          var ck = m17el('button', 'btn btn-primary', 'Check'); ck.type = 'button';
+          var sv = m17el('button', 'btn btn-secondary', 'Show solution'); sv.type = 'button';
+          btns.appendChild(ck); btns.appendChild(sv); card.appendChild(btns);
+          var fb = m17el('p', 'm3-note'); card.appendChild(fb);
+          var sol = m17el('div', 'scenario-solution', x.sol); card.appendChild(sol);
+          ck.addEventListener('click', function () {
+            var ok = true;
+            x.fields.forEach(function (f, j) {
+              var id = 'm17ex' + i + '_' + j, v = parseFloat(document.getElementById(id).value), a = x.ans[j];
+              var good = isFinite(v) && Math.abs(v - a) <= Math.abs(a) * x.tol;
+              document.getElementById(id + 'M').textContent = !isFinite(v) ? '–' : good ? '✓' : '✗';
+              document.getElementById(id + 'M').className = 'm17-mark ' + (good ? 'ok' : 'bad');
+              ok = ok && good;
+            });
+            solved[i] = ok; score();
+            fb.textContent = ok ? 'Correct within ±' + Math.round(x.tol * 100) + ' %.' : 'Not yet — check units and the worst-case assumptions (tolerance ±' + Math.round(x.tol * 100) + ' %).';
+          });
+          sv.addEventListener('click', function () { sol.classList.toggle('show'); sol.style.display = sol.style.display === 'block' ? 'none' : 'block'; });
+          host.appendChild(card);
+        });
+        score();
+      })();
+      // PCB review
+      (function () {
+        document.querySelectorAll('.m17-pcb').forEach(function (wrap) {
+          var svg = wrap.querySelector('svg'), key = wrap.getAttribute('data-k'), D = (window.M17_PCB || {})[key];
+          if (!svg || !D) return;
+          var found = {}, miss = 0, NS = 'http://www.w3.org/2000/svg';
+          var out = wrap.querySelector('.m17-pcb-res'), list = wrap.querySelector('.m17-pcb-list');
+          function upd() {
+            var n = Object.keys(found).length;
+            out.textContent = n + ' / ' + D.length + ' defects found · ' + miss + ' false flags';
+          }
+          function mark(x, y, ok) {
+            var c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', ok ? 14 : 8);
+            c.setAttribute('fill', 'none'); c.setAttribute('stroke', ok ? '#4ade80' : '#f87171'); c.setAttribute('stroke-width', '3'); c.setAttribute('class', 'm17-flag');
+            svg.appendChild(c);
+          }
+          function hit(x, y) {
+            for (var i = 0; i < D.length; i++) { var r = D[i].r; if (x >= r[0] - 6 && x <= r[0] + r[2] + 6 && y >= r[1] - 6 && y <= r[1] + r[3] + 6) return i; }
+            return -1;
+          }
+          function explain(i) {
+            if (list.querySelector('[data-i="' + i + '"]')) return;
+            var li = m17el('li', null, '<strong>' + D[i].t + '</strong> — ' + D[i].x); li.setAttribute('data-i', i); list.appendChild(li);
+          }
+          function flag(x, y) {
+            var i = hit(x, y);
+            if (i >= 0) { if (!found[i]) { found[i] = true; mark(D[i].r[0] + D[i].r[2] / 2, D[i].r[1] + D[i].r[3] / 2, true); explain(i); } }
+            else { miss++; mark(x, y, false); }
+            upd();
+          }
+          svg.addEventListener('click', function (e) {
+            var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+            var m = svg.getScreenCTM(); if (!m) return;
+            var p = pt.matrixTransform(m.inverse()); flag(p.x, p.y);
+          });
+          // keyboard: focusable zones list
+          var kb = wrap.querySelector('.m17-pcb-kb');
+          if (kb) kb.addEventListener('change', function () { var v = kb.value; if (!v) return; var z = v.split(',').map(Number); flag(z[0], z[1]); kb.value = ''; });
+          wrap.querySelector('.m17-pcb-reveal').addEventListener('click', function () {
+            D.forEach(function (d, i) { if (!found[i]) { var r = document.createElementNS(NS, 'rect'); r.setAttribute('x', d.r[0]); r.setAttribute('y', d.r[1]); r.setAttribute('width', d.r[2]); r.setAttribute('height', d.r[3]); r.setAttribute('fill', 'rgba(251,191,36,0.25)'); r.setAttribute('stroke', '#fbbf24'); r.setAttribute('stroke-dasharray', '4 3'); r.setAttribute('class', 'm17-flag'); svg.appendChild(r); explain(i); } });
+          });
+          wrap.querySelector('.m17-pcb-reset').addEventListener('click', function () {
+            svg.querySelectorAll('.m17-flag').forEach(function (e) { e.parentNode.removeChild(e); }); found = {}; miss = 0; list.innerHTML = ''; upd();
+          });
+          upd();
+        });
+      })();
+      // Troubleshooting (branching)
+      (function () {
+        var host = document.getElementById('m17Ts');
+        if (!host || !window.M17_TS) return;
+        var sel = document.getElementById('m17TsSel'), cur = 0, step = 0, pts = 0;
+        window.M17_TS.forEach(function (s, i) { var o = document.createElement('option'); o.value = i; o.textContent = (i + 1) + '. ' + s.t; sel.appendChild(o); });
+        function render() {
+          var s = window.M17_TS[cur];
+          host.innerHTML = '';
+          host.appendChild(m17el('p', 'm3-p', '<strong>Story.</strong> ' + s.story));
+          for (var k = 0; k < step; k++) host.appendChild(m17el('p', 'm3-note', '✓ Step ' + (k + 1) + ': ' + s.steps[k].done));
+          if (step < s.steps.length) {
+            var st = s.steps[step];
+            host.appendChild(m17el('p', 'm3-p', '<strong>Step ' + (step + 1) + ' of ' + s.steps.length + '.</strong> ' + st.q));
+            var box = m17el('div', 'm17-opts'), fb = m17el('p', 'm3-note');
+            st.o.forEach(function (o) {
+              var b = m17el('button', 'btn btn-secondary m17-opt', o[0]); b.type = 'button';
+              b.addEventListener('click', function () {
+                box.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+                pts += o[1];
+                b.classList.add(o[1] === 2 ? 'best' : o[1] === 1 ? 'ok' : 'poor');
+                fb.innerHTML = (o[1] === 2 ? '<strong>Best move.</strong> ' : o[1] === 1 ? '<strong>Reasonable, but not the fastest.</strong> ' : '<strong>Poor move.</strong> ') + o[2];
+                var nx = m17el('button', 'btn btn-primary', step + 1 < s.steps.length ? 'Next step →' : 'See root cause'); nx.type = 'button';
+                nx.addEventListener('click', function () { step++; render(); });
+                host.appendChild(nx);
+                document.getElementById('m17TsPts').textContent = pts + ' / ' + (s.steps.length * 2) + ' points';
+              });
+              box.appendChild(b);
+            });
+            host.appendChild(box); host.appendChild(fb);
+          } else {
+            host.appendChild(m17el('div', 'scenario-solution show', '<strong>Root cause and fix.</strong> ' + s.root)).style.display = 'block';
+          }
+          document.getElementById('m17TsPts').textContent = pts + ' / ' + (s.steps.length * 2) + ' points';
+        }
+        sel.addEventListener('change', function () { cur = +sel.value; step = 0; pts = 0; render(); });
+        document.getElementById('m17TsRestart').addEventListener('click', function () { step = 0; pts = 0; render(); });
+        render();
+      })();
+      // Selection challenges
+      (function () {
+        var host = document.getElementById('m17Sel');
+        if (!host || !window.M17_SEL) return;
+        var total = {};
+        window.M17_SEL.briefs.forEach(function (br, i) {
+          var card = m17el('div', 'm17-card');
+          card.appendChild(m17el('div', 'm17-card-h', 'Challenge ' + (i + 1) + ' &mdash; ' + br.t));
+          card.appendChild(m17el('p', 'm3-p', br.brief));
+          var fs = m17el('div', 'm17-opts');
+          window.M17_SEL.cat.forEach(function (p) {
+            var id = 'm17sel' + i + p.k;
+            var l = m17el('label', 'm17-radio', '<input type="radio" name="m17sel' + i + '" id="' + id + '" value="' + p.k + '" /> <span>' + p.n + '</span>');
+            fs.appendChild(l);
+          });
+          card.appendChild(fs);
+          var b = m17el('button', 'btn btn-primary', 'Submit choice'); b.type = 'button'; card.appendChild(b);
+          var fb = m17el('p', 'm3-note'); card.appendChild(fb);
+          b.addEventListener('click', function () {
+            var c = card.querySelector('input:checked');
+            if (!c) { fb.textContent = 'Pick a part first.'; return; }
+            var sc = br.score[c.value] || 0; total[i] = sc;
+            fb.innerHTML = (sc === 3 ? '<strong>Best choice (3/3).</strong> ' : sc > 0 ? '<strong>Workable (' + sc + '/3).</strong> ' : '<strong>Not suitable (0/3).</strong> ') + (br.why[c.value] || br.why._) + ' <em>Reference answer: ' + br.best + '.</em>';
+            var s = 0; Object.keys(total).forEach(function (k) { s += total[k]; });
+            document.getElementById('m17SelScore').textContent = s + ' / ' + window.M17_SEL.briefs.length * 3;
+          });
+          host.appendChild(card);
+        });
+      })();
+      // Capstone rubric + deliverables checklist
+      (function () {
+        var host = document.getElementById('m17Rub');
+        if (!host) return;
+        function upd() {
+          var s = 0, n = 0;
+          host.querySelectorAll('select').forEach(function (x) { s += +x.value; n++; });
+          document.getElementById('m17RubTot').textContent = s + ' / ' + n * 3;
+          var v = document.getElementById('m17RubVerdict'), p = s / (n * 3);
+          if (p >= 0.8) M3.setVerdict(v, 'ok', 'Excellent — ready for a design review');
+          else if (p >= 0.57) M3.setVerdict(v, 'warn', 'Pass — close the gaps marked 0–1');
+          else M3.setVerdict(v, 'bad', 'Not yet — revisit the linked modules');
+          try { localStorage.setItem('opto-m17-rubric', JSON.stringify([].map.call(host.querySelectorAll('select'), function (x) { return x.value; }))); } catch (e) {}
+        }
+        try { var saved = JSON.parse(localStorage.getItem('opto-m17-rubric') || 'null'); if (saved) host.querySelectorAll('select').forEach(function (x, i) { if (saved[i] != null) x.value = saved[i]; }); } catch (e) {}
+        host.querySelectorAll('select').forEach(function (x) { x.addEventListener('change', upd); });
+        upd();
+        if (window.M17_DELIV) makeChecklist('m17Deliv', 'm17DelivReset', 'opto-m17-deliv-', window.M17_DELIV);
+      })();
+      // Course completion summary (uses the site progress API when signed in)
+      (function () {
+        var grid = document.getElementById('m17Course');
+        if (!grid) return;
+        var L = window.M17_LESSONS || [];
+        var cells = {};
+        L.forEach(function (l) { var a = m17el('a', 'm17-mod', '<b>' + l[0].slice(0, 2) + '</b><span>' + l[1] + '</span>'); a.href = l[0] + '.html'; grid.appendChild(a); cells[l[0]] = a; });
+        var msg = document.getElementById('m17CourseMsg');
+        var signed = false;
+        try { signed = typeof isLoggedIn === 'function' && isLoggedIn() && typeof reApiFetch === 'function'; } catch (e) {}
+        if (!signed) { msg.textContent = 'Sign in to see which modules are marked complete. Your quiz scores are shown on each module page; the progress service records completion per lesson.'; return; }
+        reApiFetch('/api/training/progress?course=' + encodeURIComponent('Circuit/Optocoupler')).then(function (r) { return r.json(); }).then(function (d) {
+          var ls = (d && d.success && d.data && d.data.lessons) || {}, n = 0;
+          L.forEach(function (l) { var ok = ls[l[0]] && ls[l[0]].completed; if (ok) { n++; cells[l[0]].classList.add('done'); } });
+          var here = '17-labs-case-studies', rest = L.length - n - (ls[here] && ls[here].completed ? 0 : 1);
+          msg.textContent = n + ' of ' + L.length + ' modules complete.' + (rest <= 0 ? ' Finish this page with the button below to complete the course.' : ' Open the highlighted gaps to finish the course.');
+        }).catch(function () { msg.textContent = 'Progress service unavailable right now.'; });
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m17-check-', ["All 10 design exercises solved.", "Lab 1–5 run and questions answered.", "All 9 PCB defects found.", "All 5 troubleshooting stories completed.", "All 3 selection challenges answered with rationale.", "Capstone deliverables complete and self-assessed."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Optocoupler Construction — Module 03 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="How optocouplers are built: LED and detector dies, co-planar vs stacked coupling, barrier materials, creepage/DTI and package families, with animations."
     />
     <title>Optocoupler Construction | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,679 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       }
-      .topic-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
-      }
-      .topic-card {
+      .flow-strip {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 12px 14px;
-        font-size: 0.82rem;
+        padding: 8px 14px;
+        font-size: 0.78rem;
         font-weight: 600;
         color: var(--text-base);
+        text-align: center;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
-        border-radius: 10px;
-        padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
-      }
-      .reserved-block h5 {
-        font-size: 0.82rem;
-        font-weight: 800;
+      .flow-arrow {
         color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
         margin-bottom: 4px;
       }
-      .reserved-block p {
+      .adv-card p {
         font-size: 0.78rem;
-        color: var(--text-muted);
+        color: var(--text-sub);
+        line-height: 1.55;
         margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
         line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- Module 3 local components -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
       }
     </style>
   </head>
@@ -189,86 +802,1812 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
               <div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
                 <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
                   After completing this module, you will be able to:
                 </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
+                <div class="objective-grid">
+                  <div class="objective-card metric-card">
                     Describe LED and detector die technologies and their trade-offs
                   </div>
-                  <div class="metric-card">
+                  <div class="objective-card metric-card">
                     Compare co-planar, stacked, and reflective coupling constructions
                   </div>
-                  <div class="metric-card">
+                  <div class="objective-card metric-card">
                     Evaluate isolation barrier materials (polyimide, silicone, epoxy)
                   </div>
-                  <div class="metric-card">
+                  <div class="objective-card metric-card">
                     Select package types for creepage, clearance, and assembly requirements
                   </div>
-                  <div class="metric-card">
+                  <div class="objective-card metric-card">
                     Outline the manufacturing and production-test sequence
                   </div>
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Internal structure variants
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>LED technologies (GaAs, GaAlAs)
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>Detector technologies</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Package types and dimensions
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Isolation barrier materials
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Manufacturing overview
-                  </div>
-                </div>
-              </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
-                </div>
-              </div>
-
               <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+                <strong>Where this fits.</strong> Module 1 treated the optocoupler as a black box
+                &mdash; LED in, light across a barrier, detector out. This module opens the box. You
+                will see why the <em>physical construction</em> decides CTR, speed, isolation
+                rating, common-mode immunity and package size, so that when Module 4
+                (<a href="04-working-principle.html">Working Principle</a>) derives the device
+                physics and Module 6 (<a href="06-parameters.html">Parameters</a>) quantifies the
+                datasheet, every number has a physical cause you can picture. Board-level spacing is
+                covered in Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).
+                <br /><span class="m3-note"
+                  >All illustrations and animations on this page are schematic teaching drawings,
+                  not to scale. Numerical values are representative of common parts; always confirm
+                  against the current datasheet of the exact part number you buy.</span
+                >
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn active"
+                  data-target="sec1body"
+                  aria-expanded="true"
+                  aria-controls="sec1body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 1 &mdash; Anatomy of an Optocoupler
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p class="m3-p">
+                    Strip away the plastic and every optocoupler contains the same five functional
+                    elements: an <strong>emitter die</strong> (an infrared LED), a
+                    <strong>detector die</strong> (a silicon photo-sensitive device), two
+                    <strong>electrically separate lead frames</strong> that carry them, an
+                    <strong>optical path</strong> that lets light travel from one die to the other,
+                    and an <strong>insulation system</strong> that prevents anything <em>but</em>
+                    light from making the trip. The package around them provides mechanical
+                    protection, blocks ambient light, and sets the external creepage and clearance
+                    distances.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/opto-anatomy-cross-section.png"
+                      alt="Cross-section of a face-to-face optocoupler: an infrared LED die on the input lead frame at the bottom, a phototransistor die on the output lead frame at the top, an insulating film between them, all inside an inner clear mould and an outer opaque mould"
+                      loading="lazy"
+                      width="960"
+                      height="540"
+                    />
+                    <figcaption>
+                      <strong>Figure 1.</strong> Cross-section through the optical path of a
+                      face-to-face (stacked) phototransistor optocoupler. The two lead frames never
+                      touch; the only thing that crosses from left to right is infrared light. The
+                      distance straight through the solid insulation between the two sides is the
+                      <span
+                        class="gloss"
+                        data-def="Distance Through Insulation: the shortest distance through solid insulating material between input-side and output-side conductors inside the package."
+                        >DTI</span
+                      >.
+                    </figcaption>
+                  </figure>
+
+                  <div class="flow-strip" aria-label="Signal path through an optocoupler">
+                    <div class="flow-step">Input pins</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">Input lead frame</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step hot">LED die</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">Photons through the barrier</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step hot">Detector die</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">Output lead frame</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">Output pins</div>
+                  </div>
+
+                  <h3 class="m3-h3">The barrier is a system, not a single layer</h3>
+                  <p class="m3-p">
+                    It is tempting to point at the thin film between the dies and call it
+                    &ldquo;the isolation barrier&rdquo;. In reality a certification body evaluates
+                    the whole <em>insulation system</em>: the film (if any), the clear silicone or
+                    epoxy that fills the optical path, the interfaces where those materials meet,
+                    the outer moulding compound, and the external surfaces between the pins. A
+                    perfect film is worthless if moisture can wick along a poorly bonded interface
+                    from one lead frame to the other. That is why component standards such as IEC
+                    60747-5-5 test the finished part (hi-pot, partial discharge, insulation
+                    resistance) rather than the raw materials.
+                  </p>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">
+                      Interactive: Exploded View of the Package
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Drag the slider (or press Play) to pull the package apart layer by layer.
+                      Click or tap any layer to read what it does and what can go wrong with it.
+                    </p>
+                    <div class="m3-explode">
+                      <div>
+                        <svg
+                          id="m3Explode"
+                          viewBox="0 0 700 440"
+                          role="img"
+                          aria-labelledby="m3ExplodeTitle"
+                        >
+                          <title id="m3ExplodeTitle">
+                            Exploded view of an optocoupler package showing six layers
+                          </title>
+                        </svg>
+                        <div class="m3-controls">
+                          <button class="btn btn-secondary" id="m3ExplodePlay" type="button">
+                            &#9654; Play
+                          </button>
+                          <label for="m3ExplodeRange">Explode</label>
+                          <input
+                            type="range"
+                            id="m3ExplodeRange"
+                            min="0"
+                            max="100"
+                            value="70"
+                            aria-label="Explode amount"
+                          />
+                        </div>
+                      </div>
+                      <div class="m3-info" id="m3ExplodeInfo" aria-live="polite">
+                        <h5>Select a layer</h5>
+                        <p>
+                          Click any layer of the exploded package. The information panel explains
+                          its material, its job, and its typical failure modes.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="warning-box" style="margin-top: 1.2rem">
+                    <strong>Design trap &mdash; &ldquo;it&rsquo;s isolated, it has an
+                      optocoupler&rdquo;.</strong>
+                    The optocoupler only guarantees isolation <em>inside its own body</em>. The
+                    moment you route a trace, place a via or a Y-capacitor, or mount a heatsink
+                    across the gap between its input and output pins, the part&rsquo;s internal
+                    construction is irrelevant: your board now sets the barrier.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec2body"
+                  aria-expanded="false"
+                  aria-controls="sec2body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 2 &mdash; The Emitter: LED Die Technologies
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <p class="m3-p">
+                    The emitter is almost always an infrared LED made from a III&ndash;V compound
+                    semiconductor. When forward current flows, electrons and holes recombine at
+                    the junction and give up their energy as photons. The photon energy, and
+                    therefore the wavelength, is set by the energy gap the carriers fall across:
+                  </p>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">&lambda; = h&middot;c / E &nbsp;&rArr;&nbsp; &lambda;[nm] &asymp; 1240 / E[eV]</div>
+                    <ul>
+                      <li>&lambda; &mdash; emission wavelength (nm)</li>
+                      <li>h &mdash; Planck&rsquo;s constant, c &mdash; speed of light</li>
+                      <li>
+                        E &mdash; photon energy (eV), close to the band-gap energy E<sub>g</sub> of
+                        the emitting layer
+                      </li>
+                    </ul>
+                  </div>
+                  <p class="m3-p">
+                    Pure GaAs has E<sub>g</sub> &asymp; 1.42 eV at room temperature, so
+                    band-to-band emission is near 1240 / 1.42 &asymp; 870 nm. The two LED families
+                    you will meet in optocoupler datasheets both descend from GaAs:
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Property</th>
+                          <th>GaAs:Si (silicon-doped GaAs)</th>
+                          <th>GaAlAs / AlGaAs (heterostructure)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Peak wavelength</td>
+                          <td>&asymp; 940 nm (Si dopant creates lower-energy states)</td>
+                          <td>&asymp; 850&ndash;880 nm (set by aluminium fraction)</td>
+                        </tr>
+                        <tr>
+                          <td>Forward voltage V<sub>F</sub></td>
+                          <td>&asymp; 1.2 V typ, 1.4 V max at 10&ndash;20 mA</td>
+                          <td>&asymp; 1.4&ndash;1.6 V typ, up to &asymp; 1.8 V max</td>
+                        </tr>
+                        <tr>
+                          <td>Optical efficiency</td>
+                          <td>Good</td>
+                          <td>Higher &mdash; carriers confined in a thin active layer</td>
+                        </tr>
+                        <tr>
+                          <td>Speed</td>
+                          <td>Slow (long carrier lifetime): suits &micro;s-class parts</td>
+                          <td>Fast: used where the detector is fast too</td>
+                        </tr>
+                        <tr>
+                          <td>Typical use</td>
+                          <td>General-purpose phototransistor parts (PC817, 4N35)</td>
+                          <td>
+                            High-speed logic, gate-driver and linear parts (e.g. HCNR201, IL300)
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">
+                    Representative values. The datasheet&rsquo;s description line (&ldquo;GaAs
+                    infrared LED&rdquo;, &ldquo;AlGaAs LED&rdquo;) and its V<sub>F</sub> table tell
+                    you which technology a specific part uses.
+                  </p>
+
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/led-and-detector-die.png"
+                      alt="Left: layer stack of a GaAlAs double-heterostructure LED with p-GaAlAs window, thin active layer, n-GaAlAs cladding and GaAs substrate. Right: silicon NPN phototransistor with a large p-base, small n+ emitter and n-type collector, with the base-collector depletion region highlighted"
+                      loading="lazy"
+                      width="1000"
+                      height="500"
+                    />
+                    <figcaption>
+                      <strong>Figure 2.</strong> Inside the two dies. Left: a double-heterostructure
+                      LED confines electrons and holes in a thin active layer so that they recombine
+                      radiatively. Light leaves through the top and the sides of the die. Right: the
+                      phototransistor&rsquo;s large base area is the light-collecting junction; its
+                      gain is what lets CTR exceed 100 %.
+                    </figcaption>
+                  </figure>
+
+                  <h3 class="m3-h3">Why infrared and not visible light?</h3>
+                  <p class="m3-p">
+                    Silicon detectors respond best in the near-infrared, peaking at roughly
+                    800&ndash;950 nm. GaAs-family LEDs are efficient emitters in exactly that band.
+                    Visible LEDs would work, but they would couple less of their power into a
+                    silicon detector and are less efficient emitters. The infrared choice also means
+                    the outer mould can be opaque black epoxy that blocks ambient visible light.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/led-spectrum-vs-silicon.png"
+                      alt="Graph of relative intensity versus wavelength from 600 to 1150 nm showing the silicon detector response peaking near 900 nm, a GaAlAs LED peak near 870 nm and a GaAs:Si LED peak near 940 nm, both inside the silicon response"
+                      loading="lazy"
+                      width="1100"
+                      height="550"
+                    />
+                    <figcaption>
+                      <strong>Figure 3.</strong> Both LED families sit inside the silicon response
+                      curve. The overlap between the emitter spectrum and the detector response is
+                      one of the factors that multiply together to give CTR (the others are
+                      covered in Module 4).
+                    </figcaption>
+                  </figure>
+
+                  <h3 class="m3-h3">Forward voltage and temperature</h3>
+                  <p class="m3-p">
+                    The LED&rsquo;s V<sub>F</sub> falls by roughly 1.5&ndash;2 mV/&deg;C. For a
+                    resistor-driven LED this raises I<sub>F</sub> slightly when hot. That is
+                    harmless, but it matters when you calculate worst-case I<sub>F</sub> from a
+                    minimum supply with <em>maximum</em> V<sub>F</sub> at cold.
+                  </p>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; LED drive for a PC817 from 5 V</h5>
+                    Target I<sub>F</sub> = 10 mA. Datasheet: V<sub>F</sub> = 1.2 V typ, 1.4 V max
+                    (at I<sub>F</sub> = 20 mA).
+                    <ol>
+                      <li>
+                        Size the resistor for the <em>minimum</em> current case (max V<sub>F</sub>,
+                        min supply 4.75 V): R = (4.75 &minus; 1.4) / 10 mA = 335 &Omega; &rarr;
+                        choose 330 &Omega;.
+                      </li>
+                      <li>
+                        Check the <em>maximum</em> current case (V<sub>F</sub> &asymp; 1.0 V hot, 5.25
+                        V supply): I<sub>F</sub> = (5.25 &minus; 1.0) / 330 &asymp; 12.9 mA. Well
+                        below the 50 mA absolute maximum.
+                      </li>
+                      <li>
+                        LED dissipation &asymp; 12.9 mA &times; 1.2 V &asymp; 15 mW, versus a
+                        typical 70 mW input power rating.
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">
+                      Interactive: Emitter&ndash;Detector Spectral Match
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Move the LED&rsquo;s peak wavelength and spectral width and watch how much of
+                      its output falls where silicon is sensitive. The result is the
+                      detector-weighted fraction of emitted power (a simplified model of the
+                      spectral part of coupling efficiency).
+                    </p>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px">
+                      <button class="m3-preset" data-lam="940" data-fw="50" type="button">
+                        GaAs:Si 940 nm
+                      </button>
+                      <button class="m3-preset active" data-lam="870" data-fw="40" type="button">
+                        GaAlAs 870 nm
+                      </button>
+                      <button class="m3-preset" data-lam="660" data-fw="25" type="button">
+                        Red LED 660 nm
+                      </button>
+                      <button class="m3-preset" data-lam="1050" data-fw="60" type="button">
+                        Deep IR 1050 nm
+                      </button>
+                    </div>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field">
+                          <label for="m3Lam"><span>Peak wavelength</span> <output id="m3LamOut">870 nm</output></label>
+                          <input type="range" id="m3Lam" min="600" max="1100" value="870" step="5" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Fw"><span>Spectral width (FWHM)</span> <output id="m3FwOut">40 nm</output></label
+                          >
+                          <input type="range" id="m3Fw" min="15" max="100" value="40" step="5" />
+                        </div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row">
+                          <span>Photon energy at peak</span><b id="m3Ev">&ndash;</b>
+                        </div>
+                        <div class="m3-res-row">
+                          <span>Detector-weighted fraction</span><b id="m3Ovl">&ndash;</b>
+                        </div>
+                        <div class="m3-res-row">
+                          <span>Relative to best-case LED</span><b id="m3Rel">&ndash;</b>
+                        </div>
+                        <div style="margin-top: 8px"><span id="m3SpecVerdict" class="m3-verdict ok">&ndash;</span></div>
+                      </div>
+                    </div>
+                    <div class="m3-canvas-wrap">
+                      <canvas
+                        id="m3SpecCanvas"
+                        role="img"
+                        aria-label="Plot of the LED spectrum and silicon detector response versus wavelength"
+                      ></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec3body"
+                  aria-expanded="false"
+                  aria-controls="sec3body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 3 &mdash; The Detector: Die Technologies
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p class="m3-p">
+                    The emitter side of the optocoupler family is fairly uniform. The detector side
+                    is where the families diverge. Every detector starts with a silicon
+                    p&ndash;n junction that turns absorbed photons into a
+                    <span
+                      class="gloss"
+                      data-def="Photocurrent I_PH: the current generated when photons absorbed in or near a reverse-biased junction create electron-hole pairs that the junction field separates. Proportional to optical power."
+                      >photocurrent</span
+                    >
+                    I<sub>PH</sub>. What differs is what the die does with that tiny current
+                    (typically micro-amps): amplify it with a transistor, square it up with
+                    logic, stack it into a voltage that drives MOSFET gates, or use it to fire a
+                    thyristor.
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Detector die</th>
+                          <th>What is on the die</th>
+                          <th>Gain / sensitivity</th>
+                          <th>Speed class</th>
+                          <th>Examples</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Phototransistor</strong></td>
+                          <td>
+                            NPN with a large light-sensitive base&ndash;collector junction. Base is
+                            bonded out on 6-pin parts.
+                          </td>
+                          <td>CTR &asymp; 20&ndash;600 %</td>
+                          <td>t<sub>r</sub>, t<sub>f</sub> &asymp; 2&ndash;20 &micro;s (load dependent)</td>
+                          <td>PC817, 4N35, TLP785</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Photodarlington</strong></td>
+                          <td>Phototransistor driving a second transistor on the same die</td>
+                          <td>CTR &ge; 500 % (often &gt; 1000 %)</td>
+                          <td>Tens to hundreds of &micro;s</td>
+                          <td>4N32, H11B1</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Photodiode + transistor</strong></td>
+                          <td>
+                            Separate photodiode feeding the base of an output transistor. This
+                            removes the Miller-multiplied C<sub>CB</sub> from the light-sensing node.
+                          </td>
+                          <td>CTR &asymp; 7&ndash;50 %</td>
+                          <td>&asymp; 1 Mbit/s</td>
+                          <td>6N135, 6N136</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Photodiode + logic IC</strong></td>
+                          <td>
+                            Photodiode, trans-impedance amplifier, comparator and logic output, often
+                            under a transparent Faraday shield
+                          </td>
+                          <td>Specified as an LED threshold current (a few mA)</td>
+                          <td>10&ndash;50 Mbit/s class</td>
+                          <td>6N137, HCPL-2630, TLP2361</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Photovoltaic array + MOSFETs</strong></td>
+                          <td>
+                            A series stack of tiny photovoltaic cells charges the gates of a pair of
+                            output MOSFETs (solid-state relay)
+                          </td>
+                          <td>Specified as LED turn-on current</td>
+                          <td>&asymp; 0.1&ndash;few ms switching</td>
+                          <td>AQY210, TLP222</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Photo-TRIAC</strong></td>
+                          <td>
+                            Light-activated bidirectional thyristor, with optional zero-crossing
+                            inhibit circuit
+                          </td>
+                          <td>LED trigger current I<sub>FT</sub> (5&ndash;15 mA)</td>
+                          <td>Mains-cycle switching</td>
+                          <td>MOC3021, MOC3041, MOC3063</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Gate-driver IC</strong></td>
+                          <td>
+                            Photodiode, amplifier and a push-pull output stage rated for amps of
+                            peak gate current. Newer parts add UVLO, DESAT and Miller clamp.
+                          </td>
+                          <td>LED threshold current (a few mA)</td>
+                          <td>Sub-&micro;s propagation delay</td>
+                          <td>HCPL-3120, TLP250, ACPL-332J</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">
+                    Speed and gain columns are order-of-magnitude guides. Module 5 (<a
+                      href="05-types.html"
+                      >Types</a
+                    >) walks through each family with its own characteristic curves.
+                  </p>
+
+                  <h3 class="m3-h3">Why a phototransistor is slow: Miller capacitance</h3>
+                  <p class="m3-p">
+                    A phototransistor needs a <em>large</em> base&ndash;collector junction to catch
+                    light. A large junction means a large capacitance C<sub>CB</sub>. The collector
+                    swings by volts while the photocurrent charging that capacitance is only
+                    micro-amps, and the transistor&rsquo;s gain multiplies the effective
+                    capacitance (the Miller effect). This construction choice is the root of the
+                    microsecond switching times. Splitting the die into a photodiode plus a separate
+                    transistor (6N135/6N136) keeps the light-sensing node at an almost constant
+                    voltage, and gains roughly an order of magnitude in speed at the cost of CTR.
+                  </p>
+                  <div class="info-box">
+                    <strong>Pro tip &mdash; the base pin.</strong> On 6-pin phototransistor parts
+                    (4N35 and similar) the base is bonded out. A resistor R<sub>BE</sub> from base
+                    to emitter (typically 100 k&Omega;&ndash;1 M&Omega;) removes stored charge
+                    faster and shunts dark and displacement current, which speeds turn-off and
+                    improves noise immunity. The cost is some lost CTR. Left unconnected, the base
+                    pin is a high-impedance node that picks up noise. 4-pin parts such as PC817 do
+                    not bring the base out at all.
+                  </div>
+
+                  <h3 class="m3-h3">Dark current: the detector&rsquo;s leakage</h3>
+                  <p class="m3-p">
+                    With the LED off, a phototransistor still conducts a small collector&ndash;emitter
+                    leakage current I<sub>CEO</sub> (&ldquo;dark current&rdquo;). It is typically
+                    nanoamps at 25 &deg;C (datasheet maxima of tens of nA are common), but like all
+                    silicon junction leakage it rises roughly exponentially with temperature (a
+                    common rule of thumb is a doubling every &asymp; 10 &deg;C). With a high-value
+                    pull-up resistor at 100 &deg;C+, dark current can erode your logic-high margin.
+                    Check the I<sub>CEO</sub> vs T<sub>A</sub> curve.
+                  </p>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; is dark current a problem?</h5>
+                    A 4N35-class output pulls up to 5 V through R<sub>L</sub> = 100 k&Omega;. Assume
+                    I<sub>CEO</sub> = 50 nA at 25 &deg;C and a doubling every 10 &deg;C.
+                    <ol>
+                      <li>At 85 &deg;C: 50 nA &times; 2<sup>6</sup> = 3.2 &micro;A.</li>
+                      <li>
+                        Voltage drop in R<sub>L</sub> = 3.2 &micro;A &times; 100 k&Omega; = 0.32 V
+                        &rarr; output high &asymp; 4.68 V. Still a valid logic high.
+                      </li>
+                      <li>
+                        At 105 &deg;C: 12.8 &micro;A &rarr; 1.28 V drop &rarr; &asymp; 3.7 V. Now
+                        marginal for 5 V CMOS (V<sub>IH</sub> = 3.5 V). Use R<sub>L</sub> &le; 10
+                        k&Omega; or the real curve from the datasheet.
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec4body"
+                  aria-expanded="false"
+                  aria-controls="sec4body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 4 &mdash; Coupling Constructions: Co-planar, Stacked and Reflective
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <p class="m3-p">
+                    Given two dies on two separate lead frames, the manufacturer has to decide how
+                    to point one at the other. Three arrangements dominate. Each is a different
+                    trade-off between how much light arrives (which sets CTR), how far apart the
+                    two conductors are (which sets isolation), and how much they &ldquo;see&rdquo;
+                    each other electrically (which sets input&ndash;output capacitance and
+                    common-mode immunity).
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/coupling-constructions.png"
+                      alt="Three panels. A: co-planar construction with LED and detector side by side under a reflective dome, light reaching the detector by reflection. B: face-to-face construction with the detector directly above the LED and an insulating film between. C: face-to-face with only clear silicone in the gap, and a void marked as a partial discharge risk"
+                      loading="lazy"
+                      width="1080"
+                      height="530"
+                    />
+                    <figcaption>
+                      <strong>Figure 4.</strong> The three common coupling constructions.
+                      Co-planar parts use a long internal path and rely on reflection. Stacked
+                      parts face the dies directly across a film or silicone layer.
+                    </figcaption>
+                  </figure>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Construction</th>
+                          <th>How light gets across</th>
+                          <th>Strengths</th>
+                          <th>Weaknesses</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Co-planar / reflective dome</strong></td>
+                          <td>
+                            Dies side by side on one plane; a clear dome with a white reflective
+                            outer surface bounces light onto the detector
+                          </td>
+                          <td>
+                            Long internal isolation path, low C<sub>IO</sub>, very high isolation
+                            ratings possible
+                          </td>
+                          <td>
+                            Lower coupling efficiency, so lower CTR or more I<sub>F</sub> needed for
+                            the same output
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><strong>Face-to-face with insulating film</strong></td>
+                          <td>Dies stacked facing each other; a transparent polyimide film between</td>
+                          <td>
+                            Highest coupling efficiency. The film is a pre-qualified, uniform barrier
+                            with a defined DTI.
+                          </td>
+                          <td>
+                            Larger overlapping area, so higher C<sub>IO</sub>. The film&ndash;silicone
+                            interfaces must be void-free.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><strong>Face-to-face, silicone gap</strong></td>
+                          <td>Dies stacked facing each other; the gap is filled with clear silicone</td>
+                          <td>High efficiency, simple, low cost</td>
+                          <td>
+                            Isolation depends on gap control and void-free filling. Voids cause
+                            partial discharge (Section 5).
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/photon-coupling-efficiency.gif"
+                      alt="Animation: photons stream from an LED in two constructions. In the face-to-face construction many photons reach the detector directly above. In the co-planar construction photons must reflect off the dome and fewer land on the detector"
+                      loading="lazy"
+                      width="800"
+                      height="420"
+                    />
+                    <figcaption>
+                      <strong>Animation 1.</strong> Same LED, same detector, different geometry. The
+                      live counters show what fraction of the emitted photons land on the detector
+                      in each construction. This is a simplified 2-D ray model: absolute numbers
+                      are illustrative, but the ranking is real.
+                    </figcaption>
+                  </figure>
+
+                  <h3 class="m3-h3">
+                    The hidden capacitor: C<sub>IO</sub> and common-mode transients
+                  </h3>
+                  <p class="m3-p">
+                    Two lead frames and two dies separated by an insulator form a small capacitor,
+                    the
+                    <span
+                      class="gloss"
+                      data-def="Input-to-output capacitance C_IO: the parasitic capacitance between all input pins shorted together and all output pins shorted together. Typically 0.5 to 1 pF for DIP phototransistor parts."
+                      >input&ndash;output capacitance C<sub>IO</sub></span
+                    >. It is typically well under a picofarad to about 1 pF, which sounds harmless
+                    until the voltage between the two grounds moves quickly. Every volt per second
+                    of common-mode slew pushes a displacement current through the barrier:
+                  </p>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">i<sub>CM</sub> = C<sub>IO</sub> &times; dV<sub>CM</sub>/dt</div>
+                    <ul>
+                      <li>i<sub>CM</sub> &mdash; displacement current injected across the barrier (A)</li>
+                      <li>C<sub>IO</sub> &mdash; input-to-output capacitance (F)</li>
+                      <li>
+                        dV<sub>CM</sub>/dt &mdash; slew rate of the voltage between the input and
+                        output grounds (V/s)
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; 1 pF meets a fast switching node</h5>
+                    C<sub>IO</sub> = 1 pF, and the output side sits on a half-bridge switch node
+                    slewing 10 kV/&micro;s (10<sup>10</sup> V/s).
+                    <ol>
+                      <li>
+                        i<sub>CM</sub> = 1 &times; 10<sup>&minus;12</sup> F &times; 10<sup>10</sup>
+                        V/s = <strong>10 mA</strong>.
+                      </li>
+                      <li>
+                        A phototransistor&rsquo;s photocurrent is only micro-amps (e.g. I<sub>C</sub>
+                        = 2 mA at h<sub>FE</sub> &asymp; 400 gives I<sub>PH</sub> &asymp; 5
+                        &micro;A). Even a small fraction of 10 mA landing on the base node is a
+                        false &ldquo;light&rdquo; signal thousands of times larger than the real
+                        one.
+                      </li>
+                      <li>
+                        This is why high-CMTI parts use constructions that minimise and
+                        <em>steer</em> this current: a transparent conductive
+                        <span
+                          class="gloss"
+                          data-def="Faraday shield: a transparent conductive layer over the detector, tied to the output ground, that intercepts displacement current before it reaches the sensitive photodiode node."
+                          >Faraday shield</span
+                        >
+                        over the detector, tied to output ground, plus low-impedance photodiode
+                        front ends.
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">
+                      Calculator: Barrier Displacement Current
+                    </h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Worst-case assumption: the whole C<sub>IO</sub> current reaches the sensitive
+                      detector node (a shielded part diverts most of it).
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field">
+                          <label for="m3Cio"><span>C<sub>IO</sub></span> <output id="m3CioOut">0.6 pF</output></label>
+                          <input type="range" id="m3Cio" min="0.1" max="2" step="0.1" value="0.6" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Dvdt"><span>Common-mode slew dV/dt</span> <output id="m3DvdtOut">10 kV/&micro;s</output></label
+                          >
+                          <input type="range" id="m3Dvdt" min="1" max="150" step="1" value="10" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Iph"><span>Signal photocurrent I<sub>PH</sub></span> <output id="m3IphOut">5 &micro;A</output></label
+                          >
+                          <input type="range" id="m3Iph" min="1" max="100" step="1" value="5" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Dv"><span>Voltage step &Delta;V</span> <output id="m3DvOut">400 V</output></label>
+                          <input type="range" id="m3Dv" min="50" max="1500" step="50" value="400" />
+                        </div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row">
+                          <span>Displacement current i<sub>CM</sub></span><b id="m3Icm">&ndash;</b>
+                        </div>
+                        <div class="m3-res-row">
+                          <span>Ratio i<sub>CM</sub> / I<sub>PH</sub></span><b id="m3Ratio">&ndash;</b>
+                        </div>
+                        <div class="m3-res-row">
+                          <span>Charge per edge Q = C<sub>IO</sub>&middot;&Delta;V</span
+                          ><b id="m3Q">&ndash;</b>
+                        </div>
+                        <div class="m3-res-row">
+                          <span>Edge duration &Delta;V / (dV/dt)</span><b id="m3Tedge">&ndash;</b>
+                        </div>
+                        <div style="margin-top: 8px"><span id="m3CioVerdict" class="m3-verdict">&ndash;</span></div>
+                        <p class="m3-note" id="m3CioNote"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="warning-box" style="margin-top: 1.2rem">
+                    <strong>Design trap &mdash; &ldquo;it passed hi-pot, so it will survive the
+                      inverter&rdquo;.</strong>
+                    Hi-pot tests the barrier&rsquo;s <em>strength</em> at 50/60 Hz. Common-mode
+                    immunity is about its <em>capacitance</em> at kV/&micro;s. A part can hold off 5
+                    kV<sub>rms</sub> and still glitch on every edge of a SiC half-bridge. CMTI is a
+                    separate datasheet line; see Module 6.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec5body"
+                  aria-expanded="false"
+                  aria-controls="sec5body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 5 &mdash; Isolation Barrier Materials
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+                  <p class="m3-p">
+                    Four materials do most of the insulating inside an optocoupler. They must be
+                    transparent to near-infrared (where they sit in the optical path), bond reliably
+                    to each other and to metal, survive solder reflow, and hold off kilovolts for
+                    decades without eroding.
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Material</th>
+                          <th>Role</th>
+                          <th>Dielectric strength (representative)</th>
+                          <th>Strengths</th>
+                          <th>Watch-outs</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Polyimide film</strong></td>
+                          <td>Thin transparent sheet between facing dies</td>
+                          <td>&asymp; 150&ndash;300 kV/mm (thin-film test values)</td>
+                          <td>
+                            Very high strength, uniform thickness, stable to &gt; 300 &deg;C,
+                            pre-tested before assembly
+                          </td>
+                          <td>Adhesion at film edges; moisture absorption; slight IR loss</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Clear silicone</strong></td>
+                          <td>Optical gel or elastomer filling the light path</td>
+                          <td>&asymp; 15&ndash;25 kV/mm</td>
+                          <td>
+                            Excellent IR transparency, stays compliant over temperature (low stress
+                            on wire bonds)
+                          </td>
+                          <td>Voids and bubbles during dispensing; weaker bond to epoxy</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Clear epoxy</strong></td>
+                          <td>Inner transparent mould (light pipe) in double-mould parts</td>
+                          <td>&asymp; 15&ndash;30 kV/mm</td>
+                          <td>Rigid, precise geometry, good light guide</td>
+                          <td>Higher stress on dies; yellowing and cracking at high temperature</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Opaque mould compound</strong></td>
+                          <td>Outer body; defines external surfaces</td>
+                          <td>&asymp; 15&ndash;30 kV/mm</td>
+                          <td>Blocks ambient light; mechanical strength; low moisture uptake</td>
+                          <td>
+                            Its
+                            <span
+                              class="gloss"
+                              data-def="Comparative Tracking Index: the voltage at which a material surface forms a conductive carbon track under a standard drip test (IEC 60112). Higher CTI permits shorter creepage."
+                              >CTI</span
+                            >
+                            sets the material group used for external creepage
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><em>For comparison: air</em></td>
+                          <td>Clearance between pins</td>
+                          <td>&asymp; 3 kV/mm (mm-scale gaps, sea level)</td>
+                          <td>Self-healing after a flashover</td>
+                          <td>Falls with altitude; needs large distances</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">
+                    Dielectric strength depends strongly on thickness, test method, temperature and
+                    humidity. Use these values only to build intuition; the component&rsquo;s
+                    certified ratings (V<sub>IORM</sub>, V<sub>IOTM</sub>, V<sub>ISO</sub>) are what
+                    you design to.
+                  </p>
+
+                  <h3 class="m3-h3">Breakdown strength is not the design limit &mdash; partial discharge is</h3>
+                  <p class="m3-p">
+                    If polyimide holds hundreds of kV/mm, why is a part with a 0.4 mm DTI only
+                    rated for &asymp; 900 V<sub>peak</sub> continuous working voltage? Because
+                    insulation rarely fails by clean instantaneous breakdown in service. It fails by
+                    <span
+                      class="gloss"
+                      data-def="Partial discharge (PD): a localized electrical discharge that only partially bridges the insulation, typically inside a gas-filled void or along an interface. Repeated PD erodes the insulation and eventually causes full breakdown."
+                      >partial discharge</span
+                    >
+                    (PD) and slow erosion. Any gas-filled void, crack or delaminated interface inside
+                    the solid sees a <em>higher</em> field than the surrounding material. For a thin
+                    disc-shaped void across the field, it is roughly &epsilon;<sub>r</sub> times
+                    higher (&epsilon;<sub>r</sub> &asymp; 3&ndash;4 for epoxy or polyimide). And gas
+                    breaks down far more easily than solid. Each AC half-cycle above the
+                    <em>PD inception voltage</em> produces tiny discharges that carbonise and erode
+                    the void walls. Over months or years this grows &ldquo;electrical trees&rdquo;
+                    that eventually bridge the barrier.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/partial-discharge-void.gif"
+                      alt="Animation: two insulation samples between electrodes under a rising AC voltage. The void-free sample shows no discharge; the sample with a gas void flashes each half-cycle once the voltage exceeds the partial discharge inception level, with pulses marked on a waveform trace"
+                      loading="lazy"
+                      width="800"
+                      height="450"
+                    />
+                    <figcaption>
+                      <strong>Animation 2.</strong> Same material, same thickness. As the AC test
+                      voltage ramps up, the sample with a microscopic gas void starts discharging
+                      every half-cycle once the inception level is crossed. The void-free sample
+                      stays quiet. This is exactly what the production PD test of IEC 60747-5-5
+                      screens for (Section 9).
+                    </figcaption>
+                  </figure>
+
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; field across a 0.4 mm barrier</h5>
+                    A reinforced part has DTI = 0.4 mm, V<sub>IORM</sub> = 890 V<sub>peak</sub>
+                    and V<sub>IOTM</sub> = 6000 V<sub>peak</sub> (representative values for a
+                    wide-body optocoupler).
+                    <ol>
+                      <li>
+                        Continuous working stress: E = 890 V / 0.4 mm &asymp;
+                        <strong>2.2 kV/mm</strong>, about 1 % of polyimide&rsquo;s short-term
+                        strength.
+                      </li>
+                      <li>
+                        Transient over-voltage: E = 6000 V / 0.4 mm = <strong>15 kV/mm</strong>.
+                        This is still below bulk breakdown, but only for the specified short
+                        duration.
+                      </li>
+                      <li>
+                        The large apparent margin is <em>deliberate</em>. It keeps any residual
+                        void below PD inception over 20+ years, at temperature and humidity. That
+                        margin is what V<sub>IORM</sub> certifies.
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Calculator: Electric Field Across the Barrier</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Compare the average field in the insulation with the material&rsquo;s
+                      representative short-term strength. Remember: the <em>certified</em>
+                      working voltage, not this ratio, is your design limit.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field">
+                          <label for="m3Vpk"><span>Voltage across barrier (peak)</span> <output id="m3VpkOut">890 V</output></label>
+                          <input type="range" id="m3Vpk" min="100" max="10000" step="10" value="890" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Dti"><span>DTI</span> <output id="m3DtiOut">0.40 mm</output></label>
+                          <input type="range" id="m3Dti" min="0.02" max="2" step="0.01" value="0.4" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Mat">Insulating material</label>
+                          <select id="m3Mat">
+                            <option value="200">Polyimide film (&asymp; 200 kV/mm)</option>
+                            <option value="20">Clear silicone (&asymp; 20 kV/mm)</option>
+                            <option value="22">Epoxy mould compound (&asymp; 22 kV/mm)</option>
+                            <option value="3">Air, mm-scale gap (&asymp; 3 kV/mm)</option>
+                          </select>
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3Er"><span>Permittivity &epsilon;<sub>r</sub> of solid (for void field)</span> <output id="m3ErOut">3.5</output></label>
+                          <input type="range" id="m3Er" min="1" max="5" step="0.1" value="3.5" />
+                        </div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>Average field E = V / d</span><b id="m3E">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Utilisation of short-term strength</span><b id="m3Util">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Field inside a thin void (&asymp; &epsilon;<sub>r</sub>&middot;E)</span><b id="m3Ev2">&ndash;</b></div>
+                        <div style="margin-top: 8px"><span id="m3FieldVerdict" class="m3-verdict">&ndash;</span></div>
+                        <p class="m3-note" id="m3FieldNote"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="info-box" style="margin-top: 1.2rem">
+                    <strong>Pro tip &mdash; ask how the barrier is qualified.</strong> For a
+                    reinforced application, ask the vendor (or read the certificate) for: DTI, the
+                    insulation material, whether 100 % production PD testing is performed (IEC
+                    60747-5-5 method b), and the partial-discharge limit (typically &lt; 5 pC). A
+                    UL 1577 withstand rating alone does not tell you any of this.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec6body"
+                  aria-expanded="false"
+                  aria-controls="sec6body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 6 &mdash; Creepage, Clearance and DTI at Package Level
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+                  <p class="m3-p">
+                    Safety standards describe an isolation barrier with three independent
+                    distances. The package construction fixes all three for the component. Your PCB
+                    layout can only make the external ones worse, never better.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/creepage-clearance-dti.png"
+                      alt="Side view of an SMD optocoupler on a PCB showing clearance as the straight air path between input and output leads, creepage as the path along package and board surfaces between pads, and DTI as the internal distance through solid insulation between the two lead frames"
+                      loading="lazy"
+                      width="960"
+                      height="480"
+                    />
+                    <figcaption>
+                      <strong>Figure 5.</strong> Clearance (through air), creepage (along surfaces)
+                      and DTI (through solid insulation) are three different distances, protecting
+                      against three different failure mechanisms.
+                    </figcaption>
+                  </figure>
+                  <div class="adv-grid">
+                    <div class="adv-card">
+                      <h5>Clearance &mdash; protects against flashover</h5>
+                      <p>
+                        Shortest distance <strong>through air</strong> between conductors on the two
+                        sides. Sized for the <em>peak transient</em> (impulse) voltage from the
+                        overvoltage category, corrected for altitude above 2000 m.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Creepage &mdash; protects against tracking</h5>
+                      <p>
+                        Shortest distance <strong>along insulating surfaces</strong>. Sized for the
+                        <em>rms working voltage</em>, pollution degree and the material group (CTI)
+                        of the surface. Contamination plus moisture slowly forms carbon tracks.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>DTI &mdash; protects against solid breakdown</h5>
+                      <p>
+                        Shortest distance <strong>through solid insulation</strong> inside the
+                        package. Many end-product standards require &ge; 0.4 mm for supplementary
+                        or reinforced solid insulation. Thin-sheet film constructions may instead
+                        qualify by layer-count and type testing.
+                      </p>
+                    </div>
+                  </div>
+
+                  <h3 class="m3-h3">Material group: why the mould compound&rsquo;s CTI matters</h3>
+                  <p class="m3-p">
+                    Required creepage depends on how easily the insulating surface tracks, measured
+                    as the Comparative Tracking Index (IEC 60112) and grouped as follows:
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Material group</th>
+                          <th>CTI range</th>
+                          <th>Typical where you meet it</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>I</td><td>CTI &ge; 600</td><td>Special high-CTI mould compounds and laminates</td></tr>
+                        <tr><td>II</td><td>400 &le; CTI &lt; 600</td><td>Better mould compounds; high-CTI FR-4 grades</td></tr>
+                        <tr><td>IIIa</td><td>175 &le; CTI &lt; 400</td><td>Many optocoupler bodies; standard FR-4</td></tr>
+                        <tr><td>IIIb</td><td>100 &le; CTI &lt; 175</td><td>Lowest-grade materials</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">
+                    The optocoupler datasheet states its body&rsquo;s CTI or material group in the
+                    &ldquo;insulation characteristics&rdquo; table. Use the lower of the package and
+                    PCB groups for a creepage path that runs across both surfaces.
+                  </p>
+
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; does the package spacing meet a 230 V reinforced requirement?</h5>
+                    Product: 230 V<sub>AC</sub> mains, working voltage 250 V<sub>rms</sub>,
+                    overvoltage category II, pollution degree 2, material group IIIa, reinforced
+                    insulation needed. Values from the IEC 60664-1 tables (confirm against the
+                    edition and end-product standard you certify to):
+                    <ol>
+                      <li>
+                        Creepage, basic, 250 V, PD2, group III &rarr; 2.5 mm. Reinforced = 2
+                        &times; basic = <strong>5.0 mm</strong>.
+                      </li>
+                      <li>
+                        Rated impulse for OVC II at 230 V = 2.5 kV &rarr; basic clearance 1.5 mm.
+                        Reinforced uses the next impulse step (4 kV) &rarr; <strong>3.0 mm</strong>.
+                      </li>
+                      <li>
+                        Standard 7.62 mm DIP (&asymp; 7 mm external): passes with margin. SOP-4
+                        (&asymp; 5 mm): meets it exactly, with no margin for board-level losses. Narrow
+                        SO-8 (&asymp; 4 mm): fails.
+                      </li>
+                      <li>
+                        Same product in an industrial cabinet (pollution degree 3): basic creepage
+                        becomes 4.0 mm, reinforced 8.0 mm. Only the wide-lead DIP, stretched SO or
+                        wide-body SO-16 packages now qualify.
+                      </li>
+                    </ol>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Design trap &mdash; internal vs external.</strong> Internal
+                    distances (along the die-to-film interface, through the film) are covered by the
+                    component&rsquo;s certification, <em>provided you use it within its
+                    ratings</em>. External creepage and clearance must still be checked against
+                    <em>your</em> end-product standard, pollution degree and altitude. Medical
+                    equipment (IEC 60601-1, 2&nbsp;&times;&nbsp;MOPP) typically needs 8 mm at 250 V,
+                    which rules out most standard packages. See Module 16.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec7body"
+                  aria-expanded="false"
+                  aria-controls="sec7body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 7 &mdash; Package Families and How to Choose One
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+                  <p class="m3-p">
+                    The same die pair is often sold in several packages. The package decides the
+                    external creepage and clearance, the maximum certifiable working voltage, the
+                    assembly process, and the board area. Figure 6 lines up the common families at
+                    the same scale.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/package-families-scale.png"
+                      alt="Seven optocoupler packages drawn to the same scale in top view on a 1 mm grid: 4-pin DIP, 6-pin DIP, 6-pin DIP with 400-mil wide leads, SOP-4, narrow SO-8, stretched SO-6/SO-8, and wide-body SO-16, each annotated with lead span and representative creepage"
+                      loading="lazy"
+                      width="1080"
+                      height="630"
+                    />
+                    <figcaption>
+                      <strong>Figure 6.</strong> Package families to scale. What increases creepage
+                      is the lead span across the body, not the pin count. &ldquo;Stretched&rdquo;
+                      SO packages keep a small footprint along the rows while pushing the two rows
+                      apart to reach &ge; 8 mm.
+                    </figcaption>
+                  </figure>
+                  <div class="table-scroll">
+                    <table class="data-table" id="m3PkgTable">
+                      <thead>
+                        <tr>
+                          <th>Package</th>
+                          <th>Mount</th>
+                          <th>Creepage / clearance (typ.)</th>
+                          <th>Typical DTI</th>
+                          <th>Typical V<sub>IORM</sub> range</th>
+                          <th>Board area (approx.)</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody id="m3PkgBody"></tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">
+                    Representative values across several vendors. The same package outline can be
+                    certified to different values by different manufacturers. Always copy the
+                    certified figures from the exact part&rsquo;s datasheet into your safety file.
+                  </p>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Interactive: Package Comparator</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Enter your spacing and assembly requirements. The table above highlights
+                      packages that pass (green edge) and dims those that fail, and the summary
+                      recommends the smallest passing package.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field">
+                          <label for="m3ReqCr"><span>Required creepage</span> <output id="m3ReqCrOut">5.0 mm</output></label>
+                          <input type="range" id="m3ReqCr" min="2" max="12" step="0.5" value="5" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3ReqCl"><span>Required clearance</span> <output id="m3ReqClOut">3.0 mm</output></label>
+                          <input type="range" id="m3ReqCl" min="1" max="12" step="0.5" value="3" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3ReqMargin"><span>Board-layout margin to keep</span> <output id="m3ReqMarginOut">0.5 mm</output></label>
+                          <input type="range" id="m3ReqMargin" min="0" max="2" step="0.1" value="0.5" />
+                        </div>
+                        <div class="m3-field">
+                          <label for="m3ReqMount">Assembly</label>
+                          <select id="m3ReqMount">
+                            <option value="any">Either</option>
+                            <option value="SMD">Reflow SMD only</option>
+                            <option value="THT">Through-hole only</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>Packages passing</span><b id="m3PkgCount">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Smallest passing package</span><b id="m3PkgBest">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Its creepage margin</span><b id="m3PkgMargin">&ndash;</b></div>
+                        <div style="margin-top: 8px"><span id="m3PkgVerdict" class="m3-verdict">&ndash;</span></div>
+                        <p class="m3-note" id="m3PkgNote"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 class="m3-h3">Beyond spacing: the other package decisions</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card">
+                      <h5>DIP vs SMD versions of the same part</h5>
+                      <p>
+                        Many DIP parts come with gull-wing leads for reflow (often an
+                        &ldquo;S&rdquo; or &ldquo;SMD&rdquo; ordering option) and a 400-mil
+                        wide-lead option (&ldquo;W&rdquo;, &ldquo;T&rdquo;, option 6 &mdash; vendor
+                        specific). Isolation ratings can differ between options.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Channels per package</h5>
+                      <p>
+                        Dual and quad packages save area. However, adjacent channels inside one
+                        body are <em>not</em> isolated from each other to the same level (or at
+                        all) unless the datasheet states it.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>Thermal and power</h5>
+                      <p>
+                        Smaller packages have higher R<sub>&theta;JA</sub> and lower total power
+                        ratings. Gate-driver parts pushing amps of peak current need the wider
+                        bodies partly for heat, not only for spacing.
+                      </p>
+                    </div>
+                    <div class="adv-card limit">
+                      <h5>Pin-compatible is not certificate-compatible</h5>
+                      <p>
+                        A second-source part in the same outline may have a different CTI, DTI or
+                        V<sub>IORM</sub>. Re-check the insulation table before approving an
+                        alternate.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec8body"
+                  aria-expanded="false"
+                  aria-controls="sec8body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 8 &mdash; Lead Frames, Plating and Assembly Constraints
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+                  <p class="m3-p">
+                    The lead frame is the stamped or etched metal skeleton that carries the dies
+                    and becomes the pins. Its material and finish matter to you because they set
+                    solderability, whisker risk and how the package survives your reflow profile.
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Aspect</th>
+                          <th>Common choices</th>
+                          <th>Why it matters to the board designer</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Lead-frame alloy</td>
+                          <td>Copper alloys; iron&ndash;nickel (Alloy 42) in some packages</td>
+                          <td>
+                            Copper conducts heat better; Fe&ndash;Ni matches silicon expansion but
+                            is less solderable and magnetic
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Lead finish</td>
+                          <td>Matte tin; NiPdAu pre-plated frames</td>
+                          <td>Solderability and shelf life; tin whisker mitigation in long-life products</td>
+                        </tr>
+                        <tr>
+                          <td>Die attach</td>
+                          <td>Conductive (silver-filled) epoxy</td>
+                          <td>Thermal path from the dies to the pins</td>
+                        </tr>
+                        <tr>
+                          <td>Wire bond</td>
+                          <td>Gold (or copper) wire, &asymp; 25&ndash;30 &micro;m</td>
+                          <td>Wires sit in the compliant silicone; harsh thermal cycling can fatigue them</td>
+                        </tr>
+                        <tr>
+                          <td>Moisture sensitivity</td>
+                          <td>MSL rating per J-STD-020 (SMD parts)</td>
+                          <td>
+                            Absorbed moisture flashes to steam in reflow and can delaminate internal
+                            interfaces. Delamination can open an internal creepage path.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="warning-box" style="margin-top: 1.2rem">
+                    <strong>Design trap &mdash; reflow and the barrier.</strong> Popcorning or
+                    micro-delamination after an out-of-spec reflow, or reflowing a DIP part that is
+                    rated for wave or hand soldering only, may not show up as an electrical failure
+                    on the line. It can silently reduce the barrier&rsquo;s PD performance. Respect
+                    the datasheet&rsquo;s soldering conditions and MSL floor life, and bake per
+                    J-STD-033 when it is exceeded.
+                  </div>
+                  <div class="info-box" style="margin-top: 1rem">
+                    <strong>Pro tip.</strong> Through-hole DIP datasheets usually give a lead
+                    soldering limit such as 260 &deg;C for 10 s at a stated distance from the body.
+                    That is a wave or hand-soldering rating, not permission to run the DIP through
+                    a full convection reflow profile. Use the SMD (gull-wing) ordering option for
+                    reflow lines.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec9body"
+                  aria-expanded="false"
+                  aria-controls="sec9body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 9 &mdash; Manufacturing, Production Test and CTR Binning
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+                  <p class="m3-p">
+                    LED and detector wafers are fabricated separately. Often they come from
+                    different fabs and different materials systems. They meet for the first time in
+                    back-end assembly. Watch the sequence below, then read how each step shows up in
+                    the datasheet.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/assembly-sequence.gif"
+                      alt="Animation of eight assembly steps: lead frames, die attach, wire bond, insulating film, inner clear mould, outer mould, trim and form, and 100 percent test with a pass result and CTR rank B"
+                      loading="lazy"
+                      width="760"
+                      height="440"
+                    />
+                    <figcaption>
+                      <strong>Animation 3.</strong> Assembly of a face-to-face, double-mould
+                      optocoupler in eight steps. A progress strip at the top shows the current
+                      step.
+                    </figcaption>
+                  </figure>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Step</th>
+                          <th>What happens</th>
+                          <th>What it controls</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>1. Wafer fab &amp; dicing</td><td>LED (III&ndash;V) and detector (Si) wafers probed, sawn into dies</td><td>Emitter efficiency, detector gain &rarr; CTR spread</td></tr>
+                        <tr><td>2. Die attach</td><td>Dies bonded to their lead-frame pads</td><td>Thermal path, die position (optical alignment)</td></tr>
+                        <tr><td>3. Wire bond</td><td>Die pads connected to lead fingers</td><td>Reliability under thermal cycling</td></tr>
+                        <tr><td>4. Barrier / optical path</td><td>Film placed or silicone dispensed; frames brought into position</td><td>DTI, voids, coupling efficiency</td></tr>
+                        <tr><td>5. Moulding</td><td>Inner clear and outer opaque transfer moulding</td><td>Light pipe, ambient-light rejection, external creepage</td></tr>
+                        <tr><td>6. Trim, form, plate</td><td>Tie bars removed, leads formed (DIP or gull-wing)</td><td>Lead span, which sets external creepage and clearance</td></tr>
+                        <tr><td>7. Isolation test</td><td>100 % hi-pot and (for VDE/IEC-certified parts) PD test</td><td>Screens barrier defects</td></tr>
+                        <tr><td>8. Electrical test &amp; rank</td><td>V<sub>F</sub>, leakage, V<sub>CE(sat)</sub>, CTR measured; parts sorted</td><td>CTR rank bins, datasheet limits</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <h3 class="m3-h3">Two different production isolation tests</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card">
+                      <h5>UL 1577 withstand (hi-pot)</h5>
+                      <p>
+                        The rating V<sub>ISO</sub> (e.g. 5000 V<sub>rms</sub>) is a 1-minute
+                        type-test value. In production each part is typically stressed at
+                        &asymp; 1.2 &times; V<sub>ISO</sub> for 1 s. Passing proves the barrier
+                        withstands a short over-voltage today. It says nothing about decades at the
+                        working voltage.
+                      </p>
+                    </div>
+                    <div class="adv-card">
+                      <h5>IEC 60747-5-5 partial discharge</h5>
+                      <p>
+                        For parts certified with a working voltage V<sub>IORM</sub>, every unit is
+                        tested at V<sub>PR</sub> = 1.875 &times; V<sub>IORM</sub> for 1 s (method
+                        b) with a PD limit of &lt; 5 pC. Sample and type tests use a longer
+                        duration at a lower factor (method a, 1.6 &times; V<sub>IORM</sub>). This
+                        is the test that screens the voids from Section 5.
+                      </p>
+                    </div>
+                  </div>
+                  <p class="m3-note">
+                    Factors as commonly printed in optocoupler datasheets&rsquo; insulation tables.
+                    The governing values are in the standard edition cited on the part&rsquo;s
+                    certificate.
+                  </p>
+
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/manufacturing-test-flow.gif"
+                      alt="Animation of parts moving along a production line through nine stations; a few parts are rejected at hi-pot and the rest are sorted into CTR rank bins A, B, C and D with running counters"
+                      loading="lazy"
+                      width="920"
+                      height="400"
+                    />
+                    <figcaption>
+                      <strong>Animation 4.</strong> Every part is isolation-tested; a small fraction
+                      is scrapped. Survivors are measured and dropped into CTR rank bins, which is
+                      why one part number can ship with very different CTR.
+                    </figcaption>
+                  </figure>
+
+                  <h3 class="m3-h3">CTR binning: what the rank letter buys you</h3>
+                  <p class="m3-p">
+                    Coupling efficiency, LED efficiency and detector gain all vary from lot to lot,
+                    so raw CTR spreads over nearly an order of magnitude. Rather than scrap that
+                    spread, manufacturers measure every part and sell it in guaranteed
+                    <span
+                      class="gloss"
+                      data-def="CTR rank (bin): a guaranteed minimum-to-maximum CTR window, measured at a stated I_F and V_CE, sold under an ordering suffix or marked letter."
+                      >rank windows</span
+                    >.
+                  </p>
+                  <figure class="m3-fig">
+                    <img
+                      src="images/03/ctr-rank-binning.png"
+                      alt="Histogram of CTR values in a production lot from about 50 to 700 percent, with overlapping rank windows A 80 to 160 percent, B 130 to 260, C 200 to 400 and D 300 to 600, and the unranked specification 50 to 600 percent"
+                      loading="lazy"
+                      width="1100"
+                      height="505"
+                    />
+                    <figcaption>
+                      <strong>Figure 7.</strong> One process, many ranks. The rank windows overlap,
+                      so a part testing at 250 % could legally ship as rank B or rank C. Unranked
+                      parts are only guaranteed the full 50&ndash;600 % span.
+                    </figcaption>
+                  </figure>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; what does ordering a rank save?</h5>
+                    Requirement: guarantee I<sub>C</sub> &ge; 1 mA at end of life. Budget
+                    &times;0.5 for LED ageing and &times;0.8 for temperature (Module 9 refines
+                    these).
+                    <ol>
+                      <li>
+                        Unranked PC817 (CTR<sub>min</sub> = 50 %): I<sub>F</sub> = 1 mA / (0.5
+                        &times; 0.5 &times; 0.8) = <strong>5.0 mA</strong>.
+                      </li>
+                      <li>
+                        Rank B (CTR<sub>min</sub> = 130 %): I<sub>F</sub> = 1 mA / (1.3 &times; 0.5
+                        &times; 0.8) &asymp; <strong>1.9 mA</strong>, a 62 % cut in LED current.
+                        Lower I<sub>F</sub> also slows LED ageing.
+                      </li>
+                      <li>
+                        The saving is only real if the <em>ordering code</em> in your BOM locks the
+                        rank. A generic &ldquo;PC817&rdquo; line lets purchasing buy any rank.
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec10body"
+                  aria-expanded="false"
+                  aria-controls="sec10body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 10 &mdash; Reading Construction From the Datasheet
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+                  <p class="m3-p">
+                    Manufacturers rarely publish cross-sections, but the construction leaves
+                    fingerprints all over the datasheet. You can infer most of this module&rsquo;s
+                    content from five places:
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Datasheet location</th>
+                          <th>What it reveals about construction</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Description line / block diagram</td>
+                          <td>LED material (GaAs, AlGaAs), detector type, Faraday shield (&ldquo;internal shield&rdquo;)</td>
+                        </tr>
+                        <tr>
+                          <td>Insulation characteristics table</td>
+                          <td>External creepage and clearance, DTI, CTI and material group, V<sub>IORM</sub>, V<sub>IOTM</sub>, V<sub>PR</sub> test factors</td>
+                        </tr>
+                        <tr>
+                          <td>Electrical table: C<sub>IO</sub>, R<sub>IO</sub></td>
+                          <td>Face-to-face vs co-planar (C<sub>IO</sub>), barrier quality (R<sub>IO</sub> &asymp; 10<sup>11</sup> &Omega; or more)</td>
+                        </tr>
+                        <tr>
+                          <td>CMTI / CMR specification</td>
+                          <td>Shielding and detector front-end design</td>
+                        </tr>
+                        <tr>
+                          <td>Ordering information &amp; package drawing</td>
+                          <td>CTR ranks, lead-form options, wide-lead variants, MSL and soldering limits</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <h3 class="m3-h3">Questions to ask a vendor for a safety-critical barrier</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card"><h5>1. Construction</h5><p>Co-planar or face-to-face? Film, silicone, or both?</p></div>
+                    <div class="adv-card"><h5>2. DTI and material</h5><p>Minimum DTI and the insulation material specification.</p></div>
+                    <div class="adv-card"><h5>3. PD testing</h5><p>Is 100 % production PD testing done (method b)? Limit in pC?</p></div>
+                    <div class="adv-card"><h5>4. Certificates</h5><p>UL 1577 file number and VDE/IEC 60747-5-5 certificate, with the ordering options they cover.</p></div>
+                    <div class="adv-card"><h5>5. Ageing data</h5><p>CTR-degradation curves vs I<sub>F</sub> and temperature (needed in Module 9).</p></div>
+                    <div class="adv-card"><h5>6. Change control</h5><p>Will you be notified (PCN) of assembly-site, material or construction changes?</p></div>
+                  </div>
+
+                  <h3 class="m3-h3">Common construction-related field failures</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card limit"><h5>Gradual CTR loss</h5><p>LED light-output degradation, accelerated by high I<sub>F</sub> and temperature. Module 12.</p></div>
+                    <div class="adv-card limit"><h5>Barrier breakdown after years</h5><p>PD erosion from voids or delamination, often after reflow damage or repeated hi-pot testing.</p></div>
+                    <div class="adv-card limit"><h5>Intermittent output glitches</h5><p>Common-mode displacement current through C<sub>IO</sub> in unshielded parts near fast switch nodes.</p></div>
+                    <div class="adv-card limit"><h5>Surface tracking between pins</h5><p>External creepage too small for the real pollution degree; contamination and condensation.</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec11body"
+                  aria-expanded="false"
+                  aria-controls="sec11body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 11 &mdash; Key Takeaways and Design Checklist
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+                  <div class="adv-grid">
+                    <div class="adv-card"><h5>Five elements</h5><p>Emitter die, detector die, two separate lead frames, an optical path, and an insulation system.</p></div>
+                    <div class="adv-card"><h5>Infrared by design</h5><p>GaAs (&asymp; 940 nm) and GaAlAs (&asymp; 850&ndash;880 nm) LEDs match silicon&rsquo;s peak response.</p></div>
+                    <div class="adv-card"><h5>Detector sets the family</h5><p>Phototransistor, Darlington, photodiode + logic, PV array, photo-TRIAC, gate driver: same LED, different die.</p></div>
+                    <div class="adv-card"><h5>Construction is a trade-off</h5><p>Face-to-face gives high CTR; co-planar gives a long internal path and low C<sub>IO</sub>.</p></div>
+                    <div class="adv-card"><h5>C<sub>IO</sub> &times; dV/dt</h5><p>1 pF at 10 kV/&micro;s is 10 mA of displacement current. Shielding, not isolation voltage, fixes CMTI.</p></div>
+                    <div class="adv-card"><h5>PD, not breakdown</h5><p>Working-voltage ratings exist to keep voids below partial-discharge inception for decades.</p></div>
+                    <div class="adv-card"><h5>Three distances</h5><p>Clearance (air), creepage (surface) and DTI (solid) protect against different failures.</p></div>
+                    <div class="adv-card"><h5>Package sets external spacing</h5><p>Lead span, not pin count, determines creepage; &ge; 8 mm needs wide-lead or stretched packages.</p></div>
+                    <div class="adv-card"><h5>Lock the rank</h5><p>CTR ranks are measured after assembly; your BOM must name the rank to get its guarantee.</p></div>
+                  </div>
+
+                  <h3 class="m3-h3">Construction &amp; package design checklist</h3>
+                  <p class="m3-note" style="margin-bottom: 10px">
+                    Tick items as you review a design. Your ticks are saved in this browser only.
+                    Use your browser&rsquo;s print function for a sign-off copy.
+                  </p>
+                  <div id="m3Checklist"></div>
+                  <button class="btn btn-secondary" type="button" id="m3ChecklistReset" style="margin-top: 8px">
+                    Reset checklist
+                  </button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 12: KNOWLEDGE CHECK ============ -->
+              <div class="section-collapsible">
+                <button
+                  class="section-header-btn collapsed"
+                  data-target="sec12body"
+                  aria-expanded="false"
+                  aria-controls="sec12body"
+                >
+                  <span
+                    ><h2 style="font-size: 1.15rem; margin: 0">
+                      Section 12 &mdash; Knowledge Check
+                    </h2></span
+                  >
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+                  <div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">
+                      Four parts: multiple choice, true/false, a matching exercise and three
+                      engineering scenarios. Score 80 % on the multiple choice to pass the module.
+                    </p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                          margin-bottom: 0.75rem;
+                          flex-wrap: wrap;
+                          gap: 8px;
+                        "
+                      >
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">
+                          Question <span id="quizCurrentNum">1</span> of
+                          <span id="quizTotalNum">12</span> &nbsp;&bull;&nbsp; Score:
+                          <span id="quizScore">0</span>/<span id="quizTotalNum2">12</span>
+                        </div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem">
+                        <div class="progress-fill" id="quizProgressBar" style="width: 8%"></div>
+                      </div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div
+                        id="quizSummary"
+                        style="
+                          display: none;
+                          margin-top: 2rem;
+                          padding: 1.5rem;
+                          border-radius: 10px;
+                          border: 1px solid var(--border);
+                          text-align: center;
+                        "
+                      >
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3>
+                      <div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">
+                        Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span>
+                      </div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">
+                        Drag each term onto its definition, or click a term and then click a
+                        definition. Wrong drops bounce back with a hint.
+                      </p>
+                      <div class="dd-wrap">
+                        <div id="ddChips"></div>
+                        <div id="ddTargets"></div>
+                      </div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">
+                        Placed: <span id="ddScore">0</span>/6
+                      </div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 1 &mdash; The SOP-4 that moved into a factory</div>
+                        <div class="scenario-body">
+                          A 230 V<sub>AC</sub> product (working voltage 250 V<sub>rms</sub>, OVC II)
+                          uses an SOP-4 optocoupler with 5.0 mm external creepage as its
+                          reinforced barrier. It passed certification for office use (pollution
+                          degree 2, material group IIIa). Marketing now wants to sell it for
+                          installation in industrial control cabinets (pollution degree 3). Is the
+                          part still acceptable, and if not, what do you change?
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m3sol1" type="button">
+                            Reveal solution
+                          </button>
+                          <div class="scenario-solution" id="m3sol1">
+                            <strong>Analysis.</strong> At pollution degree 3, group III material and
+                            250 V, IEC 60664-1 basic creepage is 4.0 mm, so reinforced = 8.0 mm.
+                            The SOP-4&rsquo;s 5.0 mm fails by 3 mm. Clearance (3.0 mm for 4 kV
+                            impulse) is still satisfied. <strong>Fix:</strong> move to a package
+                            with &ge; 8 mm creepage (stretched SO-6/SO-8, 400-mil wide-lead DIP, or
+                            wide-body SO-16). Re-route the PCB so board creepage also reaches 8 mm,
+                            which may need a slot (Module 11). Alternatively, raise the material
+                            group: a group I body and board would shorten the requirement, but that
+                            is rarely practical for both surfaces.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 2 &mdash; Glitches on a SiC half-bridge</div>
+                        <div class="scenario-body">
+                          A prototype uses a PC817 (C<sub>IO</sub> &asymp; 0.6 pF typ, no
+                          shield) to send a fault signal from the high-side gate-drive domain of an
+                          800 V SiC half-bridge. The switch node slews at 50 kV/&micro;s, and the
+                          fault line toggles falsely on many edges. Hi-pot at 5 kV<sub>rms</sub>
+                          passes. Explain the failure using construction concepts and propose a
+                          fix.
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m3sol2" type="button">
+                            Reveal solution
+                          </button>
+                          <div class="scenario-solution" id="m3sol2">
+                            <strong>Analysis.</strong> i<sub>CM</sub> = 0.6 pF &times; 50
+                            kV/&micro;s = 30 mA for the &asymp; 16 ns of each 800 V edge (800 V / 50
+                            V/ns). That is three to four orders of magnitude above the
+                            phototransistor&rsquo;s micro-amp photocurrent. With no Faraday shield,
+                            part of it reaches the base node and is amplified by h<sub>FE</sub> into
+                            a false output pulse. Hi-pot passing is irrelevant: it tests strength,
+                            not capacitance. <strong>Fix:</strong> use a shielded high-CMTI part
+                            (a gate-driver or logic optocoupler with CMTI comfortably above 50
+                            kV/&micro;s, or a digital isolator, see Module 15). Add output
+                            filtering or debounce sized to the edge duration. Keep the output-side
+                            reference tied tightly to the local domain ground.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 3 &mdash; The rank that purchasing changed</div>
+                        <div class="scenario-body">
+                          A design drives a PC817 at I<sub>F</sub> = 2 mA and needs I<sub>C</sub>
+                          &ge; 1 mA at end of life (ageing &times;0.5, temperature &times;0.8). The
+                          engineer assumed rank C (200&ndash;400 %). The BOM line reads only
+                          &ldquo;PC817&rdquo;, and the production build uses unranked parts. Does
+                          it still work?
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m3sol3" type="button">
+                            Reveal solution
+                          </button>
+                          <div class="scenario-solution" id="m3sol3">
+                            <strong>Analysis.</strong> Rank C: 2 mA &times; 2.0 &times; 0.5
+                            &times; 0.8 = 1.6 mA, which passes with 60 % margin. Unranked (50 %
+                            min): 2 &times; 0.5 &times; 0.5 &times; 0.8 = 0.4 mA, which fails.
+                            Units at the bottom of the spread will not saturate the output at end
+                            of life. <strong>Fix:</strong> put the full ordering code with the rank
+                            in the BOM and approved-vendor list, or redesign for the unranked
+                            minimum (I<sub>F</sub> = 1 / (0.5 &times; 0.5 &times; 0.8) = 5 mA,
+                            accepting faster LED ageing). Ranks are sorted after assembly
+                            (Section 9), so the rank really is a different product.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional resources -->
+              <div class="widget-container" style="margin-top: 2rem">
+                <h3 style="margin-bottom: 0.75rem">Additional Resources</h3>
+                <div class="adv-grid">
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Datasheets worth reading for construction clues</h5>
+                    <p>
+                      PC817 (4-pin DIP, CTR ranks) &bull; 4N35 (6-pin DIP, base pin) &bull; 6N135 /
+                      6N136 (split photodiode) &bull; 6N137 (logic output, shield) &bull; TLP2361
+                      (SO6L stretched package) &bull; ACPL-332J (wide SO-16 gate driver) &bull;
+                      HCNR201 (AlGaAs LED, dual detector). Read each one&rsquo;s insulation table.
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Standards referenced</h5>
+                    <p>
+                      IEC 60747-5-5 (optocoupler insulation characteristics and PD test) &bull; UL
+                      1577 (isolation withstand) &bull; IEC 60664-1 (creepage, clearance,
+                      pollution degree) &bull; IEC 60112 (CTI) &bull; J-STD-020 / J-STD-033 (MSL,
+                      handling and bake).
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Application notes</h5>
+                    <p>
+                      Broadcom &ldquo;Regulatory Guide to Isolation Circuits&rdquo; &bull; vendor
+                      application notes on optocoupler CMR/CMTI and shielding (Broadcom, Toshiba,
+                      Vishay, Renesas) &bull; vendor reliability reports with LED ageing data.
+                    </p>
+                  </div>
+                  <div class="adv-card" style="border-left-color: #818cf8">
+                    <h5>Keep learning</h5>
+                    <p>
+                      Module 4 turns this construction into physics (CTR, switching). Module 6
+                      quantifies every parameter. Module 11 carries the spacing onto the PCB.
+                      Module 16 covers the standards behind the ratings.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div
@@ -301,6 +2640,1048 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+      // ---------- Interactive 1: exploded view ----------
+      (function () {
+        var svg = document.getElementById('m3Explode');
+        var range = document.getElementById('m3ExplodeRange');
+        var playBtn = document.getElementById('m3ExplodePlay');
+        var info = document.getElementById('m3ExplodeInfo');
+        if (!svg || !range) return;
+        var NS = 'http://www.w3.org/2000/svg';
+        var DX = 46,
+          DY = -30;
+        function el(tag, attrs, parent) {
+          var e = document.createElementNS(NS, tag);
+          for (var k in attrs) e.setAttribute(k, attrs[k]);
+          if (parent) parent.appendChild(e);
+          return e;
+        }
+        function slab(g, x, y, w, h, top, front, side, opacity) {
+          var o = opacity == null ? 1 : opacity;
+          el('polygon', { points: [x, y, x + w, y, x + w + DX, y + DY, x + DX, y + DY].join(','), fill: top, 'fill-opacity': o, stroke: 'rgba(0,0,0,0.35)', 'stroke-width': 0.8 }, g);
+          el('polygon', { points: [x, y, x + w, y, x + w, y + h, x, y + h].join(','), fill: front, 'fill-opacity': o, stroke: 'rgba(0,0,0,0.35)', 'stroke-width': 0.8 }, g);
+          el('polygon', { points: [x + w, y, x + w + DX, y + DY, x + w + DX, y + DY + h, x + w, y + h].join(','), fill: side, 'fill-opacity': o, stroke: 'rgba(0,0,0,0.35)', 'stroke-width': 0.8 }, g);
+        }
+        var layers = [
+          {
+            name: 'Outer mould — top half',
+            short: 'Outer mould (top)',
+            draw: function (g) {
+              slab(g, 150, 190, 270, 40, '#374151', '#1f2937', '#111827');
+              el('circle', { cx: 175, cy: 180, r: 5, fill: '#4b5563' }, g);
+            },
+            cy: 205,
+            info: [
+              'Opaque, black transfer-moulded epoxy. It blocks ambient light that would otherwise generate false photocurrent in the detector, and gives the package its mechanical strength.',
+              'Its surface is part of every external creepage path, so its CTI (material group) appears in the datasheet insulation table.',
+              'Failure modes: cracking or delamination from moisture during reflow ("popcorning"); surface tracking if external creepage is too small for the pollution degree.',
+            ],
+          },
+          {
+            name: 'Inner clear mould (light pipe)',
+            short: 'Inner clear mould',
+            draw: function (g) {
+              slab(g, 185, 214, 200, 30, 'rgba(125,211,252,0.45)', 'rgba(56,189,248,0.35)', 'rgba(14,165,233,0.35)');
+            },
+            cy: 229,
+            info: [
+              'IR-transparent epoxy or silicone that surrounds the optical path in double-mould parts. Its outer boundary reflects stray light back towards the detector.',
+              'It is also solid insulation between the two lead frames, so its quality (no voids, good adhesion) affects partial-discharge performance.',
+              'Failure modes: voids or bubbles (PD sites), yellowing at high temperature (lower CTR), interface delamination.',
+            ],
+          },
+          {
+            name: 'Detector die + output lead frame',
+            short: 'Detector die + frame',
+            draw: function (g) {
+              slab(g, 250, 232, 250, 6, '#e2e8f0', '#cbd5e1', '#94a3b8');
+              slab(g, 270, 238, 70, 12, '#93c5fd', '#3b82f6', '#1d4ed8');
+              el('path', { d: 'M340 244 q 18 -22 40 -8', fill: 'none', stroke: '#fbbf24', 'stroke-width': 1.5 }, g);
+            },
+            cy: 238,
+            info: [
+              'The silicon detector (phototransistor, photodiode + IC, etc.) is die-attached to the output lead frame and faces the LED.',
+              'Its large light-sensitive junction sets photocurrent and, through its capacitance, the switching speed. High-CMTI parts add a transparent Faraday shield over this die.',
+              'Failure modes: wire-bond fatigue under thermal cycling; ESD damage; increased leakage (dark current) at high temperature.',
+            ],
+          },
+          {
+            name: 'Insulating film (isolation barrier)',
+            short: 'Insulating film',
+            draw: function (g) {
+              slab(g, 200, 255, 180, 4, 'rgba(250,204,21,0.75)', 'rgba(234,179,8,0.8)', 'rgba(202,138,4,0.8)');
+            },
+            cy: 257,
+            info: [
+              'A thin, transparent polyimide film (or a controlled clear-silicone gap) between the facing dies. Its thickness is the DTI (distance through insulation).',
+              'Polyimide combines very high dielectric strength with IR transparency and stability through reflow temperatures.',
+              'Failure modes: voids at the film edges or interfaces cause partial discharge that erodes the barrier over years. Screened by the IEC 60747-5-5 production PD test.',
+            ],
+          },
+          {
+            name: 'LED die + input lead frame',
+            short: 'LED die + frame',
+            draw: function (g) {
+              slab(g, 90, 272, 250, 6, '#e2e8f0', '#cbd5e1', '#94a3b8');
+              slab(g, 200, 262, 44, 10, '#f9a8d4', '#ec4899', '#be185d');
+              el('path', { d: 'M222 262 q -26 -20 -60 8', fill: 'none', stroke: '#fbbf24', 'stroke-width': 1.5 }, g);
+            },
+            cy: 272,
+            info: [
+              'The infrared LED (GaAs ≈ 940 nm or GaAlAs ≈ 850–880 nm) is die-attached to the input lead frame; a gold wire connects its top contact to the second input lead.',
+              'The LED is the part that wears out: its light output falls with time, faster at high current and temperature. This is the main cause of CTR degradation.',
+              'Failure modes: light-output degradation (Module 12), reverse-voltage or ESD damage, wire-bond lift.',
+            ],
+          },
+          {
+            name: 'Outer mould — bottom half',
+            short: 'Outer mould (bottom)',
+            draw: function (g) {
+              slab(g, 150, 282, 270, 34, '#374151', '#1f2937', '#111827');
+            },
+            cy: 299,
+            info: [
+              'The underside of the opaque body. On SMD parts it sits close to the PCB, so board contamination and conformal coating interact with this surface.',
+              'External creepage runs along the body surfaces between the two rows of leads; the lead span across the body sets its length.',
+              'Failure modes: surface tracking between pins under contamination and humidity; flux residues reducing surface resistance.',
+            ],
+          },
+        ];
+        var root = el('g', { transform: 'translate(-50,0)' }, svg);
+        var groups = [];
+        var labels = [];
+        // paint order: bottom first
+        for (var i = layers.length - 1; i >= 0; i--) {
+          (function (idx) {
+            var g = el('g', { class: 'm3-layer', tabindex: '0', role: 'button', 'aria-label': layers[idx].name }, root);
+            layers[idx].draw(g);
+            var lab = el('text', { x: 530, y: layers[idx].cy + 4, 'text-anchor': 'start', 'font-size': 15, 'font-weight': 600, style: 'fill: var(--text-sub)' }, g);
+            lab.textContent = layers[idx].short;
+            labels[idx] = lab;
+            g.addEventListener('click', function () {
+              select(idx);
+            });
+            g.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                select(idx);
+              }
+            });
+            groups[idx] = g;
+          })(i);
+        }
+        function select(idx) {
+          groups.forEach(function (g, j) {
+            g.classList.toggle('sel', j === idx);
+          });
+          var L = layers[idx];
+          info.innerHTML =
+            '<h5>' + L.name + '</h5>' + L.info.map(function (p) {
+              return '<p>' + p + '</p>';
+            }).join('');
+        }
+        function apply(v) {
+          var k = v / 100;
+          groups.forEach(function (g, idx) {
+            var off = (idx - 2.5) * 50 * k;
+            g.setAttribute('transform', 'translate(0,' + off.toFixed(1) + ')');
+            labels[idx].setAttribute('opacity', Math.max(0, (k - 0.35) / 0.65).toFixed(2));
+          });
+        }
+        range.addEventListener('input', function () {
+          stop();
+          apply(+range.value);
+        });
+        var playing = false,
+          raf = null,
+          t0 = 0;
+        function frame(ts) {
+          if (!playing) return;
+          if (!t0) t0 = ts;
+          var v = 50 - 50 * Math.cos(((ts - t0) / 3500) * Math.PI * 2);
+          range.value = Math.round(v);
+          apply(v);
+          raf = requestAnimationFrame(frame);
+        }
+        function stop() {
+          playing = false;
+          if (raf) cancelAnimationFrame(raf);
+          playBtn.innerHTML = '&#9654; Play';
+        }
+        playBtn.addEventListener('click', function () {
+          if (playing) {
+            stop();
+            return;
+          }
+          if (M3.reduceMotion) {
+            var v = +range.value > 50 ? 0 : 100;
+            range.value = v;
+            apply(v);
+            return;
+          }
+          playing = true;
+          t0 = 0;
+          playBtn.innerHTML = '&#10074;&#10074; Pause';
+          raf = requestAnimationFrame(frame);
+        });
+        apply(+range.value);
+        select(3);
+      })();
+
+      // ---------- Interactive 2: spectral match ----------
+      (function () {
+        var lam = document.getElementById('m3Lam');
+        var fw = document.getElementById('m3Fw');
+        var canvas = document.getElementById('m3SpecCanvas');
+        if (!lam || !fw || !canvas) return;
+        function si(l) {
+          var r = l < 900 ? (l - 350) / 550 : 1 - Math.pow((l - 900) / 210, 2);
+          return Math.max(0, r);
+        }
+        function led(l, l0, w) {
+          var s = w / 2.355;
+          return Math.exp(-0.5 * Math.pow((l - l0) / s, 2));
+        }
+        function overlap(l0, w) {
+          var num = 0,
+            den = 0;
+          for (var l = 400; l <= 1300; l += 1) {
+            var e = led(l, l0, w);
+            num += e * si(l);
+            den += e;
+          }
+          return num / den;
+        }
+        function best(w) {
+          var m = 0;
+          for (var l0 = 700; l0 <= 1050; l0 += 5) m = Math.max(m, overlap(l0, w));
+          return m;
+        }
+        function update() {
+          var l0 = +lam.value,
+            w = +fw.value;
+          document.getElementById('m3LamOut').textContent = l0 + ' nm';
+          document.getElementById('m3FwOut').textContent = w + ' nm';
+          var o = overlap(l0, w),
+            b = best(w),
+            rel = o / b;
+          document.getElementById('m3Ev').textContent = M3.fmt(1240 / l0, 2) + ' eV';
+          document.getElementById('m3Ovl').textContent = M3.fmt(o * 100, 0) + ' %';
+          document.getElementById('m3Rel').textContent = M3.fmt(rel * 100, 0) + ' %';
+          var v = document.getElementById('m3SpecVerdict');
+          if (rel >= 0.9) M3.setVerdict(v, 'ok', 'Excellent match to silicon');
+          else if (rel >= 0.7) M3.setVerdict(v, 'warn', 'Usable, but coupling is reduced');
+          else M3.setVerdict(v, 'bad', 'Poor match: much of the light is wasted');
+          draw(l0, w);
+        }
+        function draw(l0, w) {
+          var p = M3.palette();
+          var rect = canvas.parentElement.getBoundingClientRect();
+          var dpr = window.devicePixelRatio || 1;
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          var ctx = canvas.getContext('2d');
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          var W = rect.width,
+            H = rect.height,
+            L = 44,
+            R = 14,
+            T = 16,
+            B = 34;
+          ctx.clearRect(0, 0, W, H);
+          function X(l) {
+            return L + ((l - 600) / 500) * (W - L - R);
+          }
+          function Y(v) {
+            return H - B - v * (H - T - B);
+          }
+          ctx.strokeStyle = p.border;
+          ctx.lineWidth = 1;
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillStyle = p.muted;
+          for (var l = 600; l <= 1100; l += 100) {
+            ctx.beginPath();
+            ctx.moveTo(X(l), T);
+            ctx.lineTo(X(l), H - B);
+            ctx.stroke();
+            ctx.textAlign = l === 1100 ? 'right' : l === 600 ? 'left' : 'center';
+            ctx.fillText(l + ' nm', X(l), H - B + 16);
+          }
+          ctx.beginPath();
+          ctx.moveTo(L, H - B);
+          ctx.lineTo(W - R, H - B);
+          ctx.stroke();
+          // overlap fill
+          ctx.beginPath();
+          ctx.moveTo(X(600), Y(0));
+          for (var l2 = 600; l2 <= 1100; l2 += 2) ctx.lineTo(X(l2), Y(Math.min(led(l2, l0, w), si(l2))));
+          ctx.lineTo(X(1100), Y(0));
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(76,223,139,0.25)';
+          ctx.fill();
+          function curve(fn, col) {
+            ctx.beginPath();
+            for (var l3 = 600; l3 <= 1100; l3 += 2) {
+              var y = Y(fn(l3));
+              if (l3 === 600) ctx.moveTo(X(l3), y);
+              else ctx.lineTo(X(l3), y);
+            }
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+          curve(si, '#60a5fa');
+          curve(function (x) {
+            return led(x, l0, w);
+          }, '#f472b6');
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#60a5fa';
+          ctx.fillText('Si detector response', L + 6, T + 12);
+          ctx.fillStyle = '#f472b6';
+          ctx.fillText('LED emission', L + 6, T + 28);
+          ctx.fillStyle = p.ok;
+          ctx.fillText('overlap (useful light)', L + 6, T + 44);
+        }
+        lam.addEventListener('input', update);
+        fw.addEventListener('input', update);
+        document.querySelectorAll('.m3-preset').forEach(function (b) {
+          b.addEventListener('click', function () {
+            document.querySelectorAll('.m3-preset').forEach(function (x) {
+              x.classList.remove('active');
+            });
+            b.classList.add('active');
+            lam.value = b.getAttribute('data-lam');
+            fw.value = b.getAttribute('data-fw');
+            update();
+          });
+        });
+        M3.onRedraw(update);
+        update();
+      })();
+
+      // ---------- Interactive 3: displacement current ----------
+      (function () {
+        var ids = ['m3Cio', 'm3Dvdt', 'm3Iph', 'm3Dv'];
+        var els = ids.map(function (i) {
+          return document.getElementById(i);
+        });
+        if (els.some(function (e) {
+          return !e;
+        }))
+          return;
+        function update() {
+          var c = +els[0].value,
+            s = +els[1].value,
+            iph = +els[2].value,
+            dv = +els[3].value;
+          document.getElementById('m3CioOut').textContent = M3.fmt(c, 1) + ' pF';
+          document.getElementById('m3DvdtOut').textContent = s + ' kV/µs';
+          document.getElementById('m3IphOut').textContent = iph + ' µA';
+          document.getElementById('m3DvOut').textContent = dv + ' V';
+          var icm_mA = c * 1e-12 * s * 1e9 * 1e3; // pF * kV/us -> A -> mA
+          var ratio = (icm_mA * 1000) / iph;
+          var q = c * dv; // pC
+          var tedge = dv / (s * 1000); // us
+          document.getElementById('m3Icm').textContent = M3.fmt(icm_mA, icm_mA < 1 ? 2 : 1) + ' mA';
+          document.getElementById('m3Ratio').textContent = ratio >= 100 ? Math.round(ratio).toLocaleString() + ' ×' : M3.fmt(ratio, 1) + ' ×';
+          document.getElementById('m3Q').textContent = M3.fmt(q, 0) + ' pC';
+          document.getElementById('m3Tedge').textContent = tedge >= 1 ? M3.fmt(tedge, 2) + ' µs' : M3.fmt(tedge * 1000, 0) + ' ns';
+          var v = document.getElementById('m3CioVerdict');
+          var note = document.getElementById('m3CioNote');
+          if (ratio < 0.1) {
+            M3.setVerdict(v, 'ok', 'Low risk even unshielded');
+            note.textContent = 'Displacement current is small compared with the signal photocurrent.';
+          } else if (ratio < 10) {
+            M3.setVerdict(v, 'warn', 'Marginal: shielded part or R_BE advised');
+            note.textContent = 'The injected current is comparable to the signal. Use a part with a Faraday shield and a specified CMTI, or add R_BE / filtering.';
+          } else {
+            M3.setVerdict(v, 'bad', 'False switching likely without shielding');
+            note.textContent = 'Injected current dwarfs the photocurrent. Choose a shielded high-CMTI optocoupler (CMTI rating above the actual dV/dt with margin) or a digital isolator.';
+          }
+        }
+        els.forEach(function (e) {
+          e.addEventListener('input', update);
+        });
+        update();
+      })();
+
+      // ---------- Interactive 4: field across barrier ----------
+      (function () {
+        var v = document.getElementById('m3Vpk'),
+          d = document.getElementById('m3Dti'),
+          m = document.getElementById('m3Mat'),
+          er = document.getElementById('m3Er');
+        if (!v || !d || !m || !er) return;
+        function update() {
+          var V = +v.value,
+            D = +d.value,
+            S = +m.value,
+            e = +er.value;
+          document.getElementById('m3VpkOut').textContent = V.toLocaleString() + ' V';
+          document.getElementById('m3DtiOut').textContent = M3.fmt(D, 2) + ' mm';
+          document.getElementById('m3ErOut').textContent = M3.fmt(e, 1);
+          var E = V / D / 1000; // kV/mm
+          var util = (E / S) * 100;
+          document.getElementById('m3E').textContent = M3.fmt(E, E < 10 ? 2 : 1) + ' kV/mm';
+          document.getElementById('m3Util').textContent = M3.fmt(util, util < 10 ? 1 : 0) + ' %';
+          document.getElementById('m3Ev2').textContent = M3.fmt(E * e, 1) + ' kV/mm';
+          var vd = document.getElementById('m3FieldVerdict'),
+            note = document.getElementById('m3FieldNote');
+          if (util < 10) {
+            M3.setVerdict(vd, 'ok', 'Comfortable long-term stress level');
+            note.textContent = 'Typical of continuous working-voltage stress in certified parts: far below breakdown, to keep voids below PD inception.';
+          } else if (util < 60) {
+            M3.setVerdict(vd, 'warn', 'Transient-level stress only');
+            note.textContent = 'Acceptable for short test or surge durations (V_IOTM, V_ISO), not as a continuous working stress.';
+          } else {
+            M3.setVerdict(vd, 'bad', 'Near or beyond short-term breakdown');
+            note.textContent = 'Expect breakdown. Increase distance, choose a stronger material, or reduce the voltage.';
+          }
+        }
+        [v, d, m, er].forEach(function (x) {
+          x.addEventListener('input', update);
+          x.addEventListener('change', update);
+        });
+        update();
+      })();
+
+      // ---------- Interactive 5: package table + comparator ----------
+      (function () {
+        var body = document.getElementById('m3PkgBody');
+        if (!body) return;
+        var P = [
+          { n: '4-pin DIP', ex: 'PC817, TLP785', mount: 'THT', cr: 7.0, cl: 7.0, dti: '0.4 mm', viorm: '≈ 630–890 V<sub>pk</sub>', area: 42, note: 'The workhorse; no base pin' },
+          { n: '6-pin DIP', ex: '4N35, MOC3021', mount: 'THT', cr: 7.0, cl: 7.0, dti: '0.4 mm', viorm: '≈ 630–890 V<sub>pk</sub>', area: 78, note: 'Base pin available on transistor parts' },
+          { n: '6-pin DIP, 400-mil wide lead', ex: 'wide-lead ordering option', mount: 'THT', cr: 8.0, cl: 8.0, dti: '0.4 mm', viorm: '≈ 890–1140 V<sub>pk</sub>', area: 100, note: '≥ 8 mm variant of standard DIP' },
+          { n: 'DIP, gull-wing SMD option', ex: 'PC817 / 4N35 SMD versions', mount: 'SMD', cr: 7.0, cl: 7.0, dti: '0.4 mm', viorm: '≈ 630–890 V<sub>pk</sub>', area: 50, note: 'DIP body with reflow leads' },
+          { n: 'SOP-4 / mini-flat', ex: 'TLP185, PC357', mount: 'SMD', cr: 5.0, cl: 5.0, dti: '0.4 mm', viorm: '≈ 400–710 V<sub>pk</sub>', area: 29, note: 'Small; creepage limits mains use' },
+          { n: 'SO-8 (narrow)', ex: 'HCPL-0600 class', mount: 'SMD', cr: 4.0, cl: 4.0, dti: '0.08–0.4 mm', viorm: '≈ 560 V<sub>pk</sub> (often basic)', area: 34, note: 'Dual-channel logic parts' },
+          { n: 'Stretched SO-6 / SO-8', ex: 'TLP2361 (SO6L), ACPL-K/-W', mount: 'SMD', cr: 8.0, cl: 8.0, dti: '0.4 mm', viorm: '≈ 1140–1230 V<sub>pk</sub>', area: 58, note: 'Reinforced in a small footprint' },
+          { n: 'Wide-body SO-16', ex: 'ACPL-332J class', mount: 'SMD', cr: 8.0, cl: 8.0, dti: '0.4 mm', viorm: '≈ 890–1414 V<sub>pk</sub>', area: 116, note: 'Gate drivers; room for power and heat' },
+        ];
+        P.forEach(function (p, i) {
+          var tr = document.createElement('tr');
+          tr.id = 'm3pkg' + i;
+          tr.innerHTML =
+            '<td><strong>' + p.n + '</strong><br><span class="m3-note">' + p.ex + '</span></td>' +
+            '<td>' + p.mount + '</td>' +
+            '<td>≈ ' + p.cr.toFixed(1) + ' / ' + p.cl.toFixed(1) + ' mm</td>' +
+            '<td>' + p.dti + '</td>' +
+            '<td>' + p.viorm + '</td>' +
+            '<td>≈ ' + p.area + ' mm²</td>' +
+            '<td>' + p.note + '</td>';
+          body.appendChild(tr);
+        });
+        var cr = document.getElementById('m3ReqCr'),
+          cl = document.getElementById('m3ReqCl'),
+          mg = document.getElementById('m3ReqMargin'),
+          mt = document.getElementById('m3ReqMount');
+        function update() {
+          var rc = +cr.value,
+            rl = +cl.value,
+            m = +mg.value,
+            mount = mt.value;
+          document.getElementById('m3ReqCrOut').textContent = rc.toFixed(1) + ' mm';
+          document.getElementById('m3ReqClOut').textContent = rl.toFixed(1) + ' mm';
+          document.getElementById('m3ReqMarginOut').textContent = m.toFixed(1) + ' mm';
+          var pass = [];
+          P.forEach(function (p, i) {
+            var ok = p.cr >= rc + m && p.cl >= rl + m && (mount === 'any' || p.mount === mount);
+            var tr = document.getElementById('m3pkg' + i);
+            tr.className = ok ? 'm3-pass' : 'm3-fail';
+            if (ok) pass.push(p);
+          });
+          document.getElementById('m3PkgCount').textContent = pass.length + ' of ' + P.length;
+          var v = document.getElementById('m3PkgVerdict'),
+            note = document.getElementById('m3PkgNote');
+          if (!pass.length) {
+            document.getElementById('m3PkgBest').textContent = 'none';
+            document.getElementById('m3PkgMargin').textContent = '–';
+            M3.setVerdict(v, 'bad', 'No standard package qualifies');
+            note.textContent = 'Consider a higher material group, reducing pollution degree (enclosure, coating per the standard), a different isolation technology, or relaxing the margin only if the standard allows.';
+            return;
+          }
+          pass.sort(function (a, b) {
+            return a.area - b.area;
+          });
+          var b = pass[0];
+          var marg = Math.min(b.cr - rc, b.cl - rl);
+          document.getElementById('m3PkgBest').textContent = b.n;
+          document.getElementById('m3PkgMargin').textContent = '+' + (b.cr - rc).toFixed(1) + ' mm';
+          if (marg >= 1) M3.setVerdict(v, 'ok', 'Comfortable spacing margin');
+          else M3.setVerdict(v, 'warn', 'Passes, but with little margin');
+          note.textContent = 'Representative spacing only: confirm the certified creepage, clearance and V_IORM of the exact ordering code, and keep the PCB spacing (Module 11) at least as large.';
+        }
+        [cr, cl, mg, mt].forEach(function (x) {
+          x.addEventListener('input', update);
+          x.addEventListener('change', update);
+        });
+        update();
+      })();
+
+      // ---------- Checklist ----------
+      (function () {
+        var host = document.getElementById('m3Checklist');
+        if (!host) return;
+        var items = [
+          'Construction type (co-planar or face-to-face) and minimum DTI recorded from the datasheet or vendor.',
+          'Package external creepage ≥ requirement for the working voltage, pollution degree and material group, with layout margin.',
+          'Package clearance ≥ requirement for the rated impulse voltage (altitude-corrected above 2000 m).',
+          'Body CTI / material group taken from the datasheet; the lower of package and PCB groups used.',
+          'UL 1577 and IEC 60747-5-5 (VDE) certificates cover the exact ordering option (lead form, wide-lead, tape).',
+          'V_IORM ≥ peak working voltage and V_IOTM ≥ expected transient across the barrier.',
+          'Common-mode dV/dt estimated; C_IO × dV/dt checked; shielded high-CMTI part used near fast switch nodes.',
+          'LED technology and V_F(max) used in the worst-case drive calculation.',
+          'CTR rank locked in the BOM with the full ordering code.',
+          'Assembly process matches the package (SMD option for reflow; MSL floor life and bake per J-STD-033).',
+          'Second-source parts compared against the insulation table, not only the pinout.',
+        ];
+        var KEY = 'opto-m03-check-';
+        function get(i) {
+          try {
+            return localStorage.getItem(KEY + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(KEY + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById('m3ChecklistReset');
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      })();
+
+      // ---------- Part A: MCQ ----------
+      var quizData = [
+        {
+          q: 'Why do almost all optocouplers use infrared LEDs rather than visible ones?',
+          opts: [
+            'Infrared light passes through the black outer mould compound',
+            'GaAs-family IR emitters are efficient and their output falls near the peak response of silicon detectors',
+            'Visible LEDs cannot be made small enough to fit in the package',
+            'Safety standards forbid visible light inside isolation components',
+          ],
+          correct: 1,
+          exp: 'Efficient GaAs/GaAlAs emitters at 850–940 nm match silicon’s near-IR response peak. The opaque mould blocks light; it does not transmit it.',
+        },
+        {
+          q: 'A datasheet describes the emitter as a “GaAs infrared LED”. What peak wavelength do you expect?',
+          opts: ['≈ 660 nm', '≈ 780 nm', '≈ 940 nm', '≈ 1300 nm'],
+          correct: 2,
+          exp: 'Silicon-doped GaAs emits around 940 nm; GaAlAs emitters sit at about 850–880 nm.',
+        },
+        {
+          q: 'Which construction generally gives the highest optical coupling efficiency (and therefore CTR)?',
+          opts: [
+            'Co-planar dies under a reflective dome',
+            'Face-to-face (stacked) dies across a thin transparent film',
+            'Dies in two separate packages connected by a fibre',
+            'All constructions have identical coupling efficiency',
+          ],
+          correct: 1,
+          exp: 'Facing the detector directly at the LED over a short distance captures the most light. Co-planar parts rely on reflection and lose more.',
+        },
+        {
+          q: 'What does DTI (distance through insulation) measure?',
+          opts: [
+            'The shortest path through air between the input and output pins',
+            'The shortest path along the package surface between pins',
+            'The shortest distance through solid insulation between the input-side and output-side conductors inside the package',
+            'The distance between the LED and the detector measured through air',
+          ],
+          correct: 2,
+          exp: 'Clearance is through air and creepage is along surfaces; DTI is through the solid insulation (film, silicone, epoxy).',
+        },
+        {
+          q: 'An unshielded part has C_IO = 1 pF. What displacement current flows during a 20 kV/µs common-mode edge?',
+          opts: ['20 µA', '2 mA', '20 mA', '200 mA'],
+          correct: 2,
+          exp: 'i = C·dV/dt = 1×10⁻¹² F × 2×10¹⁰ V/s = 20 mA, thousands of times the detector’s photocurrent.',
+        },
+        {
+          q: 'Your reflow-only SMD line needs ≥ 8 mm creepage in a small footprint. Which package family fits best?',
+          opts: ['Narrow SO-8', 'SOP-4', 'Stretched SO-6 / SO-8', 'Standard 6-pin DIP'],
+          correct: 2,
+          exp: 'Stretched SO packages push the lead rows apart to reach ≥ 8 mm while staying reflow-compatible. DIP is through-hole and ≈ 7 mm; SO-8 and SOP-4 are too short.',
+        },
+        {
+          q: 'What does ordering a specific CTR rank (e.g. rank B) guarantee?',
+          opts: [
+            'A slower LED ageing rate',
+            'A guaranteed CTR window at the stated I_F and V_CE, measured on every part',
+            'A higher isolation voltage',
+            'A different LED material',
+          ],
+          correct: 1,
+          exp: 'Ranks are sorted after electrical test. They guarantee a CTR window at the specified test condition, nothing about isolation or ageing.',
+        },
+        {
+          q: 'Why do gas voids inside the barrier matter even though the solid material has a very high breakdown strength?',
+          opts: [
+            'Voids make the package heavier',
+            'Voids see an enhanced field and discharge (PD) at much lower voltage, slowly eroding the insulation',
+            'Voids reflect light away from the detector only',
+            'Voids have no effect on AC voltages',
+          ],
+          correct: 1,
+          exp: 'A thin void sees roughly ε_r times the field, and gas breaks down easily. Repeated partial discharges erode the barrier over years.',
+        },
+        {
+          q: 'A part passes the 100 % UL 1577 production hi-pot test. What does that prove?',
+          opts: [
+            'The part will withstand V_ISO continuously for 20 years',
+            'The barrier withstood a short over-voltage stress at the time of test',
+            'The part is certified for reinforced insulation at any working voltage',
+            'The part has no internal voids',
+          ],
+          correct: 1,
+          exp: 'Hi-pot is a short withstand screen. Long-term working voltage is addressed by V_IORM and PD testing (IEC 60747-5-5).',
+        },
+        {
+          q: 'A mould compound has CTI = 250. Which material group is it?',
+          opts: ['I', 'II', 'IIIa', 'IIIb'],
+          correct: 2,
+          exp: 'IIIa covers 175 ≤ CTI < 400. Group II starts at 400 and group I at 600.',
+        },
+        {
+          q: 'Why is a 6N135/6N136 (photodiode + separate transistor) much faster than a phototransistor part?',
+          opts: [
+            'It uses a visible-light LED',
+            'The photodiode node stays at nearly constant voltage, so the Miller-multiplied C_CB no longer slows the light-sensing node',
+            'It has a higher CTR',
+            'It has no isolation barrier',
+          ],
+          correct: 1,
+          exp: 'Separating detection from amplification removes the Miller effect at the photo-junction. The price is lower CTR (≈ 7–50 %).',
+        },
+        {
+          q: 'On a 6-pin phototransistor part, what does a resistor from base to emitter (R_BE) do?',
+          opts: [
+            'Increases CTR',
+            'Speeds turn-off and shunts dark and displacement current, at the cost of some CTR',
+            'Increases the isolation voltage',
+            'Is required to make the LED emit',
+          ],
+          correct: 1,
+          exp: 'R_BE removes stored base charge and diverts leakage and common-mode current: faster and more robust, with slightly less gain.',
+        },
+      ];
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module 3 Knowledge Check. Finish the true/false, matching and scenario exercises below, then continue to Module 4.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = [
+          { s: 'A standard 7.62 mm-row DIP typically offers about 7 mm of external creepage.', a: true, exp: 'Correct: that is why wide-lead (10.16 mm) options exist for ≥ 8 mm requirements.' },
+          { s: 'Because polyimide film has a very high dielectric strength, DTI can be made arbitrarily small without consequences.', a: false, exp: 'Long-term reliability is governed by partial discharge and ageing, and many standards set minimum DTI or layer requirements for solid insulation.' },
+          { s: 'Adding R_BE on a 6-pin phototransistor part speeds up turn-off.', a: true, exp: 'It removes stored base charge and shunts leakage, at the cost of some CTR.' },
+          { s: 'Passing a 1-second hi-pot at 1.2 × V_ISO guarantees the part can run continuously at V_ISO for its lifetime.', a: false, exp: 'Hi-pot is a short withstand screen. The continuous rating is V_IORM, which is much lower.' },
+          { s: 'Face-to-face constructions typically have higher input–output capacitance than co-planar ones.', a: true, exp: 'The dies and frames overlap across a thin gap, forming a larger capacitor.' },
+          { s: 'The CTR rank of a part is decided by measuring it after assembly.', a: true, exp: 'Every part is measured and sorted into rank bins in final test.' },
+          { s: 'GaAlAs LEDs emit at a longer wavelength than GaAs:Si LEDs.', a: false, exp: 'GaAlAs is ≈ 850–880 nm, shorter than GaAs:Si at ≈ 940 nm.' },
+          { s: 'Moisture absorbed by an SMD part before reflow can delaminate internal interfaces and weaken the barrier.', a: true, exp: 'That is why MSL floor life and J-STD-033 bake procedures matter for isolation parts.' },
+        ];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = [
+          { t: 'DTI', d: 'Shortest distance through solid insulation between input and output conductors inside the package', h: 'Think “through”, not “around”.' },
+          { t: 'Creepage', d: 'Shortest path along insulating surfaces between conductors', h: 'This one is about surfaces and tracking.' },
+          { t: 'Clearance', d: 'Shortest path through air between conductors', h: 'This one is about flashover through air.' },
+          { t: 'CTI', d: 'Voltage index of a material’s resistance to surface tracking; sets the material group', h: 'It is a material property measured by a drip test.' },
+          { t: 'Faraday shield', d: 'Transparent conductive layer over the detector that diverts displacement current to output ground', h: 'It improves CMTI, not isolation voltage.' },
+          { t: 'CTR rank', d: 'Guaranteed CTR window assigned to each part after final test', h: 'It is about gain, sorted in production.' },
+        ];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

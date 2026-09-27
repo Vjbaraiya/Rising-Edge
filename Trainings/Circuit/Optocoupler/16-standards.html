@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Industry Standards and Certifications — Module 16 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Isolation standards explained: UL 1577, IEC 60747-5-5 (VDE 0884-5) vs IEC 60747-17, IEC 60664-1, 62368-1, 61010-1, 60601-1, 61800-5-1 and automotive."
     />
     <title>
       Industry Standards and Certifications | Optocoupler Design Academy | Rising Edge Technologies
@@ -42,67 +42,789 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
       }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
+      }
+    
+      .m16-cert { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--bg-alt); }
+      .m16-cert-head { font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 800; color: var(--text-sub); margin-bottom: 8px; }
+      .m16-cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
+      .m16-cf { text-align: left; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; color: var(--text-base); font: inherit; }
+      .m16-cf span { display: block; font-size: 0.7rem; color: var(--text-sub); }
+      .m16-cf b { font-size: 0.85rem; }
+      .m16-cf.active, .m16-cf:hover, .m16-cf:focus-visible { border-color: var(--cyan, #22d3ee); }
+      .m16-toks { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+      .m16-tok { width: 44px; height: 44px; border-radius: 10px; border: 2px solid var(--cyan, #22d3ee); background: var(--bg-alt); color: var(--text-base); font-weight: 800; font-size: 1.05rem; cursor: grab; }
+      .m16-tok.active { background: var(--cyan, #22d3ee); color: #0b1220; }
+      .m16-diag { display: grid; gap: 8px; }
+      .m16-row { display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); gap: 6px; align-items: center; }
+      .m16-blk { border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.8rem; font-weight: 600; background: var(--bg-alt); text-align: center; overflow-wrap: break-word; hyphens: auto; min-width: 0; }
+      @media (max-width: 480px) { .m16-blk { font-size: 0.7rem; padding: 6px; } }
+      .m16-slot { height: 44px; border: 2px dashed var(--warning, #fbbf24); border-radius: 8px; background: transparent; color: var(--text-base); font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+      .m16-slot.filled { border-style: solid; }
+      .m16-slot.m3-pass { border-color: var(--success, #4cdf8b); color: var(--success, #4cdf8b); }
+      .m16-slot.m3-fail { border-color: var(--danger, #ff6b6b); color: var(--danger, #ff6b6b); }
+      .m16-fb { margin-top: 8px; padding-left: 18px; font-size: 0.8rem; color: var(--text-sub); }
+      .m16-fb li { margin-bottom: 6px; }
     </style>
   </head>
   <body>
@@ -183,8 +905,7 @@
               <div class="badge" style="margin-bottom: 1rem">MODULE 16</div>
               <h1 style="font-size: 2.2rem">Industry Standards and Certifications</h1>
               <p class="subtitle">
-                The regulatory landscape governing isolation components and end products: component
-                standards (IEC 60747-17, UL 1577, VDE 0884) versus end-product standards (IEC 61010,
+                The regulatory landscape governing isolation components and end products: component standards (UL 1577; IEC 60747-5-5 / VDE 0884-5 for optocouplers; IEC 60747-17 / VDE 0884-17 for digital isolators) versus end-product standards (IEC 61010,
                 IEC 60601-1, IEC 62368-1), automotive functional safety (ISO 26262), and how to
                 build a coherent certification argument.
               </p>
@@ -193,75 +914,247 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S1,S5 → Q1,TF1,TF2,TF3; 2: S2,S3,S4 → Q2-Q6,TF4,Scen1; 3: S5-S9,S11 → Q7-Q9,TF5,Scen2,Scen3; 4: S10 → Q10,TF6; 5: S12 → TF7,TF8 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Distinguish component-level from end-product standards
-                  </div>
-                  <div class="metric-card">Interpret UL 1577 and VDE 0884-17 certificates</div>
-                  <div class="metric-card">
-                    Map end-product insulation requirements to component specs
-                  </div>
-                  <div class="metric-card">Address automotive (ISO 26262/AEC-Q) requirements</div>
-                  <div class="metric-card">Assemble certification evidence for safety files</div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Distinguish component-level from end-product standards</div><div class="objective-card metric-card">Interpret UL 1577 and IEC 60747-5-5 (VDE 0884-5) certificates, and tell them apart from IEC 60747-17 (VDE 0884-17)</div><div class="objective-card metric-card">Map end-product insulation requirements to component specs</div><div class="objective-card metric-card">Address automotive (ISO 26262/AEC-Q) requirements</div><div class="objective-card metric-card">Assemble certification evidence for safety files</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> This module maps the standards landscape so you can ask vendors for the right certificates, read them correctly and build your own certification argument. It uses the ratings from <a href="06-parameters.html">Module 6</a> and <a href="07-datasheet.html">Module 7</a>, the spacing rules from <a href="11-pcb-guidelines.html">Module 11</a> and the tests from <a href="13-testing-validation.html">Module 13</a>. <strong>Accuracy note:</strong> the optocoupler component standard is <strong>IEC 60747-5-5</strong> (DIN EN 60747-5-5 / VDE 0884-5). <strong>IEC 60747-17</strong> (VDE 0884-17) covers magnetic and capacitive couplers (digital isolators). Standards are summarised and paraphrased here; always work from the current edition.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; Component vs End-Product Standards</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Two kinds of standard meet at the isolation barrier. <strong>Component standards</strong> certify the isolator: the vendor pays for the tests and you receive a certificate. <strong>End-product standards</strong> certify <em>your</em> equipment: they define which barriers you need, what working voltage and insulation class each barrier has, and how the lab tests the finished product.</p>
+<figure class="m3-fig"><img src="images/16/standards-hierarchy.png" alt="Three layers: end-product standards at the top (IEC 62368-1, 61010-1, 60601-1, 61800-5-1, 62109-1, 60335-1), IEC 60664-1 insulation coordination in the middle, and component standards UL 1577, IEC 60747-5-5 and IEC 60747-17 at the bottom, with arrows showing evidence flowing upward" loading="lazy" width="1200" height="560" /><figcaption><strong>Figure 1.</strong> How the standards fit together.</figcaption></figure>
+<div class="adv-grid"><div class="adv-card"><h5>Why a certified part isn&rsquo;t enough</h5><p>The certificate covers the part as tested: its own creepage, its internal barrier. It knows nothing about your footprint, slots, coating, pollution degree, altitude, other parts bridging the barrier, or whether you used it at a higher voltage than rated.</p></div><div class="adv-card"><h5>What the component certificate buys you</h5><p>End-product standards generally accept a component certified to the right standard and class as evidence for its internal insulation, so the lab does not have to decap it or measure DTI. That can save months.</p></div><div class="adv-card"><h5>Who decides the requirement</h5><p>Your end-product standard, applied through its insulation-coordination rules (based on IEC 60664-1): working voltage, overvoltage category, pollution degree, material group and altitude.</p></div><div class="adv-card"><h5>Markets add standards</h5><p>CB scheme (IEC) for international certification; UL/CSA for North America; CQC for China; national deviations. Plan the certificate list per market early.</p></div></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Standards Navigator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Pick your product and supply. The navigator lists the usual standards and turns the supply into the coupler ratings to ask for. Impulse values follow the widely published IEC 60664-1 pattern by nominal voltage and overvoltage category, with reinforced insulation one step higher. They are <strong>representative &mdash; confirm with your end-product standard&rsquo;s tables</strong>.</p><div class="m3-calc"><div><div class="m3-field"><label for="m16NavProd"><span>Product type / market</span></label><select id="m16NavProd"><option value="ict" selected>ICT / audio-video equipment</option><option value="lab">Measurement, test & lab equipment</option><option value="med">Medical electrical equipment</option><option value="drive">Motor drive / inverter</option><option value="plc">PLC / industrial control</option><option value="pv">PV inverter</option><option value="ev">EV charger (EVSE)</option><option value="auto">Automotive (HV traction / BMS)</option><option value="app">Household appliance</option></select></div><div class="m3-field"><label for="m16NavV"><span>Nominal voltage to earth (V_rms or V DC)</span></label><select id="m16NavV"><option value="120">120 V</option><option value="230" selected>230 V</option><option value="400">400 V</option><option value="600">600 V</option><option value="800">800 V</option><option value="1000">1000 V</option></select></div><div class="m3-field"><label for="m16NavDc"><span>DC system (no &radic;2 factor)</span></label><input type="checkbox" id="m16NavDc" /></div><div class="m3-field"><label for="m16NavOvc"><span>Overvoltage category</span></label><select id="m16NavOvc"><option value="1">OVC I</option><option value="2" selected>OVC II (plug-in equipment)</option><option value="3">OVC III (fixed installation)</option><option value="4">OVC IV (origin of installation)</option></select></div><div class="m3-field"><label for="m16NavR"><span>Insulation class of the barrier</span></label><select id="m16NavR"><option value="B">Basic</option><option value="R" selected>Reinforced / double</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Typical barrier requirement</span><b id="m16NavCls">&ndash;</b></div><div class="m3-res-row"><span>Peak working voltage</span><b id="m16NavVpk">&ndash;</b></div><div class="m3-res-row"><span>Rated impulse voltage (representative)</span><b id="m16NavImp">&ndash;</b></div><div class="m3-res-row"><span>Ask the coupler vendor for</span><b id="m16NavReq">&ndash;</b></div><div style="margin-top: 8px"><span id="m16NavVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m16NavNote"></p></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Standard</th><th>Role</th></tr></thead><tbody id="m16NavBody"></tbody></table></div>
+</div>
+</div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>IEC 60747-17</div>
-                  <div class="topic-card"><span class="topic-dot"></span>UL 1577</div>
-                  <div class="topic-card"><span class="topic-dot"></span>VDE 0884</div>
-                  <div class="topic-card"><span class="topic-dot"></span>IEC 61010</div>
-                  <div class="topic-card"><span class="topic-dot"></span>IEC 60601-1</div>
-                  <div class="topic-card"><span class="topic-dot"></span>IEC 62368-1</div>
-                  <div class="topic-card"><span class="topic-dot"></span>ISO 26262</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Application-specific standards
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; UL 1577: the Withstand Rating</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p"><strong>UL 1577</strong> (&ldquo;Optical Isolators&rdquo;) is the North-American component standard, and many digital isolators are also recognised under it. It is a <em>withstand</em> standard: the part must survive a stated isolation voltage.</p>
+<div class="adv-grid"><div class="adv-card"><h5>V<sub>ISO</sub></h5><p>The rated withstand voltage, e.g. 5000 V<sub>rms</sub> for 1 minute (type test). Common ratings are 2500, 3750, 5000 and 5700 V<sub>rms</sub>.</p></div><div class="adv-card"><h5>Production test</h5><p>Every part is tested at a higher voltage for a short time, typically 1.2 &times; V<sub>ISO</sub> for 1 s. The datasheet states the exact condition.</p></div><div class="adv-card"><h5>Recognition, not listing</h5><p>Parts carry UL <em>Recognized Component</em> status under a file number. Your product still needs its own listing or certification.</p></div><div class="adv-card limit"><h5>What it doesn&rsquo;t say</h5><p>No working voltage, no PD test, no lifetime. A 5 kV<sub>rms</sub> V<sub>ISO</sub> does not mean you may run 5 kV continuously, or even 1 kV: that is what V<sub>IORM</sub>/V<sub>IOWM</sub> in IEC 60747-5-5 are for.</p></div></div>
+<div class="m3-example"><h5>Worked example &mdash; V<sub>ISO</sub> vs the product Hi-Pot</h5><p>A 230 V product needs a reinforced Hi-Pot of (representative) 3000 V<sub>rms</sub> for 60 s at type test and 1 s in production.</p><ol><li>A coupler with V<sub>ISO</sub> = 5000 V<sub>rms</sub> passes the 3000 V<sub>rms</sub> test with 1.67&times; margin.</li><li>A 2500 V<sub>rms</sub> part would be over-stressed by every production test: the wrong part, regardless of its working-voltage rating.</li><li>The working voltage (325 V<sub>pk</sub>) must still be checked against V<sub>IORM</sub> from the IEC 60747-5-5 certificate.</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; IEC 60747-5-5 / VDE 0884-5: the Optocoupler Standard</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p"><strong>IEC 60747-5-5</strong> (Europe: DIN EN 60747-5-5, VDE 0884-5) is the optocoupler standard that defines <em>working</em> and <em>transient</em> ratings, a 100 % partial-discharge test and safety-limiting values. It is what most end-product standards refer to when they accept an optocoupler as reinforced or basic insulation.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Rating</th><th>Meaning</th><th>Compare with</th></tr></thead><tbody><tr><td>V<sub>IORM</sub></td><td>Maximum repetitive peak isolation voltage (continuous, V<sub>peak</sub>)</td><td>Peak working voltage: &radic;2 &times; V<sub>rms</sub>, or DC-link maximum</td></tr><tr><td>V<sub>IOWM</sub></td><td>Maximum working isolation voltage (V<sub>rms</sub>)</td><td>RMS working voltage used in creepage tables</td></tr><tr><td>V<sub>IOTM</sub></td><td>Maximum transient isolation voltage (V<sub>peak</sub>, type-tested ~60 s)</td><td>Temporary overvoltages and dielectric test levels</td></tr><tr><td>V<sub>IOSM</sub></td><td>Maximum surge isolation voltage (1.2/50 &micro;s, V<sub>peak</sub>)</td><td>Rated impulse voltage for your overvoltage category</td></tr><tr><td>V<sub>PR</sub> / V<sub>pd(m)</sub></td><td>Partial-discharge test voltage (e.g. ~1.875 &times; V<sub>IORM</sub>, 1 s, 100 %; < 5 pC)</td><td>Evidence of PD-free operation at V<sub>IORM</sub></td></tr><tr><td>R<sub>IO</sub></td><td>Isolation resistance (at 500 V DC, at 25 &deg;C and at T<sub>S</sub>)</td><td>Leakage budget (Module 13)</td></tr><tr><td>T<sub>S</sub>, I<sub>S</sub>, P<sub>S</sub></td><td>Safety-limiting case temperature, input current and output power</td><td>Your worst single-fault conditions</td></tr><tr><td>Climatic category, pollution degree, CTI</td><td>Test climate (e.g. 55/110/21), PD for its own creepage, material group</td><td>Your environment and board spacing</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/16/certificate-anatomy.png" alt="Voltage-level chart comparing working voltage, V_IORM, the partial-discharge test voltage, V_IOTM, UL 1577 V_ISO peak and V_IOSM surge on one scale for an example reinforced coupler" loading="lazy" width="1200" height="440" /><figcaption><strong>Figure 2.</strong> The voltage family of an example reinforced coupler on one scale (representative values).</figcaption></figure>
+<h3 class="m3-h3">Safety-limiting values</h3>
+<p class="m3-p">In a fault (a shorted driver, a failed resistor), the LED current or output power can rise far above normal. IEC 60747-5-5 requires the vendor to state limits (T<sub>S</sub>, I<sub>S</sub>, P<sub>S</sub>) up to which the insulation remains intact, usually with a derating curve versus temperature. Your design must keep single-fault conditions below them.</p>
+<div class="m3-example"><h5>Worked example &mdash; checking I<sub>S</sub></h5><p>A coupler lists I<sub>S</sub> = 150 mA (input, representative). The LED is driven from 24 V through 2.2 k&Omega;.</p><ol><li>Normal: (24 &minus; 1.2) / 2200 = 10.4 mA.</li><li>Single fault: the series resistor is shorted (or a lower value fitted in error). The current is then limited only by the source: a 24 V rail can deliver amps, far above I<sub>S</sub>.</li><li>Fix: split the resistor into two in series (a single short then leaves 1.1 k&Omega; &rarr; ~21 mA), or add a fuse or current-limited source. Record this in the insulation analysis.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Certificate Decoder</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">A generic example for a fictional wide-body coupler (the &ldquo;RX-817W&rdquo;, a variant of the Module 7 teaching part). Click each field to decode it, then test the certificate against your application.</p><div id="m16Cert" class="m16-cert"><div class="m16-cert-head">EXAMPLE CERTIFICATE (generic teaching layout &mdash; not a real certificate)</div><div class="m16-cert-grid"><button type="button" class="m16-cf" data-f="std" aria-pressed="false"><span>Standard</span><b>DIN EN 60747-5-5 (VDE 0884-5)</b></button><button type="button" class="m16-cf" data-f="cls" aria-pressed="false"><span>Insulation</span><b>Reinforced</b></button><button type="button" class="m16-cf" data-f="viorm" aria-pressed="false"><span>V_IORM</span><b>1140 V peak</b></button><button type="button" class="m16-cf" data-f="viowm" aria-pressed="false"><span>V_IOWM</span><b>806 V rms</b></button><button type="button" class="m16-cf" data-f="viotm" aria-pressed="false"><span>V_IOTM</span><b>8000 V peak</b></button><button type="button" class="m16-cf" data-f="viosm" aria-pressed="false"><span>V_IOSM</span><b>8000 V peak</b></button><button type="button" class="m16-cf" data-f="pd" aria-pressed="false"><span>PD test (method b1)</span><b>1.875 × V_IORM, 1 s, < 5 pC</b></button><button type="button" class="m16-cf" data-f="clim" aria-pressed="false"><span>Climatic cat. / pollution degree</span><b>55/110/21 · PD 2</b></button><button type="button" class="m16-cf" data-f="cti" aria-pressed="false"><span>CTI / material group</span><b>≥ 175 · IIIa</b></button><button type="button" class="m16-cf" data-f="dist" aria-pressed="false"><span>Creepage / clearance / DTI</span><b>8.0 mm / 8.0 mm / ≥ 0.4 mm</b></button><button type="button" class="m16-cf" data-f="safe" aria-pressed="false"><span>T_S / I_S / P_S</span><b>150 °C / 150 mA / 300 mW</b></button><button type="button" class="m16-cf" data-f="rio" aria-pressed="false"><span>R_IO at T_S (500 V DC)</span><b>> 10⁹ Ω</b></button><button type="button" class="m16-cf" data-f="ul" aria-pressed="false"><span>UL 1577 (separate file)</span><b>V_ISO 5000 V rms, 1 min</b></button></div><div class="m3-results" style="margin-top: 10px"><div class="m3-res-row"><span id="m16CertHead">Click a field</span></div><p class="m3-note" id="m16CertText">Each field explains what it means and what to compare it with.</p></div></div><h3 class="m3-h3">Is this part enough for my application?</h3>
+<div class="m3-calc"><div><div class="m3-field"><label for="m16CkVw"><span>Working voltage across the barrier</span> <output id="m16CkVwOut"></output></label><input type="range" id="m16CkVw" min="50" max="1200" step="10" value="400" /></div><div class="m3-field"><label for="m16CkDc"><span>DC working voltage</span></label><input type="checkbox" id="m16CkDc" /></div><div class="m3-field"><label for="m16CkImp"><span>Required impulse withstand</span></label><select id="m16CkImp"><option value="2500">2.5 kV</option><option value="4000">4 kV</option><option value="6000" selected>6 kV</option><option value="8000">8 kV</option><option value="12000">12 kV</option></select></div><div class="m3-field"><label for="m16CkCls"><span>Required class</span></label><select id="m16CkCls"><option value="B">Basic</option><option value="R" selected>Reinforced</option></select></div><div class="m3-field"><label for="m16CkPd"><span>Pollution degree where installed</span></label><select id="m16CkPd"><option value="1">PD 1</option><option value="2" selected>PD 2</option><option value="3">PD 3</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Peak working voltage</span><b id="m16CkVpk">&ndash;</b></div><div style="margin-top: 8px"><span id="m16CkVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m16CkNote"></p></div></div>
+</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; IEC 60747-17 / VDE 0884-17: Digital Isolators for Comparison</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">Digital isolators use very thin barriers (Module 15) whose lifetime depends on the field across them, so they have their own component standard: <strong>IEC 60747-17</strong> (DIN EN IEC 60747-17, <strong>VDE 0884-17</strong>) for magnetic and capacitive couplers. In Germany it followed VDE 0884-10 and then <strong>VDE 0884-11, which VDE 0884-17 superseded</strong>.</p>
+<figure class="m3-fig"><img src="images/16/opto-vs-isolator-standards.png" alt="Two cards: IEC 60747-5-5 / VDE 0884-5 for optocouplers with its key ratings, and IEC 60747-17 / VDE 0884-17 for magnetic and capacitive couplers with added lifetime evidence, plus a warning not to list IEC 60747-17 as the optocoupler standard" loading="lazy" width="1200" height="470" /><figcaption><strong>Figure 3.</strong> The two component standards side by side.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Aspect</th><th>IEC 60747-5-5 (optocouplers)</th><th>IEC 60747-17 (magnetic/capacitive)</th></tr></thead><tbody><tr><td>Devices</td><td>Photocouplers / optocouplers</td><td>Digital isolators, isolated gate drivers, isolated amplifiers with magnetic or capacitive barriers</td></tr><tr><td>Voltage ratings</td><td>V<sub>IORM</sub>, V<sub>IOWM</sub>, V<sub>IOTM</sub>, V<sub>IOSM</sub></td><td>Same family of ratings</td></tr><tr><td>Partial discharge</td><td>100 % PD test</td><td>PD test as well</td></tr><tr><td>Lifetime</td><td>Not modelled; thick barrier</td><td>Barrier-life (TDDB-type) evidence at elevated working voltage, stricter for reinforced</td></tr><tr><td>Surge</td><td>V<sub>IOSM</sub> test</td><td>V<sub>IOSM</sub> test, with higher requirements for reinforced (10 kV-class)</td></tr><tr><td>Typical mistake</td><td>Listed as &ldquo;IEC 60747-17&rdquo; in documentation</td><td>Datasheets still quoting superseded VDE 0884-11 certificates</td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; copying the wrong standard into your safety file.</strong> Module 1 and many online sources list &ldquo;IEC 60747-17&rdquo; for optocouplers. A test lab will ask why an optocoupler certificate cites a digital-isolator standard. For optocouplers, cite IEC 60747-5-5 / VDE 0884-5 (plus UL 1577).</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Verify</strong> Lifetime margins, failure-rate targets and surge factors in IEC 60747-17 differ between basic and reinforced insulation and between editions. Take them from the vendor&rsquo;s certificate and lifetime report.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; IEC 60664-1: Insulation Coordination Fundamentals</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p"><strong>IEC 60664-1</strong> is the basic safety publication behind nearly all end-product insulation rules. You rarely certify to it directly, but its concepts are in every product standard.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Overvoltage category (OVC)</h5><p>I to IV, from protected electronics to the origin of the installation. It sets the transient (impulse) voltage the clearances must withstand.</p></div><div class="adv-card"><h5>Rated impulse voltage</h5><p>For a 230/400 V system (300 V to earth): about 1.5 / 2.5 / 4 / 6 kV for OVC I&ndash;IV. Reinforced insulation is designed for the next step up. (Representative; see the standard&rsquo;s table.)</p></div><div class="adv-card"><h5>Clearance</h5><p>The shortest distance through air: set by the impulse voltage (and altitude correction above 2000 m).</p></div><div class="adv-card"><h5>Creepage</h5><p>The shortest distance along a surface: set by the rms working voltage, the pollution degree (1&ndash;4) and the material group (CTI I&ndash;IIIb).</p></div><div class="adv-card"><h5>Solid insulation</h5><p>Through-insulation: must withstand the dielectric test and, for thin layers, meet extra requirements; component standards cover the part&rsquo;s internal barrier.</p></div><div class="adv-card limit"><h5>Altitude</h5><p>Clearances need a multiplication factor above 2000 m (e.g. about 1.48 at 5000 m); PV and EV equipment often ship to high sites.</p></div></div>
+<p class="m3-note">Distances and factors above are widely quoted representative figures. Cite IEC 60664-1 table numbers from the edition you apply rather than this page.</p>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; IEC 62368-1: ICT and AV Equipment</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p"><strong>IEC 62368-1</strong> covers ICT and audio/video equipment and has <strong>replaced IEC 60950-1 and IEC 60065</strong>. It is <em>hazard-based</em>: classify energy sources, then put safeguards between them and people.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Energy source classes</h5><p>ES1 (safe to touch), ES2 (limited), ES3 (hazardous, e.g. mains). An ES3 source needs basic plus supplementary, or reinforced, safeguards to an ordinary person.</p></div><div class="adv-card"><h5>Safeguards</h5><p>Basic, supplementary, reinforced, plus precautionary and skill safeguards. An optocoupler across the primary-to-ES1 boundary acts as a reinforced safeguard when certified accordingly.</p></div><div class="adv-card"><h5>Component route</h5><p>The standard accepts optocouplers certified to IEC 60747-5-5 (and isolators to IEC 60747-17) for solid insulation, provided the ratings match the working voltage and class.</p></div><div class="adv-card"><h5>Electric strength</h5><p>Test voltages come from tables based on peak working voltage, transient voltage and insulation grade (basic &asymp; 1.5 kV<sub>rms</sub>, reinforced &asymp; 3 kV<sub>rms</sub> for ordinary 230 V mains: representative).</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; IEC 61010-1: Measurement, Control and Laboratory Equipment</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p"><strong>IEC 61010-1</strong> covers electrical equipment for measurement, control and laboratory use: oscilloscopes, power supplies, analysers and much industrial control. Part <strong>IEC 61010-2-030</strong> adds requirements for measuring circuits and the familiar measurement categories.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Measurement categories</h5><p>CAT II (plug-in loads), CAT III (building installation), CAT IV (origin of supply). An isolated measuring input rated &ldquo;600 V CAT III&rdquo; must withstand the transients of that environment across every barrier behind it.</p></div><div class="adv-card"><h5>Isolated channels</h5><p>Channel-to-channel and channel-to-earth barriers each get their own rating. Optocouplers or isolated amplifiers in the digital path must match the channel&rsquo;s class.</p></div><div class="adv-card"><h5>Hazardous live</h5><p>The standard defines limits of voltage, current and energy above which a part is hazardous live; accessible parts must stay below them in normal and single-fault conditions.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; IEC 60601-1: Medical Electrical Equipment</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p"><strong>IEC 60601-1</strong> is the most demanding common standard for isolation because patients may be connected directly (and may be unable to react). It distinguishes <strong>MOOP</strong> (means of operator protection) and <strong>MOPP</strong> (means of patient protection), and it limits leakage currents tightly.</p>
+<figure class="m3-fig"><img src="images/16/medical-mopp-moop.png" alt="Block diagram of a medical device: mains feeds the power supply; two MOOP protect the operator controls and two MOPP protect the patient applied part; a table lists representative test voltages, creepage and clearance for 1 and 2 MOOP and MOPP" loading="lazy" width="1200" height="520" /><figcaption><strong>Figure 4.</strong> MOOP and MOPP with representative values for ~250 V<sub>rms</sub> working voltage.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Applied-part type</th><th>Typical use</th><th>Patient leakage, normal condition (representative)</th></tr></thead><tbody><tr><td>B</td><td>Body; not usually conductive contact</td><td>100 &micro;A</td></tr><tr><td>BF</td><td>Floating applied part (body contact)</td><td>100 &micro;A</td></tr><tr><td>CF</td><td>Direct cardiac contact</td><td>10 &micro;A</td></tr></tbody></table></div>
+<p class="m3-note">Representative limits commonly quoted from IEC 60601-1; single-fault limits are higher. Verify against the edition and amendment you certify to.</p>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; designing medical isolation to IEC 62368-1 levels.</strong> Two MOPP for a 230 V product means about 4 kV<sub>rms</sub> and 8 mm creepage (representative), significantly more than the ~3 kV<sub>rms</sub> reinforced of ICT equipment. Parts and layouts reused from an ICT design often fail.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; IEC 61800-5-1: Adjustable-Speed Drives</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<p class="m3-p"><strong>IEC 61800-5-1</strong> covers the safety of adjustable-speed drive systems. Optocoupler gate drivers, current-sense isolation and control interfaces all sit on its barriers.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Decisive voltage classes</h5><p>DVC A (safe to touch, e.g. &le; 25 V AC / 60 V DC in dry conditions) up to DVC C (mains, DC link). Accessible control circuits (DVC A) need <em>protective separation</em> (double or reinforced) from DVC C circuits.</p></div><div class="adv-card"><h5>Gate-drive barriers</h5><p>Inside the power section, the gate-drive coupler between the controller and a high-side switch may be functional or basic, depending on whether the controller side is accessible. Document it in the insulation diagram.</p></div><div class="adv-card"><h5>Working voltage</h5><p>Use the DC-link maximum (including regenerative braking overvoltage) and switching overshoot for V<sub>IORM</sub>, not the nominal mains.</p></div><div class="adv-card"><h5>Related</h5><p>IEC 62477-1 for general power-electronic converter systems; IEC 60204-1 for the machine.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Automotive: AEC-Q, ISO 26262 and FIT Data</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<p class="m3-p">Automotive adds qualification and functional-safety expectations on top of electrical safety.</p>
+<div class="adv-grid"><div class="adv-card"><h5>AEC-Q100</h5><p>Stress-test qualification for integrated circuits (digital isolators, isolated gate-driver ICs). Grades set the ambient range: grade 0 &minus;40&hellip;+150 &deg;C, grade 1 &minus;40&hellip;+125 &deg;C, grade 2 &minus;40&hellip;+105 &deg;C, grade 3 &minus;40&hellip;+85 &deg;C.</p></div><div class="adv-card"><h5>AEC-Q101 / Q102</h5><p>Qualification for discrete semiconductors (Q101) and discrete optoelectronics (Q102). Automotive optocouplers are typically qualified to one of these; check the datasheet claim.</p></div><div class="adv-card"><h5>ISO 26262</h5><p>Functional safety for road vehicles. You need failure rates (FIT) and failure-mode distributions for the coupler to calculate hardware metrics, plus diagnostics for its dangerous failure modes (e.g. a stuck output).</p></div><div class="adv-card"><h5>FIT data</h5><p>Vendors provide FIT at stated conditions, or you use handbook models (IEC 61709, SN 29500). 1 FIT = 1 failure per 10<sup>9</sup> device-hours. Optocoupler LED ageing is a <em>wear-out</em> mechanism, handled by design margin (Module 9) rather than by a constant FIT.</p></div><div class="adv-card"><h5>HV isolation</h5><p>ISO 6469-3 and OEM specifications define HV-to-LV isolation for traction systems, typically reinforced or basic plus supplementary at 400&ndash;800 V DC.</p></div></div>
+<div class="m3-example"><h5>Worked example &mdash; FIT to failure probability</h5><p>A BMS has 24 couplers at 15 FIT each (representative, at mission-profile temperature).</p><ol><li>Total &lambda; = 24 &times; 15 = 360 FIT = 360 &times; 10<sup>&minus;9</sup> /h.</li><li>Over 8000 operating hours of vehicle life: P &asymp; &lambda;t = 360 &times; 10<sup>&minus;9</sup> &times; 8000 = 2.9 &times; 10<sup>&minus;3</sup> (0.29 %) per vehicle.</li><li>ISO 26262 then asks which fraction of those failures is dangerous and detected. A stuck-HIGH fault in a cell-voltage alarm path needs a diagnostic (e.g. periodic test pulse).</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body" aria-expanded="false" aria-controls="sec11body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 11 &mdash; Application-Specific Standards</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+<p class="m3-p">Application-specific standards refine the generic rules for particular equipment. The ones optocoupler designers meet most often:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Standard</th><th>Scope</th><th>Isolation relevance</th></tr></thead><tbody><tr><td>IEC 61131-2</td><td>Programmable controllers: equipment requirements and tests</td><td>Digital input types 1/2/3 (switching thresholds and currents, Module 10), immunity levels; safety via IEC 61010-2-201</td></tr><tr><td>IEC 61851 (-1, -23)</td><td>Electric-vehicle conductive charging systems</td><td>Isolation between mains/DC output and control pilot, communication and user interface; insulation monitoring for DC charging</td></tr><tr><td>IEC 62109-1 / -2</td><td>Safety of power converters for PV systems</td><td>High DC working voltages (up to 1000&ndash;1500 V), altitude, OVC of the PV array; isolation of comms and user interfaces</td></tr><tr><td>IEC 60335-1</td><td>Household appliances</td><td>Class I/II construction; functional vs protective insulation of controls</td></tr><tr><td>IEC 60730-1</td><td>Automatic electrical controls</td><td>Controls with isolated sensors and triac outputs (MOC30xx designs)</td></tr></tbody></table></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 12 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec12body" aria-expanded="false" aria-controls="sec12body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 12 &mdash; Building the Certification Argument</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+<p class="m3-p">A certification body wants to see a coherent argument: every barrier identified, its required class and rating derived, and evidence that each crossing component and spacing meets it. Build it as you design, not the week before the lab visit.</p>
+<figure class="m3-fig"><img src="images/16/certification-flow.gif" alt="Animated six-step flow: requirements, insulation diagram, barrier table, component evidence, tests and safety file, highlighting each step in turn" loading="lazy" width="1200" height="380" /><figcaption><strong>Figure 5 (animation).</strong> Steps of the certification argument.</figcaption></figure>
+<figure class="m3-fig"><img src="images/16/insulation-diagram-example.png" alt="Insulation diagram of a class II power adapter: mains, primary circuits, a reinforced barrier crossed by transformer, optocoupler and Y-cap, and secondary SELV; with a barrier-table excerpt" loading="lazy" width="1200" height="470" /><figcaption><strong>Figure 6.</strong> An insulation diagram and barrier-table entry.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Barrier</th><th>Between</th><th>Class</th><th>Working voltage</th><th>Crossing parts</th><th>Spacing required / achieved</th><th>Evidence</th></tr></thead><tbody><tr><td>R1</td><td>Primary &harr; SELV</td><td>Reinforced</td><td>340 V<sub>pk</sub> / 250 V<sub>rms</sub></td><td>T1, U3 (opto), C12 (Y1)</td><td>creepage per table / 8.2 mm</td><td>U3: UL 1577 + IEC 60747-5-5 cert; T1 report; C12 Y1 cert; Hi-Pot report</td></tr><tr><td>B1</td><td>Primary &harr; PE chassis</td><td>Basic</td><td>250 V<sub>rms</sub></td><td>C10, C11 (Y2)</td><td>per table / 4.1 mm</td><td>Hi-Pot report; Y2 certs</td></tr></tbody></table></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Insulation-Diagram Builder</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">A class I industrial controller (230 V mains, earthed chassis, 24 V field I/O, a front-panel USB port and a relay output). Label each barrier F (functional), B (basic), S (supplementary) or R (reinforced), then check. Feedback gives the required rating for each.</p><div id="m16Bld"><div class="m16-toks" aria-label="Insulation labels"><button type="button" class="m16-tok" draggable="true" data-t="F" title="Functional">F</button><button type="button" class="m16-tok" draggable="true" data-t="B" title="Basic">B</button><button type="button" class="m16-tok" draggable="true" data-t="S" title="Supplementary">S</button><button type="button" class="m16-tok" draggable="true" data-t="R" title="Reinforced">R</button><span class="m3-note" id="m16BldHint">Drag a label onto a barrier, or click a label then click a barrier.</span></div><div class="m16-diag"><div class="m16-row"><div class="m16-blk">Mains 230 V (primary)</div><button type="button" class="m16-slot" data-s="s1" aria-label="Mains 230 V (primary) to Earthed metal chassis">?</button><div class="m16-blk">Earthed metal chassis</div></div><div class="m16-row"><div class="m16-blk">Mains 230 V (primary)</div><button type="button" class="m16-slot" data-s="s2" aria-label="Mains 230 V (primary) to Logic, display, USB (SELV)">?</button><div class="m16-blk">Logic, display, USB (SELV)</div></div><div class="m16-row"><div class="m16-blk">24 V field I/O (SELV)</div><button type="button" class="m16-slot" data-s="s3" aria-label="24 V field I/O (SELV) to Logic (SELV)">?</button><div class="m16-blk">Logic (SELV)</div></div><div class="m16-row"><div class="m16-blk">Mains 230 V (primary)</div><button type="button" class="m16-slot" data-s="s4" aria-label="Mains 230 V (primary) to Unearthed metal knob">?</button><div class="m16-blk">Unearthed metal knob</div></div><div class="m16-row"><div class="m16-blk">Relay contacts (230 V load)</div><button type="button" class="m16-slot" data-s="s5" aria-label="Relay contacts (230 V load) to Logic (SELV)">?</button><div class="m16-blk">Logic (SELV)</div></div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px"><button class="btn btn-primary" type="button" id="m16BldCheck">Check diagram</button><button class="btn btn-secondary" type="button" id="m16BldReset">Reset</button></div><div class="m3-results"><div class="m3-res-row"><span>Score</span><b id="m16BldScore">&ndash;</b></div><div style="margin-top: 8px"><span id="m16BldVerdict" class="m3-verdict">&ndash;</span></div></div><ul class="m16-fb" id="m16BldFb"></ul></div></div>
+<div class="adv-grid"><div class="adv-card"><h5>Evidence file contents</h5><p>Insulation diagram · barrier table · component certificates (UL, IEC 60747-5-5/-17, Y-caps, transformers, relays) · PCB spacing measurements · test reports · critical-components list with approved alternates.</p></div><div class="adv-card"><h5>Critical-components list</h5><p>Every part crossing a barrier is &ldquo;safety critical&rdquo;: its manufacturer and part number are listed in the report. Changing it later needs the certifier&rsquo;s approval.</p></div><div class="adv-card limit"><h5>Change control</h5><p>A new coupler source, a layout change near the barrier or a different coating reopens the argument. Put a check in your ECO process.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 13 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec13body" aria-expanded="false" aria-controls="sec13body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 13 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec13body">
+<div class="adv-grid"><div class="adv-card"><h5>Two layers</h5><p>Component standards certify the isolator; end-product standards certify your product and set the requirement.</p></div><div class="adv-card"><h5>UL 1577</h5><p>Withstand V<sub>ISO</sub> for 1 min (production ~1.2&times; for 1 s); no working voltage.</p></div><div class="adv-card"><h5>IEC 60747-5-5 (VDE 0884-5)</h5><p>The optocoupler standard: V<sub>IORM</sub>, V<sub>IOWM</sub>, V<sub>IOTM</sub>, V<sub>IOSM</sub>, 100 % PD test, safety-limiting values.</p></div><div class="adv-card"><h5>IEC 60747-17 (VDE 0884-17)</h5><p>For magnetic and capacitive couplers; supersedes VDE 0884-11 and adds barrier-lifetime evidence.</p></div><div class="adv-card"><h5>IEC 60664-1</h5><p>OVC, pollution degree, material group and altitude drive clearances, creepage and impulse ratings.</p></div><div class="adv-card"><h5>End products</h5><p>IEC 62368-1 (replaced 60950-1/60065), 61010-1, 60601-1 (MOOP/MOPP), 61800-5-1 (DVC, protective separation).</p></div><div class="adv-card"><h5>Automotive</h5><p>AEC-Q100 for ICs, Q101/Q102 for discretes and optoelectronics; ISO 26262 needs FIT data and diagnostics.</p></div><div class="adv-card"><h5>Argument</h5><p>Insulation diagram &rarr; barrier table &rarr; evidence &rarr; tests &rarr; change control.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 14 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec14body" aria-expanded="false" aria-controls="sec14body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 14 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec14body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; The wrong certificate</div><div class="scenario-body">A design review document lists &ldquo;Optocoupler U4: certified to IEC 60747-17&rdquo; for a PC817-class part used as reinforced insulation in a 230 V product.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> IEC 60747-17 covers magnetic and capacitive couplers. Obtain the vendor&rsquo;s <strong>IEC 60747-5-5 / VDE 0884-5</strong> certificate and check it lists <em>reinforced</em> insulation with V<sub>IORM</sub> &ge; 325 V<sub>pk</sub> (plus margin), and UL 1577 V<sub>ISO</sub> above the product Hi-Pot. Many standard-body PC817 variants are certified for basic insulation only, or not to 60747-5-5 at all; wide-lead or specific certified variants may be needed. Correct the document before the lab sees it.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; Solar at altitude</div><div class="scenario-body">A 1000 V DC PV inverter will be installed at 3500 m. The gate-drive coupler between the DC link and the grounded control board has V<sub>IORM</sub> = 1140 V<sub>pk</sub> and 8 mm creepage/clearance.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> V<sub>IORM</sub> 1140 V &ge; 1000 V DC plus ripple and overshoot? Only if the maximum DC (open-circuit at cold temperature, often ~1000 V by design) plus switching overshoot stays below 1140 V: check measured overshoot. Clearance must be multiplied by the altitude factor ((&asymp; 1.29 at 3500 m, representative)asymp; 1.2 at 3500 m, interpolated from the IEC 60664-1 altitude table: 1.14 at 3000 m, 1.29 at 4000 m; representative), so an 8 mm package clearance may fall short of a reinforced requirement for a high impulse voltage. Consider a higher-rated part, a PCB slot plus potting, or two barriers. Verify with IEC 62109-1 and IEC 60664-1 tables.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Medical adapter reuse</div><div class="scenario-body">A team reuses a certified ICT power-supply design (IEC 62368-1, reinforced: 3 kV<sub>rms</sub>, 6.4 mm creepage) for a patient-connected BF monitor.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> Patient protection needs 2 MOPP: representative 4 kV<sub>rms</sub>, 8 mm creepage and 5 mm clearance at 250 V, plus a patient leakage limit of ~100 &micro;A (BF). The optocoupler must have V<sub>ISO</sub> &ge; 4 kV<sub>rms</sub> with margin and adequate creepage (wide-lead package), and Y-capacitance across the patient barrier must be minimised. Either redesign the supply to 60601-1 or buy a medical-certified supply and add 2 MOPP isolation for the patient interface.</div></div></div></div>
                   </div>
                 </div>
               </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
-                </div>
-              </div>
-
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
-              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Component standards</h5><p>UL 1577 (Optical Isolators) &bull; IEC 60747-5-5 / DIN EN 60747-5-5 (VDE 0884-5) &bull; IEC 60747-17 / DIN EN IEC 60747-17 (VDE 0884-17) &bull; AEC-Q100, AEC-Q101, AEC-Q102 (Automotive Electronics Council).</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>End-product and basic standards</h5><p>IEC 60664-1 &bull; IEC 62368-1 &bull; IEC 61010-1 and IEC 61010-2-030 &bull; IEC 60601-1 &bull; IEC 61800-5-1 &bull; IEC 62477-1 &bull; IEC 61131-2 &bull; IEC 61851-1/-23 &bull; IEC 62109-1/-2 &bull; ISO 26262 &bull; ISO 6469-3.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Reliability data</h5><p>IEC 61709 (reference conditions for failure rates) &bull; Siemens SN 29500 &bull; vendor FIT and reliability reports.</p></div></div></div>
 
               <div
                 style="
@@ -293,6 +1186,581 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '16';
+      window.M_QUIZ = [{"q": "Which standard is the component standard for optocouplers?", "opts": ["IEC 60747-17", "IEC 60747-5-5 (VDE 0884-5)", "IEC 62368-1", "IEC 61131-2"], "correct": 1, "exp": "IEC 60747-5-5; 60747-17 is for magnetic/capacitive couplers."}, {"q": "VDE 0884-11 has been superseded by…", "opts": ["VDE 0884-5", "VDE 0884-17", "UL 1577", "IEC 60664-1"], "correct": 1, "exp": "VDE 0884-17 (IEC 60747-17)."}, {"q": "UL 1577 V_ISO = 5000 V_rms tells you…", "opts": ["The continuous working voltage", "The 1-minute withstand voltage", "The PD inception voltage", "The surge rating"], "correct": 1, "exp": "Withstand only; working voltage comes from V_IORM/V_IOWM."}, {"q": "For a 230 V_rms sine working voltage, compare V_IORM with…", "opts": ["230 V", "325 V peak", "3000 V", "5000 V"], "correct": 1, "exp": "V_IORM is a peak value: √2 × 230 ≈ 325 V."}, {"q": "Which rating should be compared with the rated impulse voltage of your overvoltage category?", "opts": ["V_IORM", "V_IOSM", "R_IO", "CTR"], "correct": 1, "exp": "V_IOSM is the 1.2/50 µs surge rating."}, {"q": "Safety-limiting values (T_S, I_S, P_S) are…", "opts": ["Normal operating limits", "Limits up to which the insulation stays intact under fault", "CTR test conditions", "Hi-Pot settings"], "correct": 1, "exp": "Your circuit must keep faults below them."}, {"q": "IEC 62368-1 replaced…", "opts": ["IEC 60601-1", "IEC 60950-1 and IEC 60065", "IEC 61010-1", "UL 1577"], "correct": 1, "exp": "It merged and replaced the ICT and AV standards."}, {"q": "Patient protection in IEC 60601-1 is expressed as…", "opts": ["DVC", "MOPP", "OVC", "CTI"], "correct": 1, "exp": "Means of patient protection."}, {"q": "In IEC 61800-5-1, accessible control circuits need protection from DVC C circuits by…", "opts": ["Functional insulation", "Protective separation (double/reinforced)", "No insulation", "A fuse"], "correct": 1, "exp": "Protective separation."}, {"q": "Digital isolator ICs for automotive are typically qualified to…", "opts": ["AEC-Q100", "AEC-Q200", "ISO 9001", "IEC 61131-2"], "correct": 0, "exp": "AEC-Q100 for ICs (Q101/Q102 for discretes/optoelectronics, Q200 for passives)."}];
+      window.M_TF = [{"s": "A certified optocoupler makes the end product certified for that barrier.", "a": false, "exp": "It is evidence; the product still needs its own assessment."}, {"s": "Clearance requirements increase above 2000 m altitude.", "a": true, "exp": "Thinner air breaks down at lower voltage."}, {"s": "Creepage depends on pollution degree and material group.", "a": true, "exp": "Tracking depends on contamination and CTI."}, {"s": "IEC 60747-17 adds barrier-lifetime evidence for thin-film isolators.", "a": true, "exp": "TDDB-type lifetime data."}, {"s": "2 MOPP requirements are lower than ICT reinforced requirements.", "a": false, "exp": "They are higher (e.g. ~4 kV_rms, 8 mm)."}, {"s": "1 FIT is one failure per 10⁹ device-hours.", "a": true, "exp": "Definition of FIT."}, {"s": "Changing the optocoupler supplier after certification never needs review.", "a": false, "exp": "Safety-critical parts are listed; changes need approval."}, {"s": "A reinforced barrier may replace basic plus supplementary insulation.", "a": true, "exp": "That is the definition of reinforced."}];
+      window.M_DD = [{"t": "V_IORM", "d": "Maximum repetitive peak working voltage of the barrier", "h": "Peak, continuous."}, {"t": "V_ISO", "d": "UL 1577 one-minute withstand voltage", "h": "rms, withstand."}, {"t": "MOPP", "d": "Means of patient protection", "h": "IEC 60601-1."}, {"t": "OVC", "d": "Class of transient overvoltages expected at the installation point", "h": "I–IV."}, {"t": "Protective separation", "d": "Double or reinforced insulation between circuits in drives", "h": "IEC 61800-5-1."}, {"t": "Critical-components list", "d": "Barrier parts named in the safety report", "h": "Change control."}];
+      // ---------- Module 16 ----------
+      function m16set(id, t) { var e = document.getElementById(id); if (e) e.textContent = t; }
+      // Standards navigator
+      (function () {
+        var body = document.getElementById('m16NavBody');
+        if (!body) return;
+        var P = {
+          ict: { rows: [['IEC 62368-1', 'Product safety (ICT/AV); hazard-based, replaced IEC 60950-1 and IEC 60065'], ['UL 62368-1 / CSA', 'North-American versions'], ['CISPR 32 / 35 (EN 55032/55035)', 'EMC emissions / immunity']], cls: 'Mains → accessible ES1 circuits: reinforced (or double) safeguard', key: 'R' },
+          lab: { rows: [['IEC 61010-1', 'Safety of measurement, control and laboratory equipment'], ['IEC 61010-2-030', 'Measuring circuits and measurement categories (CAT II–IV)'], ['IEC 61326-1', 'EMC for lab/measurement equipment']], cls: 'Mains → accessible parts: double/reinforced; measuring inputs rated to their CAT and voltage', key: 'R' },
+          med: { rows: [['IEC 60601-1', 'General safety of medical electrical equipment (MOOP/MOPP, leakage)'], ['IEC 60601-1-2', 'EMC collateral standard'], ['ISO 14971', 'Risk management (referenced by IEC 60601-1)']], cls: 'Mains → patient applied part: 2 MOPP; mains → operator-accessible: 2 MOOP', key: 'R' },
+          drive: { rows: [['IEC 61800-5-1', 'Safety of adjustable-speed drives (DVC classes, protective separation)'], ['IEC 61800-3', 'EMC of drives'], ['IEC 60204-1', 'Electrical equipment of machines (the machine around the drive)']], cls: 'Power circuits (DVC C) → accessible control (DVC A): protective separation (double/reinforced)', key: 'R' },
+          plc: { rows: [['IEC 61131-2', 'PLC equipment requirements (I/O types, immunity, safety via IEC 61010-2-201)'], ['IEC 61010-2-201', 'Safety of control equipment'], ['IEC 61000-6-2 / -6-4', 'Generic industrial EMC']], cls: '24 V field I/O ↔ logic: functional (both SELV/PELV); mains-rated relay outputs ↔ logic: reinforced', key: 'F' },
+          pv: { rows: [['IEC 62109-1 / -2', 'Safety of power converters in PV systems (-2: inverters)'], ['IEC 62477-1', 'Safety of power electronic converter systems (general)'], ['IEC 61000-6-x / grid codes', 'EMC and grid connection']], cls: 'PV / grid circuits (up to 1000–1500 V DC) → communication and user ports: reinforced', key: 'R' },
+          ev: { rows: [['IEC 61851-1 / -23', 'Conductive charging systems (general / DC chargers)'], ['IEC 62196 (connectors)', 'Plugs, sockets and vehicle couplers'], ['UL 2202 / UL 2594', 'North-American charger and EVSE safety']], cls: 'Mains / DC output → control-pilot, comms and user interface: reinforced (or double)', key: 'R' },
+          auto: { rows: [['ISO 6469-3', 'Electric-vehicle electrical safety (HV to LV isolation)'], ['AEC-Q100 / Q101 / Q102', 'Component stress-test qualification'], ['ISO 26262', 'Functional safety (FIT data, FMEDA, safety mechanisms)']], cls: 'HV traction (400–800 V DC) → 12 V LV system: reinforced or basic + supplementary per OEM spec', key: 'R' },
+          app: { rows: [['IEC 60335-1 (+ part 2)', 'Household appliance safety'], ['IEC 60730-1', 'Automatic electrical controls'], ['CISPR 14-1 / -2', 'Appliance EMC']], cls: 'Mains → accessible parts: basic + earthing (class I) or double/reinforced (class II)', key: 'R' },
+        };
+        var IMP = { '150': [800, 1500, 2500, 4000], '300': [1500, 2500, 4000, 6000], '600': [2500, 4000, 6000, 8000], '1000': [4000, 6000, 8000, 12000] };
+        function upd() {
+          var d = P[document.getElementById('m16NavProd').value];
+          body.innerHTML = '';
+          d.rows.concat([['IEC 60664-1', 'Insulation coordination principles used by the above'], ['UL 1577 + IEC 60747-5-5 (VDE 0884-5)', 'What to ask the optocoupler vendor for (IEC 60747-17 for a digital isolator)']]).forEach(function (r) {
+            var tr = document.createElement('tr'); tr.innerHTML = '<td><strong>' + r[0] + '</strong></td><td>' + r[1] + '</td>'; body.appendChild(tr);
+          });
+          m16set('m16NavCls', d.cls);
+          var v = +document.getElementById('m16NavV').value, ovc = +document.getElementById('m16NavOvc').value, reinf = document.getElementById('m16NavR').value === 'R';
+          var dc = document.getElementById('m16NavDc').checked;
+          var vpk = dc ? v : v * Math.SQRT2;
+          var sys = v <= 150 ? '150' : v <= 300 ? '300' : v <= 600 ? '600' : '1000';
+          var imp = IMP[sys][ovc - 1], impR = ovc < 4 ? IMP[sys][ovc] : Math.round(IMP[sys][3] * 1.6);
+          var need = reinf ? impR : imp;
+          m16set('m16NavVpk', Math.round(vpk) + ' V_peak');
+          m16set('m16NavImp', need + ' V_peak (1.2/50 µs)' + (reinf ? ' — reinforced: one step higher' : ''));
+          m16set('m16NavReq', 'V_IORM ≥ ' + Math.round(vpk) + ' V_pk · V_IOSM ≥ ' + need + ' V_pk · ' + (reinf ? 'reinforced' : 'basic') + ' insulation class on the certificate');
+          var ver = document.getElementById('m16NavVerdict'), n = document.getElementById('m16NavNote');
+          if (vpk > 1500) { M3.setVerdict(ver, 'bad', 'Beyond typical optocoupler V_IORM (~1.1–1.5 kV_pk)'); n.textContent = 'Consider a digital isolator with a high V_IORM, series insulation (two barriers) or fibre (Module 15).'; }
+          else if (vpk > 890) { M3.setVerdict(ver, 'warn', 'Needs a wide-body / high-V_IORM coupler'); n.textContent = 'Standard DIP/SMD couplers typically offer V_IORM ≈ 600–890 V_pk; wide-body (8 mm+) parts go higher.'; }
+          else { M3.setVerdict(ver, 'ok', 'Within the range of common certified couplers'); n.textContent = 'Representative: impulse values follow the familiar IEC 60664-1 pattern by nominal voltage and overvoltage category; confirm with your end-product standard.'; }
+        }
+        ['m16NavProd', 'm16NavV', 'm16NavOvc', 'm16NavR', 'm16NavDc'].forEach(function (i) { var e = document.getElementById(i); e.addEventListener('change', upd); e.addEventListener('input', upd); });
+        upd();
+      })();
+      // Certificate decoder
+      (function () {
+        var host = document.getElementById('m16Cert');
+        if (!host) return;
+        var EXP = {
+          std: ['Standard and edition', 'Tells you which rules the part was tested to. For an optocoupler this must be IEC 60747-5-5 (DIN EN 60747-5-5, VDE 0884-5). A digital isolator would show IEC 60747-17 (VDE 0884-17). Check that the edition is still accepted by your end-product standard and test lab.'],
+          cls: ['Insulation class', '“Reinforced” means the single barrier may replace double insulation. “Basic” means you need a second, supplementary barrier elsewhere if the application requires double/reinforced.'],
+          viorm: ['V_IORM — max repetitive peak isolation voltage', 'The highest repetitive peak (including DC) the barrier may see continuously. Compare with your peak working voltage (√2 × V_rms for sine, full DC-link voltage plus ripple for inverters).'],
+          viowm: ['V_IOWM — max working isolation voltage (rms)', 'The continuous rms working voltage rating. Some end-product standards and creepage tables use rms working voltage; this is the number to compare.'],
+          viotm: ['V_IOTM — max transient isolation voltage', 'The short-term (typically 60 s type-tested, 1 s production) overvoltage the barrier withstands. It relates to temporary overvoltages and dielectric-strength test levels.'],
+          viosm: ['V_IOSM — max surge isolation voltage', 'The 1.2/50 µs impulse the barrier withstands (tested above this rating, higher factor for reinforced). Compare with the rated impulse voltage for your overvoltage category.'],
+          pd: ['Partial-discharge test', 'Every part is PD-tested at a multiple of V_IORM (method b1, 1 s, < 5 pC). This is the evidence that the barrier will not age from PD at working voltage.'],
+          clim: ['Climatic category and pollution degree', '55/110/21 means tested from −55 °C to +110 °C and 21 days of damp heat. Pollution degree 2 is the basis for the part’s own creepage. If your environment is PD3, your board needs more creepage (Module 11).'],
+          cti: ['CTI / material group', 'Comparative tracking index of the package material (e.g. ≥ 175 → material group IIIa). Creepage requirements grow as CTI falls.'],
+          dist: ['Creepage, clearance, DTI', 'External creepage/clearance of the package (e.g. 8 mm wide-lead) and distance through insulation (DTI ≥ 0.4 mm is a common requirement for reinforced solid insulation). Your PCB footprint can reduce the effective creepage!'],
+          safe: ['Safety-limiting values T_S, I_S, P_S', 'The case temperature, input current and output power up to which the insulation is guaranteed under fault. Your circuit must limit a fault below these (e.g. with a resistor or fuse).'],
+          rio: ['R_IO at T_S', 'Insulation resistance at the safety-limiting temperature (e.g. > 10⁹ Ω at 500 V DC).'],
+          ul: ['UL 1577 recognition', 'Withstand rating V_ISO = 5000 V_rms for 1 min, with a production test (typically 1.2 × V_ISO for 1 s). It is a withstand rating only: it does not give a working voltage.'],
+        };
+        host.querySelectorAll('[data-f]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            host.querySelectorAll('[data-f]').forEach(function (x) { x.classList.remove('active'); x.setAttribute('aria-pressed', 'false'); });
+            b.classList.add('active'); b.setAttribute('aria-pressed', 'true');
+            var e = EXP[b.getAttribute('data-f')];
+            m16set('m16CertHead', e[0]); m16set('m16CertText', e[1]);
+          });
+        });
+        function chk() {
+          var vw = bindOut('m16CkVw', function (v) { return v + ' V_rms'; });
+          var dc = document.getElementById('m16CkDc').checked, imp = +document.getElementById('m16CkImp').value, reinf = document.getElementById('m16CkCls').value === 'R';
+          var pdeg = +document.getElementById('m16CkPd').value;
+          var vpk = dc ? vw : vw * Math.SQRT2, probs = [];
+          if (vpk > 1140) probs.push('peak working ' + Math.round(vpk) + ' V > V_IORM 1140 V');
+          if (!dc && vw > 806) probs.push('working ' + vw + ' V_rms > V_IOWM 806 V_rms');
+          if (imp > 8000) probs.push('impulse ' + imp + ' V > V_IOSM 8000 V');
+          if (pdeg > 2) probs.push('PD3 environment: part rated for PD2 — board must add creepage/coating');
+          m16set('m16CkVpk', Math.round(vpk) + ' V_peak');
+          var v = document.getElementById('m16CkVerdict'), n = document.getElementById('m16CkNote');
+          if (probs.length) { M3.setVerdict(v, probs.length === 1 && pdeg > 2 ? 'warn' : 'bad', probs.length === 1 && pdeg > 2 ? 'Part OK, installation needs attention' : 'Certificate values insufficient'); n.textContent = probs.join(' · '); }
+          else { M3.setVerdict(v, 'ok', 'Certificate values cover this application' + (reinf ? ' (reinforced)' : '')); n.textContent = 'Now check the board: creepage and clearance of the footprint, slots and coating (Module 11), and the end-product test voltage (Module 13).'; }
+        }
+        ['m16CkVw', 'm16CkDc', 'm16CkImp', 'm16CkCls', 'm16CkPd'].forEach(function (i) { var e = document.getElementById(i); e.addEventListener('change', chk); e.addEventListener('input', chk); });
+        chk();
+      })();
+      // Insulation diagram builder
+      (function () {
+        var host = document.getElementById('m16Bld');
+        if (!host) return;
+        var ANS = { s1: ['B'], s2: ['R'], s3: ['F'], s4: ['R'], s5: ['R'] };
+        var WHY = {
+          s1: 'Basic: in class I equipment, basic insulation plus protective earthing of the chassis is the accepted two-level protection. Test ≈ 1.5 kV_rms for 230 V mains (representative).',
+          s2: 'Reinforced: the logic, displays and USB port are user-accessible SELV. The transformer, optocouplers and any Y-cap crossing here need reinforced ratings (coupler: reinforced certificate, V_IORM ≥ peak working).',
+          s3: 'Functional: both sides are SELV/PELV (24 V field supply). Isolation here is for ground loops and noise, not safety — but check whether field wiring can be exposed to higher voltages in your installation.',
+          s4: 'Reinforced (or double): an unearthed metal knob is touchable and has no earth fault path, so it needs the same protection level as SELV circuits.',
+          s5: 'Reinforced: a relay switching a 230 V load puts mains on its contacts. Contact-to-coil insulation and the PCB spacing to the logic side must be reinforced.',
+        };
+        var sel = null;
+        function place(slot, tok) {
+          slot.setAttribute('data-v', tok); slot.textContent = tok; slot.className = 'm16-slot filled';
+        }
+        host.querySelectorAll('.m16-tok').forEach(function (t) {
+          t.addEventListener('dragstart', function (e) { try { e.dataTransfer.setData('text/plain', t.getAttribute('data-t')); } catch (x) {} });
+          t.addEventListener('click', function () {
+            host.querySelectorAll('.m16-tok').forEach(function (x) { x.classList.remove('active'); });
+            sel = t.getAttribute('data-t'); t.classList.add('active'); m16set('m16BldHint', 'Selected ' + sel + ' — now click a barrier slot.');
+          });
+        });
+        host.querySelectorAll('.m16-slot').forEach(function (s) {
+          s.addEventListener('dragover', function (e) { e.preventDefault(); });
+          s.addEventListener('drop', function (e) { e.preventDefault(); var v = ''; try { v = e.dataTransfer.getData('text/plain'); } catch (x) {} if (v) place(s, v); });
+          s.addEventListener('click', function () { if (sel) place(s, sel); });
+        });
+        document.getElementById('m16BldCheck').addEventListener('click', function () {
+          var ok = 0, n = 0, out = [];
+          host.querySelectorAll('.m16-slot').forEach(function (s) {
+            n++; var id = s.getAttribute('data-s'), v = s.getAttribute('data-v') || '';
+            var good = ANS[id].indexOf(v) >= 0; if (good) ok++;
+            s.className = 'm16-slot filled ' + (good ? 'm3-pass' : 'm3-fail');
+            out.push((good ? '✓ ' : '✗ ') + s.getAttribute('aria-label') + ': ' + (v || 'empty') + (good ? '' : ' → ' + ANS[id][0]) + '. ' + WHY[id]);
+          });
+          m16set('m16BldScore', ok + ' / ' + n + ' barriers correct');
+          var fb = document.getElementById('m16BldFb'); fb.innerHTML = '';
+          out.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; fb.appendChild(li); });
+          M3.setVerdict(document.getElementById('m16BldVerdict'), ok === n ? 'ok' : ok >= n - 1 ? 'warn' : 'bad', ok === n ? 'Insulation diagram complete' : 'Review the flagged barriers');
+        });
+        document.getElementById('m16BldReset').addEventListener('click', function () {
+          host.querySelectorAll('.m16-slot').forEach(function (s) { s.removeAttribute('data-v'); s.textContent = '?'; s.className = 'm16-slot'; });
+          m16set('m16BldScore', '–'); document.getElementById('m16BldFb').innerHTML = ''; sel = null;
+        });
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m16-check-', ["End-product standard(s) and markets identified.", "Insulation diagram drawn with every barrier labelled F/B/S/R.", "Working voltage (rms and peak) and OVC defined per barrier.", "Coupler certificates: UL 1577 and IEC 60747-5-5 (optocoupler) or IEC 60747-17 (digital isolator) — correct standard cited.", "V_IORM ≥ peak working; V_IOSM ≥ rated impulse; class on certificate matches the barrier.", "Safety-limiting values (I_S, P_S, T_S) respected under single fault.", "PCB creepage/clearance verified for pollution degree, material group and altitude.", "Medical: MOPP/MOOP counts and leakage limits checked (if applicable).", "Automotive: AEC-Q grade and FIT data obtained (if applicable).", "Critical-components list and change-control process in place."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

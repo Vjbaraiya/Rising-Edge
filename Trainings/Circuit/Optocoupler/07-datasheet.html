@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Reading the Datasheet — Module 07 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="How to read an optocoupler datasheet: abs max, electrical tables and test conditions, curves and log axes, safety tables, package drawings and ordering codes."
     />
     <title>Reading the Datasheet | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -189,79 +890,247 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S1,S11 → Q1,DD; 2: S4 → Q2,Q5,TF1,TF2; 3: S6-S7 → Q3,Q4,Q9,TF6; 4: S8 → Q6,Q7,TF7,Scen2; 5: S9 → Q10,TF8 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Navigate a full optocoupler datasheet with confidence
-                  </div>
-                  <div class="metric-card">Extract worst-case values (not typicals) for design</div>
-                  <div class="metric-card">
-                    Read CTR vs IF, temperature, and aging curves correctly
-                  </div>
-                  <div class="metric-card">
-                    Verify safety certification tables against project requirements
-                  </div>
-                  <div class="metric-card">
-                    Check package drawings for creepage and clearance data
-                  </div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Navigate a full optocoupler datasheet with confidence</div><div class="objective-card metric-card">Extract worst-case values (not typicals) for design</div><div class="objective-card metric-card">Read CTR vs I<sub>F</sub>, temperature, and aging curves correctly</div><div class="objective-card metric-card">Verify safety certification tables against project requirements</div><div class="objective-card metric-card">Check package drawings for creepage and clearance data</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> Module 6 defined each parameter. This module teaches you to find them, read their test conditions, and pull the right number out of a real sheet, including the curves and the safety table. To avoid reproducing any vendor&rsquo;s copyrighted document, the interactive sheet below is an <strong>original, generic layout for a fictional part (&ldquo;RX-817&rdquo;)</strong> with values typical of PC817-class parts. The skills transfer directly to real datasheets.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; Anatomy of a Datasheet and an Annotated Example</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Datasheets are dense but predictable. Once you know the map, you can find any number in seconds and, more importantly, you can find the <em>conditions</em> attached to it.</p>
+<figure class="m3-fig"><img src="images/07/datasheet-page-map.png" alt="Generic page map of an optocoupler datasheet: page 1 features and certifications, page 2 absolute maximum ratings, page 3 electrical characteristics, page 4 switching, pages 5-6 curves, page 7 insulation table, pages 8-9 package drawings, page 10 ordering information" loading="lazy" width="1100" height="560" /><figcaption><strong>Figure 1.</strong> The typical order of sections. Page 1 sells, the tables guarantee, the curves explain, and the insulation table certifies.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Annotated Datasheet (fictional RX-817)</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">An original, generic datasheet excerpt. Click or tap each underlined item for an explanation.</p><div class="m3-twocol"><div class="m-sheet" id="m7Sheet">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><strong style="color:var(--text-base);font-size:0.95rem">RX-817 &mdash; Phototransistor Optocoupler</strong><span class="m3-tag">fictional example part</span></div>
+<h5>Absolute maximum ratings (T<sub>A</sub> = 25 &deg;C)</h5>
+<table><tr><td><span class="m-hot" tabindex="0" role="button" data-k="if">Forward current I<sub>F</sub></span></td><td>50 mA</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="ifm">Peak forward current I<sub>FM</sub></span></td><td>1 A (<span class="m-hot" tabindex="0" role="button" data-k="ifmcond">t<sub>p</sub> &le; 100 &micro;s, duty 1 %</span>)</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="vr">Reverse voltage V<sub>R</sub></span></td><td>6 V</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="vceo">V<sub>CEO</sub></span></td><td>80 V</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="veco">V<sub>ECO</sub></span></td><td>6 V</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="ptot">Total power P<sub>tot</sub></span></td><td>200 mW</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="viso">Isolation voltage V<sub>ISO</sub></span></td><td>5000 V<sub>rms</sub> (1 min)</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="topr">Operating temperature</span></td><td>&minus;55 &hellip; +110 &deg;C</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="tsol">Soldering temperature</span></td><td>260 &deg;C, 10 s</td></tr></table>
+<h5>Electrical characteristics (T<sub>A</sub> = 25 &deg;C)</h5>
+<table><tr><th>Parameter</th><th>Min</th><th>Typ</th><th>Max</th><th>Conditions</th></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="vf">V<sub>F</sub></span></td><td>&ndash;</td><td>1.2 V</td><td>1.4 V</td><td><span class="m-hot" tabindex="0" role="button" data-k="vfcond">I<sub>F</sub> = 20 mA</span></td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="iceo">I<sub>CEO</sub></span></td><td>&ndash;</td><td>&ndash;</td><td>100 nA</td><td>V<sub>CE</sub> = 20 V</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="ctr">CTR</span></td><td>50 %</td><td>&ndash;</td><td>600 %</td><td><span class="m-hot" tabindex="0" role="button" data-k="ctrcond">I<sub>F</sub> = 5 mA, V<sub>CE</sub> = 5 V</span></td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="vcesat">V<sub>CE(sat)</sub></span></td><td>&ndash;</td><td>0.1 V</td><td>0.2 V</td><td>I<sub>F</sub> = 20 mA, I<sub>C</sub> = 1 mA</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="rio">R<sub>IO</sub></span></td><td>5&times;10<sup>10</sup> &Omega;</td><td>10<sup>11</sup> &Omega;</td><td>&ndash;</td><td>500 V DC</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="cio">C<sub>IO</sub></span></td><td>&ndash;</td><td>0.6 pF</td><td>1.0 pF</td><td>f = 1 MHz</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="tr">t<sub>r</sub> / t<sub>f</sub></span></td><td>&ndash;</td><td>4 / 3 &micro;s</td><td>18 / 18 &micro;s</td><td><span class="m-hot" tabindex="0" role="button" data-k="trcond">V<sub>CE</sub> = 2 V, I<sub>C</sub> = 2 mA, R<sub>L</sub> = 100 &Omega;</span></td></tr></table>
+<h5>Insulation characteristics (per IEC 60747-5-5, option V)</h5>
+<table><tr><td><span class="m-hot" tabindex="0" role="button" data-k="viorm">V<sub>IORM</sub></span></td><td>890 V<sub>pk</sub></td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="vpr">V<sub>PR</sub> (method b)</span></td><td>1669 V<sub>pk</sub>, 1 s, &lt; 5 pC</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="viotm">V<sub>IOTM</sub></span></td><td>8000 V<sub>pk</sub></td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="creep">Creepage / clearance (ext.)</span></td><td>&ge; 8.0 / &ge; 8.0 mm (option W)</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="dti">DTI</span></td><td>&ge; 0.4 mm</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="cti">CTI / material group</span></td><td>175 / IIIa</td></tr><tr><td><span class="m-hot" tabindex="0" role="button" data-k="clim">Climatic category</span></td><td>55/110/21</td></tr></table>
+<h5>Ordering information</h5>
+<table><tr><td><span class="m-hot" tabindex="0" role="button" data-k="rank">RX-817A / B / C / D</span></td><td>CTR 80&ndash;160 / 130&ndash;260 / 200&ndash;400 / 300&ndash;600 %</td></tr>
+<tr><td><span class="m-hot" tabindex="0" role="button" data-k="opt">Suffix &ldquo;W&rdquo;, &ldquo;S&rdquo;, &ldquo;T&rdquo;</span></td><td>wide lead / SMD / tape &amp; reel</td></tr></table>
+</div><div class="m3-info" id="m7SheetInfo" style="position: sticky; top: 140px" aria-live="polite"><h5>Click any underlined line</h5><p>Each highlighted item on the sheet explains what the number really means, the conditions attached to it, and the design trap hiding behind it.</p></div></div></div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Absolute maximum ratings
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Electrical characteristics
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>CTR curves</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Derating graphs</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Safety certifications</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Package information</div>
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; Absolute Maximum Ratings: What &ldquo;Absolute&rdquo; Means</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">&ldquo;Absolute maximum&rdquo; means exactly that: the stress beyond which the manufacturer no longer guarantees the part will survive. Nothing in the electrical-characteristics table is guaranteed there, and life shortens as you approach them. They are not design targets.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Rating</th><th>What physically fails beyond it</th></tr></thead><tbody><tr><td>I<sub>F</sub>, I<sub>FM</sub></td><td>LED junction overheating and current crowding; accelerated light-output degradation; bond-wire fusing at high pulses</td></tr><tr><td>V<sub>R</sub></td><td>LED reverse breakdown: localised heating damages the junction permanently</td></tr><tr><td>V<sub>CEO</sub></td><td>Collector&ndash;emitter avalanche breakdown; with energy (inductive loads), destruction</td></tr><tr><td>V<sub>ECO</sub></td><td>Emitter&ndash;base junction breakdown at a few volts; degrades h<sub>FE</sub></td></tr><tr><td>P<sub>tot</sub>, P<sub>C</sub></td><td>Junction temperature beyond limits; encapsulant stress</td></tr><tr><td>V<sub>ISO</sub></td><td>Barrier breakdown or partial-discharge damage (test rating, not working)</td></tr><tr><td>T<sub>stg</sub>, T<sub>opr</sub>, soldering</td><td>Encapsulant cracking, delamination, wire-bond fatigue, optical yellowing</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/07/operating-zones-abs-max.gif" alt="Animation of a marker sweeping LED current from 0 to 75 mA across zones: recommended range, specified test points, allowed without guarantee, and beyond the 50 mA absolute maximum" loading="lazy" width="807" height="306" /><figcaption><strong>Animation 1.</strong> Where a value sits relative to the recommended range, the specified test points and the absolute maximum. Designs belong in the green zone, with the absolute maximum derated for temperature.</figcaption></figure>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; Recommended Operating Conditions</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">Some datasheets (always for logic and gate-driver parts) include a <strong>recommended operating conditions</strong> table: the range over which the electrical characteristics apply. Typical entries: supply voltage (e.g. 4.5&ndash;5.5 V), I<sub>F(on)</sub> (e.g. 6.5&ndash;15 mA for a 6N137-class part), I<sub>F(off)</sub> or V<sub>F(off)</sub> (the input must be truly off, e.g. &le; 250 &micro;A or &le; 0.8 V), and ambient temperature.</p>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip &mdash; the off-state is specified too.</strong> Leakage from a driver pin can partially turn an LED on. A logic coupler with I<sub>F(off)</sub> &le; 250 &micro;A (typical figure) can glitch if the driving GPIO leaks, or if the LED has a pull-up through a long cable. Hold the input firmly off.</div>
+
                 </div>
               </div>
 
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Electrical Characteristics: Which Column Do You Design To?</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">The electrical characteristics table has three value columns and one conditions column. The golden rule: <strong>design with the min or max that hurts you, at conditions corrected to yours</strong>. The typical column describes the median part. Roughly half of your production will be worse.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>If you are calculating&hellip;</th><th>Use</th><th>Because</th></tr></thead><tbody><tr><td>Minimum output current</td><td>CTR<sub>min</sub> &times; corrections</td><td>Every part is guaranteed to exceed it</td></tr><tr><td>LED resistor for minimum current</td><td>V<sub>F(max)</sub></td><td>Highest V<sub>F</sub> gives the lowest I<sub>F</sub></td></tr><tr><td>LED current maximum (stress)</td><td>V<sub>F(min)</sub> or a hot, low V<sub>F</sub></td><td>Lowest V<sub>F</sub> gives the highest I<sub>F</sub></td></tr><tr><td>Leakage in the off state</td><td>I<sub>CEO(max)</sub>, at your hottest temperature</td><td>Leakage doubles about every 10 &deg;C</td></tr><tr><td>Speed</td><td>t<sub>r</sub>/t<sub>f</sub> max, converted to your R<sub>L</sub></td><td>Test circuit is not your circuit</td></tr></tbody></table></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Spot the Trap</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">For each line, click the value you should actually design with. Wrong picks explain why novices choose them.</p><div id="m7Trap"></div><p class="m3-note" id="m7TrapScore">Score: 0 / 5</p></div>
+
+                </div>
               </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Switching Characteristics and Their Test Circuits</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">Switching times are only meaningful together with their test circuit. Phototransistor datasheets typically measure with R<sub>L</sub> = 100 &Omega; at I<sub>C</sub> = 2 mA in the active region. That is great for a fast number and unlike almost any real logic interface.</p>
+<figure class="m3-fig"><img src="images/07/switching-test-circuit-vs-yours.png" alt="Two side-by-side circuits: the datasheet test circuit with a 100 ohm load and 2 mA collector current giving about 4 microsecond rise time, and a typical design with a 10 kilohm pull-up giving 60 to 100 microseconds" loading="lazy" width="1000" height="470" /><figcaption><strong>Figure 2.</strong> The same part in the datasheet test circuit and in a typical design. Use the &ldquo;response time vs R<sub>L</sub>&rdquo; curve (usually present) to translate, and remember the max column.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; translating t<sub>r</sub></h5>Datasheet: t<sub>r</sub> = 4 &micro;s typ, 18 &micro;s max at R<sub>L</sub> = 100 &Omega;. Your pull-up: 10 k&Omega;.<ol><li>The response-vs-R<sub>L</sub> curve (typical) shows roughly 60&ndash;100 &micro;s at 10 k&Omega;.</li><li>Scale by max/typ (18/4 &asymp; 4.5) for a pessimistic bound: several hundred &micro;s is possible for a worst-case part.</li><li>For a 1 kHz signal (500 &micro;s half-period) that is marginal, so reduce R<sub>L</sub> or choose a faster family (Module 5).</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Characteristic Curves: CTR vs I<sub>F</sub>, vs T<sub>A</sub>, and Log Axes</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">Curves are <em>typical</em> unless labelled otherwise. They tell you the <strong>shape</strong> of a dependency, which you apply as a ratio to a guaranteed number. Four curves matter most: CTR vs I<sub>F</sub> (often normalised to 1 at 5 mA), CTR vs T<sub>A</sub>, output current vs V<sub>CE</sub>, and response time vs R<sub>L</sub>. Some vendors also publish long-term CTR degradation curves; Module 9 uses them.</p>
+<h3 class="m3-h3">Reading log axes correctly</h3>
+<p class="m3-p">Most current axes are logarithmic. Each decade (0.1&ndash;1&ndash;10 mA) has the same width, and the minor gridlines for 2, 3 &hellip; 9 get closer together towards the next decade. A point one-third of the way through a decade is &asymp; 2, not 3.3. Interpolate logarithmically: x = 10<sup>(log x<sub>1</sub> + f&middot;(log x<sub>2</sub> &minus; log x<sub>1</sub>))</sup>.</p>
+<figure class="m3-fig"><img src="images/07/reading-log-axis-curve.gif" alt="Animation: a cursor moves along a normalised CTR versus forward current curve on a logarithmic axis, showing the relative CTR value at each point" loading="lazy" width="807" height="408" /><figcaption><strong>Animation 2.</strong> Reading a normalised CTR curve. Note how the minor gridlines crowd towards each decade line.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Curve Reader</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Drag across the plot (or use the slider) to read the normalised CTR, then apply a temperature curve and the datasheet minimum. Curves are the course&rsquo;s representative teaching model.</p><div class="m3-calc"><div><div class="m3-field"><label for="m7CrIf"><span>Cursor: I<sub>F</sub> (or drag on the plot)</span> <output id="m7CrIfOut"></output></label><input type="range" id="m7CrIf" min="0" max="100" step="0.01" value="62.95" /></div><div class="m3-field"><label for="m7CrT">Apply temperature curve</label><select id="m7CrT"><option value="25" selected>25 &deg;C (reference)</option><option value="-40">&minus;40 &deg;C</option><option value="70">70 &deg;C</option><option value="85">85 &deg;C</option><option value="100">100 &deg;C</option></select></div><div class="m3-field"><label for="m7CrMin"><span>Datasheet CTR<sub>min</sub> at 5 mA</span> <output id="m7CrMinOut"></output></label><input type="range" id="m7CrMin" min="20" max="300" step="5" value="130" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Relative CTR (I<sub>F</sub> curve)</span><b id="m7CrRel">&ndash;</b></div><div class="m3-res-row"><span>Temperature factor</span><b id="m7CrT2">&ndash;</b></div><div class="m3-res-row"><span>Estimated CTR<sub>min</sub> at this point</span><b id="m7CrOut">&ndash;</b></div><div style="margin-top: 8px"><span id="m7CrVerdict" class="m3-verdict">&ndash;</span></div></div></div>
+<div class="m3-canvas-wrap" style="height: 300px"><canvas id="m7CrCanvas" role="img" aria-label="Draggable normalised CTR versus forward current curve on a logarithmic axis"></canvas></div>
+</div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; multiplying typical curves as if they were guarantees.</strong> The ratio from a typical curve is an estimate. For safety-critical margins, verify on parts from several lots, or specify a guaranteed CTR at your operating point with the vendor.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Derating Graphs</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p">Derating graphs show the maximum allowed I<sub>F</sub>, collector power and total power vs ambient temperature. They are usually flat to 25 &deg;C (sometimes higher) and then fall linearly to zero at the maximum temperature. Read them at your worst-case ambient <em>inside the enclosure</em>, next to whatever heats the board, not at the room temperature on the specification sheet.</p>
+<div class="m3-example"><h5>Worked example</h5>P<sub>tot</sub> 200 mW at 25 &deg;C, zero at 110 &deg;C (fictional RX-817). Enclosure ambient 80 &deg;C.<ol><li>Slope = 200 / (110 &minus; 25) &asymp; 2.35 mW/&deg;C.</li><li>Allowed at 80 &deg;C: 200 &minus; 2.35 &times; 55 &asymp; <strong>71 mW</strong>, just over a third of the headline figure.</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; The Safety Certification Table</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p">The insulation (safety) table is the part of the datasheet a certification engineer reads. It is backed by the component certificates: UL 1577 (file number on page 1), VDE/IEC 60747-5-5 (certificate number), sometimes CQC or CSA. Key entries and how to use them:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Entry</th><th>What to check</th></tr></thead><tbody><tr><td>Installation class / OVC per mains voltage</td><td>Which overvoltage categories the part is rated for, at which rated mains voltage</td></tr><tr><td>Climatic category (e.g. 55/110/21)</td><td>Min temp / max temp / damp-heat days of the test</td></tr><tr><td>Pollution degree</td><td>The PD the internal and package ratings assume (usually PD2)</td></tr><tr><td>V<sub>IORM</sub>, V<sub>IOTM</sub>, V<sub>IOSM</sub>, V<sub>PR</sub></td><td>Against working, transient and surge voltages (Module 6)</td></tr><tr><td>Creepage, clearance (external)</td><td>Against the end-product requirement; wide-lead options often exist</td></tr><tr><td>DTI</td><td>Many standards require &ge; 0.4 mm for supplementary/reinforced solid insulation</td></tr><tr><td>CTI / material group</td><td>Sets the creepage requirement for the package surface</td></tr><tr><td>Safety-limiting values (I<sub>S</sub>, P<sub>S</sub>, T<sub>S</sub>)</td><td>The maximum input current/power and temperature under fault conditions for which insulation is still guaranteed</td></tr></tbody></table></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Certification-Table Decoder</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Checks the fictional RX-817 option W table (V<sub>IORM</sub> 890 V<sub>pk</sub>, creepage/clearance 8.0 mm, DTI 0.4 mm) against your application. Uses representative IEC 60664-1-style values: <strong>confirm with the governing standard table</strong> and your end-product standard, which may require more.</p><div class="m3-calc"><div><div class="m3-field"><label for="m7DcV"><span>Working voltage (rms, line-to-earth)</span> <output id="m7DcVOut"></output></label><input type="range" id="m7DcV" min="50" max="1000" step="10" value="250" /></div><div class="m3-field"><label for="m7DcPd">Pollution degree</label><select id="m7DcPd"><option value="2" selected>PD2 (clean, non-condensing)</option><option value="3">PD3 (conductive/condensing pollution)</option></select></div><div class="m3-field"><label for="m7DcIns">Insulation required</label><select id="m7DcIns"><option value="basic">Basic / supplementary</option><option value="reinforced" selected>Reinforced</option></select></div><div class="m3-field"><label for="m7DcOvc">Overvoltage category</label><select id="m7DcOvc"><option value="1">OVC I</option><option value="2" selected>OVC II</option><option value="3">OVC III</option></select></div><div class="m3-field"><label for="m7DcMg">Material group of the surfaces</label><select id="m7DcMg"><option value="I">I (CTI &ge; 600)</option><option value="II">II (400&ndash;599)</option><option value="III" selected>IIIa/IIIb (100&ndash;399)</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Peak working voltage vs V<sub>IORM</sub> 890 V<sub>pk</sub></span><b id="m7DcViorm">&ndash;</b></div><div class="m3-res-row"><span>Required creepage vs table 8.0 mm</span><b id="m7DcCr">&ndash;</b></div><div class="m3-res-row"><span>Rated impulse &rarr; required clearance vs 8.0 mm</span><b id="m7DcCl">&ndash;</b></div><div class="m3-res-row"><span>DTI 0.4 mm (reinforced solid insulation)</span><b id="m7DcDti">&ndash;</b></div><div style="margin-top: 8px"><span id="m7DcVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m7DcNote"></p></div></div>
+</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Package Drawings and Land Patterns</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<p class="m3-p">Package drawings give dimensions with tolerances, the recommended land pattern and sometimes explicit creepage/clearance callouts. Use them to make sure your footprint does not quietly reduce the certified distances, and to choose between lead-form options.</p>
+<figure class="m3-fig"><img src="images/07/package-drawing-isolation.png" alt="Top and side views of a generic 4-pin SMD optocoupler on a PCB, annotating lead span, body width, external clearance, external creepage and the land-pattern pad gap" loading="lazy" width="1100" height="550" /><figcaption><strong>Figure 3.</strong> The distances on a package drawing that matter for isolation. The certified values come from the insulation table; the drawing shows whether your pads preserve them.</figcaption></figure>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; extending pads under the body.</strong> Enlarging SMD pads for hand-soldering or &ldquo;better fillets&rdquo; moves copper towards the other side and can cut board creepage below the certified package value. Keep the vendor&rsquo;s land pattern or check the gap explicitly (Module 11).</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Ordering Information and CTR Rank Codes</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<p class="m3-p">The ordering section turns one datasheet into dozens of real part numbers: CTR rank letters, lead-form options (DIP, gull-wing SMD, wide-lead), tape-and-reel, and certification options (e.g. a suffix for VDE-tested parts). Each option can change guaranteed values.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Code element</th><th>Example meaning (fictional RX-817)</th><th>Why it matters</th></tr></thead><tbody><tr><td>Rank letter A/B/C/D</td><td>CTR 80&ndash;160 / 130&ndash;260 / 200&ndash;400 / 300&ndash;600 %</td><td>Only a ranked part number guarantees the narrower window</td></tr><tr><td>&ldquo;W&rdquo; wide lead</td><td>10.16 mm lead span, &ge; 8 mm creepage</td><td>Needed for reinforced 230 V at PD3, medical, etc.</td></tr><tr><td>&ldquo;S&rdquo; SMD</td><td>Gull-wing leads for reflow</td><td>DIP versions are often not reflow-rated</td></tr><tr><td>&ldquo;V&rdquo; / &ldquo;-000E&rdquo; etc.</td><td>VDE-certified, RoHS or lead-finish variants</td><td>The V<sub>IORM</sub> claim may apply only to this option</td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; a generic BOM line.</strong> &ldquo;PC817&rdquo; alone lets purchasing buy any rank, any lead form, any certification option. Put the full ordering code (and approved alternates with verified insulation tables) in the BOM.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body" aria-expanded="false" aria-controls="sec11body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 11 &mdash; Side by Side: A PC817-Class Sheet vs a 6N137-Class Sheet</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+<p class="m3-p">Two datasheets, two mindsets. A phototransistor sheet is organised around <strong>CTR</strong>; a logic-output sheet around <strong>thresholds and timing</strong>. Here is what to look at first in each (generic, not vendor-specific):</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Look for&hellip;</th><th>PC817-class phototransistor</th><th>6N137-class logic output</th></tr></thead><tbody><tr><td>Transfer spec</td><td>CTR min/max by rank at I<sub>F</sub> = 5 mA, V<sub>CE</sub> = 5 V</td><td>I<sub>FH</sub>/I<sub>FL</sub> threshold (e.g. &le; 5 mA); recommended I<sub>F(on)</sub></td></tr><tr><td>Output</td><td>V<sub>CEO</sub>, I<sub>C</sub>, V<sub>CE(sat)</sub> at a test point</td><td>V<sub>OL</sub> at I<sub>OL</sub>, I<sub>OH</sub> leakage, pull-up range</td></tr><tr><td>Supply</td><td>None (pull-up only)</td><td>V<sub>CC</sub> range, I<sub>CC</sub>, mandatory 0.1 &micro;F bypass</td></tr><tr><td>Timing</td><td>t<sub>r</sub>/t<sub>f</sub> at R<sub>L</sub> = 100 &Omega;; response vs R<sub>L</sub> curve</td><td>t<sub>PHL</sub>/t<sub>PLH</sub>, PWD, skew, data rate</td></tr><tr><td>Immunity</td><td>Often no CMTI spec</td><td>CM<sub>H</sub>/CM<sub>L</sub> in kV/&micro;s</td></tr><tr><td>Extras</td><td>CTR rank letters</td><td>Enable pin, output type (OC vs totem-pole)</td></tr><tr><td>Curves</td><td>CTR vs I<sub>F</sub>/T<sub>A</sub>, derating</td><td>t<sub>P</sub> vs I<sub>F</sub>/T<sub>A</sub>, V<sub>OL</sub> vs I<sub>OL</sub></td></tr></tbody></table></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 12 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec12body" aria-expanded="false" aria-controls="sec12body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 12 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+<div class="adv-grid"><div class="adv-card"><h5>Know the map</h5><p>Features &rarr; abs max &rarr; electrical &rarr; switching &rarr; curves &rarr; insulation &rarr; package &rarr; ordering.</p></div><div class="adv-card"><h5>Abs max is not a design point</h5><p>Stay in the recommended range; derate absolute limits with temperature.</p></div><div class="adv-card"><h5>Min/max, with conditions</h5><p>Use the limiting column and translate its test conditions to yours.</p></div><div class="adv-card"><h5>Test circuits differ</h5><p>Convert t<sub>r</sub>/t<sub>f</sub> to your R<sub>L</sub> with the response curve.</p></div><div class="adv-card"><h5>Curves are typical ratios</h5><p>Read shapes on log axes carefully; apply them to guaranteed numbers.</p></div><div class="adv-card"><h5>The insulation table certifies</h5><p>V<sub>IORM</sub>, creepage, DTI, CTI, PD test: compare with the end-product standard.</p></div><div class="adv-card"><h5>The drawing protects the gap</h5><p>Check land patterns do not erode certified distances.</p></div><div class="adv-card"><h5>The ordering code is the product</h5><p>Rank, lead form and certification option must be in the BOM.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 13 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec13body" aria-expanded="false" aria-controls="sec13body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 13 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec13body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; The &ldquo;typical&rdquo; design that failed in production</div><div class="scenario-body">An input was designed with CTR = 300 % (the value read off the typical CTR curve at 5 mA). In production, 8 % of boards fail the functional test. The datasheet lists CTR 50&ndash;600 %. What went wrong?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> The curve is typical, and the only guarantee is the 50 % minimum (unranked). About half the parts fall below the median and the tail reaches 50 %. <strong>Fix:</strong> design with CTR<sub>min</sub> of the rank you buy, corrected for I<sub>F</sub>, temperature and ageing (Module 6). Order a ranked part number and increase I<sub>F</sub> or reduce the required I<sub>C</sub> as needed.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; Wide-lead option or not?</div><div class="scenario-body">A 230 V product for industrial cabinets (PD3, material group IIIa, reinforced) uses the fictional RX-817 in standard 7.62 mm DIP (7.0 mm creepage). The insulation table lists 8.0 mm for option W. Which do you order?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> At 250 V, PD3, group III, representative basic creepage is 4.0 mm, so reinforced needs 8.0 mm. The standard DIP (7.0 mm) fails; option W (8.0 mm) just meets it. <strong>Fix:</strong> order option W, confirm that the VDE certificate covers option W, and keep the PCB creepage at &ge; 8 mm too (slot if necessary).</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Is 18 µs fast enough?</div><div class="scenario-body">A designer reads t<sub>r</sub> = 4 µs typ, 18 µs max and concludes a PC817 with a 22 k&Omega; pull-up can pass a 10 kHz signal (50 µs half-period). Check the reasoning.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> The 18 &micro;s max applies at R<sub>L</sub> = 100 &Omega; in the active region. With 22 k&Omega; the Miller term dominates: typical rise time is of the order of 100+ &micro;s (response-vs-R<sub>L</sub> curve), longer than the half-period. <strong>Fix:</strong> lower R<sub>L</sub> to &asymp; 1 k&Omega; with enough I<sub>F</sub> to saturate at end of life, or use a 6N136-class part.</div></div></div></div>
+                  </div>
+                </div>
+              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Practise on real sheets</h5><p>Pick a PC817-class and a 6N137-class datasheet from two different vendors and locate every item in the annotated example. Compare their insulation tables and rank codes.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Standards referenced</h5><p>IEC 60747-5-5 (insulation table) &bull; UL 1577 (V<sub>ISO</sub>) &bull; IEC 60664-1 (creepage/clearance) &bull; J-STD-020 (MSL, reflow).</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 8 turns these readings into a selection method; Module 9 applies ageing curves; Module 16 explains the certificates behind the insulation table.</p></div></div></div>
 
               <div
                 style="
@@ -293,6 +1162,662 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '7';
+      window.M_QUIZ = [{"q": "Which datasheet section guarantees performance values you can design to?", "opts": ["Features on page 1", "Electrical characteristics (min/max at stated conditions)", "Typical characteristic curves", "Absolute maximum ratings"], "correct": 1, "exp": "Min/max electrical characteristics at their test conditions are the guarantees."}, {"q": "To size an LED resistor that guarantees a minimum I_F, which V_F do you use?", "opts": ["V_F(typ)", "V_F(max)", "V_F(min)", "Zero"], "correct": 1, "exp": "The highest V_F gives the lowest current."}, {"q": "A normalised CTR curve reads 0.7 at 1 mA. The datasheet CTR_min at 5 mA is 130 %. Estimated CTR_min at 1 mA?", "opts": ["≈ 186 %", "≈ 130 %", "≈ 91 %", "≈ 70 %"], "correct": 2, "exp": "130 % × 0.7 ≈ 91 % (typical-curve estimate)."}, {"q": "On a log axis, the point one-third of the way from 1 mA to 10 mA is closest to…", "opts": ["4 mA", "3.3 mA", "2 mA", "1.3 mA"], "correct": 2, "exp": "10^(1/3) ≈ 2.15."}, {"q": "Why are phototransistor switching times in the datasheet so much faster than in most designs?", "opts": ["Datasheets exaggerate", "They are measured with R_L = 100 Ω in the active region; larger pull-ups add Miller delay", "Vendors use special parts", "Temperature"], "correct": 1, "exp": "The test circuit minimises the Miller term."}, {"q": "Which insulation-table entry must exceed the continuous peak working voltage?", "opts": ["V_IOTM", "V_IORM", "V_ISO", "V_PR"], "correct": 1, "exp": "V_IORM."}, {"q": "A CTI of 175 places the package in material group…", "opts": ["I", "II", "IIIa", "IIIb"], "correct": 2, "exp": "175 ≤ CTI < 400 is IIIa."}, {"q": "What does the rank letter in an ordering code guarantee?", "opts": ["Isolation rating", "A narrower CTR window", "Lead finish", "Temperature range"], "correct": 1, "exp": "Rank = CTR bin."}, {"q": "The derating graph falls from 200 mW at 25 °C to 0 at 110 °C. Allowed at 80 °C?", "opts": ["≈ 200 mW", "≈ 129 mW", "≈ 71 mW", "≈ 20 mW"], "correct": 2, "exp": "200 × (110 − 80)/85 ≈ 71 mW."}, {"q": "Where do you take the certified creepage figure from?", "opts": ["Measure the package drawing", "The insulation/safety table (backed by the certificate)", "The features list", "The CTR curve"], "correct": 1, "exp": "Use the certified table; the drawing checks your footprint."}];
+      window.M_TF = [{"s": "Absolute maximum ratings may be used as design targets if a margin of 10 % is kept.", "a": false, "exp": "They are survival limits; design in the recommended range with derating."}, {"s": "Typical characteristic curves are guaranteed by production test.", "a": false, "exp": "They describe typical behaviour; only min/max table values are guaranteed."}, {"s": "Logic-output coupler datasheets usually specify an input threshold current instead of CTR.", "a": true, "exp": "E.g. I_FH ≤ 5 mA."}, {"s": "The off-state input current (I_F(off)) of a logic coupler can matter in real designs.", "a": true, "exp": "Leakage can partially turn the LED on."}, {"s": "An insulation table value for option W automatically applies to the standard DIP.", "a": false, "exp": "Each ordering option has its own ratings."}, {"s": "Minor gridlines on a log axis are evenly spaced.", "a": false, "exp": "They crowd towards the next decade."}, {"s": "Safety-limiting values define the fault conditions under which insulation is still guaranteed.", "a": true, "exp": "I_S, P_S, T_S."}, {"s": "Enlarging SMD pads can reduce the creepage your board provides.", "a": true, "exp": "Copper moves towards the other side of the barrier."}];
+      window.M_DD = [{"t": "Absolute maximum", "d": "Stress beyond which survival is no longer guaranteed", "h": "Not a design point."}, {"t": "Test conditions", "d": "The I_F, V_CE, T_A, R_L at which a table value is guaranteed", "h": "The column people skip."}, {"t": "Normalised curve", "d": "A typical dependency plotted relative to a reference point", "h": "Use it as a ratio."}, {"t": "Insulation table", "d": "Certified V_IORM, creepage, DTI and CTI values", "h": "The safety page."}, {"t": "Rank code", "d": "Ordering suffix that selects a CTR window", "h": "A, B, C, D…"}, {"t": "Land pattern", "d": "Recommended PCB pad layout from the package drawing", "h": "Protects the gap."}];
+      // ---------- Module 7 ----------
+      var M7INFO = {
+        if: ['Forward current I_F: 50 mA', 'Absolute maximum at 25 °C only; it derates with temperature (see the derating graph). Good designs run the LED at 5–20 mA, well below this limit, because LED ageing accelerates with current density.'],
+        ifm: ['Peak forward current I_FM: 1 A', 'Allowed only for short pulses at low duty. Never use it for continuous drive; the footnote conditions are part of the rating.'],
+        ifmcond: ['Pulse conditions', 'The 1 A figure is meaningless without t_p ≤ 100 µs and duty ≤ 1 %. Always read the footnote attached to a peak rating.'],
+        vr: ['Reverse voltage V_R: 6 V', 'IR LEDs break down at only a few volts in reverse. Protect with an anti-parallel diode wherever polarity can reverse (Module 6).'],
+        vceo: ['V_CEO: 80 V', 'Collector–emitter breakdown with the base open. Must exceed the pull-up supply plus transients. Values differ between vendors of “the same” part.'],
+        veco: ['V_ECO: 6 V', 'Emitter–collector (reverse) voltage: tiny. If the output can be back-driven, protect it.'],
+        ptot: ['Total power P_tot: 200 mW', 'LED plus output power, at 25 °C. Derate with the graph: at 80 °C this part allows only about a third of it.'],
+        viso: ['V_ISO: 5000 V rms, 1 min', 'UL 1577 withstand TEST rating (1 s at 1.2× in production). Not a working voltage. The working rating is V_IORM in the insulation table.'],
+        topr: ['Operating temperature: −55 … +110 °C', 'The part may operate here, but electrical characteristics are specified at 25 °C unless noted; use curves or “over temperature” columns for the extremes.'],
+        tsol: ['Soldering: 260 °C, 10 s', 'For a DIP this is a wave/hand-solder lead rating at a distance from the body, not permission for full convection reflow. Use the SMD option for reflow lines.'],
+        vf: ['V_F: 1.2 V typ, 1.4 V max at 20 mA', 'Use V_F(max) to size a resistor for guaranteed minimum I_F. Note the test current: at 5 mA V_F is lower.'],
+        vfcond: ['Test condition I_F = 20 mA', 'Your LED probably runs at a different current. V_F varies logarithmically with I_F and falls ≈ 1.8 mV/°C.'],
+        iceo: ['I_CEO: 100 nA max', 'Dark current at 25 °C. It roughly doubles every 10 °C: at 85 °C expect microamps. Check leakage × pull-up at your hottest temperature.'],
+        ctr: ['CTR: 50–600 %', 'The only guarantee for an unranked part is 50 % at the test condition. Design with the rank minimum × corrections (Module 6), never with a typical value.'],
+        ctrcond: ['CTR test condition', 'I_F = 5 mA and V_CE = 5 V (active region). A saturated switch runs at V_CE ≈ 0.2 V, where CTR is lower.'],
+        vcesat: ['V_CE(sat): 0.2 V max', 'Guaranteed only at I_F = 20 mA and I_C = 1 mA (20:1 overdrive). At lower overdrive V_CE(sat) is higher.'],
+        rio: ['R_IO', 'Isolation resistance at 500 V DC. Falls with temperature and humidity; relevant for leakage-sensitive medical and measurement designs.'],
+        cio: ['C_IO: 0.6 pF typ, 1.0 pF max', 'Input–output capacitance. Multiply by your common-mode dV/dt to estimate injected current (Module 3). Use the max value.'],
+        tr: ['t_r / t_f: 4/3 µs typ, 18 µs max', 'Measured in the datasheet test circuit. Translate to your R_L with the response-time curve, and remember the max column.'],
+        trcond: ['Switching test circuit', 'V_CE = 2 V, I_C = 2 mA, R_L = 100 Ω: active region, tiny load. Real logic pull-ups (4.7–22 kΩ) are 10–100× slower.'],
+        viorm: ['V_IORM: 890 V_pk', 'The continuous working-voltage rating. Compare with the PEAK voltage across the barrier (including DC bus and ripple).'],
+        vpr: ['V_PR: 1669 V_pk, 1 s, < 5 pC', 'Partial-discharge test voltage = 1.875 × V_IORM, applied to every part (method b). Screens voids in the barrier.'],
+        viotm: ['V_IOTM: 8000 V_pk', 'Maximum transient overvoltage (seconds). Compare with the temporary overvoltage requirement of your end-product standard.'],
+        creep: ['Creepage / clearance ≥ 8.0 mm (option W)', 'Certified external distances for the wide-lead option. The standard DIP has less; check which option your BOM names.'],
+        dti: ['DTI ≥ 0.4 mm', 'Distance through insulation. Many end-product standards require ≥ 0.4 mm for supplementary or reinforced solid insulation.'],
+        cti: ['CTI 175 / group IIIa', 'Tracking index of the package surface. It selects the creepage table column (Module 3).'],
+        clim: ['Climatic category 55/110/21', 'Tested from −55 °C to +110 °C with 21 days of damp heat.'],
+        rank: ['Rank letters', 'Each suffix guarantees a narrower CTR window. Put the full ordering code in the BOM to get it.'],
+        opt: ['Lead-form and packing options', 'W = wide lead (≥ 8 mm creepage), S = gull-wing SMD, T = tape & reel. Isolation ratings can differ per option.'],
+      };
+      (function () {
+        var info = document.getElementById('m7SheetInfo');
+        if (!info) return;
+        document.querySelectorAll('#m7Sheet .m-hot').forEach(function (h) {
+          function show() {
+            document.querySelectorAll('#m7Sheet .m-hot').forEach(function (x) { x.classList.remove('sel'); });
+            h.classList.add('sel');
+            var d = M7INFO[h.getAttribute('data-k')];
+            if (d) info.innerHTML = '<h5>' + d[0] + '</h5><p>' + d[1] + '</p>';
+          }
+          h.addEventListener('click', show);
+          h.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(); } });
+        });
+      })();
+      // Spot the trap
+      (function () {
+        var host = document.getElementById('m7Trap');
+        if (!host) return;
+        var items = [
+          { l: 'CTR (unranked part), I_F = 5 mA, V_CE = 5 V', o: [['Min 50 %', true, 'Correct: the only guarantee. Then apply I_F, temperature, V_CE and ageing corrections.'], ['Typ ≈ 200 % (curve)', false, 'Typical means roughly half the parts are worse.'], ['Max 600 %', false, 'Max matters only for stability/over-drive checks, never for guaranteed output.']] },
+          { l: 't_r at R_L = 100 Ω (your pull-up is 10 kΩ)', o: [['4 µs typ', false, 'Typical and at the wrong R_L.'], ['18 µs max', false, 'Right column, wrong circuit: your 10 kΩ pull-up is much slower.'], ['Response-vs-R_L curve at 10 kΩ, scaled by max/typ', true, 'Correct: translate the test circuit to yours, then add the max/typ margin.']] },
+          { l: 'V_F for sizing a resistor that must guarantee I_F ≥ 5 mA', o: [['1.2 V typ', false, 'A part with 1.4 V would get less current than you planned.'], ['1.4 V max', true, 'Correct: the highest V_F gives the lowest current.'], ['1.0 V', false, 'Low V_F is for checking the MAXIMUM current case.']] },
+          { l: 'Barrier rating to compare with a 700 V DC bus', o: [['V_ISO 5000 V rms', false, 'A 1-minute test rating, not a working voltage.'], ['V_IORM 890 V_pk', true, 'Correct: the continuous working rating, compared with the peak working voltage.'], ['V_IOTM 8000 V_pk', false, 'Transient rating (seconds), not continuous.']] },
+          { l: 'Off-state leakage for a 100 kΩ pull-up at 85 °C', o: [['I_CEO 100 nA max (25 °C)', false, 'That is at 25 °C; leakage roughly doubles every 10 °C.'], ['I_CEO vs T_A curve at 85 °C (≈ µA)', true, 'Correct: use the temperature curve at your hottest ambient.'], ['0 A', false, 'Photodetectors always leak.']] },
+        ];
+        var score = 0;
+        items.forEach(function (it) {
+          var d = document.createElement('div');
+          d.className = 'tf-item';
+          d.innerHTML = '<div class="tf-q">' + it.l + '</div>';
+          var row = document.createElement('div');
+          row.className = 'm-opt-row';
+          var exp = document.createElement('div');
+          exp.className = 'tf-exp';
+          var done = false;
+          it.o.forEach(function (o) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tf-btn';
+            b.textContent = o[0];
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              b.classList.add(o[1] ? 'correct' : 'incorrect');
+              if (!o[1]) row.querySelectorAll('button').forEach(function (x, i) { if (it.o[i][1]) x.classList.add('correct'); });
+              else score++;
+              exp.textContent = (o[1] ? '✓ ' : '✗ ') + o[2];
+              exp.classList.add('show');
+              document.getElementById('m7TrapScore').textContent = 'Score: ' + score + ' / ' + items.length;
+            });
+            row.appendChild(b);
+          });
+          d.appendChild(row);
+          d.appendChild(exp);
+          host.appendChild(d);
+        });
+      })();
+      // Curve reader
+      (function () {
+        var canvas = document.getElementById('m7CrCanvas'), s = document.getElementById('m7CrIf');
+        if (!canvas || !s) return;
+        var EQEMAX = 0.04, ISRH = 1.0, IDROOP = 100, ETC = -0.006, HMAX = 300, ILOW = 0.05, IHIGH = 60, HTC = 0.005;
+        function ctr(IF, T) {
+          var eqe = (EQEMAX * IF) / (IF + ISRH) / (1 + IF / IDROOP) * Math.max(0.05, 1 + ETC * (T - 25));
+          var ip = eqe * 0.245 * IF; // x coupling 0.35 x detector 0.70
+          var ic = ip * 200;
+          for (var i = 0; i < 30; i++) ic = 0.5 * ic + 0.5 * (HMAX * Math.sqrt(ic / (ic + ILOW))) / (1 + ic / IHIGH) * (1 + HTC * (T - 25)) * ip;
+          return ic / IF;
+        }
+        var ref = ctr(5, 25);
+        function IFof(v) { return 0.1 * Math.pow(500, v / 100); }
+        var L = 50, R = 14, T0 = 14, B = 32;
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          var IF = IFof(+s.value), T = +document.getElementById('m7CrT').value;
+          ctx.clearRect(0, 0, W, H);
+          function X(x) { return L + ((Math.log10(x) + 1) / Math.log10(500)) * (W - L - R); }
+          function Y(y) { return H - B - (y / 1.2) * (H - T0 - B); }
+          ctx.lineWidth = 1;
+          [0.1, 1, 10].forEach(function (d) {
+            for (var k = 1; k < 10; k++) {
+              var x = d * k;
+              if (x > 50) break;
+              ctx.strokeStyle = k === 1 ? p.muted : p.border;
+              ctx.beginPath(); ctx.moveTo(X(x), T0); ctx.lineTo(X(x), H - B); ctx.stroke();
+            }
+          });
+          ctx.fillStyle = p.muted; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+          [0.1, 1, 10].forEach(function (x) { ctx.fillText(x + ' mA', X(x), H - B + 15); });
+          [0, 0.4, 0.8, 1.2].forEach(function (y) { ctx.textAlign = 'right'; ctx.fillText(y.toFixed(1), L - 6, Y(y) + 4); ctx.strokeStyle = p.border; ctx.beginPath(); ctx.moveTo(L, Y(y)); ctx.lineTo(W - R, Y(y)); ctx.stroke(); });
+          function curve(Tc, col, dash) {
+            ctx.beginPath();
+            for (var i = 0; i <= 150; i++) { var x = 0.1 * Math.pow(500, i / 150), y = ctr(x, Tc) / ref; if (i === 0) ctx.moveTo(X(x), Y(y)); else ctx.lineTo(X(x), Y(y)); }
+            ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.setLineDash(dash ? [6, 4] : []); ctx.stroke(); ctx.setLineDash([]);
+          }
+          curve(25, p.cyan, false);
+          if (T !== 25) curve(T, '#fb923c', true);
+          var y = ctr(IF, T) / ref;
+          ctx.strokeStyle = '#fbbf24'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X(IF), H - B); ctx.lineTo(X(IF), Y(y)); ctx.lineTo(L, Y(y)); ctx.stroke(); ctx.setLineDash([]);
+          ctx.beginPath(); ctx.arc(X(IF), Y(y), 6, 0, 6.283); ctx.fillStyle = '#fbbf24'; ctx.fill();
+          ctx.textAlign = 'left'; ctx.fillStyle = p.text; ctx.fillText('drag here ↔', W - R - 80, T0 + 12);
+        }
+        function upd() {
+          var IF = IFof(+s.value), T = +document.getElementById('m7CrT').value;
+          document.getElementById('m7CrIfOut').textContent = M3.fmt(IF, IF < 1 ? 2 : 1) + ' mA';
+          var mn = bindOut('m7CrMin', function (v) { return v + ' %'; });
+          var r1 = ctr(IF, 25) / ref, r2 = ctr(IF, T) / ctr(IF, 25);
+          document.getElementById('m7CrRel').textContent = '× ' + M3.fmt(r1, 2);
+          document.getElementById('m7CrT2').textContent = '× ' + M3.fmt(r2, 2);
+          document.getElementById('m7CrOut').textContent = M3.fmt(mn * r1 * r2, 0) + ' %';
+          var v = document.getElementById('m7CrVerdict'), tot = r1 * r2;
+          if (tot >= 0.9) M3.setVerdict(v, 'ok', 'Close to the datasheet test point');
+          else if (tot >= 0.6) M3.setVerdict(v, 'warn', 'Noticeably below the headline CTR');
+          else M3.setVerdict(v, 'bad', 'Far from the test point: large correction');
+          draw();
+        }
+        function fromEvent(e) {
+          var r = canvas.getBoundingClientRect(), x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+          var f = (x - L) / (r.width - L - R);
+          f = Math.max(0, Math.min(1, f));
+          s.value = (f * 100).toFixed(1);
+          upd();
+        }
+        var dragging = false;
+        canvas.addEventListener('pointerdown', function (e) { dragging = true; fromEvent(e); });
+        window.addEventListener('pointerup', function () { dragging = false; });
+        canvas.addEventListener('pointermove', function (e) { if (dragging) fromEvent(e); });
+        canvas.style.touchAction = 'none';
+        s.addEventListener('input', upd);
+        document.getElementById('m7CrMin').addEventListener('input', upd);
+        document.getElementById('m7CrT').addEventListener('change', upd);
+        M3.onRedraw(draw);
+        upd();
+      })();
+      // Certification-table decoder
+      (function () {
+        if (!document.getElementById('m7DcV')) return;
+        var CV = [50, 100, 150, 200, 250, 320, 400, 500, 630, 800, 1000];
+        var CR = {
+          '2': { I: [0.6, 0.71, 0.8, 1.0, 1.25, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0], II: [0.85, 1.0, 1.1, 1.4, 1.8, 2.2, 2.8, 3.6, 4.5, 5.6, 7.1], III: [1.2, 1.4, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0, 6.3, 8.0, 10] },
+          '3': { I: [1.5, 1.8, 2.0, 2.5, 3.2, 4.0, 5.0, 6.3, 8.0, 10, 12.5], II: [1.7, 2.0, 2.2, 2.8, 3.6, 4.5, 5.6, 7.1, 9.0, 11, 14], III: [1.9, 2.2, 2.5, 3.2, 4.0, 5.0, 6.3, 8.0, 10, 12.5, 16] },
+        };
+        var IMPV = [150, 300, 600, 1000];
+        var IMP = { '1': [0.8, 1.5, 2.5, 4.0], '2': [1.5, 2.5, 4.0, 6.0], '3': [2.5, 4.0, 6.0, 8.0] };
+        var STEPS = [0.8, 1.5, 2.5, 4.0, 6.0, 8.0, 12.0];
+        var CLR = { 0.8: 0.2, 1.5: 0.5, 2.5: 1.5, 4.0: 3.0, 6.0: 5.5, 8.0: 8.0, 12.0: 14.0 };
+        function upd() {
+          var V = bindOut('m7DcV', function (v) { return v + ' V rms'; });
+          var pd = document.getElementById('m7DcPd').value, ins = document.getElementById('m7DcIns').value, ovc = document.getElementById('m7DcOvc').value, mg = document.getElementById('m7DcMg').value;
+          var i = 0;
+          while (i < CV.length - 1 && CV[i] < V) i++;
+          var cr = CR[pd][mg][i] * (ins === 'reinforced' ? 2 : 1);
+          var j = 0;
+          while (j < IMPV.length - 1 && IMPV[j] < V) j++;
+          var imp = IMP[ovc][j];
+          if (ins === 'reinforced') imp = STEPS[Math.min(STEPS.length - 1, STEPS.indexOf(imp) + 1)];
+          var cl = CLR[imp];
+          if (pd === '3') cl = Math.max(cl, 0.8);
+          var vpk = V * Math.SQRT2;
+          document.getElementById('m7DcViorm').textContent = M3.fmt(vpk, 0) + ' V_pk ' + (vpk <= 890 ? '✓' : '✗');
+          document.getElementById('m7DcCr').textContent = M3.fmt(cr, 1) + ' mm ' + (cr <= 8 ? '✓' : '✗');
+          document.getElementById('m7DcCl').textContent = imp + ' kV → ' + M3.fmt(cl, 1) + ' mm ' + (cl <= 8 ? '✓' : '✗');
+          document.getElementById('m7DcDti').textContent = ins === 'reinforced' ? '0.4 mm ≥ 0.4 mm ✓' : 'not required for basic ✓';
+          var fails = [];
+          if (vpk > 890) fails.push('V_IORM');
+          if (cr > 8) fails.push('creepage');
+          if (cl > 8) fails.push('clearance');
+          var v = document.getElementById('m7DcVerdict'), n = document.getElementById('m7DcNote');
+          if (!fails.length) {
+            var tight = cr > 7 || vpk > 800;
+            M3.setVerdict(v, tight ? 'warn' : 'ok', tight ? 'Table values sufficient, with little margin' : 'Table values are sufficient');
+            n.textContent = 'Representative IEC 60664-1-style values. Your end-product standard (e.g. IEC 62368-1, 61010-1, 60601-1) may add requirements; the PCB must also provide the distances.';
+          } else {
+            M3.setVerdict(v, 'bad', 'Insufficient: ' + fails.join(', '));
+            n.textContent = 'Choose a part/option with higher V_IORM or wider package, improve the material group, or reduce the pollution degree (enclosure, coating) where the standard allows.';
+          }
+        }
+        document.getElementById('m7DcV').addEventListener('input', upd);
+        ['m7DcPd', 'm7DcIns', 'm7DcOvc', 'm7DcMg'].forEach(function (i) { document.getElementById(i).addEventListener('change', upd); });
+        upd();
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m7-check-', ["Every design number traced to a min/max table value, not a typical curve.", "Test conditions of each value compared with the real operating point (I_F, V_CE, T_A, R_L).", "Normalised curves applied as ratios to guaranteed values; margins added for curve uncertainty.", "Switching times translated to the actual R_L using the response-vs-R_L curve.", "Absolute maximum ratings derated for the worst enclosure temperature.", "Insulation table: V_IORM, V_IOTM, creepage, clearance, DTI, CTI checked against the end-product standard.", "Certificates (UL file, VDE certificate) cover the exact ordering option.", "Land pattern preserves the certified creepage/clearance.", "Full ordering code (rank, lead form, certification option) in the BOM.", "Second-source datasheets compared line by line, including insulation tables."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

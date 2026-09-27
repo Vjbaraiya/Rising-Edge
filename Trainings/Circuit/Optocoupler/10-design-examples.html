@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Optocoupler Design Examples — Module 10 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Seven complete optocoupler reference designs with worst-case math: MCU I/O, 24 V PLC input, TL431 feedback with Bode, gate drive, zero-cross and isolated UART."
     />
     <title>
       Optocoupler Design Examples | Optocoupler Design Academy | Rising Edge Technologies
@@ -42,66 +42,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -191,75 +892,247 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2-S3 → Q1-Q3,TF1,TF2,Scen1; 2: S4 → Q4,TF3,Scen2; 3: S5 → Q5,Q6,TF4,Scen3; 4: S6 → Q7,Q8,TF5; 5: S7-S8 → Q9,Q10,TF6,TF7 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Design isolated MCU interfaces with full component values
-                  </div>
-                  <div class="metric-card">Build robust 24 V PLC input channels</div>
-                  <div class="metric-card">Implement and compensate SMPS optocoupler feedback</div>
-                  <div class="metric-card">
-                    Design gate-driver stages with proper bypassing and CMTI margin
-                  </div>
-                  <div class="metric-card">
-                    Implement zero-cross detection and isolated communication links
-                  </div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Design isolated MCU interfaces with full component values</div><div class="objective-card metric-card">Build robust 24 V PLC input channels</div><div class="objective-card metric-card">Implement and compensate SMPS optocoupler feedback</div><div class="objective-card metric-card">Design gate-driver stages with proper bypassing and CMTI margin</div><div class="objective-card metric-card">Implement zero-cross detection and isolated communication links</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> Everything so far comes together here. Each example follows the same pattern: requirements, schematic, worst-case calculations, BOM, layout notes, common mistakes and verification. The CTR factors (k<sub>IF</sub>, k<sub>T</sub>, k<sub>age</sub>) come from Modules 6 and 9; the families from Module 5; the physics from Module 4. Component values are <strong>reference designs for learning</strong>: re-check them against your parts&rsquo; datasheets and your standards.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; The Design Method Used in Every Example</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">Every example uses the same worst-case method, so you can reuse it for any interface:</p>
+<div class="flow-strip"><div class="flow-step">Requirements</div><div class="flow-arrow">&rarr;</div><div class="flow-step">Family &amp; part (Mod. 5, 8)</div><div class="flow-arrow">&rarr;</div><div class="flow-step hot">Worst-case CTR / threshold (Mod. 6, 9)</div><div class="flow-arrow">&rarr;</div><div class="flow-step">Resistors &amp; speed (Mod. 4)</div><div class="flow-arrow">&rarr;</div><div class="flow-step">Isolation &amp; layout (Mod. 8, 11)</div><div class="flow-arrow">&rarr;</div><div class="flow-step">Verify (Mod. 13)</div></div><div class="m3-eq"><div class="m3-eq-main">Worst case: I<sub>F,min</sub> from V<sub>drive,min</sub>, V<sub>F,max</sub>, R<sub>max</sub> &nbsp;&middot;&nbsp; CTR<sub>EOL</sub> = CTR<sub>min</sub>&middot;&Pi;k &nbsp;&middot;&nbsp; k = CTR<sub>EOL</sub>&middot;I<sub>F,min</sub> / I<sub>C,needed</sub> &ge; 2</div></div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>MCU interfaces</div>
-                  <div class="topic-card"><span class="topic-dot"></span>PLC inputs</div>
-                  <div class="topic-card"><span class="topic-dot"></span>SMPS feedback</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Gate drivers</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Zero-cross detection</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Communication interfaces
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; Example 1 &mdash; Isolated Logic Input to a 3.3 V MCU</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Isolate a 5 V logic signal from a remote domain into a 3.3 V MCU</li><li>Signal up to 5 kHz; industrial ambient to 70 &deg;C; 10-year life</li><li>Functional isolation, standard creepage</li></ul><figure class="m3-fig"><img src="images/10/ex1-mcu-input.png" alt="Schematic: a remote 5 V driver feeds a PC817C LED through 390 ohms; the phototransistor pulls a 4.7 kilohm pull-up to 3.3 V into an MCU GPIO" loading="lazy" width="1000" height="420" /><figcaption><strong>Figure 1.</strong> Isolated logic input. Inverting: LED on gives a logic low.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>I<sub>F,min</sub> = (5.0 &minus; 0.4 &minus; 1.4) / 390 &Omega; &asymp; 8.2 mA (driver drop 0.4 V, V<sub>F,max</sub> 1.4 V). I<sub>F,max</sub> &asymp; (5.25 &minus; 1.0)/390 &asymp; 10.9 mA: fine for life.</li><li>I<sub>C,needed</sub> = (3.3 &minus; 0.2)/4.7 k&Omega; &asymp; 0.66 mA.</li><li>CTR<sub>EOL</sub> = 200 % (rank C) &times; 0.9 &times; 0.8 &times; 0.5 = 72 %; I<sub>C,avail</sub> = 8.2 &times; 0.72 &asymp; 5.9 mA &rarr; k &asymp; 9.</li><li>Speed: &tau; &asymp; 1.5 &micro;s + 250 &times; 10 pF &times; 4.7 k&Omega; &asymp; 13 &micro;s &rarr; t<sub>r</sub> &asymp; 30 &micro;s: fine for 5 kHz. Deep overdrive adds a few &micro;s of storage; acceptable here.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: LED Resistor + Pull-up Designer</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Rounds R<sub>LED</sub> down to the E24 series, then checks saturation at end of life and estimates edge speed with the Module 4 model.</p><div class="m3-calc"><div><div class="m3-field"><label for="m10LdVd"><span>Drive voltage (min)</span> <output id="m10LdVdOut"></output></label><input type="range" id="m10LdVd" min="1.8" max="12" step="0.05" value="5" /></div><div class="m3-field"><label for="m10LdDrop"><span>Driver drop (V<sub>OH</sub> loss)</span> <output id="m10LdDropOut"></output></label><input type="range" id="m10LdDrop" min="0" max="1" step="0.05" value="0.4" /></div><div class="m3-field"><label for="m10LdVf"><span>V<sub>F,max</sub></span> <output id="m10LdVfOut"></output></label><input type="range" id="m10LdVf" min="1" max="1.8" step="0.01" value="1.4" /></div><div class="m3-field"><label for="m10LdIf"><span>Target I<sub>F</sub></span> <output id="m10LdIfOut"></output></label><input type="range" id="m10LdIf" min="1" max="20" step="0.5" value="8" /></div><div class="m3-field"><label for="m10LdCtr"><span>CTR<sub>min</sub> (rank)</span> <output id="m10LdCtrOut"></output></label><input type="range" id="m10LdCtr" min="20" max="400" step="5" value="200" /></div><div class="m3-field"><label for="m10LdDer"><span>k<sub>IF</sub>&middot;k<sub>T</sub>&middot;k<sub>age</sub></span> <output id="m10LdDerOut"></output></label><input type="range" id="m10LdDer" min="0.15" max="1" step="0.01" value="0.36" /></div><div class="m3-field"><label for="m10LdVcc"><span>Pull-up supply</span> <output id="m10LdVccOut"></output></label><input type="range" id="m10LdVcc" min="1.8" max="24" step="0.1" value="3.3" /></div><div class="m3-field"><label for="m10LdRl"><span>Pull-up R<sub>L</sub></span> <output id="m10LdRlOut"></output></label><input type="range" id="m10LdRl" min="0" max="100" step="0.01" value="55.73" /></div></div><div class="m3-results"><div class="m3-res-row"><span>R<sub>LED</sub></span><b id="m10LdR">&ndash;</b></div><div class="m3-res-row"><span>I<sub>F</sub> range</span><b id="m10LdIfr">&ndash;</b></div><div class="m3-res-row"><span>I<sub>C</sub> needed</span><b id="m10LdNeed">&ndash;</b></div><div class="m3-res-row"><span>I<sub>C</sub> available at EOL</span><b id="m10LdAvail">&ndash;</b></div><div class="m3-res-row"><span>Output edge / usable rate</span><b id="m10LdSpeed">&ndash;</b></div><div style="margin-top: 8px"><span id="m10LdVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m10LdNote"></p></div></div>
+</div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>R1</td><td>Resistor</td><td>390 &Omega;, 1 %</td><td>Sets I<sub>F</sub> &asymp; 8&ndash;11 mA</td></tr><tr><td>U1</td><td>PC817C (rank C) or equivalent</td><td>SMD version for reflow</td><td>CTR 200&ndash;400 %</td></tr><tr><td>R2</td><td>Resistor</td><td>4.7 k&Omega;</td><td>Pull-up to 3.3 V</td></tr><tr><td>C1</td><td>Capacitor (optional)</td><td>100 pF</td><td>Glitch filter, adds &asymp; 0.5 &micro;s</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Keep the remote-side traces (LED loop) on the remote side of the barrier and the GPIO side on the MCU side; no copper crossing under the part. Pull-up close to the MCU. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>Designing with typical CTR</h5><p>300 % &ldquo;typical&rdquo; hides a 50 % unranked minimum.</p></div><div class="adv-card limit"><h5>Huge pull-up to &ldquo;save current&rdquo;</h5><p>47 k&Omega; makes edges &gt; 200 &micro;s.</p></div><div class="adv-card limit"><h5>Floating LED drive at reset</h5><p>A tri-stated remote pin can leave the LED half-on.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Measure t<sub>on</sub>/t<sub>off</sub> at max temperature</li><li>Reduce I<sub>F</sub> to 50 % and confirm the output still saturates (EOL simulation)</li><li>Check V<sub>OL</sub> &le; V<sub>IL</sub> of the MCU at max I<sub>C</sub></li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; Example 2 &mdash; MCU Output Driving a Relay or Load</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>3.3 V MCU switches a 24 V, 20 mA relay coil on an isolated 24 V supply</li><li>Relay on/off at &le; 10 Hz; fail-safe OFF at MCU reset</li></ul><figure class="m3-fig"><img src="images/10/ex2-mcu-output-relay.png" alt="Schematic: a 3.3 V GPIO drives a PC817 LED through 220 ohms; the phototransistor pulls down the gate of an N-MOSFET that switches a 24 V relay coil with a flyback diode" loading="lazy" width="1000" height="440" /><figcaption><strong>Figure 2.</strong> MCU output to a relay via a phototransistor and a MOSFET. A 24 V gate drive needs a clamp or divider.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>I<sub>F,min</sub> = (3.3 &minus; 0.3 &minus; 1.4)/220 &Omega; &asymp; 7.3 mA; check the GPIO current rating (typ. 8&ndash;20 mA per pin).</li><li>Pull-up 10 k&Omega; to 24 V &rarr; I<sub>C,needed</sub> = 2.4 mA. Rank B at EOL: 7.3 &times; 1.3 &times; 0.36 &asymp; 3.4 mA (k &asymp; 1.4: marginal). Rank C: &asymp; 5.3 mA (k &asymp; 2.2).</li><li>Gate: 24 V exceeds a typical &plusmn;20 V V<sub>GS,max</sub>. Use a 10 k&Omega;/10 k&Omega; divider (12 V gate) or a 15 V zener clamp.</li><li>Coil 24 V / 1.2 k&Omega; = 20 mA; the MOSFET dissipates only I&sup2;R<sub>DS(on)</sub>; the flyback diode clamps the turn-off spike.</li></ol></div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>R1</td><td>Resistor</td><td>220 &Omega;</td><td>I<sub>F</sub> &asymp; 7&ndash;9 mA</td></tr><tr><td>U1</td><td>PC817C</td><td>rank C</td><td>Margin at 24 V pull-up</td></tr><tr><td>R2/R3</td><td>Divider</td><td>10 k&Omega; / 10 k&Omega;</td><td>12 V gate drive</td></tr><tr><td>Q1</td><td>N-MOSFET</td><td>60 V, logic-level not required</td><td>Relay switch</td></tr><tr><td>D1</td><td>1N4148 / 1N4007</td><td>flyback</td><td>Clamps coil kick</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Put the relay coil, MOSFET and flyback diode in a tight loop on the 24 V side; keep the relay&rsquo;s contacts and their creepage away from the optocoupler area. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>Forgetting the inversion</h5><p>LED on = relay off in this topology; decide which state is fail-safe.</p></div><div class="adv-card limit"><h5>No flyback diode</h5><p>Hundreds of volts of inductive kick.</p></div><div class="adv-card limit"><h5>24 V straight onto the gate</h5><p>Destroys a &plusmn;20 V gate.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Power-cycle the MCU and confirm the relay stays off during reset</li><li>Scope V<sub>DS</sub> at turn-off with the diode fitted</li><li>Run at max ambient with 50 % I<sub>F</sub></li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Example 3 &mdash; 24 V PLC Digital Input (IEC 61131-2 Type 1 / 3)</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>24 V DC current-sinking input, IEC 61131-2 type 1 or 3 (representative regions: OFF &le; 5 V; ON 11/15&ndash;30 V at 2&ndash;15 mA)</li><li>Reverse-polarity and surge tolerant (IEC 61000-4-5 level per product standard)</li><li>Low self-heating: 16 inputs per module</li></ul><figure class="m3-fig"><img src="images/10/ex3-plc-input.png" alt="Schematic of a 24 V PLC input: reverse diode, TVS, series resistor 3.9 kilohms, 470 ohm shunt across the LED with an anti-parallel diode, PC817 output with a pull-up to 3.3 V into an MCU" loading="lazy" width="1000" height="460" /><figcaption><strong>Figure 3.</strong> The shunt resistor R2 gives a defined turn-on threshold of about 10 V, well away from both the OFF region and the ON minimum.</figcaption></figure>
+<figure class="m3-fig"><img src="images/10/plc-input-characteristic.gif" alt="Animation: input voltage sweeps from 0 to 30 V; the input current and LED current curves are shown against the IEC 61131-2 OFF and ON regions; the LED turns on near 10 V" loading="lazy" width="807" height="425" /><figcaption><strong>Animation 1.</strong> The input characteristic must stay inside the standard&rsquo;s regions: no LED current below 5 V, &ge; 2 mA above the ON minimum, &le; 15 mA at 30 V.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>Threshold V<sub>th</sub> &asymp; V<sub>D1</sub> + V<sub>LED</sub>&middot;(R1 + R2)/R2 = 0.7 + 1.05 &times; 4370/470 &asymp; 10.5 V.</li><li>At 15 V: I<sub>in</sub> &asymp; (15 &minus; 0.7 &minus; 1.1)/3.9 k&Omega; &asymp; 3.4 mA (&ge; 2 mA); I<sub>LED</sub> &asymp; 3.4 &minus; 1.1/470 &asymp; 1.0 mA.</li><li>At 30 V: I<sub>in</sub> &asymp; 7.2 mA (&le; 15 mA); P<sub>R1</sub> &asymp; 0.2 W &rarr; 0.5 W part, pulse-rated for surge.</li><li>Output: I<sub>LED</sub> &asymp; 1 mA at the ON minimum. With CTR<sub>EOL</sub> &asymp; 70 % at 1 mA (rank C &times; low-current &times; temperature &times; ageing), I<sub>C</sub> &asymp; 0.7 mA; a 22 k&Omega; pull-up needs 0.14 mA &rarr; k &asymp; 5.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: PLC Input Characteristic</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Representative IEC 61131-2 regions for 24 V DC sinking inputs &mdash; confirm with the current edition. D1 = 0.7 V and V<sub>LED</sub> = 1.05 V assumed.</p><div class="m3-calc"><div><div class="m3-field"><label for="m10PlR1"><span>R1 (series)</span> <output id="m10PlR1Out"></output></label><input type="range" id="m10PlR1" min="1000" max="10000" step="100" value="3900" /></div><div class="m3-field"><label for="m10PlR2"><span>R2 (LED shunt)</span> <output id="m10PlR2Out"></output></label><input type="range" id="m10PlR2" min="100" max="2200" step="10" value="470" /></div><div class="m3-field"><label for="m10PlType"><span>IEC 61131-2 type</span></label><select id="m10PlType"><option value="1" selected>Type 1 (ON &ge; 15 V)</option><option value="3">Type 3 (ON &ge; 11 V)</option></select></div><div class="m3-field"><label for="m10PlPr"><span>R1 power rating</span></label><select id="m10PlPr"><option value="0.25">0.25 W</option><option value="0.5" selected>0.5 W</option><option value="1">1 W</option></select></div><div class="m3-field"><label for="m10PlCtr"><span>CTR at EOL (at &asymp; 1 mA)</span> <output id="m10PlCtrOut"></output></label><input type="range" id="m10PlCtr" min="20" max="300" step="5" value="70" /></div><div class="m3-field"><label for="m10PlRpu"><span>Pull-up to 3.3 V</span> <output id="m10PlRpuOut"></output></label><input type="range" id="m10PlRpu" min="2000" max="100000" step="1000" value="22000" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Turn-on threshold</span><b id="m10PlTh">&ndash;</b></div><div class="m3-res-row"><span>At 5 V (must be OFF)</span><b id="m10Pl5">&ndash;</b></div><div class="m3-res-row"><span>At V<sub>H,min</sub> (must be ON)</span><b id="m10PlVh">&ndash;</b></div><div class="m3-res-row"><span>At 30 V (max)</span><b id="m10Pl30">&ndash;</b></div><div class="m3-res-row"><span>I<sub>C</sub> available / needed</span><b id="m10PlK">&ndash;</b></div><div style="margin-top: 8px"><span id="m10PlVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m10PlNote"></p></div></div>
+</div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>D1</td><td>Diode</td><td>1N4148 or S1x</td><td>Reverse polarity</td></tr><tr><td>TVS</td><td>SMBJ33A class</td><td>stand-off &ge; 30 V</td><td>Surge clamp</td></tr><tr><td>R1</td><td>Resistor</td><td>3.9 k&Omega;, 0.5 W, pulse-rated</td><td>Current limit / threshold</td></tr><tr><td>R2</td><td>Resistor</td><td>470 &Omega;</td><td>Threshold shunt</td></tr><tr><td>D2</td><td>1N4148</td><td>anti-parallel</td><td>LED reverse protection</td></tr><tr><td>U1</td><td>PC817C / TLP185</td><td>rank C</td><td>Isolation</td></tr><tr><td>R3</td><td>Resistor</td><td>22 k&Omega;</td><td>Pull-up</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Field-side parts (D1, TVS, R1) at the connector; TVS return to the field 0 V with a short trace. Keep 24 V field copper out of the logic area; channel-to-channel spacing per the module&rsquo;s isolation concept. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>No threshold shunt</h5><p>Leakage from 2-wire sensors turns inputs on in the OFF region.</p></div><div class="adv-card limit"><h5>0.125 W resistor</h5><p>Overheats with 16 channels at 30 V.</p></div><div class="adv-card limit"><h5>Relying on the TVS alone</h5><p>The series resistor must survive surge current too.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Sweep 0&ndash;30 V and plot I<sub>in</sub> and the logic state (compare with Animation 1)</li><li>Apply reverse 30 V and surge per the product standard</li><li>Thermal image with all inputs on at 30 V</li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Example 4 &mdash; SMPS Feedback with TL431 + PC817</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>12 V / 2 A flyback, current-mode controller with a 5 V-referenced FB pin (R<sub>PU</sub> internal or external 4.7 k&Omega;)</li><li>Crossover &asymp; 1&ndash;2 kHz; phase margin &ge; 45&deg; over CTR spread and temperature</li><li>Reinforced isolation mains &rarr; SELV (IEC 62368-1)</li></ul><figure class="m3-fig"><img src="images/10/ex4-tl431-feedback.png" alt="Schematic of TL431 and PC817 flyback feedback: on the secondary side V_OUT feeds R_LED to the optocoupler LED, whose cathode goes to the TL431 cathode; a divider R_UP and R_LOW sets the reference; R_Z and C_Z compensate; on the primary side the phototransistor pulls down the controller FB node with pull-up R_PU and C_FB" loading="lazy" width="1000" height="500" /><figcaption><strong>Figure 4.</strong> The classic TL431 + optocoupler loop with a &ldquo;fast lane&rdquo; R<sub>LED</sub> from V<sub>OUT</sub>.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>V<sub>OUT</sub> = 2.495 &times; (1 + 10k/2.61k) &asymp; 12.05 V.</li><li>TL431 bias: R<sub>BIAS</sub> = V<sub>F</sub>/1 mA &asymp; 1.2 k&Omega; &rarr; use 1 k&Omega; (keeps &ge; 1 mA in the TL431 even when the LED is off).</li><li>LED headroom: max LED current = (12 &minus; 1.2 &minus; 2.5 V<sub>KA,min</sub>)/2.2 k&Omega; &minus; 1.2 mA (bias) &asymp; 2.6 mA. FB pull-down needs &asymp; 5 V/4.7 k&Omega; &asymp; 1.1 mA; at CTR<sub>EOL</sub> 50 % that is 2.1 mA of LED current: OK.</li><li>Compensator: G = CTR&middot;R<sub>PU</sub>/R<sub>LED</sub> = 1.0 &times; 4.7/2.2 &asymp; 2.1 (6.6 dB); mid-band &times;(1 + R<sub>Z</sub>/R<sub>UP</sub>) = 4.3 (12.6 dB); zero at 1/(2&pi;&middot;10 nF&middot;20 k&Omega;) &asymp; 800 Hz.</li><li>With a plant of 6 dB and a 200 Hz pole, crossover &asymp; 1.7 kHz and PM &asymp; 67&deg; at CTR 100 %. At CTR 300 %, gain rises &asymp; 9.5 dB: re-check PM (interactive below).</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Feedback-Loop Designer (Bode)</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Simplified model: T(s) = G<sub>plant</sub>(s)&middot;H(s), plant = single pole plus an ESR zero at 20 kHz; H(s) = (CTR&middot;R<sub>PU</sub>/R<sub>LED</sub>)&middot;(1 + s&middot;C<sub>Z</sub>(R<sub>UP</sub> + R<sub>Z</sub>))/(s&middot;C<sub>Z</sub>R<sub>UP</sub>)&middot;1/(1 + s/&omega;<sub>opto</sub>). Sweep CTR between its EOL minimum and maximum.</p><div class="m3-calc"><div><div class="m3-field"><label for="m10BoCtr"><span>CTR (try min and max!)</span> <output id="m10BoCtrOut"></output></label><input type="range" id="m10BoCtr" min="20" max="400" step="5" value="100" /></div><div class="m3-field"><label for="m10BoRled"><span>R<sub>LED</sub></span> <output id="m10BoRledOut"></output></label><input type="range" id="m10BoRled" min="470" max="10000" step="10" value="2200" /></div><div class="m3-field"><label for="m10BoRpu"><span>R<sub>PU</sub></span> <output id="m10BoRpuOut"></output></label><input type="range" id="m10BoRpu" min="1000" max="22000" step="100" value="4700" /></div><div class="m3-field"><label for="m10BoRz"><span>R<sub>Z</sub> (R<sub>UP</sub> = 10 k&Omega;)</span> <output id="m10BoRzOut"></output></label><input type="range" id="m10BoRz" min="0" max="47000" step="100" value="10000" /></div><div class="m3-field"><label for="m10BoCz"><span>C<sub>Z</sub></span> <output id="m10BoCzOut"></output></label><input type="range" id="m10BoCz" min="1" max="100" step="1" value="10" /></div><div class="m3-field"><label for="m10BoFop"><span>Opto pole f<sub>opto</sub></span> <output id="m10BoFopOut"></output></label><input type="range" id="m10BoFop" min="1" max="30" step="0.1" value="10" /></div><div class="m3-field"><label for="m10BoGp"><span>Plant DC gain (power stage)</span> <output id="m10BoGpOut"></output></label><input type="range" id="m10BoGp" min="-10" max="20" step="1" value="6" /></div><div class="m3-field"><label for="m10BoFp"><span>Plant pole (output filter/load)</span> <output id="m10BoFpOut"></output></label><input type="range" id="m10BoFp" min="50" max="1000" step="10" value="200" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Crossover f<sub>c</sub></span><b id="m10BoFc">&ndash;</b></div><div class="m3-res-row"><span>Phase margin</span><b id="m10BoPm">&ndash;</b></div><div class="m3-res-row"><span>Compensator zero</span><b id="m10BoFz">&ndash;</b></div><div class="m3-res-row"><span>Mid-band compensator gain</span><b id="m10BoMid">&ndash;</b></div><div style="margin-top: 8px"><span id="m10BoVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m10BoNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 300px"><canvas id="m10BoCanvas" role="img" aria-label="Bode plot of loop gain magnitude and phase"></canvas></div>
+</div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>U1</td><td>TL431 (0.5 % or 1 %)</td><td>V<sub>KA</sub> &ge; 2.5 V</td><td>Reference + error amp</td></tr><tr><td>U2</td><td>PC817 (VDE option), narrow rank</td><td>reinforced package</td><td>Isolated error path</td></tr><tr><td>R<sub>LED</sub></td><td>Resistor</td><td>2.2 k&Omega;</td><td>Fast-lane gain</td></tr><tr><td>R<sub>BIAS</sub></td><td>Resistor</td><td>1 k&Omega;</td><td>TL431 min. current</td></tr><tr><td>R<sub>UP</sub>/R<sub>LOW</sub></td><td>Resistors 0.1&ndash;1 %</td><td>10 k&Omega; / 2.61 k&Omega;</td><td>Sets V<sub>OUT</sub></td></tr><tr><td>R<sub>Z</sub>, C<sub>Z</sub></td><td>R, C0G/X7R</td><td>10 k&Omega;, 10 nF</td><td>Integrator + zero</td></tr><tr><td>C<sub>FB</sub></td><td>Capacitor</td><td>&le; 1 nF</td><td>Noise filter (adds a pole)</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">The optocoupler straddles the transformer&rsquo;s isolation slot; keep primary FB traces short and away from the switch node (dV/dt couples into the high-impedance FB node); keep the TL431 divider away from secondary rectifier noise. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>Compensating at typical CTR</h5><p>At max CTR the loop gain is 3&times; higher: oscillation in some units.</p></div><div class="adv-card limit"><h5>Missing R<sub>BIAS</sub></h5><p>TL431 drops below 1 mA at light load: regulation fails.</p></div><div class="adv-card limit"><h5>Big C<sub>FB</sub></h5><p>Adds a low pole on top of the opto pole: phase margin collapses.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Measure the loop with an injection transformer (e.g. 20&ndash;50 &Omega; injection resistor in the divider) at min/max load and line</li><li>Repeat with a high- and a low-CTR sample, and at hot/cold</li><li>Load-step test: overshoot and ringing consistent with the measured PM</li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Example 5 &mdash; IGBT / SiC Gate-Drive Stage</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Drive a 1200 V, 100 A IGBT module (Q<sub>G</sub> &asymp; 600 nC) at 10 kHz from an MCU PWM</li><li>Reinforced isolation to the control side; DC bus 800 V; switching dV/dt up to &asymp; 10 kV/&micro;s (IGBT) or 50+ kV/&micro;s (SiC)</li><li>Short-circuit protection within &asymp; 10 &micro;s</li></ul><figure class="m3-fig"><img src="images/10/ex5-gate-drive.png" alt="Schematic: MCU PWM sinks the LED current of an HCPL-3120 or ACPL-332J; the output side runs from an isolated plus 15 V and minus 8 V supply with bypass capacitors and drives an IGBT gate through separate turn-on and turn-off resistors" loading="lazy" width="1000" height="520" /><figcaption><strong>Figure 5.</strong> Gate-drive stage with bipolar supply and split gate resistors.</figcaption></figure>
+<figure class="m3-fig"><img src="images/10/gate-drive-miller-plateau.gif" alt="Animation of gate-emitter voltage at turn-on for gate resistors of 2.2, 10 and 33 ohms, showing longer Miller plateaus with larger resistance" loading="lazy" width="807" height="391" /><figcaption><strong>Animation 2.</strong> The gate resistor sets how fast the gate charges through the Miller plateau, and so the collector dV/dt, EMI and switching loss.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>LED: I<sub>F</sub> = (5 &minus; 1.8 &minus; 0.3)/270 &Omega; &asymp; 10.7 mA (within a typical 7&ndash;16 mA recommended range).</li><li>Peak gate current &asymp; (15 &minus; (&minus;8))/(10 + 3 + 2) &Omega; &asymp; 1.5 A &le; 2.5 A rating.</li><li>Gate power = 600 nC &times; 23 V &times; 10 kHz &asymp; 0.14 W; average supply current = Q<sub>G</sub>&middot;f = 6 mA: size the isolated DC-DC with margin.</li><li>CMTI: IGBT at 10 kV/&micro;s &rarr; a &ge; 25&ndash;35 kV/&micro;s driver gives 2.5&times;+ margin. For SiC at 50&ndash;100 kV/&micro;s choose a driver rated &ge; 100&ndash;150 kV/&micro;s.</li><li>DESAT: blanking time sized so detection completes within the module&rsquo;s short-circuit withstand time (&asymp; 10 &micro;s class).</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: Gate Resistor and Peak Current</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Resistances in &Omega;, Q<sub>G</sub> in nC, f in kHz. Driver output resistance is representative; use the datasheet&rsquo;s I<sub>OH</sub>/I<sub>OL</sub> curves for your part.</p><div class="m3-calc"><div><div class="m3-field"><label for="m10GdVcc"><span>V<sub>CC2</sub></span> <output id="m10GdVccOut"></output></label><input type="range" id="m10GdVcc" min="10" max="25" step="0.5" value="15" /></div><div class="m3-field"><label for="m10GdVee"><span>V<sub>EE</sub></span> <output id="m10GdVeeOut"></output></label><input type="range" id="m10GdVee" min="-12" max="0" step="0.5" value="-8" /></div><div class="m3-field"><label for="m10GdRg"><span>R<sub>G</sub> (external)</span> <output id="m10GdRgOut"></output></label><input type="range" id="m10GdRg" min="0.5" max="47" step="0.1" value="10" /></div><div class="m3-field"><label for="m10GdRd"><span>Driver output R</span> <output id="m10GdRdOut"></output></label><input type="range" id="m10GdRd" min="0.5" max="10" step="0.1" value="3" /></div><div class="m3-field"><label for="m10GdRgi"><span>IGBT internal R<sub>G</sub></span> <output id="m10GdRgiOut"></output></label><input type="range" id="m10GdRgi" min="0" max="10" step="0.1" value="2" /></div><div class="m3-field"><label for="m10GdQg"><span>Total gate charge Q<sub>G</sub></span> <output id="m10GdQgOut"></output></label><input type="range" id="m10GdQg" min="50" max="3000" step="10" value="600" /></div><div class="m3-field"><label for="m10GdF"><span>Switching frequency</span> <output id="m10GdFOut"></output></label><input type="range" id="m10GdF" min="1" max="100" step="1" value="10" /></div><div class="m3-field"><label for="m10GdIpk"><span>Driver peak current rating</span> <output id="m10GdIpkOut"></output></label><input type="range" id="m10GdIpk" min="0.5" max="5" step="0.1" value="2.5" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Peak gate current</span><b id="m10GdI">&ndash;</b></div><div class="m3-res-row"><span>Gate drive power Q<sub>G</sub>&middot;&Delta;V&middot;f</span><b id="m10GdP">&ndash;</b></div><div class="m3-res-row"><span>Average supply current</span><b id="m10GdIa">&ndash;</b></div><div class="m3-res-row"><span>Dissipation in R<sub>G</sub> (per edge type)</span><b id="m10GdPr">&ndash;</b></div><div class="m3-res-row"><span>Rough switching (plateau) time</span><b id="m10GdT">&ndash;</b></div><div style="margin-top: 8px"><span id="m10GdVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m10GdNote"></p></div></div>
+</div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>U1</td><td>HCPL-3120 / ACPL-332J class</td><td>reinforced, wide SO</td><td>Driver + isolation</td></tr><tr><td>R<sub>LED</sub></td><td>Resistor</td><td>270 &Omega;</td><td>I<sub>F</sub> &asymp; 10 mA</td></tr><tr><td>R<sub>G,on</sub>/R<sub>G,off</sub></td><td>Pulse-rated resistors</td><td>10 &Omega; / 4.7 &Omega;</td><td>Edge-rate control</td></tr><tr><td>C1, C2</td><td>Ceramic + bulk</td><td>100 nF + 10 &micro;F on each rail</td><td>Supply the gate-current peaks</td></tr><tr><td>R<sub>GE</sub></td><td>Resistor</td><td>10 k&Omega; gate&ndash;emitter</td><td>Holds off when unpowered</td></tr><tr><td>PS1</td><td>Isolated DC-DC</td><td>+15/&minus;8 V, &ge; 1 W, reinforced</td><td>Floating supply</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Minimise the gate loop area (driver &rarr; R<sub>G</sub> &rarr; gate &rarr; emitter &rarr; driver); use a Kelvin emitter connection; place 100 nF directly at the driver pins; keep the switch node away from the driver&rsquo;s input side; respect the package creepage on the PCB with a slot if needed. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>No negative rail and no Miller clamp</h5><p>dV/dt of the other switch turns this one on through C<sub>GC</sub>: shoot-through.</p></div><div class="adv-card limit"><h5>Bypass caps far away</h5><p>Supply droop during the 1.5 A peak trips UVLO.</p></div><div class="adv-card limit"><h5>CMTI chosen for IGBT, used with SiC</h5><p>False pulses at 50+ kV/&micro;s.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Double-pulse test: V<sub>GE</sub>, V<sub>CE</sub>, I<sub>C</sub> at max bus and current</li><li>Short-circuit test with DESAT, verify soft turn-off</li><li>CMTI check: look for glitches on the fault line during switching</li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Example 6 &mdash; Mains Zero-Cross Detection</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Detect each zero crossing of 230 V / 50 Hz for TRIAC phase control or power metering</li><li>Timing uncertainty &lt; &plusmn;100 &micro;s after calibration; reinforced isolation to the MCU</li></ul><figure class="m3-fig"><img src="images/10/ex6-zero-cross.png" alt="Schematic: mains line and neutral through two 47 kilohm resistors into the anti-parallel LEDs of an H11AA1; the phototransistor pulls up to 3.3 V into an MCU capture input" loading="lazy" width="1000" height="430" /><figcaption><strong>Figure 6.</strong> Zero-cross detector. The pulse is centred on the true zero crossing.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>LED peak current &asymp; 325 V / 94 k&Omega; &asymp; 3.5 mA; average (rectified) &asymp; 2.2 mA.</li><li>Each resistor: 115 V<sub>rms</sub> &rarr; P &asymp; 0.28 W; choose 0.5&ndash;1 W, voltage-rated &ge; its share of the surge (or 3 in series).</li><li>Pulse width: output high while |V<sub>line</sub>| &lt; &asymp; 30&ndash;50 V (depends on CTR, pull-up and threshold) &rarr; &asymp; 2 &times; asin(40/325)/(2&pi;&middot;50) &asymp; 0.8 ms.</li><li>Timing: use the pulse <em>centre</em> (average of rising and falling edges). That cancels the symmetric widening and makes the result nearly independent of CTR.</li></ol></div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>R1, R2</td><td>Resistors</td><td>47 k&Omega;, 0.5&ndash;1 W, high-voltage rated</td><td>Current limit, voltage sharing</td></tr><tr><td>U1</td><td>H11AA1 (or AC-input SMD)</td><td>reinforced option if required</td><td>Bidirectional input</td></tr><tr><td>R3</td><td>Resistor</td><td>22 k&Omega;</td><td>Pull-up</td></tr><tr><td>(opt.) C</td><td>Capacitor</td><td>1&ndash;10 nF</td><td>Filter mains noise</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Mains-side resistors need creepage/clearance between them and to everything else (they carry line voltage). Keep the mains traces on the far side of the slot/barrier, with the resistors oriented along the high-voltage path. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>One small resistor</h5><p>A 0805 resistor sees 325 V peak and overheats.</p></div><div class="adv-card limit"><h5>Timing from one edge</h5><p>The edge moves with CTR and temperature.</p></div><div class="adv-card limit"><h5>Ignoring standby power</h5><p>0.56 W forever can break an energy-efficiency budget.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Scope the output against the mains (through a differential probe) and measure the centre error</li><li>Hot/cold test of pulse width</li><li>Surge test per the product standard</li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Example 7 &mdash; Isolated UART (6N137) and Isolated RS-485</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<h3 class="m3-h3">Requirements</h3>
+<ul class="m3-p" style="margin-left:18px"><li>UART at 115.2 kbit/s (upgradeable to 1 Mbit/s) between a controller and a field device</li><li>RS-485 variant: DI, RO, DE isolated, bus side powered by an isolated 5 V supply</li><li>CMTI &ge; 2&times; the expected ground-shift dV/dt</li></ul><figure class="m3-fig"><img src="images/10/ex7-uart-rs485.png" alt="Block diagram: MCU TX, RX and DE through three 6N137 couplers to an RS-485 transceiver on the isolated side with a 120 ohm termination and an isolated 5 V DC-DC supply" loading="lazy" width="1000" height="470" /><figcaption><strong>Figure 7.</strong> Isolated RS-485: three logic channels plus isolated power. For plain UART only TX and RX are needed.</figcaption></figure>
+<h3 class="m3-h3">Step-by-step calculation (worst case)</h3>
+<div class="m3-example"><h5>Calculation</h5><ol><li>LED: I<sub>F</sub> = (3.3 &minus; 0.3 &minus; 1.75)/120 &Omega; &asymp; 10 mA (inside the 6.5&ndash;15 mA recommended range).</li><li>Pull-up 1 k&Omega; to 5 V: I<sub>OL</sub> &asymp; 4.4 mA; t<sub>r</sub> &asymp; 2.2 &times; 1 k&Omega; &times; 15 pF &asymp; 33 ns.</li><li>At 1 Mbit/s: bit = 1000 ns; PWD 35 ns + 33 ns edge &asymp; 7 %: comfortable. At 115.2 kbit/s it is &lt; 1 %.</li><li>RS-485: DE must enable the driver before the first start bit; the coupler delay (&asymp; 75 ns) is negligible at these rates.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: UART Baud-Rate Checker</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Estimates edge time from the pull-up and load (open-collector) or a fixed ~10 ns (totem-pole), adds the part&rsquo;s PWD, and compares with the bit time.</p><div class="m3-calc"><div><div class="m3-field"><label for="m10UaBaud"><span>Baud rate (log slider)</span> <output id="m10UaBaudOut"></output></label><input type="range" id="m10UaBaud" min="3" max="7" step="0.01" value="5.06" /></div><div class="m3-field"><label for="m10UaPart"><span>Coupler</span></label><select id="m10UaPart"><option value="pc817">PC817 phototransistor</option><option value="6n137" selected>6N137 (open collector)</option><option value="tlp">Totem-pole logic (TLP2361 class)</option></select></div><div class="m3-field"><label for="m10UaRl"><span>Pull-up R<sub>L</sub></span> <output id="m10UaRlOut"></output></label><input type="range" id="m10UaRl" min="200" max="22000" step="10" value="1000" /></div><div class="m3-field"><label for="m10UaCl"><span>Load capacitance</span> <output id="m10UaClOut"></output></label><input type="range" id="m10UaCl" min="5" max="100" step="1" value="15" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Bit time</span><b id="m10UaTb">&ndash;</b></div><div class="m3-res-row"><span>Output rise time</span><b id="m10UaTr">&ndash;</b></div><div class="m3-res-row"><span>PWD</span><b id="m10UaPwd">&ndash;</b></div><div class="m3-res-row"><span>Timing distortion (PWD + edge)</span><b id="m10UaDist">&ndash;</b></div><div class="m3-res-row"><span>Output sink current</span><b id="m10UaIol">&ndash;</b></div><div style="margin-top: 8px"><span id="m10UaVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m10UaNote"></p></div></div>
+</div>
+<h3 class="m3-h3">Bill of materials</h3>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Ref</th><th>Part</th><th>Value / rating</th><th>Why</th></tr></thead><tbody><tr><td>U1&ndash;U3</td><td>6N137 class</td><td>10 MBd, 0.1 &micro;F each</td><td>TX/DI, RO, DE</td></tr><tr><td>R</td><td>Resistors</td><td>120 &Omega; (LED), 1 k&Omega; (pull-up)</td><td>I<sub>F</sub> and edges</td></tr><tr><td>U4</td><td>RS-485 transceiver</td><td>fail-safe receiver</td><td>Bus interface</td></tr><tr><td>PS1</td><td>Isolated DC-DC</td><td>5 V, reinforced if needed</td><td>Bus-side power</td></tr><tr><td>R<sub>T</sub></td><td>Termination</td><td>120 &Omega;</td><td>At bus ends only</td></tr></tbody></table></div>
+<h3 class="m3-h3">Layout notes</h3>
+<p class="m3-p">Bypass each 6N137 with 0.1 &micro;F at the pins; keep bus-side ground (and its large copper) away from the logic side; route the isolation gap straight under all couplers and the DC-DC. See Module 11 (<a href="11-pcb-guidelines.html">PCB Design Guidelines</a>).</p>
+<h3 class="m3-h3">Common mistakes</h3>
+<div class="adv-grid"><div class="adv-card limit"><h5>Pull-up too small</h5><p>Exceeds I<sub>OL</sub> and raises V<sub>OL</sub>.</p></div><div class="adv-card limit"><h5>Floating enable pin</h5><p>Noise gates the output.</p></div><div class="adv-card limit"><h5>Forgetting isolated power</h5><p>The bus side needs its own supply.</p></div></div>
+<h3 class="m3-h3">Test and verification</h3>
+<ul class="m3-p" style="margin-left:18px"><li>Eye/timing measurement at the maximum baud rate</li><li>Common-mode transient test between grounds</li><li>Bus fault tests (short, open, polarity)</li></ul>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<div class="adv-grid"><div class="adv-card"><h5>One method, every interface</h5><p>Worst-case I<sub>F</sub>, CTR<sub>EOL</sub>, overdrive k &ge; 2, speed, isolation, layout, verification.</p></div><div class="adv-card"><h5>MCU I/O</h5><p>Size R<sub>LED</sub> with V<sub>F,max</sub> and driver drop; mind the inversion and fail-safe state.</p></div><div class="adv-card"><h5>PLC inputs</h5><p>A shunt resistor sets a clean threshold; watch resistor power and surge.</p></div><div class="adv-card"><h5>Feedback loops</h5><p>CTR spread changes loop gain: design PM at CTR<sub>max</sub>, regulation at CTR<sub>min</sub>.</p></div><div class="adv-card"><h5>Gate drives</h5><p>Bipolar supply, split R<sub>G</sub>, local bypass, CMTI margin, DESAT.</p></div><div class="adv-card"><h5>Zero-cross</h5><p>Resistors carry mains power; time from the pulse centre.</p></div><div class="adv-card"><h5>Serial links</h5><p>PWD + edge &le; 10&ndash;20 % of a bit; bypass and pull-up per datasheet.</p></div><div class="adv-card"><h5>Verify at the corners</h5><p>Hot, cold, low-CTR samples, 50 % I<sub>F</sub> as an EOL simulation.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; Relay chatters at power-up</div><div class="scenario-body">In Example 2 the relay briefly energises every time the MCU resets. Why, and how do you fix it?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> During reset the GPIO is high-impedance: the LED is off, the phototransistor is off, and the 10 k&Omega; pull-up turns the MOSFET <em>on</em>. The topology makes &ldquo;LED off&rdquo; = relay on. <strong>Fix:</strong> invert the output stage (phototransistor drives the MOSFET gate high through a pull-down arrangement) so LED off = relay off, or add a pull-down on the MCU side that keeps the LED on during reset (less clean). Choose the fail-safe state deliberately.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; Input that turns on with nothing connected</div><div class="scenario-body">A PLC input without R2 (no LED shunt) reads ON when connected to a 2-wire proximity sensor that leaks 1.5 mA in its off state. Explain using Example 3.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> Without the shunt, 1.5 mA flows entirely through the LED. At CTR &asymp; 100 % that is 1.5 mA of collector current, easily enough to pull a 22 k&Omega; pull-up low. The standard allows off-state currents up to 1.5 mA (type 3). <strong>Fix:</strong> add R2 so that off-state current flows through the shunt (1.5 mA &times; 470 &Omega; &asymp; 0.7 V &lt; V<sub>F</sub>): the LED stays dark until the input exceeds the threshold.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Oscillation with a new CTR rank</div><div class="scenario-body">A flyback designed with rank A (80&ndash;160 %) is changed to rank D (300&ndash;600 %) for supply reasons. Some units now oscillate. Explain and fix.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> Loop gain scales with CTR: rank D can be up to 600/160 &asymp; 3.75&times; (11.5 dB) higher, pushing the crossover up towards the opto pole and reducing phase margin. <strong>Fix:</strong> scale R<sub>PU</sub>/R<sub>LED</sub> down by &asymp; the CTR ratio, re-tune R<sub>Z</sub>/C<sub>Z</sub>, and re-measure the loop at both CTR extremes. Lock the rank in the BOM.</div></div></div></div>
                   </div>
                 </div>
               </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
-                </div>
-              </div>
-
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
-              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Reference material</h5><p>Vendor application notes: TL431 + optocoupler loop design, PLC input design with optocouplers, gate-driver optocoupler application guides, 6N137 application circuits, AC-input coupler zero-cross notes.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Standards</h5><p>IEC 61131-2 (PLC I/O) &bull; IEC 62368-1 (ICT/AV supplies) &bull; IEC 61800-5-1 (drives) &bull; IEC 61000-4-x (immunity tests).</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 11 lays these circuits out; Module 13 verifies them; Module 17 has LTspice labs for several of these designs.</p></div></div></div>
 
               <div
                 style="
@@ -289,6 +1162,648 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '10';
+      window.M_QUIZ = [{"q": "For the LED resistor that must guarantee a minimum I_F, which values do you use?", "opts": ["V_drive,max and V_F,min", "V_drive,min, driver drop and V_F,max", "Typical values", "Only the absolute maximum I_F"], "correct": 1, "exp": "Worst case for minimum current."}, {"q": "Example 1: I_F,min = 8.2 mA, CTR_EOL 72 %, pull-up needs 0.66 mA. Overdrive k?", "opts": ["≈ 1", "≈ 4", "≈ 9", "≈ 20"], "correct": 2, "exp": "8.2 × 0.72 ≈ 5.9 mA; 5.9/0.66 ≈ 9."}, {"q": "Why does a 24 V pull-up onto a MOSFET gate need a clamp or divider?", "opts": ["To speed up switching", "Typical V_GS(max) is about ±20 V", "To isolate the relay", "To reduce CTR"], "correct": 1, "exp": "24 V exceeds the gate rating."}, {"q": "What does the shunt resistor across the LED in a PLC input do?", "opts": ["Increases CTR", "Sets a defined turn-on threshold and diverts off-state leakage", "Protects against surge only", "Speeds up the output"], "correct": 1, "exp": "The LED only conducts once the shunt voltage reaches V_F."}, {"q": "In a TL431 + PC817 loop, what is R_BIAS for?", "opts": ["Sets V_OUT", "Keeps ≥ 1 mA in the TL431 even when the LED current is small", "Limits LED current", "Adds a zero"], "correct": 1, "exp": "TL431 needs its minimum cathode current to regulate."}, {"q": "Loop gain of the TL431/opto compensator is proportional to…", "opts": ["R_LED / (CTR·R_PU)", "CTR·R_PU / R_LED", "C_Z only", "V_OUT"], "correct": 1, "exp": "G = CTR·R_PU/R_LED."}, {"q": "Peak gate current for 15 V / −8 V drive through 10 + 3 + 2 Ω?", "opts": ["≈ 0.5 A", "≈ 1.0 A", "≈ 1.5 A", "≈ 2.3 A"], "correct": 2, "exp": "23 V / 15 Ω ≈ 1.53 A."}, {"q": "Gate drive power for Q_G = 600 nC, ΔV = 23 V, f = 10 kHz?", "opts": ["≈ 14 mW", "≈ 0.14 W", "≈ 1.4 W", "≈ 14 W"], "correct": 1, "exp": "600 nC × 23 V × 10 kHz ≈ 0.138 W."}, {"q": "Best timing reference from an H11AA1 zero-cross pulse?", "opts": ["Rising edge", "Falling edge", "Pulse centre", "Pulse width"], "correct": 2, "exp": "The centre cancels symmetric widening."}, {"q": "A 6N137 with a 1 kΩ pull-up and 15 pF load at 1 Mbit/s has about…", "opts": ["70 % distortion", "7 % distortion", "0.07 % distortion", "no output"], "correct": 1, "exp": "(35 + 33) ns / 1000 ns ≈ 7 %."}];
+      window.M_TF = [{"s": "A phototransistor output with a pull-up is inverting: LED on gives a logic low.", "a": true, "exp": "The transistor pulls the output down."}, {"s": "The flyback diode across a relay coil can be omitted if the MOSFET is rated 60 V.", "a": false, "exp": "The inductive kick can reach hundreds of volts."}, {"s": "IEC 61131-2 allows some off-state current, which a PLC input must tolerate without switching on.", "a": true, "exp": "Hence the LED shunt resistor."}, {"s": "Changing to a higher CTR rank can destabilise an SMPS feedback loop.", "a": true, "exp": "Loop gain rises proportionally."}, {"s": "Gate-driver bypass capacitors can be placed anywhere on the supply rail.", "a": false, "exp": "They must be at the driver pins to supply the current peaks."}, {"s": "A single 0.25 W 0805 resistor is adequate across 230 V mains for a zero-cross detector.", "a": false, "exp": "Power and voltage rating are both exceeded."}, {"s": "A 6N137 needs a 0.1 µF bypass capacitor close to its supply pins.", "a": true, "exp": "It is required by the datasheet."}, {"s": "Running the design at 50 % I_F on the bench is a quick way to emulate end-of-life CTR.", "a": true, "exp": "It approximates a 50 % EOL factor."}];
+      window.M_DD = [{"t": "Overdrive factor k", "d": "Available collector current divided by the current needed to saturate", "h": "Aim for ≥ 2."}, {"t": "LED shunt resistor", "d": "Sets a PLC input threshold and absorbs off-state leakage", "h": "R2 in Example 3."}, {"t": "Fast lane", "d": "R_LED from V_OUT to the opto LED in a TL431 loop", "h": "Adds a direct gain path."}, {"t": "Miller plateau", "d": "Gate-voltage flat region while the gate-collector charge is supplied", "h": "Set by R_G."}, {"t": "DESAT", "d": "Short-circuit detection via collector voltage while on", "h": "Gate-driver feature."}, {"t": "Pulse centre", "d": "Zero-cross timing reference insensitive to CTR", "h": "Average of both edges."}];
+      // ---------- Module 10 ----------
+      var E24 = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1];
+      function e24down(r) {
+        if (r <= 0) return 0;
+        var d = Math.pow(10, Math.floor(Math.log10(r))), m = r / d, best = 1.0;
+        E24.forEach(function (e) { if (e <= m + 1e-9) best = e; });
+        return best * d;
+      }
+      function fR(r) { return r >= 1e6 ? M3.fmt(r / 1e6, 2) + ' MΩ' : r >= 1000 ? M3.fmt(r / 1000, r < 10000 ? 2 : 1) + ' kΩ' : M3.fmt(r, 0) + ' Ω'; }
+      // (1) LED resistor + pull-up designer
+      (function () {
+        if (!document.getElementById('m10LdVd')) return;
+        function upd() {
+          var vd = bindOut('m10LdVd', function (v) { return M3.fmt(v, 2) + ' V'; });
+          var vdrop = bindOut('m10LdDrop', function (v) { return M3.fmt(v, 2) + ' V'; });
+          var vf = bindOut('m10LdVf', function (v) { return M3.fmt(v, 2) + ' V'; });
+          var ift = bindOut('m10LdIf', function (v) { return M3.fmt(v, 1) + ' mA'; });
+          var ctr = bindOut('m10LdCtr', function (v) { return v + ' %'; }) / 100;
+          var der = bindOut('m10LdDer', function (v) { return '× ' + M3.fmt(v, 2); });
+          var vcc = bindOut('m10LdVcc', function (v) { return M3.fmt(v, 1) + ' V'; });
+          var rl = Math.round(100 * Math.pow(1000, bindOut('m10LdRl', function (v) { return fR(100 * Math.pow(1000, v / 100)); }) / 100));
+          var rled = e24down((vd - vdrop - vf) / (ift / 1000));
+          var ifmin = rled > 0 ? ((vd - vdrop - vf) / rled) * 1000 : 0;
+          var ifmax = rled > 0 ? ((vd * 1.05 - 1.0) / rled) * 1000 : 0;
+          var need = ((vcc - 0.2) / rl) * 1000, avail = ifmin * ctr * der, k = avail / need;
+          var tau = 1.5 + (250 * 10e-12 * rl) * 1e6, tr = 2.2 * tau + (k > 1 ? 2 * Math.log(k) : 0);
+          document.getElementById('m10LdR').textContent = rled > 0 ? fR(rled) + ' (E24)' : 'drive too low';
+          document.getElementById('m10LdIfr').textContent = M3.fmt(ifmin, 1) + ' – ' + M3.fmt(ifmax, 1) + ' mA';
+          document.getElementById('m10LdNeed').textContent = M3.fmt(need, 2) + ' mA';
+          document.getElementById('m10LdAvail').textContent = M3.fmt(avail, 2) + ' mA (k = ' + M3.fmt(k, 1) + ')';
+          document.getElementById('m10LdSpeed').textContent = '≈ ' + M3.fmt(tr, 0) + ' µs → ≤ ' + M3.fmt(1000 / (4 * tr), 1) + ' kHz';
+          var v = document.getElementById('m10LdVerdict'), n = document.getElementById('m10LdNote');
+          if (rled <= 0) { M3.setVerdict(v, 'bad', 'Drive voltage cannot supply the LED'); n.textContent = 'Use a higher drive voltage or a transistor LED driver.'; }
+          else if (k < 1) { M3.setVerdict(v, 'bad', 'Output will not saturate at end of life'); n.textContent = 'Raise I_F, choose a higher rank, or increase R_L (slower).'; }
+          else if (k < 2) { M3.setVerdict(v, 'warn', 'Saturates, but below 2× margin'); n.textContent = 'Aim for k ≥ 2 with worst-case CTR.'; }
+          else if (ifmax > 20) { M3.setVerdict(v, 'warn', 'Works, but I_F max is high for LED life'); n.textContent = 'Consider a lower target I_F with a higher rank (Module 9).'; }
+          else { M3.setVerdict(v, 'ok', 'Robust worst-case design'); n.textContent = 'Check the speed estimate against your signal rate (Module 4 model; verify on the bench).'; }
+        }
+        ['m10LdVd', 'm10LdDrop', 'm10LdVf', 'm10LdIf', 'm10LdCtr', 'm10LdDer', 'm10LdVcc', 'm10LdRl'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        upd();
+      })();
+      // (2) PLC input calculator
+      (function () {
+        if (!document.getElementById('m10PlR1')) return;
+        function model(V, R1, R2, VD, VL) {
+          var vn = Math.max(0, V - VD), il = vn / (R1 + R2);
+          if (il * R2 < VL) return { iin: il * 1000, iled: 0 };
+          var iin = (vn - VL) / R1;
+          return { iin: Math.max(iin, VL / R2) * 1000, iled: Math.max(0, iin - VL / R2) * 1000 };
+        }
+        function upd() {
+          var R1 = bindOut('m10PlR1', function (v) { return fR(v); }), R2 = bindOut('m10PlR2', function (v) { return fR(v); });
+          var VD = 0.7, VL = 1.05;
+          var type = document.getElementById('m10PlType').value, vh = type === '1' ? 15 : 11;
+          var prat = +document.getElementById('m10PlPr').value;
+          var ctr = bindOut('m10PlCtr', function (v) { return v + ' %'; }) / 100;
+          var rpu = bindOut('m10PlRpu', function (v) { return fR(v); });
+          var a = model(5, R1, R2, VD, VL), b = model(vh, R1, R2, VD, VL), c = model(30, R1, R2, VD, VL);
+          var vth = VD + VL * (R1 + R2) / R2;
+          var p30 = Math.pow(c.iin / 1000, 2) * R1;
+          var need = (3.1 / rpu) * 1000, avail = b.iled * ctr;
+          document.getElementById('m10PlTh').textContent = M3.fmt(vth, 1) + ' V';
+          document.getElementById('m10Pl5').textContent = M3.fmt(a.iin, 2) + ' mA in / ' + M3.fmt(a.iled, 2) + ' mA LED';
+          document.getElementById('m10PlVh').textContent = M3.fmt(b.iin, 2) + ' mA in / ' + M3.fmt(b.iled, 2) + ' mA LED (at ' + vh + ' V)';
+          document.getElementById('m10Pl30').textContent = M3.fmt(c.iin, 2) + ' mA, P_R1 = ' + M3.fmt(p30 * 1000, 0) + ' mW';
+          document.getElementById('m10PlK').textContent = M3.fmt(avail, 2) + ' / ' + M3.fmt(need, 2) + ' mA (k = ' + M3.fmt(avail / need, 1) + ')';
+          var probs = [];
+          if (vth <= 5.5) probs.push('threshold too low: may turn on in the OFF region');
+          if (vth >= vh - 0.5) probs.push('threshold too close to the ON minimum');
+          if (b.iin < 2) probs.push('input current below 2 mA at V_H,min');
+          if (c.iin > 15) probs.push('input current above 15 mA at 30 V');
+          if (p30 > 0.5 * prat) probs.push('R1 power above 50 % of its rating');
+          if (avail < 2 * need) probs.push('output not saturating with 2× margin at V_H,min');
+          var v = document.getElementById('m10PlVerdict'), n = document.getElementById('m10PlNote');
+          if (!probs.length) { M3.setVerdict(v, 'ok', 'Meets the type ' + type + ' regions (representative)'); n.textContent = 'Add surge protection (TVS), reverse diode and firmware debounce. Verify with the current IEC 61131-2 edition.'; }
+          else { M3.setVerdict(v, probs.length > 1 ? 'bad' : 'warn', probs.length + ' issue(s)'); n.textContent = probs.join('; ') + '.'; }
+        }
+        ['m10PlR1', 'm10PlR2', 'm10PlCtr', 'm10PlRpu'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        ['m10PlType', 'm10PlPr'].forEach(function (i) { document.getElementById(i).addEventListener('change', upd); });
+        upd();
+      })();
+      // (3) TL431 + PC817 loop designer with Bode plot
+      (function () {
+        var canvas = document.getElementById('m10BoCanvas');
+        if (!canvas) return;
+        var P = {};
+        function H(f) {
+          var w = 2 * Math.PI * f;
+          var G = (P.ctr * P.rpu) / P.rled;
+          var wz = 1 / (P.cz * (P.rup + P.rz)), wi = 1 / (P.cz * P.rup), wo = 2 * Math.PI * P.fop;
+          var mag = G * Math.sqrt(1 + Math.pow(w / wz, 2)) / (w / wi) / Math.sqrt(1 + Math.pow(w / wo, 2));
+          var ph = -90 + (Math.atan(w / wz) * 180) / Math.PI - (Math.atan(w / wo) * 180) / Math.PI;
+          var gp = Math.pow(10, P.gp0 / 20), wp = 2 * Math.PI * P.fp, we = 2 * Math.PI * P.fesr;
+          var pm = gp * Math.sqrt(1 + Math.pow(w / we, 2)) / Math.sqrt(1 + Math.pow(w / wp, 2));
+          var pp = (-Math.atan(w / wp) + Math.atan(w / we)) * 180 / Math.PI;
+          return { m: 20 * Math.log10(mag * pm), p: ph + pp };
+        }
+        function upd() {
+          P.ctr = bindOut('m10BoCtr', function (v) { return v + ' %'; }) / 100;
+          P.rled = bindOut('m10BoRled', function (v) { return fR(v); });
+          P.rpu = bindOut('m10BoRpu', function (v) { return fR(v); });
+          P.rup = 10000;
+          P.rz = bindOut('m10BoRz', function (v) { return fR(v); });
+          P.cz = bindOut('m10BoCz', function (v) { return v + ' nF'; }) * 1e-9;
+          P.fop = bindOut('m10BoFop', function (v) { return M3.fmt(v, 1) + ' kHz'; }) * 1000;
+          P.gp0 = bindOut('m10BoGp', function (v) { return v + ' dB'; });
+          P.fp = bindOut('m10BoFp', function (v) { return v + ' Hz'; });
+          P.fesr = 20000;
+          var fc = null, pm = null;
+          for (var e = 1; e <= 5; e += 0.002) { var f = Math.pow(10, e), h = H(f); if (h.m <= 0) { fc = f; pm = 180 + h.p; break; } }
+          document.getElementById('m10BoFc').textContent = fc ? M3.fmt(fc / 1000, 2) + ' kHz' : '> 100 kHz';
+          document.getElementById('m10BoPm').textContent = pm !== null ? M3.fmt(pm, 0) + '°' : '–';
+          document.getElementById('m10BoFz').textContent = M3.fmt(1 / (2 * Math.PI * P.cz * (P.rup + P.rz)), 0) + ' Hz';
+          document.getElementById('m10BoMid').textContent = M3.fmt(20 * Math.log10(((P.ctr * P.rpu) / P.rled) * (1 + P.rz / P.rup)), 1) + ' dB';
+          var v = document.getElementById('m10BoVerdict'), n = document.getElementById('m10BoNote');
+          if (pm === null) { M3.setVerdict(v, 'warn', 'No crossover found in range'); n.textContent = 'Adjust gains.'; }
+          else if (pm < 30) { M3.setVerdict(v, 'bad', 'Phase margin too low: ringing/instability'); n.textContent = 'Lower the mid-band gain (R_PU/R_LED), move the zero lower (C_Z, R_Z), or keep the opto pole well above crossover.'; }
+          else if (pm < 45) { M3.setVerdict(v, 'warn', 'Marginal phase margin'); n.textContent = 'Check at the maximum CTR: gain rises and the crossover moves towards the opto pole.'; }
+          else if (fc > P.fop / 2) { M3.setVerdict(v, 'warn', 'Crossover close to the opto pole'); n.textContent = 'CTR and temperature spread will move the opto pole: keep f_c below about half of it.'; }
+          else { M3.setVerdict(v, 'ok', 'Stable with good margin at this CTR'); n.textContent = 'Now sweep CTR from its end-of-life minimum to its maximum and confirm both ends.'; }
+          draw();
+        }
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, Hh = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, Hh);
+          var L = 48, R = 48, T = 12, B = 28;
+          function X(e) { return L + ((e - 1) / 4) * (W - L - R); }
+          function Ym(m) { return T + ((60 - m) / 120) * (Hh - T - B); }
+          function Yp(ph) { return T + ((0 - ph) / 270) * (Hh - T - B); }
+          ctx.font = '11px Inter, sans-serif'; ctx.lineWidth = 1;
+          for (var e = 1; e <= 5; e++) { ctx.strokeStyle = p.border; ctx.beginPath(); ctx.moveTo(X(e), T); ctx.lineTo(X(e), Hh - B); ctx.stroke(); ctx.fillStyle = p.muted; ctx.textAlign = 'center'; ctx.fillText(e < 3 ? Math.pow(10, e) + ' Hz' : Math.pow(10, e - 3) + ' kHz', X(e), Hh - B + 15); }
+          [-60, -30, 0, 30, 60].forEach(function (m) { ctx.strokeStyle = m === 0 ? p.muted : p.border; ctx.beginPath(); ctx.moveTo(L, Ym(m)); ctx.lineTo(W - R, Ym(m)); ctx.stroke(); ctx.fillStyle = p.cyan; ctx.textAlign = 'right'; ctx.fillText(m + ' dB', L - 4, Ym(m) + 4); });
+          [-45, -90, -135, -180, -225].forEach(function (ph) { ctx.fillStyle = '#fb923c'; ctx.textAlign = 'left'; ctx.fillText(ph + '°', W - R + 4, Yp(ph) + 4); });
+          ctx.strokeStyle = p.cyan; ctx.lineWidth = 2.2; ctx.beginPath();
+          for (var i = 0; i <= 400; i++) { var ee = 1 + (4 * i) / 400, h = H(Math.pow(10, ee)); var y = Math.max(T, Math.min(Hh - B, Ym(h.m))); if (i === 0) ctx.moveTo(X(ee), y); else ctx.lineTo(X(ee), y); }
+          ctx.stroke();
+          ctx.strokeStyle = '#fb923c'; ctx.beginPath();
+          for (var j = 0; j <= 400; j++) { var e2 = 1 + (4 * j) / 400, h2 = H(Math.pow(10, e2)); var y2 = Math.max(T, Math.min(Hh - B, Yp(h2.p))); if (j === 0) ctx.moveTo(X(e2), y2); else ctx.lineTo(X(e2), y2); }
+          ctx.stroke();
+          ctx.setLineDash([4, 4]); ctx.strokeStyle = p.bad; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, Yp(-180)); ctx.lineTo(W - R, Yp(-180)); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = p.cyan; ctx.textAlign = 'left'; ctx.fillText('|T| (dB)', L + 6, T + 12); ctx.fillStyle = '#fb923c'; ctx.fillText('∠T (°)', L + 70, T + 12);
+        }
+        ['m10BoCtr', 'm10BoRled', 'm10BoRpu', 'm10BoRz', 'm10BoCz', 'm10BoFop', 'm10BoGp', 'm10BoFp'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        M3.onRedraw(draw);
+        upd();
+      })();
+      // (4) Gate driver calculator
+      (function () {
+        if (!document.getElementById('m10GdVcc')) return;
+        function upd() {
+          var vcc = bindOut('m10GdVcc', function (v) { return v + ' V'; }), vee = bindOut('m10GdVee', function (v) { return v + ' V'; });
+          var rg = bindOut('m10GdRg', function (v) { return M3.fmt(v, 1) + ' Ω'; }), rd = bindOut('m10GdRd', function (v) { return M3.fmt(v, 1) + ' Ω'; });
+          var rgi = bindOut('m10GdRgi', function (v) { return M3.fmt(v, 1) + ' Ω'; }), qg = bindOut('m10GdQg', function (v) { return v + ' nC'; });
+          var f = bindOut('m10GdF', function (v) { return v + ' kHz'; }), ipr = bindOut('m10GdIpk', function (v) { return M3.fmt(v, 1) + ' A'; });
+          var dv = vcc - vee, ipk = dv / (rg + rd + rgi), pg = qg * 1e-9 * dv * f * 1e3, iavg = qg * 1e-9 * f * 1e3 * 1000;
+          var prg = (pg / 2) * (rg / (rg + rd + rgi));
+          var tsw = (qg * 1e-9) / (ipk / 2) * 1e9;
+          document.getElementById('m10GdI').textContent = M3.fmt(ipk, 2) + ' A';
+          document.getElementById('m10GdP').textContent = M3.fmt(pg * 1000, 0) + ' mW';
+          document.getElementById('m10GdIa').textContent = M3.fmt(iavg, 1) + ' mA';
+          document.getElementById('m10GdPr').textContent = M3.fmt(prg * 1000, 0) + ' mW';
+          document.getElementById('m10GdT').textContent = '≈ ' + M3.fmt(tsw, 0) + ' ns';
+          var v = document.getElementById('m10GdVerdict'), n = document.getElementById('m10GdNote');
+          if (ipk > ipr) { M3.setVerdict(v, 'bad', 'Peak current exceeds the driver rating'); n.textContent = 'Increase R_G, or add an external booster stage.'; }
+          else if (ipk > 0.8 * ipr) { M3.setVerdict(v, 'warn', 'Peak current close to the rating'); n.textContent = 'Keep margin for tolerance and temperature.'; }
+          else if (vee > -2) { M3.setVerdict(v, 'warn', 'Little or no negative turn-off voltage'); n.textContent = 'Hard-switched IGBTs often need −5…−9 V or an active Miller clamp to avoid parasitic turn-on.'; }
+          else { M3.setVerdict(v, 'ok', 'Within driver rating'); n.textContent = 'Size the isolated supply for Q_G·f plus the driver’s quiescent current; check the resistor pulse rating.'; }
+        }
+        ['m10GdVcc', 'm10GdVee', 'm10GdRg', 'm10GdRd', 'm10GdRgi', 'm10GdQg', 'm10GdF', 'm10GdIpk'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        upd();
+      })();
+      // (5) UART checker
+      (function () {
+        if (!document.getElementById('m10UaBaud')) return;
+        function upd() {
+          var baud = bindOut('m10UaBaud', function (v) { return Math.round(Math.pow(10, v)).toLocaleString() + ' bit/s'; });
+          baud = Math.pow(10, baud);
+          var part = document.getElementById('m10UaPart').value;
+          var rl = bindOut('m10UaRl', function (v) { return fR(v); }), cl = bindOut('m10UaCl', function (v) { return v + ' pF'; });
+          var tb = 1e9 / baud, tr, pwd, iol;
+          if (part === 'pc817') { var tau = (1.5 + 250 * 10e-12 * rl * 1e6) * 1000; tr = 2.2 * tau; pwd = 0.8 * tr; iol = (5 / rl) * 1000; }
+          else if (part === '6n137') { tr = 2.2 * rl * cl * 1e-3; pwd = 35; iol = ((5 - 0.6) / rl) * 1000; }
+          else { tr = 10; pwd = 25; iol = 0; }
+          var dist = ((pwd + tr) / tb) * 100;
+          document.getElementById('m10UaTb').textContent = M3.fmt(tb >= 1000 ? tb / 1000 : tb, 2) + (tb >= 1000 ? ' µs' : ' ns');
+          document.getElementById('m10UaTr').textContent = M3.fmt(tr, 0) + ' ns';
+          document.getElementById('m10UaPwd').textContent = M3.fmt(pwd, 0) + ' ns';
+          document.getElementById('m10UaDist').textContent = M3.fmt(dist, 1) + ' % of a bit';
+          document.getElementById('m10UaIol').textContent = part === 'tlp' ? 'totem-pole (no pull-up)' : M3.fmt(iol, 1) + ' mA';
+          var v = document.getElementById('m10UaVerdict'), n = document.getElementById('m10UaNote');
+          if (part === '6n137' && iol > 13) { M3.setVerdict(v, 'bad', 'Pull-up too small: output sink current too high'); n.textContent = 'Keep the pull-up within the datasheet range (e.g. ≥ 350 Ω at 5 V).'; }
+          else if (dist > 35) { M3.setVerdict(v, 'bad', 'Too much distortion for this baud rate'); n.textContent = 'Use a faster part, a smaller pull-up, or a lower baud rate.'; }
+          else if (dist > 20) { M3.setVerdict(v, 'warn', 'Marginal: UART sampling margin eroded'); n.textContent = 'Reduce the pull-up or load capacitance, or choose a lower-PWD part.'; }
+          else { M3.setVerdict(v, 'ok', 'Timing margin is comfortable'); n.textContent = 'Also check CMTI in noisy environments (Module 6).'; }
+        }
+        ['m10UaBaud', 'm10UaRl', 'm10UaCl'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        document.getElementById('m10UaPart').addEventListener('change', upd);
+        upd();
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m10-check-', ["LED resistor sized with V_drive,min, driver drop and V_F,max; I_F,max checked for life.", "Overdrive k ≥ 2 at CTR_EOL for every switching output.", "Output inversion and fail-safe state (reset, power-down) decided deliberately.", "Inductive loads: flyback diode; MOSFET V_GS within rating.", "PLC inputs: threshold between OFF and ON regions; resistor power and surge rating.", "SMPS loop: R_BIAS for TL431; LED current headroom; PM ≥ 45° at CTR_max; regulation at CTR_min.", "Gate drive: peak current ≤ rating; bypass at pins; negative rail or Miller clamp; CMTI margin.", "Zero-cross: resistor power/voltage rating; timing from pulse centre.", "Serial links: PWD + edge ≤ 10–20 % of bit; pull-up within datasheet range; 0.1 µF bypass.", "Verification plan covers hot/cold, low-CTR samples and 50 % I_F."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

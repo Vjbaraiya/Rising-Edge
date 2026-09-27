@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Testing and Validation — Module 13 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Testing isolated designs: AC/DC Hi-Pot with Y-caps and trip settings, PD, insulation resistance, CTR bench tests, CMTI, EMC criteria and production test."
     />
     <title>Testing and Validation | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -191,71 +892,262 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2,S3,S4 → Q1-Q5,TF1-TF3,Scen1; 2: S5 → Q6,TF4,TF8,Scen2; 3: S6,S7,S9 → Q7,Q8,TF6; 4: S8 → Q9,TF7,Scen3; 5: S1,S10,S11 → Q10,TF5 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">Specify and run Hi-Pot tests safely and correctly</div>
-                  <div class="metric-card">Measure isolation resistance and interpret results</div>
-                  <div class="metric-card">Characterize CTR on the bench across conditions</div>
-                  <div class="metric-card">Validate EMC performance of isolated interfaces</div>
-                  <div class="metric-card">
-                    Design production test coverage for isolation circuits
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Specify and run Hi-Pot tests safely and correctly</div><div class="objective-card metric-card">Measure isolation resistance and interpret results</div><div class="objective-card metric-card">Characterize CTR on the bench across conditions</div><div class="objective-card metric-card">Validate EMC performance of isolated interfaces</div><div class="objective-card metric-card">Design production test coverage for isolation circuits</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> Module 12 showed how isolated interfaces fail. This module shows how to prove they won&rsquo;t: type tests that prove the design with margin, bench characterisation of the transfer function, EMC validation, and production tests that prove every unit was built correctly <em>without</em> damaging it. It uses the parameters from <a href="06-parameters.html">Module 6</a>, the margins from <a href="09-derating.html">Module 9</a> and the failure modes from <a href="12-failure-mechanisms.html">Module 12</a>. The standards behind the test levels are covered in <a href="16-standards.html">Module 16</a>.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; The Test Pyramid</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">A coupler datasheet proves the <em>component</em>. It says nothing about your creepage, your flux residue, your Y-capacitors or the 2 kV burst that couples in through a 20 m sensor cable. Validation is layered: each level proves something the level below cannot, and the cost per test rises as you go up.</p>
+<figure class="m3-fig"><img src="images/13/test-pyramid.png" alt="Pyramid with four levels: component qualification at the base, then board or sub-assembly, then system, then production at the top, each with example tests" loading="lazy" width="1100" height="560" /><figcaption><strong>Figure 1.</strong> The isolation test pyramid. The top level runs on every unit; the lower levels run on samples.</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th></th><th>Type (design) test</th><th>Routine (production) test</th></tr></thead><tbody><tr><td>Purpose</td><td>Prove the <em>design</em> meets the standard with margin</td><td>Prove <em>each unit</em> was built correctly</td></tr><tr><td>Samples</td><td>A few units, often pre-conditioned (damp heat, thermal cycling)</td><td>Every unit (100 %)</td></tr><tr><td>Hi-Pot example</td><td>Full level for ~60 s</td><td>Same level for ~1 s (or as the standard allows)</td></tr><tr><td>Destructive?</td><td>May be; the units are scrapped afterwards</td><td>Must not degrade the unit that ships</td></tr><tr><td>Examples</td><td>Hi-Pot, PD, EMC, thermal, touch current, CMTI, life test</td><td>Hi-Pot, functional I/O, ICT, sample R<sub>IO</sub></td></tr></tbody></table></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; treating the vendor&rsquo;s isolation test as your isolation test.</strong> The vendor tested the coupler in air, with clean pins. Your board adds creepage over solder mask, contamination, conformal coating defects, via placement and other parts bridging the barrier. Only a board- or system-level test proves those.</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> Write the test plan while you design, not after the prototype arrives. Every requirement in the specification (working voltage, insulation class, CMTI, CTR at end of life) should map to at least one test with a numeric pass criterion. Section 11 gives a template.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; Hi-Pot Fundamentals: AC vs DC, Ramp, Dwell and Trip</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">A <span class="gloss" data-tip="Also called dielectric withstand, electric strength or high-potential test.">Hi-Pot test</span> applies a voltage far above the working voltage across the insulation for a defined time and checks that nothing breaks down. It does <em>not</em> measure lifetime or partial discharge: a barrier can pass Hi-Pot and still age from PD at working voltage (that is what the PD test in Section 4 is for).</p>
+<div class="adv-grid"><div class="adv-card"><h5>AC test</h5><p>Stresses the insulation like mains does, including PD at peaks. Capacitive current flows through Y-caps and the barrier capacitance, so the tester sees current even with perfect insulation.</p></div><div class="adv-card"><h5>DC test</h5><p>No capacitive current once charged, so leakage is easy to see and Y-caps don&rsquo;t trip it. The equivalent DC voltage is the AC <em>peak</em>. The DUT stores charge and must be discharged afterwards.</p></div><div class="adv-card"><h5>Ramp</h5><p>Raise the voltage gradually (seconds, not instantly) so the charging current and any overshoot don&rsquo;t cause false trips or overstress.</p></div><div class="adv-card"><h5>Dwell</h5><p>The time at full voltage: typically 60 s for type tests and about 1 s for routine tests. Take the actual times from your standard.</p></div><div class="adv-card"><h5>Trip current</h5><p>The tester removes the voltage when the current exceeds this. Set it above the normal (capacitive plus leakage) current but low enough to catch a breakdown.</p></div><div class="adv-card"><h5>Arc detection</h5><p>Some testers flag short, high-frequency current bursts (flashover or corona) that never reach the trip level.</p></div></div>
+<div class="m3-eq"><div class="m3-eq-main">V<sub>DC,eq</sub> = &radic;2 &times; V<sub>AC,rms</sub> &asymp; 1.414 &times; V<sub>AC,rms</sub> &nbsp;&nbsp;&nbsp; I<sub>C</sub> = 2&pi; f C V<sub>AC,rms</sub></div><ul><li>V<sub>AC,rms</sub>: specified AC test voltage (V<sub>rms</sub>); V<sub>DC,eq</sub>: equivalent DC test voltage (V)</li><li>f: test frequency (50 or 60 Hz); C: total capacitance across the barrier (F): Y-caps plus the coupler&rsquo;s C<sub>IO</sub> (&asymp; 0.5&ndash;1 pF each)</li><li>I<sub>C</sub>: capacitive current the tester sees with perfect insulation (A<sub>rms</sub>)</li></ul></div>
+<figure class="m3-fig"><img src="images/13/hipot-ramp.gif" alt="Animation of two Hi-Pot runs: a good unit whose current follows the capacitive current through ramp, dwell and ramp-down, and a contaminated unit that breaks down during the ramp and trips the tester" loading="lazy" width="960" height="440" /><figcaption><strong>Figure 2 (animation).</strong> Ramp, dwell and ramp-down, first on a good unit and then on a unit that breaks down.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; AC or DC for a board with Y-caps?</h5><p>A 230 V mains SMPS has 2 &times; 2.2 nF Y-caps in parallel across the barrier (4.4 nF). The end-product standard calls for a representative 3000 V<sub>rms</sub> between primary and SELV.</p><ol><li>Capacitive current at 50 Hz: I<sub>C</sub> = 2&pi; &times; 50 &times; 4.4 nF &times; 3000 V = <strong>4.1 mA</strong>.</li><li>A typical 5 mA trip gives only 0.9 mA of margin; at 60 Hz (4.98 mA) it trips a good board.</li><li>DC alternative (if the standard allows it): 1.414 &times; 3000 = <strong>4243 V DC</strong>. Once charged, the current is only leakage (nA to &micro;A), so a trip of 0.1&ndash;0.5 mA is meaningful.</li><li>Stored energy after the DC test: &frac12; C V<sup>2</sup> = &frac12; &times; 4.4 nF &times; 4243<sup>2</sup> &asymp; <strong>40 mJ</strong>. That is a painful shock, so discharge before touching.</li></ol></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; raising the AC trip limit until the test passes.</strong> A 20 mA trip limit on a board with 4 mA of capacitive current cannot see a 10 mA leakage fault. Fix the method (DC, or test before fitting the Y-caps) rather than blinding the tester.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; Hi-Pot in Practice: Set-up, Safety and Pitfalls</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">Getting the <em>connections</em> right matters as much as the voltage. Every pin on each side is shorted together so the full voltage appears only across the insulation under test, never across a single junction inside the coupler or across another part.</p>
+<figure class="m3-fig"><img src="images/13/hipot-setup.png" alt="Hi-Pot test set-up: tester with HV and return terminals inside an interlocked enclosure; the DUT board has all primary-side pins shorted to HV and all secondary-side pins shorted to return, with a Y-capacitor across the isolation barrier" loading="lazy" width="1100" height="560" /><figcaption><strong>Figure 3.</strong> Correct Hi-Pot connection of an isolated board.</figcaption></figure>
+<h3 class="m3-h3">Procedure</h3>
+<div class="m3-example"><h5>Routine Hi-Pot on an isolated board</h5><ol><li>Guard: interlocked fixture or enclosure, two-hand start or light curtain, HV warning lamp. Only trained operators.</li><li>Short all primary-side nets to HV and all secondary-side nets (and SELV connectors) to return. Test primary&ndash;PE separately where it is a different insulation class.</li><li>Verify the tester with a known-good and a known-bad reference (a &ldquo;fail&rdquo; resistor) at the start of each shift.</li><li>Ramp to the test voltage, dwell, ramp down. Record voltage, time, maximum current and pass/fail with the serial number.</li><li>Discharge (automatic in most DC testers) and confirm 0 V before releasing the fixture.</li></ol></div>
+<div class="adv-grid"><div class="adv-card limit"><h5>Stored charge</h5><p>After a DC test, Y-caps and bulk caps can hold kV. Use the tester&rsquo;s discharge function and a grounding stick in the lab.</p></div><div class="adv-card limit"><h5>Repeated tests</h5><p>Each full-level test stresses the barrier. Standards and vendors generally recommend a reduced level (often around 80 %) for retests after rework.</p></div><div class="adv-card limit"><h5>Surge suppressors</h5><p>MOVs, TVS diodes and spark gaps from line to PE will conduct during a Hi-Pot test. They are usually disconnected for the test, as the standard allows.</p></div><div class="adv-card limit"><h5>Wrong sides shorted</h5><p>Forgetting one secondary net leaves it floating: it charges through stray capacitance and may arc to a neighbour, a false fail or real damage.</p></div></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Hi-Pot Test Planner</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Pick the insulation class, working voltage and test type. The planner suggests a <strong>representative</strong> test voltage (a simplified rule: basic &asymp; max(1500 V, 2V<sub>W</sub> + 1000 V)<sub>rms</sub>, reinforced = 2 &times; basic), timing and trip setting, then animates the run. Always take the actual values from your end-product standard.</p><div class="m3-calc"><div><div class="m3-field"><label for="m13HpIns"><span>Insulation under test</span></label><select id="m13HpIns"><option value="fun">Functional</option><option value="basic">Basic / supplementary</option><option value="reinf" selected>Reinforced / double</option></select></div><div class="m3-field"><label for="m13HpVw"><span>Working voltage</span> <output id="m13HpVwOut"></output></label><input type="range" id="m13HpVw" min="50" max="1000" step="10" value="230" /></div><div class="m3-field"><label for="m13HpKind"><span>Test type</span></label><select id="m13HpKind"><option value="type" selected>Type test (design)</option><option value="routine">Routine test (production)</option></select></div><div class="m3-field"><label for="m13HpMode"><span>Test waveform</span></label><select id="m13HpMode"><option value="ac50" selected>AC 50 Hz</option><option value="ac60">AC 60 Hz</option><option value="dc">DC (1.414 × AC)</option></select></div><div class="m3-field"><label for="m13HpCy"><span>Y-capacitance across barrier</span> <output id="m13HpCyOut"></output></label><input type="range" id="m13HpCy" min="0" max="10" step="0.1" value="2.2" /></div><div class="m3-field"><label for="m13HpViso"><span>Coupler V_ISO rating (V<sub>rms</sub>, 1 min)</span></label><input type="number" id="m13HpViso" value="5000" step="100" min="500" max="10000" /></div><div class="m3-field"><label for="m13HpFault"><span>Inject a breakdown fault at 70 % of test voltage</span></label><input type="checkbox" id="m13HpFault" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Test voltage</span><b id="m13HpV">&ndash;</b></div><div class="m3-res-row"><span>Timing</span><b id="m13HpT">&ndash;</b></div><div class="m3-res-row"><span>Expected current</span><b id="m13HpI">&ndash;</b></div><div class="m3-res-row"><span>Suggested trip setting</span><b id="m13HpTrip">&ndash;</b></div><div style="margin-top: 8px"><span id="m13HpVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13HpNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 240px"><canvas id="m13HpCanvas" role="img" aria-label="Animated Hi-Pot run showing test voltage and current against the trip limit"></canvas></div>
+<button class="btn btn-secondary" type="button" id="m13HpPlay">&#9654; Play</button></div>
+<p class="m3-note">The simplified rule reproduces the familiar 1.5 kV<sub>rms</sub> basic / 3 kV<sub>rms</sub> reinforced levels for 230 V mains, but modern standards (IEC 62368-1, IEC 61010-1, IEC 60601-1) derive test voltages from tables of peak working voltage, transient overvoltage and insulation class. Use their tables. See <a href="16-standards.html">Module 16</a>.</p>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Partial-Discharge Testing: the Concept</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p"><span class="gloss" data-tip="Localised breakdown in a small part of the insulation, typically a void or delamination, that does not bridge the electrodes.">Partial discharge</span> (PD) is what slowly kills a barrier at working voltage (Module 12, Section 7). A Hi-Pot test cannot see it; a PD test can. The measurement follows IEC 60270: a coupling capacitor and measuring impedance detect the tiny charge pulses, reported as <em>apparent charge</em> in picocoulombs (pC).</p>
+<div class="adv-grid"><div class="adv-card"><h5>Inception voltage</h5><p>The voltage at which PD starts as you raise the voltage. It must be comfortably above the peak working voltage.</p></div><div class="adv-card"><h5>Extinction voltage</h5><p>The voltage at which PD stops as you lower it again. It is usually lower than inception, which is why the test goes <em>down</em> to the measurement level after a higher stress.</p></div><div class="adv-card"><h5>Threshold</h5><p>Optocoupler datasheets typically quote a PD limit of about 5 pC at the test level.</p></div><div class="adv-card"><h5>Who tests</h5><p>For couplers certified to IEC 60747-5-5, the <em>vendor</em> PD-tests 100 % of parts. Board-level PD testing needs a shielded set-up and is mostly done for high-voltage designs (drives, PV, medical).</p></div></div>
+<figure class="m3-fig"><img src="images/13/pd-test-profiles.png" alt="Two voltage-time profiles: method a applies V_IOTM for about 60 seconds then reduces to about 1.6 times V_IORM for a 10-second PD measurement; method b1 applies about 1.875 times V_IORM for about 1 second on every part" loading="lazy" width="1200" height="420" /><figcaption><strong>Figure 4.</strong> PD test profiles as they appear in IEC 60747-5-5 coupler datasheets (representative).</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">V<sub>pd(m)</sub> &asymp; F &times; V<sub>IORM</sub>, &nbsp; q<sub>pd</sub> &lt; 5 pC</div><ul><li>V<sub>IORM</sub>: maximum repetitive peak working voltage the barrier is certified for (V<sub>peak</sub>)</li><li>F: test factor; about 1.875 for the 100 % routine test (method b1, 1 s) and about 1.6 for the sample test after environmental stress (method a, 10 s), as commonly listed on datasheets</li><li>q<sub>pd</sub>: apparent charge (pC)</li></ul></div>
+<div class="m3-example"><h5>Worked example &mdash; reading the PD figures</h5><p>A gate-drive coupler lists V<sub>IORM</sub> = 891 V<sub>peak</sub>.</p><ol><li>Routine (every part): 1.875 &times; 891 &asymp; <strong>1671 V<sub>peak</sub></strong> for 1 s, PD &lt; 5 pC.</li><li>Sample (after stress): 1.6 &times; 891 &asymp; <strong>1426 V<sub>peak</sub></strong> for 10 s, PD &lt; 5 pC.</li><li>Your peak working voltage must not exceed 891 V<sub>peak</sub>, including DC-link ripple and switching overshoot (Module 9).</li></ol></div>
+<div class="info-box" style="margin-top: 1rem"><strong>Verify</strong> Test factors, times and the PD limit depend on the insulation class and the edition of IEC 60747-5-5. Read them from the part&rsquo;s certificate, not from this page.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Isolation Resistance: Measuring and Interpreting G&Omega;</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">An insulation-resistance test (&ldquo;megger&rdquo; test) applies a moderate DC voltage, typically <strong>500 V or 1000 V DC</strong>, and reports resistance. It is non-destructive, gives a number you can trend, and is very sensitive to contamination and moisture. It complements Hi-Pot: Hi-Pot proves withstand; IR shows surface and bulk quality.</p>
+<figure class="m3-fig"><img src="images/13/insulation-resistance-behaviour.png" alt="Three charts: apparent resistance rising over ten minutes as absorption current decays, with a higher polarisation index for clean insulation; surface resistance falling with humidity, much faster for a flux-contaminated board; and R_IO halving about every 10 degrees C" loading="lazy" width="1200" height="420" /><figcaption><strong>Figure 5.</strong> Why an IR reading needs time, humidity and temperature recorded alongside it (representative curves).</figcaption></figure>
+<div class="adv-grid"><div class="adv-card"><h5>Read at a fixed time</h5><p>The reading rises for minutes as absorption current decays. Use 60 s unless your procedure says otherwise. The ratio R<sub>10 min</sub>/R<sub>1 min</sub> (polarisation index) above about 2 indicates dry, clean insulation.</p></div><div class="adv-card"><h5>Use the guard terminal</h5><p>To measure the coupler bulk and not the board surface (or the reverse), connect the megger&rsquo;s guard to a ring around one side to divert surface current.</p></div><div class="adv-card"><h5>Humidity dominates</h5><p>Clean boards lose perhaps one decade from 20 % to 90 % RH; flux-contaminated ones lose several. A low reading at high RH that recovers after drying means a surface problem.</p></div><div class="adv-card"><h5>Temperature</h5><p>Bulk resistance roughly halves for every ~10 &deg;C rise (representative). Compare readings only at similar temperatures, or correct them.</p></div></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Insulation-Resistance and Leakage Calculator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Parallel leakage paths across the barrier (couplers, board surface, bleeders) set the insulation resistance; the barrier capacitance sets the AC leakage. Limits shown are representative &mdash; verify with IEC 62368-1 / IEC 61010-1 / IEC 60601-1 as applicable.</p><div class="m3-calc"><div><div class="m3-field"><label for="m13IrN"><span>Couplers across the barrier</span> <output id="m13IrNOut"></output></label><input type="range" id="m13IrN" min="1" max="16" step="1" value="4" /></div><div class="m3-field"><label for="m13IrRio"><span>R<sub>IO</sub> per coupler at 25 &deg;C (G&Omega;, datasheet min)</span></label><input type="number" id="m13IrRio" value="50" step="1" min="1" /></div><div class="m3-field"><label for="m13IrSurf"><span>Board surface condition</span></label><select id="m13IrSurf"><option value="1000" selected>Clean, dry (~1 T&Omega;)</option><option value="100">Clean, humid (~100 G&Omega;)</option><option value="1">Flux residue, humid (~1 G&Omega;)</option></select></div><div class="m3-field"><label for="m13IrT"><span>Temperature</span> <output id="m13IrTOut"></output></label><input type="range" id="m13IrT" min="25" max="110" step="5" value="25" /></div><div class="m3-field"><label for="m13IrBleed"><span>Bleeder resistance across barrier (M&Omega;, 0 = none)</span></label><input type="number" id="m13IrBleed" value="0" step="1" min="0" /></div><div class="m3-field"><label for="m13IrVt"><span>Megger voltage</span></label><select id="m13IrVt"><option value="500" selected>500 V DC</option><option value="1000">1000 V DC</option></select></div><div class="m3-field"><label for="m13IrAcc"><span>Your acceptance limit (M&Omega;)</span></label><input type="number" id="m13IrAcc" value="100" step="1" min="0" /></div><div class="m3-field"><label for="m13IrVw"><span>Working voltage (V<sub>rms</sub>, 50 Hz)</span></label><input type="number" id="m13IrVw" value="230" step="1" min="0" /></div><div class="m3-field"><label for="m13IrCy"><span>Y-capacitance across barrier (nF)</span></label><input type="number" id="m13IrCy" value="2.2" step="0.1" min="0" /></div><div class="m3-field"><label for="m13IrLim"><span>Leakage / touch-current limit (representative)</span></label><select id="m13IrLim"><option value="250" selected>0.25 mA (class II equipment)</option><option value="3500">3.5 mA (class I, earthed)</option><option value="100">100 &micro;A (medical, BF patient leakage)</option><option value="10">10 &micro;A (medical, CF patient leakage)</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Total insulation resistance</span><b id="m13IrR">&ndash;</b></div><div class="m3-res-row"><span>Megger current</span><b id="m13IrIdc">&ndash;</b></div><div class="m3-res-row"><span>Resistive leakage at V<sub>W</sub></span><b id="m13IrIres">&ndash;</b></div><div class="m3-res-row"><span>Capacitive leakage at V<sub>W</sub></span><b id="m13IrIcap">&ndash;</b></div><div class="m3-res-row"><span>Total leakage (vector sum)</span><b id="m13IrItouch">&ndash;</b></div><div style="margin-top: 8px"><span id="m13IrVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13IrNote"></p></div></div>
+</div>
+<div class="m3-example"><h5>Worked example &mdash; why a medical design fails on Y-caps, not couplers</h5><ol><li>4 couplers at 50 G&Omega; each in parallel = 12.5 G&Omega;. At 230 V: 18 nA resistive leakage, which is negligible.</li><li>A 2.2 nF Y-cap at 230 V, 50 Hz: 2&pi; &times; 50 &times; 2.2 nF &times; 230 = <strong>159 &micro;A</strong>.</li><li>That exceeds a representative 10 &micro;A CF limit sixteen-fold. The fix is to remove the Y-cap across the patient barrier (and solve EMI another way), not to change the coupler.</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Bench CTR Characterisation</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">Datasheet curves are typical. Before committing to a design you should characterise a few parts yourself: it catches wrong ranks and counterfeit parts, and gives you data at <em>your</em> operating point, which is rarely the datasheet&rsquo;s 5 mA / 5 V test condition.</p>
+<figure class="m3-fig"><img src="images/13/ctr-bench.png" alt="Bench set-up: a source-measure unit forcing I_F into the LED, a second SMU forcing V_CE = 5 V and measuring I_C, the DUT inside a thermal chamber with a thermocouple on the package" loading="lazy" width="1100" height="520" /><figcaption><strong>Figure 6.</strong> Two-SMU CTR bench. A current source plus a voltage source and ammeter works too.</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">CTR = (I<sub>C</sub> / I<sub>F</sub>) &times; 100 % &nbsp; at stated V<sub>CE</sub> and T<sub>A</sub></div><ul><li>I<sub>C</sub>: collector current measured with V<sub>CE</sub> held constant (mA)</li><li>I<sub>F</sub>: forced LED current (mA)</li><li>V<sub>CE</sub>: collector&ndash;emitter voltage, typically 5 V (V); T<sub>A</sub>: chamber temperature (&deg;C)</li></ul></div>
+<figure class="m3-fig"><img src="images/13/ctr-sweep.gif" alt="Animation of a CTR characterisation: points are added as I_F is stepped from 0.5 to 30 mA at minus 40, 25 and 85 degrees C, building three curves" loading="lazy" width="810" height="396" /><figcaption><strong>Figure 7 (animation).</strong> Building the CTR map: sweep I<sub>F</sub> at each temperature.</figcaption></figure>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: CTR Measurement Lab</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">A virtual bench with a PC817-class teaching model (typical part, &plusmn;2 % measurement scatter). Set I<sub>F</sub> and temperature, press <em>Measure point</em> to log readings, and build your own CTR curves. Try the DC option at 30 mA to see self-heating.</p><div class="m3-calc"><div><div class="m3-field"><label for="m13LabIf"><span>Forward current I<sub>F</sub> (log slider)</span> <output id="m13LabIfOut"></output></label><input type="range" id="m13LabIf" min="0" max="100" step="1" value="56" /></div><div class="m3-field"><label for="m13LabT"><span>Chamber temperature</span></label><select id="m13LabT"><option value="-40">−40 °C</option><option value="0">0 °C</option><option value="25" selected>25 °C</option><option value="70">70 °C</option><option value="100">100 °C</option></select></div><div class="m3-field"><label for="m13LabMin"><span>Your design minimum CTR (%)</span></label><input type="number" id="m13LabMin" value="50" step="5" min="1" /></div><div class="m3-field"><label for="m13LabDc"><span>DC measurement (no pulsing: LED self-heats)</span></label><input type="checkbox" id="m13LabDc" /></div><div class="m3-field"><label for="m13LabModel"><span>Show typical curve at this temperature</span></label><input type="checkbox" id="m13LabModel" checked /></div><div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px"><button class="btn btn-primary" type="button" id="m13LabMeas">Measure point</button><button class="btn btn-secondary" type="button" id="m13LabClear">Clear data</button></div></div><div class="m3-results"><div class="m3-res-row"><span>Reading: I<sub>C</sub> at V<sub>CE</sub> = 5 V</span><b id="m13LabIc">&ndash;</b></div><div class="m3-res-row"><span>V<sub>F</sub></span><b id="m13LabVf">&ndash;</b></div><div class="m3-res-row"><span>CTR</span><b id="m13LabCtr">&ndash;</b></div><div class="m3-res-row"><span>LED junction temperature</span><b id="m13LabTj">&ndash;</b></div><div style="margin-top: 8px"><span id="m13LabVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13LabNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 280px"><canvas id="m13LabCanvas" role="img" aria-label="Measured CTR versus forward current, one coloured curve per chamber temperature"></canvas></div>
+<p class="m3-note" id="m13LabCount">0 points logged</p><div class="table-scroll"><table class="data-table"><thead><tr><th>T<sub>A</sub></th><th>I<sub>F</sub> (mA)</th><th>I<sub>C</sub> (mA)</th><th>CTR (%)</th></tr></thead><tbody id="m13LabBody"></tbody></table></div>
+</div>
+<div class="m3-example"><h5>Worked example &mdash; incoming check of a CTR rank</h5><p>You receive PC817C parts (rank C: 200&ndash;400 % at I<sub>F</sub> = 5 mA, V<sub>CE</sub> = 5 V, 25 &deg;C). Five samples read I<sub>C</sub> = 11.8, 13.1, 12.4, 9.1 and 12.9 mA at 5 mA.</p><ol><li>CTR = 236, 262, 248, <strong>182</strong>, 258 %.</li><li>One part is below the rank&rsquo;s 200 % floor. Re-measure (check V<sub>CE</sub>, temperature, pulse timing); if it is confirmed, quarantine the lot and ask the distributor for traceability.</li><li>A consistent shift of all samples by a fixed factor often points to a set-up error (wrong V<sub>CE</sub>, self-heating). A single outlier points to the parts.</li></ol></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; characterising at 25 &deg;C only.</strong> CTR falls at both ends of the temperature range for many phototransistor couplers (Module 6). A design that works on the bench can fail at &minus;25 &deg;C in a cabinet in winter. Always include the temperature extremes of your specification.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Switching and CMTI Bench Tests</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p">Timing and common-mode tests validate the dynamic side of the interface. Both are very sensitive to the fixture: a 10 cm ground lead on a scope probe can add more ringing than the part produces.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Parameter</th><th>How to measure</th><th>Pitfalls</th></tr></thead><tbody><tr><td>t<sub>PHL</sub>, t<sub>PLH</sub></td><td>50 % input to 50 % output (or the thresholds in the datasheet test circuit), at the datasheet R<sub>L</sub> and C<sub>L</sub> and at your own</td><td>Probe capacitance adds to C<sub>L</sub>; use &le; 10 pF active or low-C passive probes</td></tr><tr><td>PWD (|t<sub>PHL</sub> &minus; t<sub>PLH</sub>|)</td><td>Same set-up; measure both edges, over temperature and supply</td><td>PWD changes with LED current and temperature; check the worst corner</td></tr><tr><td>t<sub>r</sub>, t<sub>f</sub></td><td>10&ndash;90 % of the output swing</td><td>Phototransistor fall/rise depend on R<sub>L</sub> (Miller effect, Module 4)</td></tr><tr><td>CMTI</td><td>Common-mode pulse between the two grounds; output monitored for a glitch</td><td>Scope must be referenced to the output side only; measure dV/dt at the DUT pins</td></tr></tbody></table></div>
+<figure class="m3-fig"><img src="images/13/cmti-setup.png" alt="CMTI bench set-up: a common-mode pulse generator connected between the input ground and the output ground of the DUT, the input held high or low, and a scope referenced to the output ground watching for glitches" loading="lazy" width="1100" height="520" /><figcaption><strong>Figure 8.</strong> CMTI test: the pulse generator drives the whole input side relative to the output side.</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">dV/dt = 0.8 &times; V<sub>CM</sub> / t<sub>10&ndash;90</sub></div><ul><li>V<sub>CM</sub>: common-mode pulse amplitude (V)</li><li>t<sub>10&ndash;90</sub>: 10&ndash;90 % rise (or fall) time of the pulse measured at the DUT (s)</li><li>Result usually quoted in kV/&micro;s</li></ul></div>
+<div class="m3-example"><h5>Worked example &mdash; is the test hard enough?</h5><p>Your SiC inverter switches 800 V in 20 ns (10&ndash;90 %), which is 0.8 &times; 800 / 20 ns = <strong>32 kV/&micro;s</strong> at the gate-drive barrier. The lab pulse generator gives 1.2 kV with a 40 ns rise.</p><ol><li>Generator dV/dt = 0.8 &times; 1200 / 40 ns = <strong>24 kV/&micro;s</strong>, which is less than the application.</li><li>The test cannot prove the requirement. Use a faster generator or a smaller fixture capacitance, or validate in the real inverter with a differential probe and output-glitch monitoring.</li><li>Aim for at least 2&times; the application dV/dt in the test, which suits a coupler rated &ge; 50 kV/&micro;s (e.g. ACPL-332J / TLP5214-class; check the datasheet).</li></ol></div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> Test both states (output HIGH and output LOW) and both edge polarities. Many couplers glitch in only one combination, which is usually the one you didn&rsquo;t test.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; EMC Validation of Isolated Interfaces</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<p class="m3-p">EMC testing is where isolated interfaces are exposed to real-world abuse. The barrier capacitance (C<sub>IO</sub> plus layout) gives fast common-mode transients a path across; long cables deliver them. The basic standards define the waveforms; the generic or product standards (e.g. IEC 61000-6-1 / -6-2, or a product-family standard) set the levels and performance criteria.</p>
+<figure class="m3-fig"><img src="images/13/emc-waveforms.png" alt="Four panels: ESD contact-discharge current waveform with a sub-nanosecond first peak; EFT 5/50 ns pulse with burst timing inset; surge combination wave with 1.2/50 microsecond voltage and 8/20 microsecond current; and a text panel explaining how each test couples into an isolated interface" loading="lazy" width="1200" height="640" /><figcaption><strong>Figure 9.</strong> The three transient immunity waveforms and how they reach an optocoupler (shapes approximated for teaching).</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Basic standard</th><th>Test levels 1 / 2 / 3 / 4 (open-circuit)</th><th>Coupling</th></tr></thead><tbody><tr><td>IEC 61000-4-2 ESD</td><td>contact 2 / 4 / 6 / 8 kV; air 2 / 4 / 8 / 15 kV</td><td>Direct to touchable points; indirect via coupling planes</td></tr><tr><td>IEC 61000-4-4 EFT/burst</td><td>power 0.5 / 1 / 2 / 4 kV; signal 0.25 / 0.5 / 1 / 2 kV</td><td>CDN on power; capacitive clamp on I/O cables</td></tr><tr><td>IEC 61000-4-5 surge</td><td>0.5 / 1 / 2 / 4 kV</td><td>Line&ndash;line (2 &Omega;) and line&ndash;earth (12 &Omega;) via CDN</td></tr></tbody></table></div>
+<p class="m3-note">Level summary for orientation; the standards define tolerances, set-ups and additional levels. Check the edition you test to.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Criterion A</h5><p>Normal performance within specification during and after the test.</p></div><div class="adv-card"><h5>Criterion B</h5><p>Temporary degradation or loss of function during the test that recovers <em>by itself</em> afterwards; no change of stored data or operating mode.</p></div><div class="adv-card"><h5>Criterion C</h5><p>Temporary loss of function that needs operator intervention or a system reset.</p></div><div class="adv-card limit"><h5>Criterion D</h5><p>Loss of function that is not recoverable (damage). Never acceptable.</p></div></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: EMC Test-Level Reference and Pass-Criteria Explainer</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Levels shown are <strong>representative</strong> of the generic immunity standards; product standards may be stricter. Verify against the current edition you test to.</p><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px"><div class="m3-field"><label for="m13EmcEnv"><span>Environment (generic standard)</span></label><select id="m13EmcEnv"><option value="ind" selected>Industrial (IEC 61000-6-2 style)</option><option value="res">Residential / light industrial (IEC 61000-6-1 style)</option></select></div><div class="m3-field"><label for="m13EmcPort"><span>Port</span></label><select id="m13EmcPort"><option value="all" selected>All ports</option><option value="enc">Enclosure</option><option value="ac">AC power</option><option value="dc">DC power</option><option value="sig">Signal / I/O</option></select></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Test</th><th>Port / applies to</th><th>Representative level</th><th>Criterion</th></tr></thead><tbody id="m13EmcBody"></tbody></table></div>
+<h3 class="m3-h3">Pass-criteria explainer</h3>
+<div class="m3-calc"><div><div class="m3-field"><label for="m13EmcReq"><span>Criterion required by the standard for this test</span></label><select id="m13EmcReq"><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select></div><div class="m3-field"><label for="m13EmcObs"><span>What you observed</span></label><select id="m13EmcObs"><option value="a">No change at all</option><option value="b" selected>Output glitched, recovered by itself</option><option value="c">Communication stopped until reset</option><option value="d">Coupler damaged</option></select></div></div><div class="m3-results"><div class="m3-res-row"><span>Observed behaviour</span><b id="m13EmcClass">&ndash;</b></div><div style="margin-top: 8px"><span id="m13EmcVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13EmcNote"></p></div></div>
+</div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; testing the board on the bench instead of the system.</strong> Cable routing, enclosure bonding, the PE connection and the power supply all change the result. An ESD pass on the bench says little about the finished product.</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> Instrument the isolated interface during EMC testing: count UART framing errors, log PLC input transitions, or use a spare channel that should never change. &ldquo;Criterion A&rdquo; claimed without monitoring is a guess.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Thermal Testing</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<p class="m3-p">Optocoupler ageing depends on LED junction temperature (Module 9), so validate the temperature in the real product: enclosure closed, maximum ambient, worst-case load, after thermal equilibrium (typically 1&ndash;2 h for a closed enclosure).</p>
+<figure class="m3-fig"><img src="images/13/thermal-measurement.png" alt="An optocoupler on a PCB with a fine-gauge thermocouple bonded to the top centre and an IR camera aimed at a patch of matt-black tape; equation T_J approximately equals T_top plus psi_JT times power" loading="lazy" width="1100" height="480" /><figcaption><strong>Figure 10.</strong> Measuring package temperature and estimating T<sub>J</sub>.</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">T<sub>J</sub> &asymp; T<sub>top</sub> + &psi;<sub>JT</sub> &times; P, &nbsp; P = V<sub>F</sub> I<sub>F</sub> + V<sub>CE</sub> I<sub>C</sub></div><ul><li>T<sub>top</sub>: measured package top temperature (&deg;C)</li><li>&psi;<sub>JT</sub>: junction-to-top characterisation parameter (&deg;C/W; representative 20&ndash;50 &deg;C/W for small packages, often not published; see JEDEC JESD51)</li><li>P: total dissipation (W): LED plus output transistor</li></ul></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Junction-Temperature Estimate</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Enter your measurement. For these low-power parts T<sub>J</sub> is only slightly above T<sub>top</sub>; the real danger is a hot neighbour raising the local ambient.</p><div class="m3-calc"><div><div class="m3-field"><label for="m13ThTop"><span>Measured package top T<sub>top</sub></span> <output id="m13ThTopOut"></output></label><input type="range" id="m13ThTop" min="20" max="120" step="1" value="78" /></div><div class="m3-field"><label for="m13ThIf"><span>I<sub>F</sub></span> <output id="m13ThIfOut"></output></label><input type="range" id="m13ThIf" min="1" max="50" step="1" value="10" /></div><div class="m3-field"><label for="m13ThVf"><span>V<sub>F</sub> (V)</span></label><input type="number" id="m13ThVf" value="1.25" step="0.01" min="0.8" max="2" /></div><div class="m3-field"><label for="m13ThIc"><span>I<sub>C</sub> (mA)</span></label><input type="number" id="m13ThIc" value="5" step="0.1" min="0" /></div><div class="m3-field"><label for="m13ThVce"><span>V<sub>CE</sub> (V)</span></label><input type="number" id="m13ThVce" value="0.3" step="0.1" min="0" /></div><div class="m3-field"><label for="m13ThPsi"><span>&psi;<sub>JT</sub> (&deg;C/W, representative)</span></label><input type="number" id="m13ThPsi" value="30" step="1" min="0" /></div><div class="m3-field"><label for="m13ThMax"><span>Derated T<sub>J</sub> limit (&deg;C, Module 9)</span></label><input type="number" id="m13ThMax" value="100" step="1" min="0" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Dissipation P</span><b id="m13ThP">&ndash;</b></div><div class="m3-res-row"><span>Estimated T<sub>J</sub></span><b id="m13ThTj">&ndash;</b></div><div class="m3-res-row"><span>Margin to limit</span><b id="m13ThMargin">&ndash;</b></div><div style="margin-top: 8px"><span id="m13ThVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13ThNote"></p></div></div>
+</div>
+<div class="adv-grid"><div class="adv-card"><h5>Thermocouple choice</h5><p>Fine gauge (36&ndash;40 AWG), bead bonded with thermally conductive epoxy. A heavy thermocouple heat-sinks the package and reads low.</p></div><div class="adv-card"><h5>IR camera</h5><p>Put matt-black tape or paint (&epsilon; &asymp; 0.95) on the part, or calibrate emissivity against a thermocouple.</p></div><div class="adv-card"><h5>V<sub>F</sub> as a thermometer</h5><p>Calibrate V<sub>F</sub> at a small pulsed current against chamber temperature (&asymp; &minus;1.5 to &minus;2 mV/&deg;C), then read it in-circuit to get the LED junction temperature directly.</p></div><div class="adv-card"><h5>Report</h5><p>Log T<sub>A</sub> next to the part, the enclosure and airflow state, load, and time to equilibrium.</p></div></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Production Test Strategies</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+<p class="m3-p">Production testing must catch assembly defects on every unit, quickly and without degrading the product. Design for test at schematic stage: test points on both sides of the barrier, a way to drive each isolated input, and a way to read each isolated output.</p>
+<figure class="m3-fig"><img src="images/13/production-coverage.png" alt="Production test flow of AOI, ICT, Hi-Pot, functional and end-of-line sample stations, above a matrix of seven typical faults showing which stations reliably or partly detect each" loading="lazy" width="1160" height="560" /><figcaption><strong>Figure 11.</strong> Production stations and the faults each one catches (illustrative).</figcaption></figure>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Test</th><th>Coverage</th><th>Typical time</th><th>Notes</th></tr></thead><tbody><tr><td>AOI / X-ray</td><td>Placement, polarity, solder bridges, lead-frame bridges under the part</td><td>seconds</td><td>Catch a rotated coupler before Hi-Pot</td></tr><tr><td>ICT</td><td>Component values, opens/shorts; LED V<sub>F</sub> via test pads</td><td>seconds</td><td>Needs pads on both sides; the barrier breaks the fixture&rsquo;s ground reference</td></tr><tr><td>Hi-Pot (routine)</td><td>Barrier breakdown, bridges across creepage, contamination at high field</td><td>1&ndash;3 s</td><td>Mandatory in many safety standards for mains-connected equipment</td></tr><tr><td>Functional</td><td>Transfer at the limit: drive the input at minimum I<sub>F</sub>, check the output switches</td><td>seconds</td><td>The only test that catches a weak CTR on the board</td></tr><tr><td>Sample IR / burn-in</td><td>Process drift, contamination trend, early-life failures</td><td>minutes&ndash;hours</td><td>Sampling detects trends, not individual bad units</td></tr></tbody></table></div>
+<div class="m3-example"><h5>Worked example &mdash; a functional test that screens CTR</h5><p>A PLC input must switch at 15 V with an end-of-life CTR of at least 60 %. The production test drives the input at the <em>threshold</em> condition, not at 24 V.</p><ol><li>Apply 15 V (not 24 V) so I<sub>F</sub> is at its design minimum.</li><li>Check the output logic level is valid with the <em>maximum</em> pull-up resistor tolerance simulated (or accept a guard-banded limit on the output voltage).</li><li>A unit with a low-rank or damaged coupler fails here, though it would pass a 24 V go/no-go test.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Sampling vs 100 % Test</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">P(detect) = 1 &minus; (1 &minus; p)<sup>n</sup>. Small defect rates need very large samples, which is why safety tests run on every unit.</p><div class="m3-calc"><div><div class="m3-field"><label for="m13SmpN"><span>Sample size n</span> <output id="m13SmpNOut"></output></label><input type="range" id="m13SmpN" min="1" max="500" step="1" value="125" /></div><div class="m3-field"><label for="m13SmpPpm"><span>True defect rate (ppm)</span></label><input type="number" id="m13SmpPpm" value="500" step="10" min="0" max="1000000" /></div><div class="m3-field"><label for="m13SmpLot"><span>Lot size</span></label><input type="number" id="m13SmpLot" value="5000" step="100" min="1" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Probability the sample contains &ge; 1 defect</span><b id="m13SmpPd">&ndash;</b></div><div class="m3-res-row"><span>Defective units shipped from the untested rest</span><b id="m13SmpEsc">&ndash;</b></div><div style="margin-top: 8px"><span id="m13SmpVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m13SmpNote"></p></div></div>
+</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 11 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec11body" aria-expanded="false" aria-controls="sec11body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 11 &mdash; Building the Validation Plan</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec11body">
+<p class="m3-p">Pull everything together in a design-verification (DVT) matrix: one row per requirement, one test per row, a numeric pass criterion, a sample size and a link to evidence. It becomes the core of your certification file (<a href="16-standards.html">Module 16</a>).</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Requirement</th><th>Test</th><th>Samples</th><th>Pass criterion (example)</th><th>Evidence</th></tr></thead><tbody><tr><td>Reinforced insulation, 230 V mains</td><td>Hi-Pot type test after humidity conditioning</td><td>3 boards</td><td>No breakdown at the standard&rsquo;s level for 60 s</td><td>Test report + photos of set-up</td></tr><tr><td>Barrier working voltage</td><td>Review V<sub>IORM</sub>, creepage/clearance measurement</td><td>Design + 1 board</td><td>V<sub>IORM</sub> &ge; peak V<sub>W</sub>; creepage &ge; required</td><td>Certificate + measurement record</td></tr><tr><td>Leakage / touch current</td><td>Measure at 1.1 &times; mains, 60 Hz</td><td>3 units</td><td>&lt; limit of end-product standard</td><td>Report</td></tr><tr><td>CTR at end of life</td><td>Bench CTR at T<sub>min</sub>/T<sub>max</sub>; functional at threshold</td><td>10 parts / 3 boards</td><td>Margin &ge; ageing factor from Module 9</td><td>Data file + plots</td></tr><tr><td>Timing / PWD</td><td>Scope measurement over temperature</td><td>5 boards</td><td>PWD &lt; budget; t<sub>P</sub> &lt; spec</td><td>Scope captures</td></tr><tr><td>CMTI</td><td>Common-mode pulse test / in-system</td><td>3 boards</td><td>No glitch at &ge; 2&times; application dV/dt</td><td>Captures</td></tr><tr><td>EMC immunity</td><td>ESD, EFT, surge, conducted RF per product standard</td><td>1&ndash;2 systems</td><td>Criterion A/B as required</td><td>Accredited lab report</td></tr><tr><td>Thermal</td><td>Thermocouple at max T<sub>A</sub>, closed enclosure</td><td>2 systems</td><td>T<sub>J</sub> &le; derated limit &minus; 10 &deg;C</td><td>Report</td></tr></tbody></table></div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip</strong> Re-run the Hi-Pot and IR tests <em>after</em> environmental conditioning (damp heat, thermal cycling). Many contamination and delamination problems only appear after stress, and that is also what the standards&rsquo; type-test sequences do.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 12 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec12body" aria-expanded="false" aria-controls="sec12body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 12 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec12body">
+<div class="adv-grid"><div class="adv-card"><h5>Layered proof</h5><p>Component data, board type tests, system EMC/thermal and production tests each prove something different.</p></div><div class="adv-card"><h5>Type vs routine</h5><p>Type tests prove the design with margin; routine tests prove each unit without damaging it.</p></div><div class="adv-card"><h5>AC vs DC Hi-Pot</h5><p>DC equivalent = 1.414 &times; AC<sub>rms</sub>. AC current includes Y-cap charging; DC hides it but stores energy.</p></div><div class="adv-card"><h5>Connections</h5><p>Short all pins on each side; test each barrier separately; discharge afterwards.</p></div><div class="adv-card"><h5>Hi-Pot &ne; PD</h5><p>Withstand does not prove freedom from partial discharge; the vendor&rsquo;s PD test covers the coupler.</p></div><div class="adv-card"><h5>IR needs context</h5><p>Record voltage, time, temperature and RH. Humidity collapses dirty surfaces.</p></div><div class="adv-card"><h5>Characterise CTR</h5><p>Pulsed, at your operating point and at temperature extremes.</p></div><div class="adv-card"><h5>Instrument EMC tests</h5><p>Monitor the isolated channel to claim criterion A or B honestly.</p></div><div class="adv-card"><h5>Test at threshold</h5><p>Functional production tests at the minimum drive condition screen weak couplers.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 13 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec13body" aria-expanded="false" aria-controls="sec13body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 13 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec13body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; The production line that trips at 60 Hz</div><div class="scenario-body">A product passes routine Hi-Pot (3 kV<sub>rms</sub>, 5 mA trip) in Europe. The same product, tested at the US factory at 60 Hz, fails about 30 % of units. There is 4.4 nF of Y-capacitance across the barrier.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> I<sub>C</sub> = 2&pi; &times; 60 &times; 4.4 nF &times; 3000 = 4.98 mA, right at the 5 mA trip; Y-cap tolerance (&plusmn;20 %) decides pass or fail. At 50 Hz it was 4.15 mA. <strong>Fix:</strong> use the equivalent DC test (4243 V DC, trip about 0.5 mA) if the standard allows, or raise the AC trip with justification (for example 8 mA) and verify with a reference fault. Don&rsquo;t just raise the trip until it passes.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; The megger that disagreed</div><div class="scenario-body">An IR test at 500 V DC reads 400 M&Omega; in the morning (RH 85 %, unconditioned lab) and 60 G&Omega; in the afternoon after the air conditioning starts (RH 45 %). The spec requires &ge; 1 G&Omega;.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> A 150&times; swing with humidity is a surface-contamination signature (clean boards typically change by less than one decade). Inspect for flux residue in the creepage gap; clean, bake and retest at a controlled RH. Add RH and temperature to the test procedure and a cleaning/coating step to production. Also rerun the Hi-Pot after damp-heat conditioning: the board passed a dry test but may track in the field.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; The EMC glitch</div><div class="scenario-body">During a &plusmn;2 kV EFT test on a 24 V PLC input cable, a 6N137-based input produces 2&ndash;3 false pulses per burst; the PLC counts them. The product standard requires criterion B for this port.<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> Counted false pulses corrupt data, so this does not &ldquo;recover by itself&rdquo; and is effectively criterion C. Estimate the common-mode dV/dt on the cable, then check CMTI (6N137-class &asymp; 10 kV/&micro;s min is modest) and layout capacitance across the barrier. <strong>Fixes:</strong> an input RC filter and debouncing matched to the signal bandwidth, a coupler with &ge; 25&ndash;50 kV/&micro;s CMTI, and a tighter input loop. Retest with the counter monitored.</div></div></div></div>
                   </div>
                 </div>
               </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>Hi-Pot testing</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Isolation resistance</div>
-                  <div class="topic-card"><span class="topic-dot"></span>CTR measurement</div>
-                  <div class="topic-card"><span class="topic-dot"></span>EMC validation</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Thermal testing</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Production test methods
-                  </div>
-                </div>
-              </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
-                </div>
-              </div>
-
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
-              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Test methods</h5><p>IEC 60270 (partial-discharge measurement) &bull; IEC 61000-4-2 / -4-4 / -4-5 / -4-6 / -4-3 (immunity test methods) &bull; IEC 61000-6-1 / -6-2 (generic immunity) &bull; JEDEC JESD51 series (thermal measurement).</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Where test levels come from</h5><p>End-product standards: IEC 62368-1 (electric strength test), IEC 61010-1, IEC 60601-1 (dielectric strength, leakage currents), IEC 61800-5-1. Component: UL 1577, IEC 60747-5-5 (see Module 16).</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Vendor material</h5><p>Your coupler vendor&rsquo;s CMTI test-circuit description, isolation certificate and reliability report; the Hi-Pot tester manufacturer&rsquo;s application guide for AC vs DC testing.</p></div></div></div>
 
               <div
                 style="
@@ -285,6 +1177,725 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '13';
+      window.M_QUIZ = [{"q": "The DC Hi-Pot voltage equivalent to 3000 V_rms AC is about…", "opts": ["2121 V", "3000 V", "4243 V", "6000 V"], "correct": 2, "exp": "DC equals the AC peak: 1.414 × 3000 ≈ 4243 V."}, {"q": "Why can a perfectly good board trip an AC Hi-Pot test?", "opts": ["The coupler’s CTR is too high", "Y-capacitor charging current exceeds the trip setting", "DC leakage through the LED", "The ramp was too slow"], "correct": 1, "exp": "I = 2πfCV flows through Y-caps even with ideal insulation."}, {"q": "During a Hi-Pot test, all pins on each side of the barrier are shorted together to…", "opts": ["Speed up the test", "Keep the test voltage off individual junctions and stress only the barrier", "Increase capacitance", "Allow CTR to be measured"], "correct": 1, "exp": "Otherwise the test voltage can appear across an LED or transistor junction."}, {"q": "A Hi-Pot pass proves that the barrier…", "opts": ["Is free of partial discharge", "Withstood the test voltage for the test time", "Will last 20 years", "Has CTR within spec"], "correct": 1, "exp": "Withstand only; PD and ageing need other tests."}, {"q": "The typical PD limit quoted in optocoupler datasheets is about…", "opts": ["5 pC", "5 nC", "5 µA", "5 mV"], "correct": 0, "exp": "Apparent charge below about 5 pC at the test voltage."}, {"q": "An IR reading drops 100× when humidity rises from 45 % to 85 %. The most likely cause is…", "opts": ["LED ageing", "Surface contamination (e.g. flux residue)", "Wrong megger voltage", "Bulk barrier damage"], "correct": 1, "exp": "Clean surfaces change far less with RH."}, {"q": "Why pulse the LED current when characterising CTR?", "opts": ["To save power", "To keep LED self-heating from raising T_J above the chamber temperature", "Because SMUs cannot source DC", "To increase CTR"], "correct": 1, "exp": "Self-heating would bias the temperature data."}, {"q": "A CM pulse of 1000 V with a 50 ns 10–90 % rise has a dV/dt of…", "opts": ["20 kV/µs", "16 kV/µs", "50 kV/µs", "2 kV/µs"], "correct": 1, "exp": "0.8 × 1000 / 50 ns = 16 kV/µs."}, {"q": "An output that glitches during an EFT burst and recovers by itself without data loss meets criterion…", "opts": ["A", "B", "C", "D"], "correct": 1, "exp": "Self-recovering temporary degradation is criterion B."}, {"q": "Which production test best screens a coupler with CTR too low for the design?", "opts": ["Hi-Pot", "AOI", "Functional test at minimum drive (threshold)", "IR at 500 V"], "correct": 2, "exp": "Only a transfer test at the limit exercises CTR margin."}];
+      window.M_TF = [{"s": "Routine Hi-Pot tests usually run for about 1 s instead of 60 s.", "a": true, "exp": "Type test ~60 s; routine ~1 s (as the standard allows)."}, {"s": "Repeating full-level Hi-Pot tests after each rework is harmless.", "a": false, "exp": "Each test stresses the barrier; use reduced levels and limit the count."}, {"s": "A DC Hi-Pot test leaves stored charge that must be discharged.", "a": true, "exp": "Y-caps and barrier capacitance hold charge at kV."}, {"s": "Insulation resistance readings should be taken at a defined time after applying voltage.", "a": true, "exp": "The reading rises as absorption current decays."}, {"s": "The vendor’s isolation test proves your board’s creepage is adequate.", "a": false, "exp": "Board-level contamination and layout are not covered."}, {"s": "Scope probe ground leads can corrupt a CMTI measurement.", "a": true, "exp": "High dV/dt induces voltage in the ground loop."}, {"s": "Criterion D is acceptable for surge tests on signal ports.", "a": false, "exp": "D (damage) is never acceptable."}, {"s": "In medical designs, Y-capacitance often limits patient leakage more than coupler leakage.", "a": true, "exp": "A nF-scale capacitor at 230 V passes ~100 µA."}];
+      window.M_DD = [{"t": "Dwell", "d": "Time held at full test voltage", "h": "60 s type / ~1 s routine."}, {"t": "Trip current", "d": "Current at which the tester removes the voltage", "h": "Set above normal current."}, {"t": "Polarisation index", "d": "Ratio of 10-minute to 1-minute insulation resistance", "h": "High means dry and clean."}, {"t": "Apparent charge", "d": "PD pulse magnitude in pC", "h": "IEC 60270."}, {"t": "Criterion B", "d": "Temporary degradation that recovers by itself", "h": "No operator action."}, {"t": "Routine test", "d": "Test performed on every production unit", "h": "Must be non-destructive."}];
+      // ---------- Module 13 ----------
+      function m13sel(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+      function m13num(id, dflt) { var e = document.getElementById(id); var v = e ? parseFloat(e.value) : NaN; return isFinite(v) ? v : dflt; }
+      function m13set(id, t) { var e = document.getElementById(id); if (e) e.textContent = t; }
+      function m13si(v, unit) {
+        var a = Math.abs(v), pre = [[1e12, 'T'], [1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']];
+        if (!isFinite(v)) return '–';
+        if (a === 0) return '0 ' + unit;
+        for (var i = 0; i < pre.length; i++) if (a >= pre[i][0] * 0.9995) return (v / pre[i][0]).toPrecision(3) + ' ' + pre[i][1] + unit;
+        return v.toExponential(2) + ' ' + unit;
+      }
+      // Hi-Pot planner + animated run
+      (function () {
+        var canvas = document.getElementById('m13HpCanvas');
+        if (!canvas) return;
+        var btn = document.getElementById('m13HpPlay');
+        var st = {}, prog = 0, playing = false, last = 0;
+        function plan() {
+          var ins = m13sel('m13HpIns'), kind = m13sel('m13HpKind'), mode = m13sel('m13HpMode');
+          var vw = bindOut('m13HpVw', function (v) { return v + ' V_rms'; });
+          var cy = bindOut('m13HpCy', function (v) { return M3.fmt(v, 1) + ' nF'; });
+          var viso = m13num('m13HpViso', 5000);
+          var basic = Math.max(1500, 2 * vw + 1000);
+          var vac = ins === 'fun' ? Math.max(500, 1.5 * vw) : ins === 'basic' ? basic : 2 * basic;
+          vac = Math.ceil(vac / 50) * 50;
+          var f = mode === 'ac60' ? 60 : 50, isDC = mode === 'dc';
+          var vt = isDC ? vac * Math.SQRT2 : vac;
+          var dwell = kind === 'type' ? 60 : 1, ramp = kind === 'type' ? 5 : 1;
+          var ic = isDC ? 0 : 2 * Math.PI * f * cy * 1e-9 * vac; // A
+          var ileak = vt / 1e9; // assume ≥ 1 GΩ barrier
+          var trip = isDC ? Math.max(0.1e-3, 20 * ileak) : Math.max(1e-3, 1.5 * ic + 0.5e-3);
+          st = { vt: vt, isDC: isDC, ic: ic, trip: trip, ramp: ramp, dwell: dwell, cy: cy, vac: vac };
+          m13set('m13HpV', isDC ? Math.round(vt) + ' V DC (= ' + vac + ' V_rms × 1.414)' : vac + ' V_rms, ' + f + ' Hz');
+          m13set('m13HpT', 'ramp ≈ ' + ramp + ' s (≈ ' + Math.round(vt / ramp) + ' V/s) · dwell ' + dwell + ' s · ramp down, then discharge');
+          m13set('m13HpI', isDC ? 'charging ≈ ' + m13si(cy * 1e-9 * vt / ramp, 'A') + ' during ramp; steady leakage < ' + m13si(ileak, 'A') : m13si(ic, 'A') + ' capacitive (Y-caps) + barrier leakage');
+          m13set('m13HpTrip', m13si(trip, 'A') + (isDC ? ' (DC leakage trip)' : ' (AC total current trip)'));
+          var v = document.getElementById('m13HpVerdict'), n = document.getElementById('m13HpNote');
+          var vrmsEq = isDC ? vt / Math.SQRT2 : vt;
+          if (vrmsEq > viso) { M3.setVerdict(v, 'bad', 'Test voltage exceeds the coupler V_ISO rating'); n.textContent = 'Choose a coupler with a higher V_ISO (and V_IORM) — or the insulation class is wrong for this part.'; }
+          else if (!isDC && ic > 5e-3) { M3.setVerdict(v, 'warn', 'Y-cap current is large: AC trip margin is poor'); n.textContent = 'Consider a DC test (if the end-product standard allows it) or test before the Y-caps are fitted; a high AC trip setting hides real faults.'; }
+          else if (kind === 'routine' && vrmsEq > 0.8 * viso) { M3.setVerdict(v, 'warn', 'Routine test > 80 % of V_ISO: cumulative stress'); n.textContent = 'Every production and rework retest adds stress. Limit retests and use a reduced level for them.'; }
+          else { M3.setVerdict(v, 'ok', 'Plan is consistent with the part rating'); n.textContent = 'Representative values only — take the actual test voltage, time and trip criteria from your end-product standard (e.g. IEC 62368-1, IEC 61010-1, IEC 60601-1).'; }
+          draw();
+        }
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var L = 54, R = 12, T = 18, mid = H * 0.5, B = H - 26;
+          var tot = st.ramp * 2 + st.dwell + 1, fault = document.getElementById('m13HpFault').checked;
+          function X(t) { return L + (t / tot) * (W - L - R); }
+          function V(t) { var r = st.ramp; if (t < r) return st.vt * t / r; if (t < r + st.dwell) return st.vt; if (t < 2 * r + st.dwell) return st.vt * (2 * r + st.dwell - t) / r; return 0; }
+          var imax = Math.max(st.trip * 1.6, 1e-6);
+          function I(t) {
+            var v = V(t), dv = (V(t + 0.001) - v) / 0.001;
+            var i = st.isDC ? st.cy * 1e-9 * Math.abs(dv) + v / 1e9 : st.ic * v / st.vt + v / 1e9;
+            if (fault && v > 0.7 * st.vt) i += imax;
+            return i;
+          }
+          ctx.strokeStyle = p.border; ctx.lineWidth = 1; ctx.strokeRect(L, T, W - L - R, mid - T - 8); ctx.strokeRect(L, mid + 6, W - L - R, B - mid - 6);
+          ctx.fillStyle = p.sub; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+          ctx.fillText('V: ' + Math.round(st.vt) + (st.isDC ? ' V DC' : ' V_rms'), L + 6, T + 13);
+          ctx.fillText('I (trip ' + m13si(st.trip, 'A') + ')', L + 6, mid + 20);
+          function Yv(v) { return mid - 8 - (v / (st.vt * 1.1)) * (mid - T - 12); }
+          function Yi(i) { return B - Math.min(1, i / imax) * (B - mid - 14); }
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = p.bad; ctx.beginPath(); ctx.moveTo(L, Yi(st.trip)); ctx.lineTo(W - R, Yi(st.trip)); ctx.stroke(); ctx.setLineDash([]);
+          var tEnd = prog * tot, tripped = -1;
+          ctx.lineWidth = 2; ctx.strokeStyle = p.warn; ctx.beginPath();
+          for (var k = 0; k <= 400; k++) { var t = (k / 400) * tEnd; if (I(t) > st.trip) { tripped = t; break; } k ? ctx.lineTo(X(t), Yv(V(t))) : ctx.moveTo(X(t), Yv(V(t))); }
+          ctx.stroke();
+          ctx.strokeStyle = p.cyan; ctx.beginPath();
+          for (k = 0; k <= 400; k++) { t = (k / 400) * tEnd; if (tripped >= 0 && t > tripped) break; k ? ctx.lineTo(X(t), Yi(I(t))) : ctx.moveTo(X(t), Yi(I(t))); }
+          ctx.stroke();
+          ctx.textAlign = 'center'; ctx.font = 'bold 13px sans-serif';
+          if (tripped >= 0) { ctx.fillStyle = p.bad; ctx.fillText('TRIP at ' + Math.round(V(tripped)) + ' V — output removed', W / 2, mid); playing = false; btn.innerHTML = '&#9654; Play'; }
+          else if (prog >= 1) { ctx.fillStyle = p.ok; ctx.fillText('PASS — now discharge and verify 0 V before handling', W / 2, mid); }
+          ctx.fillStyle = p.muted; ctx.font = '10px sans-serif'; ctx.fillText('time (ramp ' + st.ramp + ' s · dwell ' + st.dwell + ' s · ramp down)', W / 2, H - 8);
+          ctx.textAlign = 'left';
+        }
+        function loop(ts) {
+          if (!playing) return;
+          var dt = last ? (ts - last) / 1000 : 0; last = ts;
+          prog = Math.min(1, prog + dt / 4);
+          draw();
+          if (prog >= 1) { playing = false; btn.innerHTML = '&#9654; Play'; return; }
+          if (playing) requestAnimationFrame(loop);
+        }
+        btn.addEventListener('click', function () {
+          if (playing) { playing = false; btn.innerHTML = '&#9654; Play'; return; }
+          if (prog >= 1 || prog === 0) prog = 0;
+          if (M3.reduceMotion) { prog = 1; draw(); return; }
+          playing = true; last = 0; btn.innerHTML = '&#10074;&#10074; Pause'; requestAnimationFrame(loop);
+        });
+        ['m13HpIns', 'm13HpKind', 'm13HpMode', 'm13HpVw', 'm13HpCy', 'm13HpViso', 'm13HpFault'].forEach(function (i) {
+          var e = document.getElementById(i); if (e) { e.addEventListener('input', function () { prog = prog > 0 ? 1 : 0; plan(); }); e.addEventListener('change', plan); }
+        });
+        prog = 1; plan(); M3.onRedraw(draw);
+      })();
+      // CTR lab simulator
+      (function () {
+        var canvas = document.getElementById('m13LabCanvas');
+        if (!canvas) return;
+        var EQEMAX = 0.04, ISRH = 1.0, IDROOP = 100, ETC = -0.006, HMAX = 300, ILOW = 0.05, IHIGH = 60, HTC = 0.005;
+        function ctr(IF, T) {
+          var eqe = (EQEMAX * IF) / (IF + ISRH) / (1 + IF / IDROOP) * Math.max(0.05, 1 + ETC * (T - 25));
+          var ip = eqe * 0.245 * IF, ic = ip * 200;
+          for (var i = 0; i < 30; i++) ic = 0.5 * ic + 0.5 * (HMAX * Math.sqrt(ic / (ic + ILOW))) / (1 + ic / IHIGH) * Math.max(0.05, 1 + HTC * (T - 25)) * ip;
+          return (ic / IF) * (1 - Math.exp(-50)) * (1 + 5 / 80);
+        }
+        var pts = [], COL = { '-40': '#60a5fa', '0': '#22d3ee', '25': '#4ade80', '70': '#fbbf24', '100': '#f87171' };
+        function IFof(v) { return 0.5 * Math.pow(60, v / 100); }
+        function reading() {
+          var IF = IFof(+document.getElementById('m13LabIf').value), T = +m13sel('m13LabT');
+          var dc = document.getElementById('m13LabDc').checked;
+          var vf = 1.2 + 0.041 * Math.log(IF / 10) + 0.003 * (IF - 10) - 0.0018 * (T - 25);
+          var Tj = T + (dc ? 0.35 * (vf * IF) : 0); // ≈ 350 °C/W LED-to-ambient, mW → °C
+          return { IF: IF, T: T, Tj: Tj, vf: vf - 0.0018 * (Tj - T), c: ctr(IF, Tj) };
+        }
+        function upd() {
+          var r = reading();
+          m13set('m13LabIfOut', M3.fmt(r.IF, r.IF < 10 ? 2 : 1) + ' mA');
+          m13set('m13LabIc', M3.fmt(r.IF * r.c, 3) + ' mA');
+          m13set('m13LabVf', M3.fmt(r.vf, 3) + ' V');
+          m13set('m13LabCtr', M3.fmt(r.c * 100, 0) + ' %');
+          m13set('m13LabTj', M3.fmt(r.Tj, 1) + ' °C');
+          var mn = m13num('m13LabMin', 50), v = document.getElementById('m13LabVerdict'), n = document.getElementById('m13LabNote');
+          if (r.c * 100 < mn) { M3.setVerdict(v, 'bad', 'Below your design minimum CTR (' + mn + ' %)'); n.textContent = 'This operating point fails even before ageing — raise I_F, choose a higher rank, or reduce the required CTR.'; }
+          else if (r.c * 100 < 1.5 * mn) { M3.setVerdict(v, 'warn', 'Less than 1.5× margin over your design minimum'); n.textContent = 'Remember: this is one sample. Worst-case parts and end-of-life ageing sit well below the typical curve (Modules 6 and 9).'; }
+          else { M3.setVerdict(v, 'ok', 'Comfortable margin at this point'); n.textContent = document.getElementById('m13LabDc').checked ? 'DC drive: self-heating raises T_J above the chamber temperature, which is why datasheets use pulsed measurements.' : 'Pulsed measurement: T_J ≈ chamber temperature.'; }
+          draw();
+        }
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var L = 48, R = 12, T0 = 14, B = 34, ymax = 200;
+          pts.forEach(function (q) { ymax = Math.max(ymax, q.c * 115); });
+          ymax = Math.ceil(ymax / 50) * 50;
+          function X(x) { return L + (Math.log(x / 0.5) / Math.log(60)) * (W - L - R); }
+          function Y(y) { return H - B - (y / ymax) * (H - T0 - B); }
+          ctx.strokeStyle = p.border; ctx.fillStyle = p.muted; ctx.font = '10px sans-serif'; ctx.lineWidth = 1;
+          [0.5, 1, 2, 5, 10, 20, 30].forEach(function (x) { ctx.beginPath(); ctx.moveTo(X(x), T0); ctx.lineTo(X(x), H - B); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(x, X(x), H - B + 13); });
+          for (var y = 0; y <= ymax; y += 50) { ctx.beginPath(); ctx.moveTo(L, Y(y)); ctx.lineTo(W - R, Y(y)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(y, L - 5, Y(y) + 3); }
+          ctx.textAlign = 'center'; ctx.fillText('I_F (mA, log)', (L + W) / 2, H - 6);
+          ctx.save(); ctx.translate(12, (T0 + H - B) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('CTR (%)', 0, 0); ctx.restore();
+          if (document.getElementById('m13LabModel').checked) {
+            var T = +m13sel('m13LabT');
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = p.sub; ctx.beginPath();
+            for (var k = 0; k <= 80; k++) { var f = 0.5 * Math.pow(60, k / 80); var yy = Y(ctr(f, T) * 100); k ? ctx.lineTo(X(f), yy) : ctx.moveTo(X(f), yy); }
+            ctx.stroke(); ctx.setLineDash([]);
+          }
+          var groups = {};
+          pts.forEach(function (q) { (groups[q.T] = groups[q.T] || []).push(q); });
+          Object.keys(groups).forEach(function (T) {
+            var g = groups[T].slice().sort(function (a, b) { return a.IF - b.IF; });
+            ctx.strokeStyle = ctx.fillStyle = COL[T] || p.cyan; ctx.lineWidth = 1.6; ctx.beginPath();
+            g.forEach(function (q, i) { i ? ctx.lineTo(X(q.IF), Y(q.c * 100)) : ctx.moveTo(X(q.IF), Y(q.c * 100)); }); ctx.stroke();
+            g.forEach(function (q) { ctx.beginPath(); ctx.arc(X(q.IF), Y(q.c * 100), 3.5, 0, 6.283); ctx.fill(); });
+          });
+          var r = reading();
+          ctx.strokeStyle = p.text; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(r.IF), T0); ctx.lineTo(X(r.IF), H - B); ctx.stroke();
+        }
+        document.getElementById('m13LabMeas').addEventListener('click', function () {
+          var r = reading(); r.c = r.c * (1 + (Math.random() - 0.5) * 0.04);
+          pts.push(r);
+          var tb = document.getElementById('m13LabBody'), tr = document.createElement('tr');
+          tr.innerHTML = '<td>' + r.T + ' °C' + (r.Tj - r.T > 0.5 ? ' (T_J ' + M3.fmt(r.Tj, 0) + ')' : '') + '</td><td>' + M3.fmt(r.IF, 2) + '</td><td>' + M3.fmt(r.IF * r.c, 3) + '</td><td>' + M3.fmt(r.c * 100, 0) + '</td>';
+          tb.insertBefore(tr, tb.firstChild);
+          m13set('m13LabCount', pts.length + ' points logged');
+          draw();
+        });
+        document.getElementById('m13LabClear').addEventListener('click', function () { pts = []; document.getElementById('m13LabBody').innerHTML = ''; m13set('m13LabCount', '0 points logged'); draw(); });
+        ['m13LabIf', 'm13LabT', 'm13LabDc', 'm13LabModel', 'm13LabMin'].forEach(function (i) { var e = document.getElementById(i); e.addEventListener('input', upd); e.addEventListener('change', upd); });
+        upd(); M3.onRedraw(draw);
+      })();
+      // Insulation resistance & leakage
+      (function () {
+        if (!document.getElementById('m13IrN')) return;
+        function upd() {
+          var n = bindOut('m13IrN', function (v) { return v + (v === 1 ? ' coupler' : ' couplers'); });
+          var rio = m13num('m13IrRio', 50) * 1e9;
+          var surf = +m13sel('m13IrSurf') * 1e9;
+          var T = bindOut('m13IrT', function (v) { return v + ' °C'; });
+          var vt = +m13sel('m13IrVt'), vw = m13num('m13IrVw', 230), cy = m13num('m13IrCy', 2.2);
+          var bleed = m13num('m13IrBleed', 0) * 1e6;
+          var rioT = rio * Math.pow(2, -(Math.max(T, 25) - 25) / 10);
+          var g = n / rioT + 1 / surf + (bleed > 0 ? 1 / bleed : 0);
+          var Rt = 1 / g;
+          var idc = vt / Rt, ires = vw / Rt, icap = 2 * Math.PI * 50 * (cy * 1e-9 + n * 1e-12) * vw;
+          var itouch = Math.sqrt(ires * ires + icap * icap);
+          m13set('m13IrR', m13si(Rt, 'Ω'));
+          m13set('m13IrIdc', m13si(idc, 'A') + ' at ' + vt + ' V DC');
+          m13set('m13IrIres', m13si(ires, 'A'));
+          m13set('m13IrIcap', m13si(icap, 'A'));
+          m13set('m13IrItouch', m13si(itouch, 'A'));
+          var acc = m13num('m13IrAcc', 100) * 1e6, lim = +m13sel('m13IrLim') * 1e-6;
+          var v = document.getElementById('m13IrVerdict'), note = document.getElementById('m13IrNote');
+          if (Rt < acc) { M3.setVerdict(v, 'bad', 'Insulation resistance below your acceptance limit'); note.textContent = 'Find the dominant path: a bleeder resistor, contamination (clean and re-test dry) or a damaged part. Never hide it by raising the test voltage.'; }
+          else if (itouch > lim) { M3.setVerdict(v, 'bad', 'Leakage / touch current above the selected limit'); note.textContent = icap > ires ? 'The capacitive path dominates: reduce Y-capacitance across this barrier.' : 'The resistive path dominates: remove bleeders or improve the surface.'; }
+          else if (itouch > 0.5 * lim) { M3.setVerdict(v, 'warn', 'Leakage above 50 % of the limit'); note.textContent = 'Tolerances (Y-cap +20 %), mains +10 % and 60 Hz operation eat the remaining margin.'; }
+          else { M3.setVerdict(v, 'ok', 'Resistance and leakage within limits'); note.textContent = 'Record the test voltage, time (1 min), temperature and RH with the reading so it can be compared later.'; }
+        }
+        ['m13IrN', 'm13IrRio', 'm13IrSurf', 'm13IrT', 'm13IrVt', 'm13IrVw', 'm13IrCy', 'm13IrBleed', 'm13IrAcc', 'm13IrLim'].forEach(function (i) { var e = document.getElementById(i); e.addEventListener('input', upd); e.addEventListener('change', upd); });
+        upd();
+      })();
+      // EMC levels and pass criteria
+      (function () {
+        var body = document.getElementById('m13EmcBody');
+        if (!body) return;
+        var L = {
+          ind: { esd: ['±4 kV contact / ±8 kV air', 'B'], eftAC: ['±2 kV', 'B'], eftDC: ['±2 kV', 'B'], eftSig: ['±1 kV', 'B'], surgeAC: ['±2 kV L–E / ±1 kV L–L', 'B'], surgeDC: ['±0.5 kV', 'B'], surgeSig: ['±1 kV L–E (long lines)', 'B'], cs: ['10 V', 'A'], rs: ['10 V/m', 'A'] },
+          res: { esd: ['±4 kV contact / ±8 kV air', 'B'], eftAC: ['±1 kV', 'B'], eftDC: ['±0.5 kV', 'B'], eftSig: ['±0.5 kV', 'B'], surgeAC: ['±2 kV L–E / ±1 kV L–L', 'B'], surgeDC: ['±0.5 kV', 'B'], surgeSig: ['not always required', 'B'], cs: ['3 V', 'A'], rs: ['3 V/m', 'A'] },
+        };
+        var ROWS = [
+          ['esd', 'ESD (IEC 61000-4-2)', 'enc', 'Enclosure, connectors, touchable metal'],
+          ['eftAC', 'EFT/burst (IEC 61000-4-4)', 'ac', 'AC power port'], ['eftDC', 'EFT/burst (IEC 61000-4-4)', 'dc', 'DC power port'], ['eftSig', 'EFT/burst (IEC 61000-4-4)', 'sig', 'Signal / I/O port (via clamp)'],
+          ['surgeAC', 'Surge (IEC 61000-4-5)', 'ac', 'AC power port'], ['surgeDC', 'Surge (IEC 61000-4-5)', 'dc', 'DC power port'], ['surgeSig', 'Surge (IEC 61000-4-5)', 'sig', 'Signal lines leaving the building / > 30 m'],
+          ['cs', 'Conducted RF (IEC 61000-4-6)', 'all', 'Cables, 0.15–80 MHz'], ['rs', 'Radiated RF (IEC 61000-4-3)', 'enc', 'Enclosure, 80 MHz – several GHz'],
+        ];
+        var OBS = { a: 'A', b: 'B', c: 'C', d: 'D' };
+        function render() {
+          var env = m13sel('m13EmcEnv'), port = m13sel('m13EmcPort');
+          body.innerHTML = '';
+          ROWS.forEach(function (r) {
+            if (port !== 'all' && r[2] !== port && r[2] !== 'all') return;
+            var x = L[env][r[0]], tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + r[1] + '</td><td>' + r[3] + '</td><td><strong>' + x[0] + '</strong></td><td>' + x[1] + '</td>';
+            body.appendChild(tr);
+          });
+          var req = m13sel('m13EmcReq'), obs = OBS[m13sel('m13EmcObs')];
+          var v = document.getElementById('m13EmcVerdict'), n = document.getElementById('m13EmcNote');
+          var rank = { A: 0, B: 1, C: 2, D: 3 };
+          m13set('m13EmcClass', 'Criterion ' + obs);
+          if (obs === 'D') { M3.setVerdict(v, 'bad', 'FAIL — damage or loss of function that is not recoverable'); n.textContent = 'Criterion D is never an acceptable result. Investigate the barrier and protection (latent damage is likely).'; }
+          else if (rank[obs] <= rank[req]) { M3.setVerdict(v, 'ok', 'PASS — observed ' + obs + ' meets required ' + req); n.textContent = 'Document exactly what was monitored (outputs, communication error counters) and the acceptance rule you agreed in the test plan.'; }
+          else { M3.setVerdict(v, 'bad', 'FAIL — observed ' + obs + ', required ' + req); n.textContent = obs === 'B' ? 'A glitch that self-recovers is not good enough where criterion A applies (e.g. continuous RF). Improve filtering or CMTI margin.' : 'Needing an operator reset is criterion C. Add filtering, input debouncing or watchdog recovery, or raise CMTI.'; }
+        }
+        ['m13EmcEnv', 'm13EmcPort', 'm13EmcReq', 'm13EmcObs'].forEach(function (i) { document.getElementById(i).addEventListener('change', render); });
+        render();
+      })();
+      // Junction temperature estimate
+      (function () {
+        if (!document.getElementById('m13ThTop')) return;
+        function upd() {
+          var ttop = bindOut('m13ThTop', function (v) { return v + ' °C'; });
+          var iF = bindOut('m13ThIf', function (v) { return v + ' mA'; });
+          var vf = m13num('m13ThVf', 1.25), ic = m13num('m13ThIc', 5), vce = m13num('m13ThVce', 0.3), psi = m13num('m13ThPsi', 30), tmax = m13num('m13ThMax', 100);
+          var P = (vf * iF + vce * ic) / 1000, tj = ttop + psi * P;
+          m13set('m13ThP', M3.fmt(P * 1000, 1) + ' mW');
+          m13set('m13ThTj', M3.fmt(tj, 1) + ' °C');
+          m13set('m13ThMargin', M3.fmt(tmax - tj, 1) + ' °C');
+          var v = document.getElementById('m13ThVerdict'), n = document.getElementById('m13ThNote');
+          if (tj > tmax) { M3.setVerdict(v, 'bad', 'Above the derated limit'); n.textContent = 'Reduce I_F, move the part away from hot neighbours, or pick a 105/125 °C-rated coupler.'; }
+          else if (tmax - tj < 10) { M3.setVerdict(v, 'warn', 'Less than 10 °C margin'); n.textContent = 'Measurement uncertainty (thermocouple heat-sinking, placement) is typically a few °C.'; }
+          else { M3.setVerdict(v, 'ok', 'Within the derated limit'); n.textContent = 'Re-check at maximum ambient with the enclosure closed.'; }
+        }
+        ['m13ThTop', 'm13ThIf', 'm13ThVf', 'm13ThIc', 'm13ThVce', 'm13ThPsi', 'm13ThMax'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        upd();
+      })();
+      // Sampling vs 100 %
+      (function () {
+        if (!document.getElementById('m13SmpN')) return;
+        function upd() {
+          var n = bindOut('m13SmpN', function (v) { return v + ' units'; });
+          var ppm = m13num('m13SmpPpm', 500), lot = m13num('m13SmpLot', 5000);
+          var p = Math.min(1, Math.max(0, ppm / 1e6));
+          var pd = 1 - Math.pow(1 - p, n);
+          var esc = lot * p * (1 - Math.min(n, lot) / lot);
+          m13set('m13SmpPd', M3.fmt(pd * 100, 1) + ' %');
+          m13set('m13SmpEsc', M3.fmt(esc, 1) + ' units per lot');
+          var v = document.getElementById('m13SmpVerdict'), note = document.getElementById('m13SmpNote');
+          if (pd < 0.5) { M3.setVerdict(v, 'bad', 'Sampling will usually miss this defect rate'); note.textContent = 'For safety-related faults (barrier, creepage) sampling is not enough: test every unit (Hi-Pot 100 %).'; }
+          else if (pd < 0.95) { M3.setVerdict(v, 'warn', 'Detection is likely but not assured'); note.textContent = 'Acceptable for process monitoring of non-safety parameters; not for safety.'; }
+          else { M3.setVerdict(v, 'ok', 'Sample size detects this rate with high probability'); note.textContent = 'Detecting the problem is not the same as screening it out: the defective units in the rest of the lot still ship unless you then test 100 %.'; }
+        }
+        ['m13SmpN', 'm13SmpPpm', 'm13SmpLot'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        upd();
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m13-check-', ["Validation plan maps every isolation requirement to a test and pass criterion.", "Hi-Pot level, waveform, time and trip taken from the end-product standard.", "Y-cap current calculated; AC trip setting or DC method justified.", "All pins on each side shorted; each barrier tested separately.", "Hi-Pot fixture interlocked; discharge and verification procedure written.", "Retest policy uses reduced level; retest count limited.", "IR readings logged with voltage, time, temperature and RH.", "CTR characterised pulsed at T_min/T_max and at the real operating point.", "CMTI test dV/dt ≥ 2 × application dV/dt, both states and polarities.", "EMC tests instrumented; required criteria per port documented.", "T_J verified in the closed enclosure at maximum ambient.", "Production functional test drives isolated inputs at threshold."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

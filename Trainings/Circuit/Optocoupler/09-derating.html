@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Optocoupler Derating — Module 09 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="Optocoupler derating: LED ageing vs current and temperature, CTR margin stacking, the 50% EOL rule, Arrhenius and mission profiles, and a derating report tool."
     />
     <title>Optocoupler Derating | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,767 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+      .flow-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        text-align: center;
+      }
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .flow-arrow {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin-bottom: 4px;
+      }
+      .adv-card p {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
       }
-      .topic-grid {
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
       }
-      .topic-card {
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
+      }
+
+      .m5-sym {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-base);
+      }
+      .m-code {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 12px 14px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 0.76rem;
         color: var(--text-base);
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.6rem 0;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .m-wiz-q {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text-base);
+        margin: 10px 0 6px;
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
+      .m-opt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .m-hot {
+        cursor: pointer;
+        border-bottom: 1px dashed var(--cyan, #22d3ee);
+      }
+      .m-hot.sel {
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .m-hot.trap-ok {
+        background: rgba(76, 223, 139, 0.18);
+      }
+      .m-hot.trap-bad {
+        background: rgba(255, 107, 107, 0.18);
+      }
+      .m-sheet {
+        background: var(--bg-card, var(--bg-alt));
+        border: 1px solid var(--border);
         border-radius: 10px;
         padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
+        font-size: 0.8rem;
+        color: var(--text-sub);
       }
-      .reserved-block h5 {
-        font-size: 0.82rem;
+      .m-sheet h5 {
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        color: var(--text-base);
+        margin: 12px 0 6px;
       }
-      .reserved-block p {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        margin: 0;
-        line-height: 1.5;
+      .m-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .m-sheet td,
+      .m-sheet th {
+        border-bottom: 1px solid var(--border);
+        padding: 5px 6px;
+        text-align: left;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .lesson-body .container > div[style*='justify-content: space-between'] .btn {
+        white-space: normal;
+        max-width: 100%;
+        text-align: center;
+      }
+      .m-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--cyan, #22d3ee);
       }
     </style>
   </head>
@@ -188,78 +889,184 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
+              <!-- objective map: 1: S2 → Q1,TF1-3,Scen1; 2: S3 → Q2,Q3,TF8; 3: S4 → Q9,TF7,Scen3; 4: S5-S6 → Q4-Q7,TF5,Scen2; 5: S7 → Q8,Q10 -->
+<div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  After completing this module, you will be able to:
-                </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">
-                    Apply LED current derating from manufacturer aging data
-                  </div>
-                  <div class="metric-card">
-                    Stack CTR margins: bin minimum, temperature, and end-of-life
-                  </div>
-                  <div class="metric-card">
-                    Derate power dissipation and forward current with temperature
-                  </div>
-                  <div class="metric-card">Estimate lifetime from stress conditions</div>
-                  <div class="metric-card">Document derating rationale for design reviews</div>
+                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">After completing this module, you will be able to:</p>
+                <div class="objective-grid"><div class="objective-card metric-card">Apply LED current derating from manufacturer aging data</div><div class="objective-card metric-card">Stack CTR margins: bin minimum, temperature, and end-of-life</div><div class="objective-card metric-card">Derate power dissipation and forward current with temperature</div><div class="objective-card metric-card">Estimate lifetime from stress conditions</div><div class="objective-card metric-card">Document derating rationale for design reviews</div></div>
+              </div>
+              <div class="info-box" style="margin-bottom: 2rem"><strong>Where this fits.</strong> Module 6 built the worst-case CTR equation and Module 7 showed where the curves live. This module designs for the part you will have <em>in year ten</em>: how the LED ages, how margins stack, how temperature erodes every rating, and how to write it all down so a reviewer can check it. Module 12 (<a href="12-failure-mechanisms.html">Failure Mechanisms</a>) covers the physics of what happens when derating is ignored.
+                <br /><span class="m3-note">Illustrations and animations are original teaching drawings, not to scale. Values marked representative are typical of common parts; always confirm against the current datasheet or standard you design to.</span>
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; Why Derate: Designing for the Part in Year Ten</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+<p class="m3-p">A new optocoupler and the same part after ten years in a warm cabinet are, electrically, different components. The LED emits less light, the encapsulant may have darkened slightly, and the leakage at the output is higher when hot. Derating means choosing today&rsquo;s operating point so that tomorrow&rsquo;s part still meets the specification, with margin.</p>
+<div class="adv-grid"><div class="adv-card"><h5>Derate for survival</h5><p>Keep stresses (I<sub>F</sub>, V<sub>CEO</sub>, I<sub>C</sub>, P, T<sub>J</sub>) well below absolute ratings, so random failure rates stay low.</p></div><div class="adv-card"><h5>Derate for function</h5><p>Keep enough CTR (or LED current above the threshold) at end of life, over temperature, for the circuit to work.</p></div><div class="adv-card"><h5>Derate for ageing itself</h5><p>Lower I<sub>F</sub> and T<sub>J</sub> slow LED degradation, so derating is partly self-rewarding.</p></div></div>
+<div class="warning-box" style="margin-top: 1rem"><strong>Design trap &mdash; &ldquo;it passed the prototype test&rdquo;.</strong> A prototype built with fresh, typical parts at room temperature tests the <em>best</em> case. Field returns come from the worst-case corner: minimum-rank part, hottest enclosure, year eight.</div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card"><span class="topic-dot"></span>LED current derating</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>CTR margin methodology
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>Temperature effects</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Reliability engineering
-                  </div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Lifetime considerations
-                  </div>
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; LED Light-Output Degradation</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+<p class="m3-p">LED light output decreases over time as defects grow in and around the active region, increasing non-radiative recombination (Module 12 covers the mechanisms). Manufacturers publish the result as <strong>CTR degradation curves</strong>: relative CTR vs time for several I<sub>F</sub> and temperatures. Three rules emerge from every such dataset:</p>
+<div class="adv-grid"><div class="adv-card"><h5>Current density drives it</h5><p>Degradation rises faster than linearly with I<sub>F</sub>. Doubling I<sub>F</sub> can cut time-to-threshold several-fold.</p></div><div class="adv-card"><h5>Temperature accelerates it</h5><p>Higher junction temperature speeds defect growth (Arrhenius behaviour).</p></div><div class="adv-card"><h5>It slows with time</h5><p>Most loss happens early; the curve flattens on a log time axis.</p></div></div>
+<figure class="m3-fig"><img src="images/09/led-ageing-curves.png" alt="Two charts of relative CTR versus years: left, curves for 5, 10 and 20 mA at 60 degrees Celsius, with 20 mA degrading fastest; right, curves for 40, 60, 85 and 100 degrees at 10 mA, with the hottest degrading fastest; a dashed 50 percent end-of-life line on both" loading="lazy" width="1100" height="460" /><figcaption><strong>Figure 1.</strong> Ageing trends from the course&rsquo;s teaching model. The more light you ask for now, the less you keep later.</figcaption></figure>
+<figure class="m3-fig"><img src="images/09/led-ageing-over-years.gif" alt="Animation of relative CTR over 20 years at 70 degrees Celsius for 5, 10 and 20 mA, with markers crossing the 50 percent threshold at very different times" loading="lazy" width="807" height="391" /><figcaption><strong>Animation 1.</strong> At 70 &deg;C the 20 mA part crosses the 50 % line in about five years; the 10 mA part in decades; the 5 mA part effectively never.</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">CTR(t)/CTR<sub>0</sub> = exp[&minus;K&middot;(I<sub>F</sub>/10 mA)<sup>n</sup>&middot;AF(T<sub>J</sub>)&middot;(t/10<sup>5</sup> h)<sup>m</sup>] &nbsp;&nbsp; (teaching model: K = 0.25, n = 1.5, m = 0.6, E<sub>a</sub> = 0.5 eV)</div><ul><li>This is a representative model for learning the trends, not vendor data.</li><li>For real designs, read the vendor&rsquo;s degradation curves (or request reliability data) and interpolate to your I<sub>F</sub> and T<sub>J</sub>.</li></ul></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: LED Ageing Simulator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Junction temperature includes the LED&rsquo;s own heating (I<sub>F</sub>&middot;V<sub>F</sub>&middot;R<sub>&theta;JA</sub>, V<sub>F</sub> = 1.2 V). The curve shows relative CTR over 30 years with your threshold.</p><div class="m3-calc"><div><div class="m3-field"><label for="m9SimIf"><span>LED current I<sub>F</sub></span> <output id="m9SimIfOut"></output></label><input type="range" id="m9SimIf" min="1" max="30" step="0.5" value="10" /></div><div class="m3-field"><label for="m9SimTa"><span>Ambient T<sub>A</sub></span> <output id="m9SimTaOut"></output></label><input type="range" id="m9SimTa" min="0" max="110" step="1" value="60" /></div><div class="m3-field"><label for="m9SimRth"><span>R<sub>&theta;JA</sub> (self-heating)</span> <output id="m9SimRthOut"></output></label><input type="range" id="m9SimRth" min="0" max="600" step="10" value="350" /></div><div class="m3-field"><label for="m9SimEol"><span>EOL threshold (CTR relative to new)</span> <output id="m9SimEolOut"></output></label><input type="range" id="m9SimEol" min="30" max="90" step="1" value="50" /></div><div class="m3-field"><label for="m9SimLife"><span>Required life</span> <output id="m9SimLifeOut"></output></label><input type="range" id="m9SimLife" min="1" max="30" step="1" value="10" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Junction temperature (LED heating only)</span><b id="m9SimTj">&ndash;</b></div><div class="m3-res-row"><span>CTR after required life</span><b id="m9SimAtLife">&ndash;</b></div><div class="m3-res-row"><span>Years to reach threshold</span><b id="m9SimYears">&ndash;</b></div><div style="margin-top: 8px"><span id="m9SimVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m9SimNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 280px"><canvas id="m9SimCanvas" role="img" aria-label="Projected relative CTR versus years with end-of-life threshold"></canvas></div>
+</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip &mdash; drive the LED gently.</strong> Many vendors&rsquo; ageing data suggest that running phototransistor couplers at roughly 5&ndash;10 mA (well under half of I<sub>F,max</sub>) gives long, flat CTR life. Choosing a higher CTR rank to allow lower I<sub>F</sub> is usually the cheapest reliability improvement available.</div>
+
                 </div>
               </div>
 
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; CTR Margin Stacking and the 50 % End-of-Life Rule</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+<p class="m3-p">Worst-case CTR is a product of independent factors. Each looks modest alone, but together they routinely remove two-thirds of the headline figure:</p>
+<figure class="m3-fig"><img src="images/09/ctr-margin-stack.gif" alt="Animated waterfall bar chart: datasheet CTR minimum 130 percent, then 117 after the I_F factor, 94 after temperature, 84 after V_CE saturation, and 42 percent at end of life" loading="lazy" width="807" height="374" /><figcaption><strong>Animation 2.</strong> The margin stack for a rank-B PC817-class part in a hot switching application. Only a third of the datasheet minimum remains.</figcaption></figure>
+<div class="m3-eq"><div class="m3-eq-main">CTR<sub>EOL</sub> = CTR<sub>min</sub> &times; k<sub>IF</sub> &times; k<sub>T</sub> &times; k<sub>VCE</sub> &times; k<sub>age</sub> &times; k<sub>extra</sub> &nbsp;&nbsp; design rule: CTR<sub>EOL</sub> &ge; 2 &times; CTR<sub>needed</sub> for switching outputs</div></div>
+<h3 class="m3-h3">Why &ldquo;50 % at end of life&rdquo;?</h3>
+<p class="m3-p">Many companies adopt k<sub>age</sub> = 0.5 as a default when vendor data for the exact conditions is missing. It is conservative for gently driven parts (5&ndash;10 mA, moderate temperature), and roughly what the harsher corners of published degradation curves show over 10+ years. The rule is valuable because it is simple and auditable. Replace it with data-backed factors when you have them, and never use a <em>less</em> conservative factor without data.</p>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: CTR Margin Stack</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">The bar chart shows each factor&rsquo;s effect; the verdict compares CTR<sub>EOL</sub> with what the circuit needs (e.g. from Module 4&rsquo;s saturation checker).</p><div class="m3-calc"><div><div class="m3-field"><label for="m9MsMin"><span>CTR<sub>min</sub> of the rank</span> <output id="m9MsMinOut"></output></label><input type="range" id="m9MsMin" min="20" max="400" step="5" value="130" /></div><div class="m3-field"><label for="m9MsIf"><span>k<sub>IF</sub> (I<sub>F</sub> curve)</span> <output id="m9MsIfOut"></output></label><input type="range" id="m9MsIf" min="0.3" max="1.2" step="0.01" value="0.9" /></div><div class="m3-field"><label for="m9MsT"><span>k<sub>T</sub> (worst temperature)</span> <output id="m9MsTOut"></output></label><input type="range" id="m9MsT" min="0.4" max="1.1" step="0.01" value="0.8" /></div><div class="m3-field"><label for="m9MsV"><span>k<sub>VCE</sub> (saturation)</span> <output id="m9MsVOut"></output></label><input type="range" id="m9MsV" min="0.5" max="1" step="0.01" value="0.9" /></div><div class="m3-field"><label for="m9MsAge"><span>k<sub>age</sub> (end of life)</span> <output id="m9MsAgeOut"></output></label><input type="range" id="m9MsAge" min="0.3" max="1" step="0.01" value="0.5" /></div><div class="m3-field"><label for="m9MsU"><span>k<sub>extra</sub> (curve uncertainty)</span> <output id="m9MsUOut"></output></label><input type="range" id="m9MsU" min="0.6" max="1" step="0.01" value="0.9" /></div><div class="m3-field"><label for="m9MsReq"><span>CTR the circuit needs</span> <output id="m9MsReqOut"></output></label><input type="range" id="m9MsReq" min="5" max="200" step="1" value="25" /></div></div><div class="m3-results"><div class="m3-res-row"><span>CTR<sub>EOL</sub></span><b id="m9MsEol">&ndash;</b></div><div class="m3-res-row"><span>Margin = CTR<sub>EOL</sub> / CTR needed</span><b id="m9MsMargin">&ndash;</b></div><div style="margin-top: 8px"><span id="m9MsVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m9MsNote"></p></div></div>
+<div class="m3-canvas-wrap" style="height: 250px"><canvas id="m9MsCanvas" role="img" aria-label="Waterfall chart of CTR through each derating factor"></canvas></div>
+</div>
+
                 </div>
               </div>
 
-              <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; Temperature Derating of I<sub>F</sub>, P<sub>D</sub> and I<sub>C</sub></h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+<p class="m3-p">Every rating in the absolute-maximum table falls with temperature, but not always along the same line. Read each derating graph separately:</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Rating</th><th>Typical derating (representative)</th><th>Watch for</th></tr></thead><tbody><tr><td>I<sub>F</sub></td><td>Flat to 25&ndash;55 &deg;C, linear to zero at T<sub>max</sub></td><td>The LED limit often binds first in hot enclosures</td></tr><tr><td>P<sub>D</sub> (LED), P<sub>C</sub> (output), P<sub>tot</sub></td><td>Linear from 25 &deg;C to zero at T<sub>max</sub></td><td>Linear-mode outputs dissipate much more than saturated ones</td></tr><tr><td>I<sub>C</sub></td><td>Limited indirectly via P<sub>C</sub> and T<sub>J</sub></td><td>I<sub>C</sub>&middot;V<sub>CE</sub> in feedback loops</td></tr><tr><td>Isolation</td><td>Safety-limiting values (I<sub>S</sub>, P<sub>S</sub>, T<sub>S</sub>)</td><td>Barrier guarantees only apply within them</td></tr></tbody></table></div>
+<div class="m3-example"><h5>Worked example &mdash; which limit binds first?</h5>Fictional part: I<sub>F</sub> 50 mA flat to 25 &deg;C, zero at 110 &deg;C; P<sub>tot</sub> 200 mW, same shape. Design: I<sub>F</sub> = 15 mA (18 mW LED), output saturated at 5 mA and 0.2 V (1 mW). Enclosure 90 &deg;C.<ol><li>I<sub>F</sub> limit at 90 &deg;C = 50 &times; (110 &minus; 90)/85 &asymp; 11.8 mA &rarr; <strong>15 mA exceeds it</strong>.</li><li>P<sub>tot</sub> limit = 200 &times; 20/85 &asymp; 47 mW &rarr; 19 mW is fine.</li><li>So the LED current rating binds first. Reduce I<sub>F</sub> to &le; &asymp; 6 mA (a 50 % derating of 11.8 mA) and compensate with a higher CTR rank.</li></ol></div>
+
+                </div>
               </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Reliability Engineering Basics: Arrhenius, FIT and Handbook Models</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+<p class="m3-p">Two different kinds of &ldquo;reliability&rdquo; apply to optocouplers, and mixing them up leads to bad decisions:</p>
+<div class="adv-grid"><div class="adv-card"><h5>Random failures (constant rate)</h5><p>Counted in FIT: failures per 10<sup>9</sup> device-hours. MTBF = 10<sup>9</sup>/FIT hours. Handbook models such as <strong>SN 29500</strong> (Siemens) and <strong>IEC 61709</strong> give reference failure rates and stress factors for temperature and load. Optocouplers typically sit in the tens-of-FIT range at moderate stress (representative).</p></div><div class="adv-card limit"><h5>Wear-out (drift)</h5><p>CTR degradation is gradual and predictable, not random. A FIT number does not capture it. Handle it with end-of-life margin (Section 3), not with MTBF.</p></div></div>
+<div class="m3-eq"><div class="m3-eq-main">AF = exp[ (E<sub>a</sub>/k) &middot; (1/T<sub>use</sub> &minus; 1/T<sub>stress</sub>) ] &nbsp;&nbsp; k = 8.617&times;10<sup>&minus;5</sup> eV/K, temperatures in kelvin</div><ul><li>E<sub>a</sub> &mdash; activation energy of the failure mechanism (e.g. 0.3&ndash;0.7 eV for many; use what the data supports)</li><li>FIT<sub>use</sub> &asymp; FIT<sub>ref</sub> / AF when converting between temperatures (handbook models add further stress factors)</li></ul></div>
+<figure class="m3-fig"><img src="images/09/arrhenius-acceleration.png" alt="Log plot of acceleration factor versus stress temperature relative to 55 degrees Celsius for activation energies of 0.3, 0.5, 0.7 and 1.0 electron volts" loading="lazy" width="1000" height="460" /><figcaption><strong>Figure 2.</strong> Arrhenius acceleration relative to 55 &deg;C. The activation energy matters enormously: at 125 &deg;C, AF ranges from about 6 to about 500.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; what does a 1000 h test at 100 &deg;C prove?</h5>E<sub>a</sub> = 0.5 eV, field use at 55 &deg;C.<ol><li>AF = exp[5802 &times; (1/328.15 &minus; 1/373.15)] &asymp; <strong>8.4</strong>.</li><li>1000 h at 100 &deg;C &asymp; 8400 h &asymp; <strong>1 year</strong> at 55 &deg;C, not ten.</li><li>Longer claims need longer tests, more parts, or the vendor&rsquo;s cumulative reliability data.</li></ol></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Calculator: Arrhenius Acceleration Factor</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Convert test time at a stress temperature into equivalent field time. Only valid if the stress does not introduce a new failure mechanism.</p><div class="m3-calc"><div><div class="m3-field"><label for="m9ArEa"><span>Activation energy E<sub>a</sub></span> <output id="m9ArEaOut"></output></label><input type="range" id="m9ArEa" min="0.2" max="1.2" step="0.05" value="0.5" /></div><div class="m3-field"><label for="m9ArTu"><span>Use temperature</span> <output id="m9ArTuOut"></output></label><input type="range" id="m9ArTu" min="0" max="110" step="1" value="55" /></div><div class="m3-field"><label for="m9ArTs"><span>Stress (test) temperature</span> <output id="m9ArTsOut"></output></label><input type="range" id="m9ArTs" min="25" max="175" step="1" value="100" /></div><div class="m3-field"><label for="m9ArH"><span>Test duration</span> <output id="m9ArHOut"></output></label><input type="range" id="m9ArH" min="100" max="5000" step="100" value="1000" /></div></div><div class="m3-results"><div class="m3-res-row"><span>Acceleration factor AF</span><b id="m9ArAf">&ndash;</b></div><div class="m3-res-row"><span>Equivalent field time</span><b id="m9ArEq">&ndash;</b></div><div style="margin-top: 8px"><span id="m9ArVerdict" class="m3-verdict">&ndash;</span></div><p class="m3-note" id="m9ArNote"></p></div></div>
+</div>
+<p class="m3-note">SN 29500 and IEC 61709 are cited here by name only; their tables are not reproduced. Consult the current editions for reference failure rates and stress models.</p>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Lifetime Estimation from a Mission Profile</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+<p class="m3-p">Products do not live at one temperature. A <strong>mission profile</strong> lists how many hours are spent at each condition. Converting each slice to an equivalent time at a reference temperature (with AF) gives a realistic ageing budget:</p>
+<div class="m3-eq"><div class="m3-eq-main">t<sub>eq</sub> = &Sigma; t<sub>i</sub> &middot; AF(T<sub>i</sub> &rarr; T<sub>ref</sub>) &nbsp;&nbsp; then read CTR loss from the degradation curve at t<sub>eq</sub></div></div>
+<figure class="m3-fig"><img src="images/09/mission-profile-ageing.png" alt="Two bar charts: left, share of a 10-year life spent at 25, 45, 60 and 75 degrees; right, the share of LED ageing caused by each, where 75 degrees causes about 19 percent despite being only 5 percent of the time" loading="lazy" width="1100" height="430" /><figcaption><strong>Figure 3.</strong> A 10-year profile equals about 5.5 years at 60 &deg;C. The rare hot hours matter far more than their share of time.</figcaption></figure>
+<div class="m3-example"><h5>Worked example &mdash; equivalent life</h5>10 years: 20 % at 25 &deg;C, 60 % at 45 &deg;C, 15 % at 60 &deg;C, 5 % at 75 &deg;C; E<sub>a</sub> 0.5 eV; reference 60 &deg;C.<ol><li>AF(25&rarr;60) &asymp; 0.13, AF(45&rarr;60) &asymp; 0.44, AF(60&rarr;60) = 1, AF(75&rarr;60) &asymp; 2.1.</li><li>t<sub>eq</sub> &asymp; 10 &times; (0.2&middot;0.13 + 0.6&middot;0.44 + 0.15&middot;1 + 0.05&middot;2.1) &asymp; <strong>5.5 years at 60 &deg;C</strong>.</li><li>Read the CTR loss for 5.5 years at your I<sub>F</sub> and 60 &deg;C, rather than assuming 10 years at the maximum temperature (overly pessimistic) or at room temperature (optimistic).</li></ol></div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Derating Policies and Documenting the Rationale</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+<p class="m3-p">A derating policy turns engineering judgement into a checkable rule. Typical company policies for optocouplers (examples, not a standard):</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Stress</th><th>Typical policy limit</th><th>Rationale</th></tr></thead><tbody><tr><td>I<sub>F</sub></td><td>&le; 50 % of I<sub>F,max</sub> derated to T<sub>A,max</sub></td><td>LED life; thermal margin</td></tr><tr><td>V<sub>CEO</sub></td><td>&le; 80 % of rating (including transients)</td><td>Avalanche and leakage margin</td></tr><tr><td>I<sub>C</sub>, P<sub>C</sub>, P<sub>tot</sub></td><td>&le; 50 % of derated rating</td><td>Junction temperature and random failure rate</td></tr><tr><td>T<sub>J</sub></td><td>&le; T<sub>J,max</sub> &minus; 20&hellip;25 &deg;C</td><td>Encapsulant ageing, dark current</td></tr><tr><td>CTR</td><td>CTR<sub>EOL</sub> &ge; 2 &times; needed (switching)</td><td>Function over life</td></tr><tr><td>Isolation</td><td>Peak working &le; V<sub>IORM</sub> (no derating credit for V<sub>ISO</sub>)</td><td>Partial-discharge-free life</td></tr></tbody></table></div>
+<div class="widget-container" style="margin-top: 1.4rem"><h3 style="margin-bottom: 0.4rem">Interactive: Derating Report Generator</h3><p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">Fill in your design values. The generator checks them against the policy above and produces a plain-text table you can paste into a design-review file.</p><div class="m3-calc"><div><div class="m3-field"><label for="m9RpPart">Part / reference</label><input type="text" id="m9RpPart" value="U12 PC817C (rank C)" style="width:100%;background:var(--bg-input,var(--bg-alt));color:var(--text-base);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:0.82rem" /></div><div class="m3-field"><label for="m9RpIf"><span>I<sub>F</sub> used (mA)</span></label><input type="number" id="m9RpIf" value="8" step="any" /></div><div class="m3-field"><label for="m9RpIfMax"><span>I<sub>F</sub> max, derated at T<sub>A,max</sub> (mA)</span></label><input type="number" id="m9RpIfMax" value="20" step="any" /></div><div class="m3-field"><label for="m9RpV"><span>V<sub>CE</sub> applied max (V)</span></label><input type="number" id="m9RpV" value="24" step="any" /></div><div class="m3-field"><label for="m9RpVmax"><span>V<sub>CEO</sub> rating (V)</span></label><input type="number" id="m9RpVmax" value="35" step="any" /></div><div class="m3-field"><label for="m9RpIc"><span>I<sub>C</sub> used (mA)</span></label><input type="number" id="m9RpIc" value="2" step="any" /></div><div class="m3-field"><label for="m9RpIcMax"><span>I<sub>C</sub> max (mA)</span></label><input type="number" id="m9RpIcMax" value="50" step="any" /></div><div class="m3-field"><label for="m9RpP"><span>P<sub>tot</sub> used (mW)</span></label><input type="number" id="m9RpP" value="12" step="any" /></div><div class="m3-field"><label for="m9RpPMax"><span>P<sub>tot</sub> allowed at T<sub>A,max</sub> (mW)</span></label><input type="number" id="m9RpPMax" value="60" step="any" /></div><div class="m3-field"><label for="m9RpK"><span>CTR<sub>EOL</sub> / CTR needed</span></label><input type="number" id="m9RpK" value="2.4" step="any" /></div><div class="m3-field"><label for="m9RpTa"><span>T<sub>A,max</sub> (&deg;C)</span></label><input type="number" id="m9RpTa" value="70" step="any" /></div></div><div class="m3-results"><p class="m3-note" style="margin-top:0">Policy used: I<sub>F</sub> &le; 50 %, V<sub>CE</sub> &le; 80 %, I<sub>C</sub> &le; 50 %, P &le; 50 % of derated ratings; CTR margin &ge; 2.</p><textarea id="m9RpOut" readonly rows="14" wrap="off" style="width:100%;white-space:pre;overflow:auto;font-family:Consolas,monospace;font-size:0.72rem;background:var(--bg-alt);color:var(--text-base);border:1px solid var(--border);border-radius:8px;padding:8px"></textarea><button class="btn btn-secondary" type="button" id="m9RpCopy" style="margin-top:8px">Copy table</button> <span id="m9RpVerdict" class="m3-verdict">&ndash;</span></div></div>
+</div>
+<div class="info-box" style="margin-top: 1rem"><strong>Pro tip &mdash; write down the source of every factor.</strong> A reviewer should be able to trace each k-factor and derated limit to a datasheet curve, a vendor reliability report, or the policy default. &ldquo;k<sub>age</sub> = 0.5 (policy default, no vendor data for 70 &deg;C)&rdquo; is a good line in a report; a bare 0.5 is not.</div>
+
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+<div class="adv-grid"><div class="adv-card"><h5>Design for year ten</h5><p>Worst-case rank, hottest enclosure, end-of-life CTR.</p></div><div class="adv-card"><h5>Current ages the LED</h5><p>Degradation grows faster than linearly with I<sub>F</sub>; gentle drive pays twice.</p></div><div class="adv-card"><h5>Temperature accelerates</h5><p>Arrhenius: AF = exp[(E<sub>a</sub>/k)(1/T<sub>use</sub> &minus; 1/T<sub>stress</sub>)].</p></div><div class="adv-card"><h5>Margins multiply</h5><p>CTR<sub>min</sub> &times; k<sub>IF</sub> &times; k<sub>T</sub> &times; k<sub>VCE</sub> &times; k<sub>age</sub> &asymp; one-third of the headline.</p></div><div class="adv-card"><h5>50 % EOL default</h5><p>Conservative, auditable; replace only with data.</p></div><div class="adv-card"><h5>Every limit derates</h5><p>Check I<sub>F</sub>, P and I<sub>C</sub> separately at T<sub>A,max</sub>; the LED limit often binds first.</p></div><div class="adv-card"><h5>FIT is not drift</h5><p>Random failure rate and CTR wear-out are different problems.</p></div><div class="adv-card"><h5>Document it</h5><p>Policy, factors and sources in a reviewable table.</p></div></div>
+<h3 class="m3-h3">Design checklist</h3>
+<p class="m3-note">Tick items as you review a design. Your ticks are saved in this browser only; use your browser&rsquo;s print function for a sign-off copy.</p>
+<div id="mChecklist"></div><button class="btn btn-secondary" type="button" id="mChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+<div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">Four parts: multiple choice, true/false, a matching exercise and engineering scenarios. Score 80 % on the multiple choice to pass the module.</p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">10</span> &nbsp;&bull;&nbsp; Score: <span id="quizScore">0</span>/<span id="quizTotalNum2">10</span></div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3><div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div></div>
+                    <div class="widget-container"><h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3><div class="scenario"><div class="scenario-head">Scenario 1 &mdash; The brighter LED that shortened life</div><div class="scenario-body">To gain margin, a designer doubles I<sub>F</sub> from 10 to 20 mA in a PC817-class input running at 70 &deg;C. Is that a good trade?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol1" type="button">Reveal solution</button><div class="scenario-solution" id="msol1"><strong>Analysis.</strong> Today&rsquo;s CTR&times;I<sub>F</sub> roughly doubles, but ageing accelerates super-linearly with current. In the teaching model, time to 50 % CTR at 70 &deg;C falls from about 27 years at 10 mA to about 5 years at 20 mA. The higher current also brings the LED closer to its derated limit. <strong>Better:</strong> keep I<sub>F</sub> near 5&ndash;10 mA and gain margin with a higher CTR rank, a smaller required I<sub>C</sub> (larger pull-up, if speed allows), or a threshold-type (logic) part.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 2 &mdash; A 1000-hour test and a 10-year claim</div><div class="scenario-body">A supplier shows 1000 h of CTR data at 100 &deg;C with &lt; 5 % loss and claims it proves 10-year stability at 55 &deg;C. Check the claim (E<sub>a</sub> = 0.5 eV).<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol2" type="button">Reveal solution</button><div class="scenario-solution" id="msol2"><strong>Analysis.</strong> AF(55&rarr;100 &deg;C) &asymp; 8.4, so 1000 h &asymp; 8400 h &asymp; 1 year at 55 &deg;C. The data supports roughly one year of equivalent field use, not ten. Ask for longer data (several thousand hours at several temperatures and currents) or use a conservative EOL factor.</div></div></div><div class="scenario"><div class="scenario-head">Scenario 3 &mdash; Which rating binds?</div><div class="scenario-body">At T<sub>A,max</sub> = 85 &deg;C the fictional part allows I<sub>F</sub> &asymp; 20 mA and P<sub>tot</sub> &asymp; 80 mW (derated). The design uses I<sub>F</sub> = 12 mA and dissipates 18 mW. Does it meet a 50 % derating policy?<button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="msol3" type="button">Reveal solution</button><div class="scenario-solution" id="msol3"><strong>Analysis.</strong> Power: 18/80 = 22.5 %, which passes. LED current: 12/20 = 60 %, which fails the 50 % limit. <strong>Fix:</strong> reduce I<sub>F</sub> to &le; 10 mA (choose a higher CTR rank if needed) and record the derated limits and their sources in the report.</div></div></div></div>
+                  </div>
+                </div>
+              </div>
+<div class="widget-container" style="margin-top: 2rem"><h3 style="margin-bottom: 0.75rem">Additional Resources</h3><div class="adv-grid"><div class="adv-card" style="border-left-color: #818cf8"><h5>Data to request</h5><p>Vendor reliability reports and long-term CTR degradation curves (current and temperature matrix), FIT data with confidence level, and qualification test summaries.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Handbooks and standards</h5><p>SN 29500 (component failure rates) &bull; IEC 61709 (reference conditions and stress models) &bull; JEDEC JESD47 (qualification) &bull; AEC-Q101 for automotive discretes.</p></div><div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 12 explains the degradation physics; Module 13 shows how to measure CTR drift on the bench; Module 10 applies these margins in complete designs.</p></div></div></div>
 
               <div
                 style="
@@ -291,6 +1098,597 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+
+      function makeChecklist(hostId, resetId, key, items) {
+        var host = document.getElementById(hostId);
+        if (!host) return;
+        function get(i) {
+          try {
+            return localStorage.getItem(key + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(key + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById(resetId);
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      }
+      function mCanvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+      function bindOut(id, fmt) {
+        var el = document.getElementById(id), out = document.getElementById(id + 'Out');
+        if (el && out) out.textContent = fmt(+el.value);
+        return el ? +el.value : NaN;
+      }
+      window.M_NUM = '9';
+      window.M_QUIZ = [{"q": "Which operating choice most slows LED light-output degradation?", "opts": ["Higher I_F for more margin", "Lower I_F and lower junction temperature", "Higher V_CE", "Faster switching"], "correct": 1, "exp": "Degradation accelerates with current density and temperature."}, {"q": "CTR_min 100 %, k_IF 0.9, k_T 0.8, k_VCE 0.9, k_age 0.5. What is CTR_EOL?", "opts": ["≈ 65 %", "≈ 50 %", "≈ 32 %", "≈ 90 %"], "correct": 2, "exp": "100 × 0.9 × 0.8 × 0.9 × 0.5 ≈ 32 %."}, {"q": "A common default end-of-life factor when no vendor data exists is…", "opts": ["1.0", "0.9", "0.5", "0.1"], "correct": 2, "exp": "k_age = 0.5 is a widely used conservative default."}, {"q": "With E_a = 0.5 eV, what is the Arrhenius AF from 55 °C to 100 °C?", "opts": ["≈ 2", "≈ 8", "≈ 50", "≈ 400"], "correct": 1, "exp": "exp[5802 × (1/328.15 − 1/373.15)] ≈ 8.4."}, {"q": "FIT is defined as…", "opts": ["Failures per million hours", "Failures per 10⁹ device-hours", "Mean time between failures in years", "CTR loss per year"], "correct": 1, "exp": "1 FIT = 1 failure per 10⁹ device-hours."}, {"q": "Why is MTBF not a good way to handle CTR degradation?", "opts": ["It is too pessimistic", "CTR drift is a predictable wear-out mechanism, not a constant random failure rate", "MTBF only applies to capacitors", "It ignores temperature"], "correct": 1, "exp": "Wear-out needs end-of-life margin, not a random-failure statistic."}, {"q": "A 10-year mission profile is dominated by 45 °C but includes 5 % at 75 °C. The hot hours…", "opts": ["can be ignored", "cause a disproportionate share of ageing", "reduce ageing", "only affect isolation"], "correct": 1, "exp": "AF grows exponentially with temperature."}, {"q": "A typical derating policy limit for V_CEO is…", "opts": ["≤ 100 %", "≤ 80 % including transients", "≤ 20 %", "no limit"], "correct": 1, "exp": "80 % is a common policy value."}, {"q": "At 90 °C a derating graph allows I_F = 12 mA. Under a 50 % policy, maximum design I_F is…", "opts": ["24 mA", "12 mA", "6 mA", "3 mA"], "correct": 2, "exp": "50 % of the derated limit."}, {"q": "What makes a derating report reviewable?", "opts": ["Only the final verdict", "Each factor and limit with its source (datasheet curve, vendor data, or policy default)", "Typical values", "Photographs"], "correct": 1, "exp": "Traceability lets a reviewer check every number."}];
+      window.M_TF = [{"s": "Most LED light-output loss happens early, and the rate of loss slows over time.", "a": true, "exp": "Degradation curves flatten on a log time axis."}, {"s": "Doubling I_F exactly halves the time to reach a given CTR loss.", "a": false, "exp": "Degradation is super-linear in current: time falls by more than half."}, {"s": "A higher CTR rank can let you run a lower I_F and extend life.", "a": true, "exp": "Usually the cheapest reliability improvement."}, {"s": "V_ISO provides extra margin, so the peak working voltage may exceed V_IORM slightly.", "a": false, "exp": "V_IORM is the continuous limit; V_ISO gives no working-voltage credit."}, {"s": "Arrhenius acceleration is only valid if the stress does not introduce a new failure mechanism.", "a": true, "exp": "Otherwise the test measures something else."}, {"s": "SN 29500 and IEC 61709 are handbook-style references for component failure rates.", "a": true, "exp": "They provide reference rates and stress models."}, {"s": "In hot enclosures the LED current derating often binds before the total power derating.", "a": true, "exp": "See the worked example in Section 4."}, {"s": "The 50 % end-of-life rule is a law of physics.", "a": false, "exp": "It is a conservative engineering convention."}];
+      window.M_DD = [{"t": "k_age", "d": "Fraction of initial CTR assumed to remain at end of life", "h": "Often 0.5."}, {"t": "Activation energy", "d": "Energy parameter setting how strongly a mechanism accelerates with temperature", "h": "In eV."}, {"t": "FIT", "d": "Failures per 10⁹ device-hours", "h": "Random failure rate."}, {"t": "Mission profile", "d": "Time spent at each operating condition over the product life", "h": "Used for equivalent life."}, {"t": "Derating policy", "d": "Company rule limiting stresses to a fraction of ratings", "h": "E.g. I_F ≤ 50 %."}, {"t": "Acceleration factor", "d": "Ratio of ageing rates between stress and use conditions", "h": "From Arrhenius."}];
+      // ---------- Module 9 ----------
+      var M9 = {
+        K: 0.25, N: 1.5, EA: 0.5, KB: 8.617e-5, TREF: 60, M: 0.6,
+        af: function (T, Tref, Ea) { return Math.exp((Ea / this.KB) * (1 / (Tref + 273.15) - 1 / (T + 273.15))); },
+        rel: function (IF, TJ, h) { return Math.exp(-this.K * Math.pow(IF / 10, this.N) * this.af(TJ, this.TREF, this.EA) * Math.pow(h / 1e5, this.M)); },
+      };
+      (function () {
+        var canvas = document.getElementById('m9SimCanvas');
+        if (!canvas) return;
+        var cur = {};
+        function upd() {
+          var IF = bindOut('m9SimIf', function (v) { return M3.fmt(v, 1) + ' mA'; });
+          var Ta = bindOut('m9SimTa', function (v) { return v + ' °C'; });
+          var R = bindOut('m9SimRth', function (v) { return v + ' °C/W'; });
+          var th = bindOut('m9SimEol', function (v) { return v + ' %'; }) / 100;
+          var life = bindOut('m9SimLife', function (v) { return v + ' years'; });
+          var TJ = Ta + (IF * 1.2 * R) / 1000;
+          var atLife = M9.rel(IF, TJ, life * 8760);
+          var yrs = null;
+          for (var y = 0.05; y <= 300; y *= 1.02) { if (M9.rel(IF, TJ, y * 8760) < th) { yrs = y; break; } }
+          document.getElementById('m9SimTj').textContent = M3.fmt(TJ, 0) + ' °C';
+          document.getElementById('m9SimAtLife').textContent = M3.fmt(atLife * 100, 0) + ' %';
+          document.getElementById('m9SimYears').textContent = yrs === null ? '> 300 years' : M3.fmt(yrs, yrs < 10 ? 1 : 0) + ' years';
+          var v = document.getElementById('m9SimVerdict'), n = document.getElementById('m9SimNote');
+          if (yrs !== null && yrs < life) { M3.setVerdict(v, 'bad', 'Threshold reached before end of life'); n.textContent = 'Reduce I_F (with a higher CTR rank), lower the temperature, or relax the threshold with a larger circuit margin.'; }
+          else if (yrs !== null && yrs < 2 * life) { M3.setVerdict(v, 'warn', 'Meets life, with less than 2× margin'); n.textContent = 'Model uncertainty is large: aim for at least twice the required life, or use vendor data.'; }
+          else { M3.setVerdict(v, 'ok', 'Comfortable life margin'); n.textContent = 'Teaching model only: confirm with the vendor’s degradation curves for this part.'; }
+          cur = { IF: IF, TJ: TJ, th: th, life: life };
+          draw();
+        }
+        function draw() {
+          var c = mCanvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          var L = 44, R = 12, T = 12, B = 30;
+          function X(y) { return L + (y / 30) * (W - L - R); }
+          function Y(r) { return H - B - r * (H - T - B); }
+          ctx.strokeStyle = p.border; ctx.fillStyle = p.muted; ctx.font = '11px Inter, sans-serif'; ctx.lineWidth = 1;
+          [0, 5, 10, 15, 20, 25, 30].forEach(function (y) { ctx.beginPath(); ctx.moveTo(X(y), T); ctx.lineTo(X(y), H - B); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(y + ' y', X(y), H - B + 15); });
+          [0, 0.25, 0.5, 0.75, 1].forEach(function (r) { ctx.beginPath(); ctx.moveTo(L, Y(r)); ctx.lineTo(W - R, Y(r)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(r * 100 + '%', L - 6, Y(r) + 4); });
+          ctx.strokeStyle = p.bad; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(L, Y(cur.th)); ctx.lineTo(W - R, Y(cur.th)); ctx.stroke();
+          ctx.strokeStyle = p.muted; ctx.beginPath(); ctx.moveTo(X(cur.life), T); ctx.lineTo(X(cur.life), H - B); ctx.stroke(); ctx.setLineDash([]);
+          ctx.beginPath();
+          for (var i = 0; i <= 300; i++) { var y = (30 * i) / 300, r = M9.rel(cur.IF, cur.TJ, Math.max(y, 0.001) * 8760); if (i === 0) ctx.moveTo(X(y), Y(r)); else ctx.lineTo(X(y), Y(r)); }
+          ctx.strokeStyle = p.cyan; ctx.lineWidth = 2.4; ctx.stroke();
+          ctx.fillStyle = p.text; ctx.textAlign = 'left'; ctx.fillText('required life', X(cur.life) + 4, T + 12);
+        }
+        ['m9SimIf', 'm9SimTa', 'm9SimRth', 'm9SimEol', 'm9SimLife'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        M3.onRedraw(draw);
+        upd();
+      })();
+      (function () {
+        var canvas = document.getElementById('m9MsCanvas');
+        if (!canvas) return;
+        var st = [], req = 0;
+        function upd() {
+          var f = function (v) { return '× ' + M3.fmt(v, 2); };
+          var c0 = bindOut('m9MsMin', function (v) { return v + ' %'; });
+          var a = bindOut('m9MsIf', f), b = bindOut('m9MsT', f), c = bindOut('m9MsV', f), d = bindOut('m9MsAge', f), e = bindOut('m9MsU', f);
+          req = bindOut('m9MsReq', function (v) { return v + ' %'; });
+          st = [['CTR_min', c0], ['× k_IF', c0 * a], ['× k_T', c0 * a * b], ['× k_VCE', c0 * a * b * c], ['× k_age', c0 * a * b * c * d], ['× k_extra = EOL', c0 * a * b * c * d * e]];
+          var eol = st[st.length - 1][1], m = eol / req;
+          document.getElementById('m9MsEol').textContent = M3.fmt(eol, 1) + ' %';
+          document.getElementById('m9MsMargin').textContent = '× ' + M3.fmt(m, 2);
+          var v = document.getElementById('m9MsVerdict'), n = document.getElementById('m9MsNote');
+          if (m >= 2) { M3.setVerdict(v, 'ok', 'Meets the 2× end-of-life rule'); n.textContent = 'Document the source of each factor in the derating report.'; }
+          else if (m >= 1) { M3.setVerdict(v, 'warn', 'Works at EOL, but below 2× margin'); n.textContent = 'Raise the CTR rank, increase I_F moderately, or reduce the CTR the circuit needs.'; }
+          else { M3.setVerdict(v, 'bad', 'Fails at end of life'); n.textContent = 'The circuit will stop working as the part ages or runs hot. Redesign.'; }
+          draw();
+        }
+        function draw() {
+          var cc = mCanvas(canvas), ctx = cc.ctx, W = cc.W, H = cc.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          if (!st.length) return;
+          var L = 110, R = 60, T = 8, B = 8, max = Math.max(st[0][1], req);
+          var bh = (H - T - B) / st.length - 6;
+          st.forEach(function (s, i) {
+            var y = T + i * (bh + 6), w = ((W - L - R) * s[1]) / max;
+            ctx.fillStyle = i === st.length - 1 ? '#f87171' : i === 0 ? '#4ade80' : '#22d3ee';
+            ctx.globalAlpha = 0.8; ctx.fillRect(L, y, w, bh); ctx.globalAlpha = 1;
+            ctx.fillStyle = p.sub; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(s[0], L - 8, y + bh / 2 + 4);
+            ctx.textAlign = 'left'; ctx.fillStyle = p.text; ctx.fillText(M3.fmt(s[1], 0) + ' %', L + w + 6, y + bh / 2 + 4);
+          });
+          var xr = L + ((W - L - R) * req) / max;
+          ctx.strokeStyle = p.warn; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(xr, T); ctx.lineTo(xr, H - B); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = p.warn; ctx.textAlign = 'center'; ctx.fillText('needed', xr, H - 2);
+        }
+        ['m9MsMin', 'm9MsIf', 'm9MsT', 'm9MsV', 'm9MsAge', 'm9MsU', 'm9MsReq'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        M3.onRedraw(draw);
+        upd();
+      })();
+      (function () {
+        if (!document.getElementById('m9ArEa')) return;
+        function upd() {
+          var ea = bindOut('m9ArEa', function (v) { return M3.fmt(v, 2) + ' eV'; });
+          var tu = bindOut('m9ArTu', function (v) { return v + ' °C'; });
+          var ts = bindOut('m9ArTs', function (v) { return v + ' °C'; });
+          var h = bindOut('m9ArH', function (v) { return v + ' h'; });
+          var af = M9.af(ts, tu, ea);
+          var eq = h * af;
+          document.getElementById('m9ArAf').textContent = af >= 100 ? M3.fmt(af, 0) : M3.fmt(af, 2);
+          document.getElementById('m9ArEq').textContent = M3.fmt(eq, 0) + ' h ≈ ' + M3.fmt(eq / 8760, 2) + ' years';
+          var v = document.getElementById('m9ArVerdict'), n = document.getElementById('m9ArNote');
+          if (ts <= tu) { M3.setVerdict(v, 'warn', 'Stress is not hotter than use'); n.textContent = 'No acceleration: the test only represents its own duration.'; }
+          else if (ts > 150) { M3.setVerdict(v, 'warn', 'Very high stress temperature'); n.textContent = 'Above typical optocoupler ratings new mechanisms (encapsulant, bond) can appear; AF may not be valid.'; }
+          else { M3.setVerdict(v, 'ok', 'Valid if the mechanism is unchanged'); n.textContent = 'The result is only as good as the activation energy you assume; use data-backed E_a.'; }
+        }
+        ['m9ArEa', 'm9ArTu', 'm9ArTs', 'm9ArH'].forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        upd();
+      })();
+      (function () {
+        var out = document.getElementById('m9RpOut');
+        if (!out) return;
+        var ids = ['m9RpPart', 'm9RpIf', 'm9RpIfMax', 'm9RpV', 'm9RpVmax', 'm9RpIc', 'm9RpIcMax', 'm9RpP', 'm9RpPMax', 'm9RpK', 'm9RpTa'];
+        function val(i) { return document.getElementById(i).value; }
+        function pad(s, n) { s = String(s); while (s.length < n) s += ' '; return s; }
+        function upd() {
+          var rows = [
+            ['I_F', +val('m9RpIf'), +val('m9RpIfMax'), 0.5, 'mA'],
+            ['V_CE vs V_CEO', +val('m9RpV'), +val('m9RpVmax'), 0.8, 'V'],
+            ['I_C', +val('m9RpIc'), +val('m9RpIcMax'), 0.5, 'mA'],
+            ['P_tot', +val('m9RpP'), +val('m9RpPMax'), 0.5, 'mW'],
+          ];
+          var fails = 0;
+          var t = 'DERATING REPORT — ' + val('m9RpPart') + '\nT_A,max = ' + val('m9RpTa') + ' °C   policy: I_F/I_C/P ≤ 50 %, V ≤ 80 %, CTR margin ≥ 2\n';
+          t += pad('Stress', 16) + pad('Used', 10) + pad('Limit', 10) + pad('Ratio', 8) + pad('Policy', 8) + 'Result\n' + '-'.repeat(60) + '\n';
+          rows.forEach(function (r) {
+            var ratio = r[2] > 0 ? r[1] / r[2] : Infinity, ok = ratio <= r[3];
+            if (!ok) fails++;
+            t += pad(r[0], 16) + pad(r[1] + ' ' + r[4], 10) + pad(r[2] + ' ' + r[4], 10) + pad((ratio * 100).toFixed(0) + ' %', 8) + pad('≤' + r[3] * 100 + '%', 8) + (ok ? 'PASS' : 'FAIL') + '\n';
+          });
+          var k = +val('m9RpK'), okk = k >= 2;
+          if (!okk) fails++;
+          t += pad('CTR_EOL margin', 16) + pad('×' + k, 10) + pad('–', 10) + pad('–', 8) + pad('≥2', 8) + (okk ? 'PASS' : 'FAIL') + '\n';
+          t += '-'.repeat(60) + '\nOverall: ' + (fails ? fails + ' item(s) FAIL — justify or redesign' : 'all items PASS') + '\nSources: [list datasheet curves / vendor data / policy defaults here]';
+          out.value = t;
+          M3.setVerdict(document.getElementById('m9RpVerdict'), fails ? 'bad' : 'ok', fails ? fails + ' item(s) fail the policy' : 'All items pass');
+        }
+        ids.forEach(function (i) { document.getElementById(i).addEventListener('input', upd); });
+        document.getElementById('m9RpCopy').addEventListener('click', function () {
+          var b = this;
+          function done() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy table'; }, 1500); }
+          try {
+            if (navigator.clipboard) navigator.clipboard.writeText(out.value).then(done, function () { out.select(); document.execCommand('copy'); done(); });
+            else { out.select(); document.execCommand('copy'); done(); }
+          } catch (e) { out.select(); }
+        });
+        upd();
+      })();
+      makeChecklist('mChecklist', 'mChecklistReset', 'opto-m9-check-', ["I_F ≤ 50 % of the derated maximum at T_A,max.", "LED ageing checked with vendor degradation data (or k_age = 0.5 documented as policy).", "CTR_EOL computed with all factors; ≥ 2 × the CTR the circuit needs (switching).", "Each derating graph (I_F, P_D, P_C, P_tot) read at T_A,max.", "V_CEO ≤ 80 % including transients; I_C and P_C ≤ 50 % of derated values.", "T_J estimated including LED self-heating.", "Mission profile converted to equivalent life where the temperature varies.", "Accelerated-test claims checked with a stated activation energy.", "Random failure rate (FIT) handled separately from wear-out.", "Derating report filed with sources for every factor."]);
+
+      // ---------- Knowledge check engine ----------
+      var quizData = window.M_QUIZ || [];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module ' + window.M_NUM + ' Knowledge Check. Finish the remaining exercises below, then continue to the next module.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = window.M_TF || [];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = window.M_DD || [];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {

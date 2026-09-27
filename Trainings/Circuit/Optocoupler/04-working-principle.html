@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png" />
     <meta
       name="description"
-      content="Working Principle — Module 04 of the Optocoupler (Opto-Isolator) Design Academy. Coming soon."
+      content="How an optocoupler works: LED physics, coupling losses, photocurrent, CTR vs current and temperature, saturation, switching times and the opto pole, with animations."
     />
     <title>Working Principle | Optocoupler Design Academy | Rising Edge Technologies</title>
     <link
@@ -40,66 +40,679 @@
       })();
     </script>
     <style>
-      .coming-banner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(251, 146, 60, 0.1);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-        border-radius: 999px;
-        padding: 6px 16px;
+      /* -- shared lesson components (from Module 1) -- */
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .gloss {
+        border-bottom: 1px dotted var(--cyan, #22d3ee);
+        cursor: help;
+        position: relative;
+      }
+      .gloss:hover::after {
+        content: attr(data-def);
+        position: absolute;
+        left: 0;
+        bottom: 130%;
+        z-index: 30;
+        width: 260px;
+        background: var(--bg-card);
+        color: var(--text-sub);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 10px 12px;
         font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 1rem;
+        line-height: 1.5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       }
-      .topic-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 10px;
-      }
-      .topic-card {
+      .flow-strip {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .flow-step {
         background: var(--bg-alt);
         border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 12px 14px;
-        font-size: 0.82rem;
+        padding: 8px 14px;
+        font-size: 0.78rem;
         font-weight: 600;
         color: var(--text-base);
+        text-align: center;
       }
-      .topic-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--cyan, #22d3ee);
-        flex-shrink: 0;
+      .flow-step.hot {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
       }
-      .reserved-block {
-        border: 1px dashed var(--border);
-        border-radius: 10px;
-        padding: 16px 18px;
-        margin-bottom: 10px;
-        background: var(--bg-alt);
-        opacity: 0.85;
-      }
-      .reserved-block h5 {
-        font-size: 0.82rem;
-        font-weight: 800;
+      .flow-arrow {
         color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.9rem;
+      }
+      .adv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .adv-card {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success, #4cdf8b);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+      .adv-card.limit {
+        border-left-color: var(--danger, #ff6b6b);
+      }
+      .adv-card h5 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-base);
         margin-bottom: 4px;
       }
-      .reserved-block p {
+      .adv-card p {
         font-size: 0.78rem;
-        color: var(--text-muted);
+        color: var(--text-sub);
+        line-height: 1.55;
         margin: 0;
+      }
+      /* timeline */
+      .timeline-eras {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .timeline-era {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .timeline-era.active,
+      .timeline-era:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .timeline-detail {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 110px;
+      }
+      .timeline-detail h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-base);
+        margin-bottom: 6px;
+      }
+      .timeline-detail p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* anatomy */
+      .anatomy-wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .anatomy-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .anatomy-part {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .anatomy-part:hover {
+        opacity: 0.75;
+      }
+      .anatomy-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 180px;
+      }
+      .anatomy-info h5 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .anatomy-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0;
+      }
+      /* comparison table */
+      .cmp-controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .cmp-btn {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .cmp-btn.active {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      td.cmp-best {
+        color: var(--success, #4cdf8b);
+        font-weight: 700;
+      }
+      /* True/False quiz */
+      .tf-item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: var(--bg-alt);
+      }
+      .tf-q {
+        font-size: 0.85rem;
+        color: var(--text-base);
+        font-weight: 600;
+        margin-bottom: 10px;
         line-height: 1.5;
+      }
+      .tf-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .tf-btn {
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-base);
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .tf-btn.correct {
+        border-color: var(--success, #4cdf8b);
+        color: var(--success, #4cdf8b);
+      }
+      .tf-btn.incorrect {
+        border-color: var(--danger, #ff6b6b);
+        color: var(--danger, #ff6b6b);
+      }
+      .tf-exp {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        line-height: 1.6;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+      }
+      .tf-exp.show {
+        display: block;
+      }
+      /* drag & drop matching */
+      .dd-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .dd-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .dd-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-base);
+        cursor: grab;
+        margin-bottom: 8px;
+        user-select: none;
+      }
+      .dd-chip.selected {
+        outline: 2px solid var(--cyan, #22d3ee);
+      }
+      .dd-chip.placed {
+        opacity: 0.45;
+        cursor: default;
+        border-style: dashed;
+      }
+      .dd-target {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        min-height: 58px;
+        background: var(--bg-alt);
+      }
+      .dd-target.over {
+        border-color: var(--cyan, #22d3ee);
+      }
+      .dd-target h6 {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .dd-slot {
+        font-size: 0.76rem;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dd-slot.ok {
+        background: rgba(76, 223, 139, 0.12);
+        color: var(--success, #4cdf8b);
+      }
+      .dd-slot.bad {
+        background: rgba(255, 107, 107, 0.12);
+        color: var(--danger, #ff6b6b);
+      }
+      /* design scenarios */
+      .scenario {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .scenario-head {
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-base);
+      }
+      .scenario-body {
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+      }
+      .scenario-solution {
+        display: none;
+        border-top: 1px dashed var(--border);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .scenario-solution.show {
+        display: block;
+      }
+
+      /* -- shared lesson components (from Module 3) -- */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .m3-p {
+        color: var(--text-sub);
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+      .m3-h3 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.6rem;
+        color: var(--text-base);
+      }
+      .m3-fig {
+        margin: 1rem 0 1.4rem;
+      }
+      .m3-fig img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0b1220;
+      }
+      .m3-fig figcaption {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-top: 8px;
+      }
+      .m3-fig figcaption strong {
+        color: var(--text-sub);
+      }
+      .m3-eq {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan, #22d3ee);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 0.8rem 0 1rem;
+        font-size: 0.86rem;
+        color: var(--text-base);
+        line-height: 1.7;
+      }
+      .m3-eq .m3-eq-main {
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: 'Cambria Math', 'Times New Roman', serif;
+        margin-bottom: 4px;
+      }
+      .m3-eq ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+        color: var(--text-sub);
+        font-size: 0.8rem;
+      }
+      .m3-example {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin: 1rem 0;
+        font-size: 0.84rem;
+        color: var(--text-sub);
+        line-height: 1.7;
+      }
+      .m3-example h5 {
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-example ol {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .m3-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .m3-note {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+      .m3-twocol {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-twocol {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-table td,
+      .data-table th {
+        vertical-align: top;
+      }
+      /* verdicts */
+      .m3-verdict {
+        display: inline-block;
+        font-size: 0.74rem;
+        font-weight: 800;
+        border-radius: 6px;
+        padding: 3px 9px;
+        border: 1px solid currentColor;
+      }
+      .m3-verdict.ok {
+        color: var(--success, #4cdf8b);
+      }
+      .m3-verdict.warn {
+        color: var(--warning, #fbbf24);
+      }
+      .m3-verdict.bad {
+        color: var(--danger, #ff6b6b);
+      }
+      /* exploded view */
+      .m3-explode {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 820px) {
+        .m3-explode {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-explode svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .m3-layer {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .m3-layer:hover,
+      .m3-layer.sel {
+        opacity: 0.8;
+      }
+      .m3-layer.sel rect,
+      .m3-layer.sel path,
+      .m3-layer.sel polygon {
+        stroke: var(--cyan, #22d3ee);
+        stroke-width: 2;
+      }
+      .m3-layer text {
+        pointer-events: none;
+      }
+      .m3-info {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        min-height: 200px;
+      }
+      .m3-info h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--cyan, #22d3ee);
+        margin-bottom: 6px;
+      }
+      .m3-info p {
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.65;
+        margin: 0 0 6px;
+      }
+      .m3-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin: 10px 0 0;
+      }
+      .m3-controls label {
+        font-size: 0.78rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .m3-controls input[type='range'] {
+        flex: 1;
+        min-width: 140px;
+      }
+      /* calculators */
+      .m3-calc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .m3-calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .m3-field {
+        margin-bottom: 12px;
+      }
+      .m3-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 4px;
+      }
+      .m3-field label output {
+        color: var(--cyan, #22d3ee);
+        font-weight: 800;
+      }
+      .m3-field input[type='range'] {
+        width: 100%;
+      }
+      .m3-field select,
+      .m3-field input[type='number'] {
+        width: 100%;
+        background: var(--bg-input, var(--bg-alt));
+        color: var(--text-base);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+      .m3-results {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .m3-res-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 0.8rem;
+        color: var(--text-sub);
+      }
+      .m3-res-row:last-of-type {
+        border-bottom: 0;
+      }
+      .m3-res-row b {
+        color: var(--text-base);
+        font-variant-numeric: tabular-nums;
+      }
+      .m3-canvas-wrap {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+      .m3-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .m3-preset {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-sub);
+        cursor: pointer;
+      }
+      .m3-preset.active,
+      .m3-preset:hover {
+        border-color: var(--cyan, #22d3ee);
+        color: var(--cyan, #22d3ee);
+      }
+      .m3-pkg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      tr.m3-pass td:first-child {
+        border-left: 3px solid var(--success, #4cdf8b);
+      }
+      tr.m3-fail td:first-child {
+        border-left: 3px solid var(--danger, #ff6b6b);
+      }
+      tr.m3-fail {
+        opacity: 0.6;
+      }
+      /* checklist */
+      .m3-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: var(--bg-alt);
+        font-size: 0.82rem;
+        color: var(--text-sub);
+        line-height: 1.55;
+        cursor: pointer;
+      }
+      .m3-check input {
+        margin-top: 3px;
+        accent-color: var(--cyan, #22d3ee);
+      }
+      .m3-check.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+      @media print {
+        .content-sidebar,
+        #global-nav,
+        #global-footer,
+        #global-bottom-nav {
+          display: none !important;
+        }
+        .section-body {
+          display: block !important;
+        }
+      }
+      .section-header-btn h2 {
+        color: var(--text-base);
       }
     </style>
   </head>
@@ -189,73 +802,694 @@
 
           <section class="section" style="padding-top: 2rem">
             <div class="container">
-              <div class="coming-banner">&#9203; Coming Soon &mdash; content in development</div>
-
               <div class="widget-container" style="margin-bottom: 2rem">
                 <h3 style="margin-bottom: 1rem">Learning Objectives</h3>
                 <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
                   After completing this module, you will be able to:
                 </p>
-                <div class="metrics-grid">
-                  <div class="metric-card">Explain photon generation from LED forward current</div>
-                  <div class="metric-card">
-                    Trace the optical coupling path and its efficiency losses
-                  </div>
-                  <div class="metric-card">Derive CTR behavior versus IF, temperature, and VCE</div>
-                  <div class="metric-card">Analyze switching waveforms and storage/delay times</div>
-                  <div class="metric-card">
-                    Predict dynamic performance from datasheet parameters
-                  </div>
-                </div>
-              </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Planned Topics</h3>
-                <div class="topic-grid">
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Optical coupling physics
-                  </div>
-                  <div class="topic-card"><span class="topic-dot"></span>Photon generation</div>
-                  <div class="topic-card"><span class="topic-dot"></span>CTR behavior in depth</div>
-                  <div class="topic-card"><span class="topic-dot"></span>Switching operation</div>
-                  <div class="topic-card">
-                    <span class="topic-dot"></span>Dynamic characteristics
-                  </div>
-                </div>
-              </div>
-
-              <div class="widget-container" style="margin-bottom: 2rem">
-                <h3 style="margin-bottom: 1rem">Reserved Sections</h3>
-                <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px">
-                  This module will follow the same interactive format as Module 1:
-                </p>
-                <div class="reserved-block">
-                  <h5>Interactive animations</h5>
-                  <p>Animated diagrams and simulations for this module are in development.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Engineering calculators</h5>
-                  <p>Module-specific design calculators will appear here.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Design examples</h5>
-                  <p>Worked examples with full component values are planned for this section.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Knowledge check</h5>
-                  <p>Multiple-choice, true/false, and scenario exercises will be added.</p>
-                </div>
-                <div class="reserved-block">
-                  <h5>Downloadable resources</h5>
-                  <p>PDF notes, reference tables, and checklists will be provided.</p>
+                <div class="objective-grid">
+                  <div class="objective-card metric-card">Explain photon generation from LED forward current</div>
+                  <div class="objective-card metric-card">Trace the optical coupling path and its efficiency losses</div>
+                  <div class="objective-card metric-card">Derive CTR behavior versus I<sub>F</sub>, temperature, and V<sub>CE</sub></div>
+                  <div class="objective-card metric-card">Analyze switching waveforms and storage/delay times</div>
+                  <div class="objective-card metric-card">Predict dynamic performance from datasheet parameters</div>
                 </div>
               </div>
 
               <div class="info-box" style="margin-bottom: 2rem">
-                <strong>While you wait:</strong> Module 1 &mdash; Introduction to Optocouplers
-                &mdash; is fully available, including animations, the CTR and isolation calculators,
-                and a complete knowledge check.
-                <a href="01-introduction.html">Start there &rarr;</a>
+                <strong>Where this fits.</strong> Module 3 (<a href="03-construction.html">Construction</a>)
+                showed you the parts inside the package: an infrared LED die, a silicon detector die,
+                and the barrier between them. This module follows one milliamp of LED current through
+                that hardware and turns it into physics you can calculate with: photons per electron,
+                coupling losses, photocurrent, transistor gain, saturation and switching speed. Module 6
+                (<a href="06-parameters.html">Parameters</a>) then maps these mechanisms onto the
+                datasheet numbers, and Module 10 (<a href="10-design-examples.html">Design Examples</a>)
+                uses the small-signal model in real feedback loops.
+                <br /><span class="m3-note"
+                  >Curves, animations and calculators on this page use a representative PC817-class
+                  phototransistor model built for teaching: LED external efficiency &asymp; 3&ndash;4 %,
+                  coupling &asymp; 35 %, detector quantum efficiency &asymp; 70 %, peak h<sub>FE</sub>
+                  &asymp; 300. The shapes and trends are typical. For design, always use the curves and
+                  min/max limits of the part you buy.</span
+                >
+              </div>
+
+              <!-- ============ SECTION 1 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn active" data-target="sec1body" aria-expanded="true" aria-controls="sec1body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 1 &mdash; The Big Picture: Four Conversions</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="sec1body">
+                  <p class="m3-p">
+                    An optocoupler performs four conversions in series. <strong>Electrons become
+                    photons</strong> in the LED. <strong>Photons travel</strong> through the optical
+                    path, and some are lost. <strong>Photons become electrons again</strong> in the
+                    detector junction, as a photocurrent. <strong>The photocurrent is amplified</strong>
+                    by the detector transistor. Each step has an efficiency, and the product of the
+                    four is the number every designer cares about: the
+                    <span class="gloss" data-def="Current Transfer Ratio: CTR = I_C / I_F × 100 %, measured at a specified I_F, V_CE and temperature.">current transfer ratio (CTR)</span>.
+                  </p>
+                  <figure class="m3-fig">
+                    <img src="images/04/ctr-efficiency-chain.png" alt="Block chain: I_F of 5 mA multiplied by LED efficiency 3.2 percent, coupling efficiency 35 percent, detector quantum efficiency 70 percent and transistor gain about 270 gives a collector current of 10.6 mA and a CTR of about 210 percent" loading="lazy" width="1100" height="430" />
+                    <figcaption><strong>Figure 1.</strong> CTR is a product of four efficiencies. Less than 1 % of the LED&rsquo;s electrons turn into photocurrent. The transistor&rsquo;s gain of a few hundred is what brings CTR back above 100 %, and it is also why CTR depends so strongly on current and temperature.</figcaption>
+                  </figure>
+                  <figure class="m3-fig">
+                    <img src="images/04/photon-to-collector-current.gif" alt="Animation: electrons and holes recombine at the LED junction and emit photons, which cross the barrier and are absorbed at the detector base-collector junction, creating electron-hole pairs that are amplified into a stream of collector current" loading="lazy" width="900" height="460" />
+                    <figcaption><strong>Animation 1.</strong> The four stages in motion. Notice how few photons actually generate an electron&ndash;hole pair in the detector, and how each pair turns into a burst of collector current through transistor gain.</figcaption>
+                  </figure>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Interactive: Photon-Flow Simulator</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Move the LED current and watch every stage respond. The particle rates are
+                      proportional to the real currents; the numbers are calculated with the
+                      module&rsquo;s PC817-class model at 25 &deg;C and V<sub>CE</sub> = 5 V.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field">
+                          <label for="m4FlowIf"><span>LED current I<sub>F</sub></span> <output id="m4FlowIfOut">5 mA</output></label>
+                          <input type="range" id="m4FlowIf" min="0.2" max="30" step="0.1" value="5" />
+                        </div>
+                        <div class="m3-controls" style="margin-top: 0">
+                          <button class="btn btn-secondary" type="button" id="m4FlowPlay">&#10074;&#10074; Pause</button>
+                        </div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>Optical power leaving LED</span><b id="m4FlowPopt">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Photocurrent I<sub>PH</sub></span><b id="m4FlowIph">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Transistor gain h<sub>FE</sub> at this I<sub>C</sub></span><b id="m4FlowHfe">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Collector current I<sub>C</sub></span><b id="m4FlowIc">&ndash;</b></div>
+                        <div class="m3-res-row"><span>CTR</span><b id="m4FlowCtr">&ndash;</b></div>
+                      </div>
+                    </div>
+                    <div class="m3-canvas-wrap" style="height: 240px">
+                      <canvas id="m4FlowCanvas" role="img" aria-label="Animated particle view of LED electrons, photons, photocurrent and collector current"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 2 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec2body" aria-expanded="false" aria-controls="sec2body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 2 &mdash; LED Physics: From Electrons to Photons</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec2body">
+                  <p class="m3-p">
+                    Forward-biasing the LED injects electrons into the p-side and holes into the
+                    n-side. When an electron and a hole recombine, the energy they release goes one of
+                    two ways. In <strong>radiative recombination</strong> it leaves as a photon with an
+                    energy close to the band gap (&asymp; 1.3&ndash;1.45 eV, i.e. 850&ndash;940 nm). In
+                    <strong>non-radiative recombination</strong> it becomes heat in the crystal lattice,
+                    through defects (Shockley&ndash;Read&ndash;Hall recombination) or three-carrier
+                    Auger processes. The LED&rsquo;s job is to make the first path win.
+                  </p>
+                  <h3 class="m3-h3">Internal, extraction and external efficiency</h3>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">&eta;<sub>EQE</sub> = &eta;<sub>IQE</sub> &times; &eta;<sub>extr</sub> &nbsp;&nbsp;&nbsp; P<sub>opt</sub> = &eta;<sub>EQE</sub> &times; (1240 / &lambda;[nm]) &times; I<sub>F</sub></div>
+                    <ul>
+                      <li>&eta;<sub>IQE</sub> &mdash; internal quantum efficiency: fraction of recombinations that are radiative</li>
+                      <li>&eta;<sub>extr</sub> &mdash; extraction efficiency: fraction of generated photons that escape the die</li>
+                      <li>&eta;<sub>EQE</sub> &mdash; external quantum efficiency: photons out per electron in</li>
+                      <li>P<sub>opt</sub> &mdash; optical power in W when I<sub>F</sub> is in A (1240/&lambda; is the photon energy in eV)</li>
+                    </ul>
+                  </div>
+                  <p class="m3-p">
+                    Internal efficiency can be high, but extraction is the killer. GaAs has a
+                    refractive index of about 3.5, so light hitting the die surface at more than a small
+                    critical angle is totally internally reflected and eventually reabsorbed. That is why
+                    simple optocoupler LEDs have external efficiencies of only a few percent.
+                  </p>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; why so little light gets out</h5>
+                    GaAs (n<sub>1</sub> &asymp; 3.5) into clear silicone (n<sub>2</sub> &asymp; 1.4):
+                    <ol>
+                      <li>Critical angle: sin &theta;<sub>c</sub> = 1.4 / 3.5 = 0.40 &rarr; &theta;<sub>c</sub> &asymp; 23.6&deg;.</li>
+                      <li>Fraction of isotropic emission inside that escape cone, through one face: (1 &minus; cos &theta;<sub>c</sub>) / 2 = (1 &minus; 0.917) / 2 &asymp; <strong>4.2 %</strong>.</li>
+                      <li>Fresnel reflection even inside the cone at normal incidence: ((3.5 &minus; 1.4)/(3.5 + 1.4))<sup>2</sup> &asymp; 18 % lost.</li>
+                      <li>Side faces and back-reflection recover some light, but a few percent overall is typical: this is the &eta;<sub>extr</sub> term.</li>
+                    </ol>
+                  </div>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; optical power at 5 mA</h5>
+                    GaAs LED at 940 nm, &eta;<sub>EQE</sub> &asymp; 3.2 % at I<sub>F</sub> = 5 mA.
+                    Photon energy 1240 / 940 = 1.32 eV. P<sub>opt</sub> = 0.032 &times; 1.32 V
+                    &times; 5 mA &asymp; <strong>0.21 mW</strong>. The electrical input is 5 mA &times;
+                    1.15 V &asymp; 5.8 mW, so wall-plug efficiency is &asymp; 3.6 % and the rest is heat.
+                  </div>
+
+                  <h3 class="m3-h3">The LED is still a diode: V<sub>F</sub>, I<sub>F</sub> and temperature</h3>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">V<sub>F</sub> &asymp; n&middot;V<sub>T</sub>&middot;ln(I<sub>F</sub> / I<sub>S</sub>) + I<sub>F</sub>&middot;R<sub>S</sub></div>
+                    <ul>
+                      <li>n &mdash; ideality factor (&asymp; 1.5&ndash;2 for GaAs LEDs); V<sub>T</sub> = kT/q &asymp; 25.7 mV at 25 &deg;C</li>
+                      <li>I<sub>S</sub> &mdash; saturation current, which rises steeply with temperature, so V<sub>F</sub> falls by &asymp; 1.5&ndash;2 mV/&deg;C</li>
+                      <li>R<sub>S</sub> &mdash; series resistance (a few ohms); dominates at high current</li>
+                    </ul>
+                  </div>
+                  <figure class="m3-fig">
+                    <img src="images/04/led-vf-and-light-output.png" alt="Two charts. Left: forward voltage versus forward current on a log axis at minus 40, 25 and 100 degrees Celsius, falling with temperature. Right: optical output versus forward current, sub-linear at high current and lower at high temperature" loading="lazy" width="1155" height="483" />
+                    <figcaption><strong>Figure 2.</strong> Left: V<sub>F</sub> shifts down about 1.8 mV/&deg;C. Right: light output is not proportional to I<sub>F</sub>. Efficiency is lower at very low current (defect recombination competes), droops at high current (Auger, heating), and falls with temperature, typically by a few tenths of a percent per &deg;C for GaAs-family LEDs.</figcaption>
+                  </figure>
+                  <div class="info-box">
+                    <strong>Pro tip &mdash; LED temperature is two temperatures.</strong> Light output
+                    depends on <em>junction</em> temperature. At high I<sub>F</sub> the die self-heats
+                    above ambient, so a datasheet curve measured with short pulses can look better than
+                    what you get with DC drive. The small-signal dynamic resistance r<sub>d</sub> =
+                    n&middot;V<sub>T</sub>/I<sub>F</sub> (&asymp; 4 &Omega; at 10 mA) matters when the
+                    LED is driven by a voltage source such as a TL431 cathode: it sets the LED
+                    branch&rsquo;s small-signal gain (Section 8).
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 3 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec3body" aria-expanded="false" aria-controls="sec3body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 3 &mdash; The Optical Path and Coupling Losses</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec3body">
+                  <p class="m3-p">
+                    Of the light that leaves the LED die, only a fraction reaches the detector&rsquo;s
+                    active junction. The coupling efficiency &eta;<sub>c</sub> collects every geometric
+                    and optical loss between the two dies. It is fixed by the construction (Module 3),
+                    so you cannot change it as a designer. You can, however, understand why it varies
+                    between parts and over life.
+                  </p>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead><tr><th>Loss mechanism</th><th>What happens</th><th>Typical influence</th></tr></thead>
+                      <tbody>
+                        <tr><td>Geometry (solid angle)</td><td>The LED radiates into a wide cone; the detector subtends only part of it</td><td>Dominant term. Face-to-face &gt; co-planar.</td></tr>
+                        <tr><td>Fresnel reflections</td><td>Partial reflection at every refractive-index step (die/silicone, silicone/film, film/die)</td><td>A few % to &asymp; 20 % per high-contrast interface</td></tr>
+                        <tr><td>Absorption</td><td>Clear silicone, epoxy and polyimide absorb a little near-IR</td><td>Small when new; rises if materials yellow at high temperature</td></tr>
+                        <tr><td>Detector fill factor</td><td>Light landing on metal contacts or outside the base area generates nothing useful</td><td>Set by detector layout</td></tr>
+                        <tr><td>Alignment tolerance</td><td>Die placement and frame spacing vary from part to part</td><td>A main source of CTR spread between units</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="m3-note">Typical overall coupling efficiencies range from roughly 10 % to 50 % depending on construction. This module&rsquo;s model uses 35 %.</p>
+                  <div class="warning-box" style="margin-top: 1rem">
+                    <strong>Design trap &mdash; &ldquo;CTR only degrades because of the LED&rdquo;.</strong>
+                    LED ageing is the main mechanism, but optical-path darkening (yellowing of
+                    encapsulants after long exposure to high temperature) also lowers &eta;<sub>c</sub>.
+                    Both show up as the same symptom: less collector current for the same I<sub>F</sub>.
+                    Module 9 budgets for both together as an end-of-life factor.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 4 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec4body" aria-expanded="false" aria-controls="sec4body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 4 &mdash; The Photodiode Junction as a Current Source</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec4body">
+                  <p class="m3-p">
+                    A photon with more energy than silicon&rsquo;s band gap (1.12 eV, i.e. wavelengths
+                    shorter than &asymp; 1100 nm) can be absorbed and create an electron&ndash;hole pair.
+                    If that happens inside, or within a diffusion length of, the reverse-biased
+                    depletion region, the junction&rsquo;s field sweeps the pair apart. The electron and
+                    hole flow as <em>photocurrent</em>. Two properties make this junction behave like a
+                    near-ideal current source:
+                  </p>
+                  <div class="adv-grid">
+                    <div class="adv-card"><h5>Linear in light</h5><p>Photocurrent is proportional to absorbed optical power over many decades, from nanoamps to milliamps.</p></div>
+                    <div class="adv-card"><h5>Almost independent of voltage</h5><p>Once reverse-biased, the junction collects the same current whatever the bias. It is a current source in parallel with the junction capacitance.</p></div>
+                  </div>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">I<sub>PH</sub> = &Rscr; &times; P<sub>abs</sub> &nbsp;&nbsp;&nbsp; &Rscr; [A/W] = &eta;<sub>det</sub> &times; &lambda;[nm] / 1240</div>
+                    <ul>
+                      <li>&Rscr; &mdash; responsivity: amps of photocurrent per watt of light</li>
+                      <li>&eta;<sub>det</sub> &mdash; detector quantum efficiency: pairs collected per photon arriving</li>
+                      <li>P<sub>abs</sub> &mdash; optical power reaching the junction (W)</li>
+                    </ul>
+                  </div>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; following the 0.21 mW from Section 2</h5>
+                    <ol>
+                      <li>Light reaching the detector: 0.21 mW &times; &eta;<sub>c</sub> 0.35 &asymp; 73 &micro;W.</li>
+                      <li>Responsivity at 940 nm with &eta;<sub>det</sub> = 0.70: 0.70 &times; 940/1240 &asymp; 0.53 A/W. An ideal (&eta; = 1) detector would give 0.76 A/W.</li>
+                      <li>I<sub>PH</sub> = 0.53 A/W &times; 73 &micro;W &asymp; <strong>39 &micro;A</strong>, from 5 mA of LED current: a ratio of 0.78 %.</li>
+                    </ol>
+                  </div>
+                  <p class="m3-p">
+                    With no light the junction still leaks a small <strong>dark current</strong>
+                    (thermally generated pairs). It doubles roughly every 10 &deg;C. In a phototransistor
+                    this leakage is multiplied by h<sub>FE</sub> and appears as I<sub>CEO</sub> (Module 3, Section 3).
+                  </p>
+                  <div class="info-box">
+                    <strong>Pro tip &mdash; photodiode-output parts use this current directly.</strong>
+                    6N135/6N136, 6N137 and the linear IL300/HCNR201 read the photodiode current
+                    before, or instead of, a transistor&rsquo;s h<sub>FE</sub>. That is why their
+                    transfer is more linear, faster and more stable with temperature. The trade-off is a
+                    far lower &ldquo;CTR&rdquo;.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 5 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec5body" aria-expanded="false" aria-controls="sec5body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 5 &mdash; Phototransistor Action and the CTR Equation</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec5body">
+                  <p class="m3-p">
+                    In a phototransistor the light-sensitive junction <em>is</em> the base&ndash;collector
+                    junction. Photocurrent generated there flows into the base exactly as if an external
+                    base current had been applied, and the transistor multiplies it:
+                  </p>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">I<sub>C</sub> = h<sub>FE</sub> &times; I<sub>PH</sub> + I<sub>CEO</sub> &nbsp;&nbsp;&rArr;&nbsp;&nbsp; CTR = I<sub>C</sub> / I<sub>F</sub> = &eta;<sub>EQE</sub> &times; &eta;<sub>c</sub> &times; &eta;<sub>det</sub> &times; h<sub>FE</sub></div>
+                    <ul>
+                      <li>Equivalent form: CTR = [P<sub>opt</sub>/I<sub>F</sub> in W/A] &times; &eta;<sub>c</sub> &times; &Rscr;[A/W] &times; h<sub>FE</sub></li>
+                      <li>I<sub>CEO</sub> &mdash; dark current, negligible except at high temperature and very low I<sub>F</sub></li>
+                      <li>Every factor depends on something: &eta;<sub>EQE</sub>(I<sub>F</sub>, T), h<sub>FE</sub>(I<sub>C</sub>, T, V<sub>CE</sub>). So CTR is a curve, not a constant.</li>
+                    </ul>
+                  </div>
+                  <h3 class="m3-h3">Why CTR peaks at a middle current</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card limit"><h5>Low I<sub>F</sub>: both halves weaken</h5><p>LED: defect (SRH) recombination steals a larger share of carriers, so &eta;<sub>EQE</sub> drops. Transistor: at micro-amp base currents, surface and base recombination make h<sub>FE</sub> fall.</p></div>
+                    <div class="adv-card limit"><h5>High I<sub>F</sub>: both halves droop</h5><p>LED: Auger losses and self-heating reduce efficiency. Transistor: high-level injection makes h<sub>FE</sub> fall at large I<sub>C</sub>.</p></div>
+                    <div class="adv-card"><h5>Middle: the sweet spot</h5><p>For PC817-class parts CTR peaks around a few mA, which is exactly why datasheets specify CTR at I<sub>F</sub> = 5 mA.</p></div>
+                  </div>
+                  <h3 class="m3-h3">Why CTR falls at both temperature extremes</h3>
+                  <p class="m3-p">
+                    Two effects fight. LED light output <strong>falls</strong> as temperature rises (more
+                    non-radiative recombination). Transistor h<sub>FE</sub> <strong>rises</strong> with
+                    temperature (typically a few tenths of a percent per &deg;C). Near room temperature
+                    they roughly cancel. When cold, h<sub>FE</sub> loss wins; when hot, the LED loss
+                    wins. The net CTR curve is usually flattest around 0&ndash;40 &deg;C and drops at
+                    both ends. The drop is steepest when hot.
+                  </p>
+                  <figure class="m3-fig">
+                    <img src="images/04/ctr-vs-if-and-temperature.png" alt="Left: CTR versus forward current on a log axis at minus 40, 25 and 100 degrees, peaking near 5 mA at about 210 percent. Right: CTR relative to 25 degrees versus temperature for 1, 5 and 20 mA, flat near room temperature and falling to about 0.7 to 0.76 at 110 degrees" loading="lazy" width="1155" height="483" />
+                    <figcaption><strong>Figure 3.</strong> The same physics, two views. The 100 &deg;C curve sits &asymp; 20 % below the 25 &deg;C curve at 5 mA. Low-current operation loses more at temperature because the LED&rsquo;s defect recombination is more temperature-sensitive there.</figcaption>
+                  </figure>
+                  <h3 class="m3-h3">CTR and V<sub>CE</sub></h3>
+                  <p class="m3-p">
+                    Datasheets specify CTR at V<sub>CE</sub> = 5 V, where the transistor is well into its
+                    active region. Below roughly 0.5&ndash;1 V the collector&ndash;base junction starts to
+                    forward-bias, the transistor enters saturation, and the <em>measured</em> CTR
+                    collapses. In the model, CTR at V<sub>CE</sub> = 0.2 V is only &asymp; 80 % of its
+                    5 V value. Any &ldquo;CTR at V<sub>CE</sub>(sat)&rdquo; line in a datasheet is
+                    there precisely because switching designs live in this region (Section 6).
+                  </p>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; using the datasheet&rsquo;s CTR at a different I<sub>F</sub> and temperature</h5>
+                    A PC817 rank B is guaranteed CTR &ge; 130 % at I<sub>F</sub> = 5 mA, V<sub>CE</sub> = 5 V,
+                    25 &deg;C. Your circuit runs at I<sub>F</sub> = 1 mA and up to 60 &deg;C.
+                    <ol>
+                      <li>From the normalised CTR&ndash;I<sub>F</sub> curve (here, the model): CTR(1 mA)/CTR(5 mA) &asymp; 0.70.</li>
+                      <li>From the CTR&ndash;temperature curve at 1 mA: CTR(60 &deg;C)/CTR(25 &deg;C) &asymp; 0.93.</li>
+                      <li>Worst-case new-part CTR &asymp; 130 % &times; 0.70 &times; 0.93 &asymp; <strong>85 %</strong>. Still apply the ageing factor from Module 9.</li>
+                      <li>Caveat: normalised curves are <em>typical</em>. Treat the ratio as an estimate, and keep generous margin or verify on real parts.</li>
+                    </ol>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Interactive: CTR Explorer</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      The plot shows CTR vs I<sub>F</sub> at &minus;40 &deg;C, 25 &deg;C and 100 &deg;C
+                      plus your chosen temperature (dashed). Move the operating point, temperature and
+                      V<sub>CE</sub>, and scale the part&rsquo;s nominal CTR to represent different
+                      ranks.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field"><label for="m4CtrIf"><span>I<sub>F</sub></span> <output id="m4CtrIfOut">5 mA</output></label><input type="range" id="m4CtrIf" min="0" max="100" step="0.01" value="62.95" /></div>
+                        <div class="m3-field"><label for="m4CtrT"><span>Ambient T<sub>A</sub></span> <output id="m4CtrTOut">25 &deg;C</output></label><input type="range" id="m4CtrT" min="-40" max="110" value="25" /></div>
+                        <div class="m3-field"><label for="m4CtrV"><span>V<sub>CE</sub></span> <output id="m4CtrVOut">5.0 V</output></label><input type="range" id="m4CtrV" min="0.05" max="10" step="0.05" value="5" /></div>
+                        <div class="m3-field"><label for="m4CtrScale"><span>Nominal CTR at 5 mA, 25 &deg;C</span> <output id="m4CtrScaleOut">210 %</output></label><input type="range" id="m4CtrScale" min="50" max="600" step="10" value="210" /></div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>CTR at this point</span><b id="m4CtrVal">&ndash;</b></div>
+                        <div class="m3-res-row"><span>I<sub>C</sub> = CTR &times; I<sub>F</sub></span><b id="m4CtrIc">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Relative to datasheet point (5 mA, 25 &deg;C, 5 V)</span><b id="m4CtrRel">&ndash;</b></div>
+                        <div class="m3-res-row"><span>LED efficiency / h<sub>FE</sub> here</span><b id="m4CtrParts">&ndash;</b></div>
+                        <div style="margin-top: 8px"><span id="m4CtrVerdict" class="m3-verdict">&ndash;</span></div>
+                      </div>
+                    </div>
+                    <div class="m3-canvas-wrap" style="height: 300px">
+                      <canvas id="m4CtrCanvas" role="img" aria-label="Plot of CTR versus forward current for several temperatures with the selected operating point marked"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 6 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec6body" aria-expanded="false" aria-controls="sec6body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 6 &mdash; Linear vs Saturated Operation</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec6body">
+                  <p class="m3-p">
+                    Put a resistor R<sub>L</sub> from V<sub>CC</sub> to the collector and the transistor
+                    can do one of two things. If CTR &times; I<sub>F</sub> is <em>less</em> than the
+                    current the resistor can pass, the transistor stays in its <strong>active (linear)
+                    region</strong>. Then I<sub>C</sub> = CTR &times; I<sub>F</sub> and the output voltage
+                    is an analog copy of the LED current. If CTR &times; I<sub>F</sub> is
+                    <em>more</em> than the resistor allows, the transistor <strong>saturates</strong>:
+                    V<sub>CE</sub> collapses to V<sub>CE(sat)</sub> (typically 0.1&ndash;0.3 V) and the
+                    output is a clean logic low.
+                  </p>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">Saturated when &nbsp; CTR<sub>worst</sub> &times; I<sub>F</sub> &ge; (V<sub>CC</sub> &minus; V<sub>CE(sat)</sub>) / R<sub>L</sub></div>
+                    <ul>
+                      <li>Overdrive factor k = CTR &times; I<sub>F</sub> &times; R<sub>L</sub> / (V<sub>CC</sub> &minus; V<sub>CE(sat)</sub>). Switching designs want k &ge; 2 at end of life.</li>
+                      <li>More overdrive &rarr; lower V<sub>CE(sat)</sub>, but longer storage time at turn-off (Section 7).</li>
+                    </ul>
+                  </div>
+                  <figure class="m3-fig">
+                    <img src="images/04/output-characteristics-load-line.png" alt="Output characteristic curves of I_C versus V_CE for I_F from 0.5 to 5 mA with a dashed load line for 5 V and 1 kilohm, and a shaded saturation region below 0.3 volts" loading="lazy" width="1050" height="504" />
+                    <figcaption><strong>Figure 4.</strong> Output characteristics with a 1 k&Omega; load line. At 1 mA the curve crosses the load line in the active region (V<sub>CE</sub> &asymp; 3.5 V). At 3 mA or more the crossing is in the shaded saturation region.</figcaption>
+                  </figure>
+                  <figure class="m3-fig">
+                    <img src="images/04/saturation-operating-point.gif" alt="Animation: as I_F increases, the operating point moves up the load line from the active region into the saturation region and V_CE drops to about 0.2 volts" loading="lazy" width="900" height="450" />
+                    <figcaption><strong>Animation 2.</strong> Increasing I<sub>F</sub> slides the operating point up the load line. Once it enters saturation, doubling I<sub>F</sub> again barely changes V<sub>OUT</sub>. It only buys margin against CTR loss, at the cost of speed.</figcaption>
+                  </figure>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; will a 3.3 V logic output reach a valid low?</h5>
+                    V<sub>CC</sub> = 3.3 V, R<sub>L</sub> = 4.7 k&Omega;, I<sub>F</sub> = 2 mA, unranked PC817 (CTR<sub>min</sub> 50 %),
+                    temperature factor 0.8, end-of-life factor 0.5.
+                    <ol>
+                      <li>Current needed to saturate: (3.3 &minus; 0.2) / 4.7 k&Omega; &asymp; 0.66 mA.</li>
+                      <li>Worst-case available: 2 mA &times; 0.50 &times; 0.8 &times; 0.5 = 0.40 mA. k &asymp; 0.61, so the output is <strong>not saturated</strong>.</li>
+                      <li>V<sub>OUT</sub> = 3.3 &minus; 0.40 mA &times; 4.7 k&Omega; &asymp; 1.42 V. That is above V<sub>IL</sub> for 3.3 V CMOS, so the input reads an undefined level.</li>
+                      <li>Fix: I<sub>F</sub> = 5 mA gives k &asymp; 1.5. Better still, 5 mA with rank B (130 %) gives k &asymp; 4, or raise R<sub>L</sub> to 10 k&Omega; if the slower edges are acceptable.</li>
+                    </ol>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Calculator: Saturation Checker</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      Enter the worst-case CTR you trust (datasheet minimum &times; temperature &times;
+                      ageing factors) and the circuit values. The checker tells you whether the output
+                      saturates, the overdrive factor, and the resulting output-low voltage.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field"><label for="m4SatIf"><span>I<sub>F</sub></span> <output id="m4SatIfOut">2.0 mA</output></label><input type="range" id="m4SatIf" min="0.2" max="20" step="0.1" value="2" /></div>
+                        <div class="m3-field"><label for="m4SatCtr"><span>CTR<sub>min</sub> (datasheet)</span> <output id="m4SatCtrOut">50 %</output></label><input type="range" id="m4SatCtr" min="10" max="600" step="5" value="50" /></div>
+                        <div class="m3-field"><label for="m4SatDer"><span>Derating (temp &times; ageing)</span> <output id="m4SatDerOut">0.40</output></label><input type="range" id="m4SatDer" min="0.2" max="1" step="0.05" value="0.4" /></div>
+                        <div class="m3-field"><label for="m4SatRl"><span>R<sub>L</sub></span> <output id="m4SatRlOut">4.7 k&Omega;</output></label><input type="range" id="m4SatRl" min="0" max="100" step="0.01" value="55.73" /></div>
+                        <div class="m3-field"><label for="m4SatVcc"><span>V<sub>CC</sub></span> <output id="m4SatVccOut">3.3 V</output></label><input type="range" id="m4SatVcc" min="1.8" max="24" step="0.1" value="3.3" /></div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>Current to saturate</span><b id="m4SatNeed">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Worst-case I<sub>C</sub> available</span><b id="m4SatAvail">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Overdrive factor k</span><b id="m4SatK">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Estimated V<sub>OUT</sub> (low state)</span><b id="m4SatVout">&ndash;</b></div>
+                        <div class="m3-res-row"><span>I<sub>F</sub> for k = 2</span><b id="m4SatIf2">&ndash;</b></div>
+                        <div style="margin-top: 8px"><span id="m4SatVerdict" class="m3-verdict">&ndash;</span></div>
+                        <p class="m3-note" id="m4SatNote"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 7 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec7body" aria-expanded="false" aria-controls="sec7body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 7 &mdash; Switching Behaviour: Delay, Storage and the Miller Effect</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec7body">
+                  <p class="m3-p">
+                    Switching times are defined on the output waveform between the 10 % and 90 % points.
+                    With a pull-up resistor, the output is inverted: turning the LED on makes the output
+                    fall.
+                  </p>
+                  <figure class="m3-fig">
+                    <img src="images/04/switching-time-definitions.png" alt="Timing diagram with an LED current pulse and the inverted output voltage, marking delay time t_d, fall time t_f, storage time t_s and rise time t_r between the 10 and 90 percent levels" loading="lazy" width="1000" height="470" />
+                    <figcaption><strong>Figure 5.</strong> t<sub>on</sub> = t<sub>d</sub> + t<sub>f</sub> and t<sub>off</sub> = t<sub>s</sub> + t<sub>r</sub>. In phototransistor parts t<sub>off</sub> is almost always the longer one.</figcaption>
+                  </figure>
+                  <div class="table-scroll">
+                    <table class="data-table">
+                      <thead><tr><th>Interval</th><th>Physical cause</th><th>What makes it longer</th></tr></thead>
+                      <tbody>
+                        <tr><td>t<sub>d</sub> (delay)</td><td>LED turn-on plus charging the base node until the transistor starts to conduct</td><td>Low I<sub>F</sub>; large junction capacitance</td></tr>
+                        <tr><td>t<sub>f</sub> (output fall)</td><td>Collector current rising while the collector node slews down</td><td>Large R<sub>L</sub> (Miller); low overdrive</td></tr>
+                        <tr><td>t<sub>s</sub> (storage)</td><td>Excess charge stored in the saturated base must be removed before I<sub>C</sub> can fall</td><td>Deep saturation (high overdrive k); no base discharge path</td></tr>
+                        <tr><td>t<sub>r</sub> (output rise)</td><td>Collector current decaying while C<sub>CB</sub> is charged back through R<sub>L</sub></td><td>Large R<sub>L</sub>; high h<sub>FE</sub>; large C<sub>CB</sub></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h3 class="m3-h3">The Miller effect: why R<sub>L</sub> dominates speed</h3>
+                  <p class="m3-p">
+                    The large light-collecting base&ndash;collector junction has a capacitance C<sub>CB</sub>
+                    of the order of 10 pF. It connects the base (driven only by micro-amps of
+                    photocurrent) to the collector (swinging by volts across R<sub>L</sub>). Seen from the
+                    base, that capacitance is multiplied by the stage&rsquo;s voltage gain, roughly
+                    g<sub>m</sub>&middot;R<sub>L</sub>. A useful engineering approximation for the
+                    dominant time constant is:
+                  </p>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">&tau; &asymp; &tau;<sub>0</sub> + h<sub>FE</sub> &middot; C<sub>CB</sub> &middot; R<sub>L</sub> &nbsp;&nbsp;&nbsp; t<sub>r</sub> &asymp; 2.2 &tau;</div>
+                    <ul>
+                      <li>&tau;<sub>0</sub> &mdash; intrinsic base time constant with R<sub>L</sub> &rarr; 0 (&asymp; 1&ndash;2 &micro;s for PC817-class parts)</li>
+                      <li>h<sub>FE</sub>&middot;C<sub>CB</sub>&middot;R<sub>L</sub> &mdash; the Miller term. It grows linearly with R<sub>L</sub>.</li>
+                    </ul>
+                  </div>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; checking the model against a datasheet</h5>
+                    PC817 datasheets quote t<sub>r</sub> &asymp; 4 &micro;s typ at R<sub>L</sub> = 100 &Omega;, I<sub>C</sub> = 2 mA.
+                    Model: &tau; = 1.5 &micro;s + 270 &times; 10 pF &times; 100 &Omega; = 1.77 &micro;s &rarr; t<sub>r</sub> &asymp; 3.9 &micro;s.
+                    With R<sub>L</sub> = 10 k&Omega;: &tau; &asymp; 1.5 + 27 = 28.5 &micro;s &rarr; t<sub>r</sub> &asymp; 63 &micro;s,
+                    sixteen times slower from the same part. Datasheet &ldquo;response time vs R<sub>L</sub>&rdquo; curves show the same trend.
+                  </div>
+                  <figure class="m3-fig">
+                    <img src="images/04/load-resistor-vs-speed.gif" alt="Animation drawing the output voltage for three load resistors, 100 ohms, 1 kilohm and 10 kilohms, with the same LED pulse; the 10 kilohm output rises much more slowly after the LED turns off" loading="lazy" width="900" height="504" />
+                    <figcaption><strong>Animation 3.</strong> Same part, same 5 mA pulse. With 100 &Omega; the edges are fast, but 10.6 mA only swings the output by about 1 V (not a logic signal). With 10 k&Omega; the output swings rail to rail but turns off in tens of microseconds. Choosing R<sub>L</sub> is a speed-versus-swing trade-off.</figcaption>
+                  </figure>
+                  <h3 class="m3-h3">Speed-up techniques</h3>
+                  <div class="adv-grid">
+                    <div class="adv-card"><h5>Base resistor R<sub>BE</sub> (6-pin parts)</h5><p>Gives stored base charge a discharge path and shunts slow photocurrent tails. It speeds turn-off and cuts storage time. The cost: it steals &asymp; V<sub>BE</sub>/R<sub>BE</sub> of photocurrent, so CTR drops, especially at low I<sub>F</sub>.</p></div>
+                    <div class="adv-card"><h5>Keep the collector still</h5><p>Drive the collector into a low-impedance node (a common-base transistor or a trans-impedance amplifier). With little voltage swing there is no Miller multiplication.</p></div>
+                    <div class="adv-card"><h5>Avoid deep saturation</h5><p>Size overdrive for end-of-life margin, not 10&times;. Every extra factor of overdrive adds storage time (&asymp; &tau;<sub>s</sub>&middot;ln k).</p></div>
+                    <div class="adv-card limit"><h5>Or change the part</h5><p>Above &asymp; 20&ndash;50 kbit/s a photodiode-output part (6N136, 6N137) or a digital isolator is usually the right answer, not a heavily tuned phototransistor.</p></div>
+                  </div>
+
+                  <div class="widget-container" style="margin-top: 1.4rem">
+                    <h3 style="margin-bottom: 0.4rem">Interactive: Switching-Waveform Simulator</h3>
+                    <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 12px">
+                      A square LED pulse drives a PC817-class model with a pull-up to V<sub>CC</sub> = 5 V.
+                      Vary R<sub>L</sub>, I<sub>F</sub> and R<sub>BE</sub> and watch t<sub>on</sub>,
+                      t<sub>off</sub> and the output swing. The time axis rescales automatically.
+                    </p>
+                    <div class="m3-calc">
+                      <div>
+                        <div class="m3-field"><label for="m4SwRl"><span>R<sub>L</sub></span> <output id="m4SwRlOut">1 k&Omega;</output></label><input type="range" id="m4SwRl" min="0" max="100" step="0.001" value="33.334" /></div>
+                        <div class="m3-field"><label for="m4SwIf"><span>I<sub>F</sub></span> <output id="m4SwIfOut">5 mA</output></label><input type="range" id="m4SwIf" min="0.5" max="20" step="0.5" value="5" /></div>
+                        <div class="m3-field"><label for="m4SwRbe"><span>R<sub>BE</sub> (base to emitter)</span> <output id="m4SwRbeOut">open</output></label><input type="range" id="m4SwRbe" min="0" max="6" step="1" value="0" /></div>
+                      </div>
+                      <div class="m3-results">
+                        <div class="m3-res-row"><span>Operating mode</span><b id="m4SwMode">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Output swing</span><b id="m4SwSwing">&ndash;</b></div>
+                        <div class="m3-res-row"><span>t<sub>on</sub> = t<sub>d</sub> + t<sub>f</sub></span><b id="m4SwTon">&ndash;</b></div>
+                        <div class="m3-res-row"><span>t<sub>off</sub> = t<sub>s</sub> + t<sub>r</sub></span><b id="m4SwToff">&ndash;</b></div>
+                        <div class="m3-res-row"><span>Rough max. toggle rate</span><b id="m4SwFmax">&ndash;</b></div>
+                        <div style="margin-top: 8px"><span id="m4SwVerdict" class="m3-verdict">&ndash;</span></div>
+                      </div>
+                    </div>
+                    <div class="m3-canvas-wrap" style="height: 280px">
+                      <canvas id="m4SwCanvas" role="img" aria-label="LED current pulse and simulated output voltage waveform"></canvas>
+                    </div>
+                    <p class="m3-note">Teaching model: &tau; = (&tau;<sub>0</sub> + h<sub>FE</sub>&middot;C<sub>CB</sub>&middot;R<sub>L</sub>)&middot;R<sub>BE</sub>/(R<sub>BE</sub> + 200 k&Omega;), t<sub>s</sub> = &tau;<sub>s</sub>&middot;ln k, and R<sub>BE</sub> steals 0.55 V/R<sub>BE</sub> of photocurrent. Trends are realistic; absolute times vary by part and vendor.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 8 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec8body" aria-expanded="false" aria-controls="sec8body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 8 &mdash; Small-Signal Model and the Opto Pole</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec8body">
+                  <p class="m3-p">
+                    In an SMPS feedback loop the optocoupler never switches. It sits in its active
+                    region and passes small changes of LED current to the primary side. For that job
+                    you need the <strong>small-signal (incremental) CTR</strong> and the frequency
+                    response, not the DC CTR.
+                  </p>
+                  <figure class="m3-fig">
+                    <img src="images/04/small-signal-model-opto-pole.png" alt="Equivalent circuit: LED side with dynamic resistance; detector side with a photocurrent source into the base node, C_BE, a Miller capacitance C_CB from base to collector, a gm current source and load resistor R_L" loading="lazy" width="1000" height="470" />
+                    <figcaption><strong>Figure 6.</strong> Small-signal equivalent circuit. The photocurrent source feeds a base node loaded by C<sub>BE</sub> and the Miller-multiplied C<sub>CB</sub>. The result is a single dominant pole whose frequency falls as R<sub>L</sub> rises.</figcaption>
+                  </figure>
+                  <div class="m3-eq">
+                    <div class="m3-eq-main">CTR<sub>ss</sub> = &Delta;I<sub>C</sub> / &Delta;I<sub>F</sub> &nbsp;&nbsp;&nbsp; f<sub>opto</sub> &asymp; 1 / (2&pi;&tau;) = 1 / (2&pi;(&tau;<sub>0</sub> + h<sub>FE</sub>&middot;C<sub>CB</sub>&middot;R<sub>L</sub>))</div>
+                    <ul>
+                      <li>CTR<sub>ss</sub> is the slope of the I<sub>C</sub>&ndash;I<sub>F</sub> curve at the bias point. It differs from the DC CTR because CTR itself varies with I<sub>F</sub>.</li>
+                      <li>f<sub>opto</sub> &mdash; the &ldquo;opto pole&rdquo;. It adds phase lag to the loop and must be included in compensation.</li>
+                    </ul>
+                  </div>
+                  <div class="m3-example">
+                    <h5>Worked example &mdash; opto pole in a TL431 + PC817 loop</h5>
+                    Primary-side pull-up R<sub>L</sub> = 4.7 k&Omega;, bias I<sub>C</sub> &asymp; 1 mA (h<sub>FE</sub> &asymp; 290 in the model), C<sub>CB</sub> &asymp; 10 pF, &tau;<sub>0</sub> &asymp; 1.5 &micro;s.
+                    <ol>
+                      <li>&tau; = 1.5 &micro;s + 290 &times; 10 pF &times; 4.7 k&Omega; &asymp; 15 &micro;s.</li>
+                      <li>f<sub>opto</sub> = 1 / (2&pi; &times; 15 &micro;s) &asymp; <strong>10.6 kHz</strong>.</li>
+                      <li>A loop crossing over at 2&ndash;3 kHz sees roughly 11&ndash;16&deg; of extra phase lag from the optocoupler alone. Doubling R<sub>L</sub> to raise gain moves the pole down to &asymp; 5.5 kHz and doubles that lag.</li>
+                      <li>Real opto poles vary widely with part, bias current and temperature (a few kHz to tens of kHz are common). Measure it with a network analyzer before closing a demanding loop. Module 10 shows how.</li>
+                    </ol>
+                  </div>
+                  <div class="warning-box">
+                    <strong>Design trap &mdash; compensating with the typical CTR.</strong> Loop gain
+                    is proportional to CTR<sub>ss</sub>. A rank that spans 130&ndash;260 %, plus ageing
+                    and temperature, changes loop gain by 3&ndash;4&times; across units and life.
+                    Design the compensation for stability at maximum CTR and adequate regulation at
+                    minimum CTR.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 9 ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec9body" aria-expanded="false" aria-controls="sec9body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 9 &mdash; Key Takeaways and Design Checklist</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec9body">
+                  <div class="adv-grid">
+                    <div class="adv-card"><h5>Four conversions</h5><p>CTR = &eta;<sub>EQE</sub> &times; &eta;<sub>c</sub> &times; &eta;<sub>det</sub> &times; h<sub>FE</sub>. Under 1 % of LED electrons become photocurrent; h<sub>FE</sub> does the rest.</p></div>
+                    <div class="adv-card"><h5>Extraction limits the LED</h5><p>Total internal reflection in high-index GaAs keeps external efficiency at a few percent.</p></div>
+                    <div class="adv-card"><h5>The junction is a current source</h5><p>Photocurrent is linear in light and almost independent of voltage: &Rscr; = &eta;&middot;&lambda;/1240 A/W.</p></div>
+                    <div class="adv-card"><h5>CTR is a curve</h5><p>It peaks at a few mA, falls at both current extremes and at both temperature extremes, and collapses at low V<sub>CE</sub>.</p></div>
+                    <div class="adv-card"><h5>Saturation needs overdrive</h5><p>Switching designs need CTR<sub>worst</sub>&middot;I<sub>F</sub> &ge; 2&times; the load current at end of life.</p></div>
+                    <div class="adv-card"><h5>R<sub>L</sub> sets speed</h5><p>&tau; &asymp; &tau;<sub>0</sub> + h<sub>FE</sub>&middot;C<sub>CB</sub>&middot;R<sub>L</sub>: the Miller term makes large pull-ups slow.</p></div>
+                    <div class="adv-card"><h5>Turn-off is the slow edge</h5><p>Storage time grows with overdrive; R<sub>BE</sub> helps but costs CTR.</p></div>
+                    <div class="adv-card"><h5>Loops see a pole</h5><p>The opto pole (typically a few kHz to tens of kHz) and CTR spread must be part of loop compensation.</p></div>
+                  </div>
+                  <h3 class="m3-h3">Working-principle design checklist</h3>
+                  <p class="m3-note" style="margin-bottom: 10px">Tick items as you review a design. Your ticks are saved in this browser only.</p>
+                  <div id="m4Checklist"></div>
+                  <button class="btn btn-secondary" type="button" id="m4ChecklistReset" style="margin-top: 8px">Reset checklist</button>
+                </div>
+              </div>
+
+              <!-- ============ SECTION 10: KNOWLEDGE CHECK ============ -->
+              <div class="section-collapsible">
+                <button class="section-header-btn collapsed" data-target="sec10body" aria-expanded="false" aria-controls="sec10body">
+                  <span><h2 style="font-size: 1.15rem; margin: 0">Section 10 &mdash; Knowledge Check</h2></span>
+                  <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="sec10body">
+                  <div class="knowledge-check">
+                    <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem">
+                      Four parts: multiple choice, true/false, a matching exercise and three engineering
+                      scenarios. Score 80 % on the multiple choice to pass the module.
+                    </p>
+                    <div class="quiz-container widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part A &mdash; Multiple Choice</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px">
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">
+                          Question <span id="quizCurrentNum">1</span> of <span id="quizTotalNum">12</span> &nbsp;&bull;&nbsp; Score:
+                          <span id="quizScore">0</span>/<span id="quizTotalNum2">12</span>
+                        </div>
+                        <div id="quizDots" style="display: flex; gap: 5px; flex-wrap: wrap"></div>
+                      </div>
+                      <div class="progress-bar" style="margin-bottom: 1.25rem"><div class="progress-fill" id="quizProgressBar" style="width: 8%"></div></div>
+                      <div id="quizSlides"></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 1.25rem">
+                        <button class="btn btn-secondary" id="quizPrevBtn" type="button">&larr; Prev</button>
+                        <button class="btn btn-primary" id="quizNextBtn" type="button">Next &rarr;</button>
+                      </div>
+                      <div id="quizSummary" style="display: none; margin-top: 2rem; padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border); text-align: center">
+                        <div id="quizFinalScore" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem"></div>
+                        <div id="quizFinalMsg" style="font-size: 0.88rem; color: var(--text-sub)"></div>
+                      </div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part B &mdash; True or False</h3>
+                      <div id="tfList"></div>
+                      <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 8px">Score: <span id="tfScore">0</span>/<span id="tfTotal">8</span></div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.4rem">Part C &mdash; Match the Term to Its Meaning</h3>
+                      <p style="color: var(--text-sub); font-size: 0.82rem; margin-bottom: 14px">Drag each term onto its definition, or click a term and then click a definition.</p>
+                      <div class="dd-wrap"><div id="ddChips"></div><div id="ddTargets"></div></div>
+                      <div id="ddStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 10px">Placed: <span id="ddScore">0</span>/6</div>
+                    </div>
+
+                    <div class="widget-container">
+                      <h3 style="margin-bottom: 0.75rem">Part D &mdash; Engineering Scenarios</h3>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 1 &mdash; The PWM signal that lost its duty cycle</div>
+                        <div class="scenario-body">
+                          A 10 kHz, 50 % duty PWM signal is isolated with a PC817: I<sub>F</sub> = 10 mA,
+                          R<sub>L</sub> = 10 k&Omega; to 5 V. On the scope the isolated output is badly
+                          distorted: the low pulses are much longer than 50 µs. Explain and fix it.
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m4sol1" type="button">Reveal solution</button>
+                          <div class="scenario-solution" id="m4sol1">
+                            <strong>Analysis.</strong> Needed I<sub>C</sub> is only 0.48 mA while CTR&times;I<sub>F</sub>
+                            is &asymp; 20 mA, so the overdrive k is &asymp; 40. Storage time is &asymp; &tau;<sub>s</sub>&middot;ln 40 (several µs). Worse,
+                            the Miller time constant with 10 k&Omega; is &tau; &asymp; 1.5 + 225&times;10 pF&times;10 k&Omega; &asymp; 24 µs, so
+                            t<sub>r</sub> &asymp; 53 µs. The output cannot return high within a 50 µs half-period, so the
+                            low time stretches. <strong>Fix:</strong> use R<sub>L</sub> &asymp; 1 k&Omega; with I<sub>F</sub> sized for
+                            k &asymp; 2&ndash;3 at end of life (&tau; &asymp; 4 µs, t<sub>r</sub> &asymp; 9 µs). Add R<sub>BE</sub> on a
+                            6-pin part if needed. For tight duty accuracy, move to a 6N137-class logic-output
+                            part or a digital isolator.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 2 &mdash; Low-power input in a hot cabinet</div>
+                        <div class="scenario-body">
+                          To save power, a 24 V digital input drives a PC817 rank B (CTR &ge; 130 % at 5 mA) at
+                          only I<sub>F</sub> = 1 mA. It must saturate a 10 k&Omega; pull-up to 3.3 V at 85 &deg;C
+                          after 10 years (ageing factor 0.5). Does it work?
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m4sol2" type="button">Reveal solution</button>
+                          <div class="scenario-solution" id="m4sol2">
+                            <strong>Analysis.</strong> Needed: (3.3 &minus; 0.2)/10 k&Omega; = 0.31 mA. CTR at 1 mA &asymp; 130 % &times;
+                            0.70 (I<sub>F</sub> curve) &asymp; 91 %. At 85 &deg;C &asymp; &times;0.83 &rarr; 76 %. At end of life &times;0.5 &rarr; 38 %.
+                            Available 1 mA &times; 0.38 = 0.38 mA, so k &asymp; 1.2. It saturates, but with almost no margin, and
+                            only if the typical curves hold for your units. <strong>Fix:</strong> raise I<sub>F</sub> to 2 mA
+                            (k &asymp; 3.2 after re-reading both curves at 2 mA), or use a higher rank. Low-I<sub>F</sub> designs lose twice:
+                            CTR is lower at low current <em>and</em> more temperature-sensitive there.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="scenario">
+                        <div class="scenario-head">Scenario 3 &mdash; More gain, less stability</div>
+                        <div class="scenario-body">
+                          A flyback&rsquo;s TL431 + PC817 loop was stable with a 4.7 k&Omega; primary-side pull-up.
+                          To increase low-frequency gain, a colleague changed it to 22 k&Omega;. The output now rings
+                          after load steps. Crossover is about 2 kHz. What happened?
+                          <button class="btn btn-secondary" style="display: block; margin-top: 10px" data-reveal="m4sol3" type="button">Reveal solution</button>
+                          <div class="scenario-solution" id="m4sol3">
+                            <strong>Analysis.</strong> The opto pole moved. With 4.7 k&Omega;: &tau; &asymp; 15 µs &rarr; f<sub>opto</sub> &asymp;
+                            10.6 kHz, which costs about 11&deg; at 2 kHz. With 22 k&Omega;: &tau; &asymp; 1.5 + 290&times;10 pF&times;22 k&Omega; &asymp;
+                            65 µs &rarr; f<sub>opto</sub> &asymp; 2.4 kHz, which costs about 40&deg; at 2 kHz. On top of that, the gain rose
+                            4.7&times;, pushing crossover higher where the lag is even worse. Phase margin collapses.
+                            <strong>Fix:</strong> restore the pull-up, get the gain from the TL431 compensation network, and
+                            include the measured opto pole in the loop design (Module 10).
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="widget-container" style="margin-top: 2rem">
+                <h3 style="margin-bottom: 0.75rem">Additional Resources</h3>
+                <div class="adv-grid">
+                  <div class="adv-card" style="border-left-color: #818cf8"><h5>Datasheet curves to study</h5><p>PC817 / TLP785: CTR vs I<sub>F</sub>, CTR vs T<sub>A</sub>, response time vs R<sub>L</sub>. 4N35: the base pin and R<sub>BE</sub> curves. 6N135/6N136: the photodiode current and output-transistor gain shown separately.</p></div>
+                  <div class="adv-card" style="border-left-color: #818cf8"><h5>Application notes</h5><p>Vendor optocoupler application notes on CTR, response time and R<sub>BE</sub> speed-up (Vishay, Toshiba, Renesas, onsemi) &bull; SMPS loop-design literature on characterising the optocoupler pole (TL431 + optocoupler compensation).</p></div>
+                  <div class="adv-card" style="border-left-color: #818cf8"><h5>Physics background</h5><p>Any semiconductor-device text chapters on LEDs (radiative vs non-radiative recombination, extraction), photodiodes (responsivity) and BJT switching (charge-control model, storage time, Miller effect).</p></div>
+                  <div class="adv-card" style="border-left-color: #818cf8"><h5>Keep learning</h5><p>Module 5 compares the output families. Module 6 turns these mechanisms into datasheet parameters. Module 9 adds ageing. Module 10 designs complete circuits, including the feedback loop.</p></div>
+                </div>
               </div>
 
               <div
@@ -288,6 +1522,939 @@
     <script src="../../../assets/js/training-progress.js"></script>
     <script>
       requireAuth();
+    </script>
+    <script>
+      // ---------- Accordion toggle ----------
+      (function () {
+        var btns = document.querySelectorAll('.section-header-btn');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var target = document.getElementById(btn.getAttribute('data-target'));
+            if (!target) return;
+            var isOpen = target.classList.contains('open');
+            if (isOpen) {
+              target.classList.remove('open');
+              target.style.display = 'none';
+              btn.classList.remove('active');
+              btn.classList.add('collapsed');
+              btn.setAttribute('aria-expanded', 'false');
+            } else {
+              target.classList.add('open');
+              target.style.display = 'block';
+              btn.classList.add('active');
+              btn.classList.remove('collapsed');
+              btn.setAttribute('aria-expanded', 'true');
+              window.dispatchEvent(new Event('resize'));
+            }
+          });
+        });
+        document.querySelectorAll('.section-body').forEach(function (el) {
+          if (!el.classList.contains('open')) el.style.display = 'none';
+        });
+      })();
+
+      // ---------- Shared helpers ----------
+      var M3 = (function () {
+        function cssVar(name, fallback) {
+          var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+          return (v && v.trim()) || fallback;
+        }
+        function palette() {
+          return {
+            text: cssVar('--text-base', '#e2e8f0'),
+            sub: cssVar('--text-sub', '#9aa3b5'),
+            muted: cssVar('--text-muted', '#7b8496'),
+            border: cssVar('--border', '#334155'),
+            cyan: cssVar('--cyan', '#22d3ee'),
+            ok: cssVar('--success', '#4cdf8b'),
+            bad: cssVar('--danger', '#ff6b6b'),
+            warn: cssVar('--warning', '#fbbf24'),
+          };
+        }
+        var redrawers = [];
+        function onRedraw(fn) {
+          redrawers.push(fn);
+        }
+        function redrawAll() {
+          redrawers.forEach(function (f) {
+            try {
+              f();
+            } catch (e) {}
+          });
+        }
+        var t;
+        window.addEventListener('resize', function () {
+          clearTimeout(t);
+          t = setTimeout(redrawAll, 80);
+        });
+        try {
+          new MutationObserver(redrawAll).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+          });
+        } catch (e) {}
+        function setVerdict(el, cls, text) {
+          if (!el) return;
+          el.className = 'm3-verdict ' + cls;
+          el.textContent = text;
+        }
+        function fmt(v, d) {
+          return Number(v).toFixed(d);
+        }
+        var reduceMotion = false;
+        try {
+          reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        return {
+          palette: palette,
+          onRedraw: onRedraw,
+          setVerdict: setVerdict,
+          fmt: fmt,
+          reduceMotion: reduceMotion,
+        };
+      })();
+
+      // ---------- Module 4 teaching model (PC817-class, representative) ----------
+      var OM = (function () {
+        var EQEMAX = 0.04, ISRH = 1.0, IDROOP = 100, ETC = -0.006, ETAC = 0.35, ETADET = 0.7;
+        var HMAX = 300, ILOW = 0.05, IHIGH = 60, HTC = 0.005;
+        function eqe(IF, T) {
+          return (EQEMAX * IF) / (IF + ISRH) / (1 + IF / IDROOP) * Math.max(0.05, 1 + ETC * (T - 25));
+        }
+        function hfe(IC, T) {
+          return (HMAX * Math.sqrt(IC / (IC + ILOW))) / (1 + IC / IHIGH) * (1 + HTC * (T - 25));
+        }
+        function fv(V) {
+          return (1 - Math.exp(-V / 0.1)) * (1 + V / 80);
+        }
+        function iph(IF, T) {
+          return eqe(IF, T) * ETAC * ETADET * IF; // mA
+        }
+        function ctr(IF, T, V) {
+          if (T == null) T = 25;
+          if (V == null) V = 5;
+          var ip = iph(IF, T), ic = ip * 200;
+          for (var i = 0; i < 30; i++) ic = 0.5 * ic + 0.5 * hfe(ic, T) * ip;
+          return (ic / IF) * fv(V);
+        }
+        var TAU0 = 1.5, CCB = 10e-12, R0 = 200e3, TAUS = 2.0;
+        function sw(IF, RL, VCC, RBE) {
+          var ip = iph(IF, 25);
+          var c = ctr(IF, 25, 5);
+          var kR = RBE ? RBE / (RBE + R0) : 1;
+          var fb = RBE ? Math.max(0, (ip - (0.55 / RBE) * 1e3) / ip) : 1;
+          var icAct = c * IF * fb;
+          var icSat = ((VCC - 0.2) / RL) * 1e3;
+          var k = icAct / icSat;
+          var h = hfe(Math.max(icAct, 1e-3), 25);
+          var tau = (TAU0 + h * CCB * RL * 1e6) * kR;
+          var r = { k: k, tau: tau, icAct: icAct, icSat: icSat, fb: fb, taus: TAUS * kR };
+          if (k <= 0.001) {
+            r.dead = true;
+            return r;
+          }
+          if (k > 1) {
+            r.td = tau * Math.log(k / (k - 0.1));
+            r.tf = tau * Math.log((k - 0.1) / (k - 0.9));
+            r.ts = TAUS * kR * Math.log(k);
+            r.sat = true;
+          } else {
+            r.td = tau * Math.log(1 / 0.9);
+            r.tf = 2.197 * tau;
+            r.ts = 0;
+            r.sat = false;
+          }
+          r.tr = 2.197 * tau;
+          r.ton = r.td + r.tf;
+          r.toff = r.ts + r.tr;
+          return r;
+        }
+        return { eqe: eqe, hfe: hfe, fv: fv, iph: iph, ctr: ctr, sw: sw };
+      })();
+      function m4fmtI(mA) {
+        if (mA >= 1) return M3.fmt(mA, mA < 10 ? 2 : 1) + ' mA';
+        if (mA >= 0.001) return M3.fmt(mA * 1000, mA * 1000 < 10 ? 1 : 0) + ' µA';
+        return M3.fmt(mA * 1e6, 0) + ' nA';
+      }
+      function m4fmtT(us) {
+        if (us >= 1000) return M3.fmt(us / 1000, 2) + ' ms';
+        if (us >= 1) return M3.fmt(us, us < 10 ? 2 : 1) + ' µs';
+        return M3.fmt(us * 1000, 0) + ' ns';
+      }
+      function m4canvas(canvas) {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: rect.width, H: rect.height };
+      }
+
+      // ---------- Interactive 1: photon-flow simulator ----------
+      (function () {
+        var canvas = document.getElementById('m4FlowCanvas');
+        var slider = document.getElementById('m4FlowIf');
+        var btn = document.getElementById('m4FlowPlay');
+        if (!canvas || !slider) return;
+        var parts = [], playing = !M3.reduceMotion, acc = { e: 0, ic: 0 };
+        var st = {};
+        function calc() {
+          var IF = +slider.value;
+          var ip = OM.iph(IF, 25), c = OM.ctr(IF, 25, 5), ic = c * IF;
+          st = { IF: IF, ip: ip, ic: ic, c: c, popt: OM.eqe(IF, 25) * 1.32 * IF, h: ic / ip };
+          document.getElementById('m4FlowIfOut').textContent = M3.fmt(IF, IF < 10 ? 1 : 0) + ' mA';
+          document.getElementById('m4FlowPopt').textContent = M3.fmt(st.popt * 1000, 0) + ' µW';
+          document.getElementById('m4FlowIph').textContent = m4fmtI(ip);
+          document.getElementById('m4FlowHfe').textContent = M3.fmt(st.h, 0);
+          document.getElementById('m4FlowIc').textContent = m4fmtI(ic);
+          document.getElementById('m4FlowCtr').textContent = M3.fmt(c * 100, 0) + ' %';
+        }
+        function step(W, H) {
+          var x1 = W * 0.22, xb0 = W * 0.3, xb1 = W * 0.36, xd = W * 0.44, xo = W * 0.8;
+          acc.e += st.IF * 0.12;
+          while (acc.e >= 1) {
+            acc.e -= 1;
+            parts.push({ k: 'e', x: W * 0.04, y: H * (0.25 + Math.random() * 0.5), vx: 2 + Math.random() });
+          }
+          var next = [];
+          parts.forEach(function (p) {
+            if (p.k === 'e') {
+              p.x += p.vx;
+              if (p.x >= x1) {
+                if (Math.random() < 0.35) next.push({ k: 'ph', x: x1, y: p.y, vx: 4, vy: (Math.random() - 0.5) * 2.4 });
+                return;
+              }
+            } else if (p.k === 'ph') {
+              p.x += p.vx;
+              p.y += p.vy;
+              if (p.y < H * 0.12 || p.y > H * 0.88) return;
+              if (p.x >= xd) {
+                if (Math.random() < 0.55) next.push({ k: 'pair', x: xd + 6, y: p.y, age: 0 });
+                return;
+              }
+            } else if (p.k === 'pair') {
+              p.age++;
+              p.x += 1.2;
+              if (p.age > 18) return;
+            } else if (p.k === 'ic') {
+              p.x += p.vx;
+              if (p.x > W * 0.98) return;
+            }
+            next.push(p);
+          });
+          acc.ic += Math.min(12, st.ic * 0.35);
+          while (acc.ic >= 1) {
+            acc.ic -= 1;
+            var spread = Math.min(0.36, 0.05 + st.ic * 0.02);
+            next.push({ k: 'ic', x: W * 0.62, y: H * (0.5 + (Math.random() - 0.5) * 2 * spread), vx: 3 + Math.random() * 2 });
+          }
+          parts = next.slice(-900);
+        }
+        function draw() {
+          var c = m4canvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          function zone(x0, x1, col, lab) {
+            ctx.fillStyle = col;
+            ctx.fillRect(x0, H * 0.1, x1 - x0, H * 0.8);
+            ctx.fillStyle = p.sub;
+            ctx.font = '600 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(lab, (x0 + x1) / 2, H * 0.97);
+          }
+          zone(W * 0.02, W * 0.22, 'rgba(236,72,153,0.10)', 'LED: e⁻ + h⁺ → photon');
+          zone(W * 0.3, W * 0.36, 'rgba(234,179,8,0.18)', 'barrier');
+          zone(W * 0.44, W * 0.58, 'rgba(96,165,250,0.12)', 'B–C junction');
+          zone(W * 0.62, W * 0.98, 'rgba(74,222,128,0.08)', 'I_C = h_FE × I_PH');
+          parts.forEach(function (q) {
+            ctx.beginPath();
+            if (q.k === 'e') ctx.fillStyle = '#818cf8';
+            else if (q.k === 'ph') ctx.fillStyle = '#f87171';
+            else if (q.k === 'pair') ctx.fillStyle = '#facc15';
+            else ctx.fillStyle = '#4ade80';
+            ctx.arc(q.x, q.y, q.k === 'ic' ? 1.8 : 2.6, 0, 6.283);
+            ctx.fill();
+          });
+        }
+        function loop() {
+          if (playing) {
+            var r = canvas.parentElement.getBoundingClientRect();
+            step(r.width, r.height);
+            draw();
+          }
+          requestAnimationFrame(loop);
+        }
+        slider.addEventListener('input', function () {
+          calc();
+          if (!playing) draw();
+        });
+        btn.addEventListener('click', function () {
+          playing = !playing;
+          btn.innerHTML = playing ? '&#10074;&#10074; Pause' : '&#9654; Play';
+        });
+        if (!playing) btn.innerHTML = '&#9654; Play';
+        calc();
+        if (M3.reduceMotion) {
+          var r = canvas.parentElement.getBoundingClientRect();
+          for (var i = 0; i < 120; i++) step(r.width, r.height);
+          draw();
+        }
+        M3.onRedraw(draw);
+        requestAnimationFrame(loop);
+      })();
+
+      // ---------- Interactive 2: CTR explorer ----------
+      (function () {
+        var sIf = document.getElementById('m4CtrIf'), sT = document.getElementById('m4CtrT'), sV = document.getElementById('m4CtrV'), sS = document.getElementById('m4CtrScale');
+        var canvas = document.getElementById('m4CtrCanvas');
+        if (!sIf || !canvas) return;
+        var ref = OM.ctr(5, 25, 5);
+        function ifFromSlider(v) {
+          return 0.1 * Math.pow(500, v / 100);
+        } // 0.1 .. 50 mA
+        function update() {
+          var IF = ifFromSlider(+sIf.value), T = +sT.value, V = +sV.value, S = +sS.value / 100 / ref;
+          document.getElementById('m4CtrIfOut').textContent = M3.fmt(IF, IF < 1 ? 2 : 1) + ' mA';
+          document.getElementById('m4CtrTOut').textContent = T + ' °C';
+          document.getElementById('m4CtrVOut').textContent = M3.fmt(V, 2) + ' V';
+          document.getElementById('m4CtrScaleOut').textContent = sS.value + ' %';
+          var c = OM.ctr(IF, T, V) * S;
+          var rel = OM.ctr(IF, T, V) / ref;
+          document.getElementById('m4CtrVal').textContent = M3.fmt(c * 100, 0) + ' %';
+          document.getElementById('m4CtrIc').textContent = m4fmtI(c * IF);
+          document.getElementById('m4CtrRel').textContent = '× ' + M3.fmt(rel, 2);
+          var ip = OM.iph(IF, T), icv = OM.ctr(IF, T, 5) * IF;
+          document.getElementById('m4CtrParts').textContent = M3.fmt(OM.eqe(IF, T) * 100, 1) + ' % / ' + M3.fmt(icv / ip, 0);
+          var v = document.getElementById('m4CtrVerdict');
+          if (V < 0.5) M3.setVerdict(v, 'warn', 'Low V_CE: transistor near saturation, CTR reduced');
+          else if (rel >= 0.85) M3.setVerdict(v, 'ok', 'Near the datasheet test condition');
+          else if (rel >= 0.6) M3.setVerdict(v, 'warn', 'CTR reduced: apply this factor to CTR_min');
+          else M3.setVerdict(v, 'bad', 'Far below the rated point: large extra margin needed');
+          draw(IF, T, V, S);
+        }
+        function draw(IF, T, V, S) {
+          var c = m4canvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          var L = 50, R = 14, Tp = 14, B = 34;
+          ctx.clearRect(0, 0, W, H);
+          var ymax = 0;
+          var curves = [[-40, '#60a5fa'], [25, '#4ade80'], [100, '#f87171']];
+          var pts = {};
+          curves.concat([[T, p.cyan]]).forEach(function (cv) {
+            var arr = [];
+            for (var i = 0; i <= 120; i++) {
+              var x = 0.1 * Math.pow(500, i / 120);
+              var y = OM.ctr(x, cv[0], V) * S * 100;
+              arr.push([x, y]);
+              ymax = Math.max(ymax, y);
+            }
+            pts[cv[0] + cv[1]] = arr;
+          });
+          ymax = Math.ceil((ymax * 1.1) / 50) * 50;
+          function X(x) {
+            return L + ((Math.log10(x) + 1) / Math.log10(500)) * (W - L - R);
+          }
+          function Y(y) {
+            return H - B - (y / ymax) * (H - Tp - B);
+          }
+          ctx.strokeStyle = p.border;
+          ctx.fillStyle = p.muted;
+          ctx.font = '11px Inter, sans-serif';
+          ctx.lineWidth = 1;
+          [0.1, 0.3, 1, 3, 10, 30, 50].forEach(function (x) {
+            ctx.beginPath();
+            ctx.moveTo(X(x), Tp);
+            ctx.lineTo(X(x), H - B);
+            ctx.stroke();
+            ctx.textAlign = x === 50 ? 'right' : 'center';
+            ctx.fillText(x + ' mA', X(x), H - B + 15);
+          });
+          for (var g = 0; g <= ymax; g += ymax / 5) {
+            ctx.beginPath();
+            ctx.moveTo(L, Y(g));
+            ctx.lineTo(W - R, Y(g));
+            ctx.stroke();
+            ctx.textAlign = 'right';
+            ctx.fillText(Math.round(g) + '%', L - 6, Y(g) + 4);
+          }
+          curves.concat([[T, p.cyan]]).forEach(function (cv, idx) {
+            var arr = pts[cv[0] + cv[1]];
+            ctx.beginPath();
+            arr.forEach(function (q, i) {
+              if (i === 0) ctx.moveTo(X(q[0]), Y(q[1]));
+              else ctx.lineTo(X(q[0]), Y(q[1]));
+            });
+            ctx.strokeStyle = cv[1];
+            ctx.lineWidth = idx === 3 ? 2.4 : 1.6;
+            ctx.setLineDash(idx === 3 ? [6, 4] : []);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          });
+          ctx.textAlign = 'left';
+          ctx.font = '600 11px Inter, sans-serif';
+          [['−40 °C', '#60a5fa'], ['25 °C', '#4ade80'], ['100 °C', '#f87171'], ['your T = ' + T + ' °C (dashed)', p.cyan]].forEach(function (l, i) {
+            ctx.fillStyle = l[1];
+            ctx.fillText(l[0], L + 8, Tp + 12 + i * 15);
+          });
+          var y = OM.ctr(IF, T, V) * S * 100;
+          ctx.beginPath();
+          ctx.arc(X(IF), Y(y), 6, 0, 6.283);
+          ctx.fillStyle = p.cyan;
+          ctx.fill();
+          ctx.strokeStyle = p.text;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+        [sIf, sT, sV, sS].forEach(function (s) {
+          s.addEventListener('input', update);
+        });
+        M3.onRedraw(update);
+        update();
+      })();
+
+      // ---------- Interactive 4: saturation checker ----------
+      (function () {
+        var ids = ['m4SatIf', 'm4SatCtr', 'm4SatDer', 'm4SatRl', 'm4SatVcc'];
+        var el = {};
+        ids.forEach(function (i) {
+          el[i] = document.getElementById(i);
+        });
+        if (!el.m4SatIf) return;
+        function rl(v) {
+          return 100 * Math.pow(1000, v / 100);
+        } // 100 R .. 100 k
+        function fmtR(r) {
+          return r >= 1000 ? M3.fmt(r / 1000, r < 10000 ? 2 : r < 100000 ? 1 : 0) + ' kΩ' : M3.fmt(r, 0) + ' Ω';
+        }
+        function update() {
+          var IF = +el.m4SatIf.value, ctr = +el.m4SatCtr.value / 100, d = +el.m4SatDer.value, R = rl(+el.m4SatRl.value), V = +el.m4SatVcc.value;
+          document.getElementById('m4SatIfOut').textContent = M3.fmt(IF, 1) + ' mA';
+          document.getElementById('m4SatCtrOut').textContent = el.m4SatCtr.value + ' %';
+          document.getElementById('m4SatDerOut').textContent = M3.fmt(d, 2);
+          document.getElementById('m4SatRlOut').textContent = fmtR(R);
+          document.getElementById('m4SatVccOut').textContent = M3.fmt(V, 1) + ' V';
+          var need = ((V - 0.2) / R) * 1000;
+          var avail = IF * ctr * d;
+          var k = avail / need;
+          document.getElementById('m4SatNeed').textContent = m4fmtI(need);
+          document.getElementById('m4SatAvail').textContent = m4fmtI(avail);
+          document.getElementById('m4SatK').textContent = M3.fmt(k, 2);
+          var vout = k >= 1 ? 0.1 + 0.15 / k : V - (avail * R) / 1000;
+          document.getElementById('m4SatVout').textContent = M3.fmt(vout, 2) + ' V';
+          document.getElementById('m4SatIf2').textContent = M3.fmt((2 * need) / (ctr * d), 2) + ' mA';
+          var v = document.getElementById('m4SatVerdict'), n = document.getElementById('m4SatNote');
+          if (k >= 2) {
+            M3.setVerdict(v, 'ok', 'Saturated with healthy margin');
+            n.textContent = k > 10 ? 'Very deep saturation: expect long storage time at turn-off. Consider lowering I_F or R_L if speed matters.' : 'Good switching design: the output stays low even with the derated worst-case CTR.';
+          } else if (k >= 1) {
+            M3.setVerdict(v, 'warn', 'Saturated, but with little margin');
+            n.textContent = 'Any further CTR loss or lower I_F pushes the output out of saturation. Aim for k ≥ 2.';
+          } else {
+            M3.setVerdict(v, 'bad', 'Not saturated: output is linear');
+            n.textContent = 'V_OUT sits at an analog level. Increase I_F, choose a higher CTR rank, or raise R_L (slower).';
+          }
+        }
+        ids.forEach(function (i) {
+          el[i].addEventListener('input', update);
+        });
+        update();
+      })();
+
+      // ---------- Interactive 3: switching simulator ----------
+      (function () {
+        var sRl = document.getElementById('m4SwRl'), sIf = document.getElementById('m4SwIf'), sRbe = document.getElementById('m4SwRbe');
+        var canvas = document.getElementById('m4SwCanvas');
+        if (!sRl || !canvas) return;
+        var RBEV = [0, 2e6, 1e6, 470e3, 220e3, 100e3, 47e3];
+        var VCC = 5;
+        function rl(v) {
+          return 100 * Math.pow(1000, v / 100);
+        }
+        function fmtR(r) {
+          return r >= 1e6 ? M3.fmt(r / 1e6, 1) + ' MΩ' : r >= 1000 ? M3.fmt(r / 1000, r < 10000 ? 2 : r < 100000 ? 1 : 0) + ' kΩ' : M3.fmt(r, 0) + ' Ω';
+        }
+        var s = null, R = 1000, IF = 5, RBE = 0;
+        function update() {
+          R = rl(+sRl.value);
+          IF = +sIf.value;
+          RBE = RBEV[+sRbe.value];
+          document.getElementById('m4SwRlOut').textContent = fmtR(R);
+          document.getElementById('m4SwIfOut').textContent = M3.fmt(IF, 1) + ' mA';
+          document.getElementById('m4SwRbeOut').textContent = RBE ? fmtR(RBE) : 'open';
+          s = OM.sw(IF, R, VCC, RBE || null);
+          var v = document.getElementById('m4SwVerdict');
+          if (s.dead) {
+            ['m4SwMode', 'm4SwSwing', 'm4SwTon', 'm4SwToff', 'm4SwFmax'].forEach(function (i) {
+              document.getElementById(i).textContent = '–';
+            });
+            document.getElementById('m4SwMode').textContent = 'never turns on';
+            M3.setVerdict(v, 'bad', 'R_BE steals all the photocurrent');
+            draw();
+            return;
+          }
+          var swing = Math.min(s.icAct, s.icSat) * R / 1000;
+          document.getElementById('m4SwMode').textContent = s.sat ? 'saturated (k = ' + M3.fmt(s.k, 1) + ')' : 'linear (k = ' + M3.fmt(s.k, 2) + ')';
+          document.getElementById('m4SwSwing').textContent = M3.fmt(swing, 2) + ' V';
+          document.getElementById('m4SwTon').textContent = m4fmtT(s.ton);
+          document.getElementById('m4SwToff').textContent = m4fmtT(s.toff);
+          var f = 1e3 / (2 * (s.ton + s.toff));
+          document.getElementById('m4SwFmax').textContent = f >= 1 ? M3.fmt(f, f < 10 ? 1 : 0) + ' kHz' : M3.fmt(f * 1000, 0) + ' Hz';
+          if (swing < 0.6 * VCC) M3.setVerdict(v, 'warn', 'Fast but small swing: not a logic signal');
+          else if (s.toff > 50) M3.setVerdict(v, 'bad', 'Slow turn-off: limit to low-frequency signals');
+          else if (s.toff > 15) M3.setVerdict(v, 'warn', 'Moderate speed: fine for kHz-range signals');
+          else M3.setVerdict(v, 'ok', 'Full swing with fast edges for this part class');
+          draw();
+        }
+        function draw() {
+          var c = m4canvas(canvas), ctx = c.ctx, W = c.W, H = c.H, p = M3.palette();
+          ctx.clearRect(0, 0, W, H);
+          if (!s) return;
+          var L = 46, Rm = 12, T0 = 12, B = 30;
+          var pw = s.dead ? 50 : Math.max(10, 3 * Math.max(s.ton, s.toff, s.tau * 2));
+          var tmax = pw * 2.4, t0 = pw * 0.15, t1 = t0 + pw;
+          function X(t) {
+            return L + (t / tmax) * (W - L - Rm);
+          }
+          var yI0 = T0 + 50, yI1 = T0 + 10;
+          var yV = function (v) {
+            return H - B - (v / 5.5) * (H - B - T0 - 70);
+          };
+          ctx.strokeStyle = p.border;
+          ctx.fillStyle = p.muted;
+          ctx.font = '11px Inter, sans-serif';
+          ctx.lineWidth = 1;
+          for (var i = 0; i <= 5; i++) {
+            var t = (tmax * i) / 5;
+            ctx.beginPath();
+            ctx.moveTo(X(t), T0);
+            ctx.lineTo(X(t), H - B);
+            ctx.stroke();
+            ctx.textAlign = i === 5 ? 'right' : 'center';
+            ctx.fillText(m4fmtT(t), X(t), H - B + 15);
+          }
+          [0, 2.5, 5].forEach(function (v) {
+            ctx.textAlign = 'right';
+            ctx.fillText(v + ' V', L - 6, yV(v) + 4);
+            ctx.beginPath();
+            ctx.moveTo(L, yV(v));
+            ctx.lineTo(W - Rm, yV(v));
+            ctx.stroke();
+          });
+          ctx.fillStyle = '#f472b6';
+          ctx.textAlign = 'left';
+          ctx.fillText('I_F (LED pulse)', X(t1) + 6, yI1 + 10);
+          ctx.beginPath();
+          ctx.moveTo(X(0), yI0);
+          ctx.lineTo(X(t0), yI0);
+          ctx.lineTo(X(t0), yI1);
+          ctx.lineTo(X(t1), yI1);
+          ctx.lineTo(X(t1), yI0);
+          ctx.lineTo(X(tmax), yI0);
+          ctx.strokeStyle = '#f472b6';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.fillStyle = p.cyan;
+          ctx.fillText('V_OUT', L + 6, yV(5) - 6);
+          ctx.beginPath();
+          for (var j = 0; j <= 600; j++) {
+            var tt = (tmax * j) / 600, I = 0;
+            if (!s.dead) {
+              if (tt >= t0 && tt < t1) I = Math.min(s.icSat, s.icAct * (1 - Math.exp(-(tt - t0) / s.tau)));
+              else if (tt >= t1) {
+                var Ion = Math.min(s.icSat, s.icAct * (1 - Math.exp(-(t1 - t0) / s.tau)));
+                var hold = s.icAct > s.icSat ? s.ts : 0, dt = tt - t1;
+                I = dt < hold ? Ion : Ion * Math.exp(-(dt - hold) / s.tau);
+              }
+            }
+            var vo = Math.max(0.1, VCC - (I * R) / 1000);
+            if (j === 0) ctx.moveTo(X(tt), yV(vo));
+            else ctx.lineTo(X(tt), yV(vo));
+          }
+          ctx.strokeStyle = p.cyan;
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+        }
+        [sRl, sIf, sRbe].forEach(function (x) {
+          x.addEventListener('input', update);
+        });
+        M3.onRedraw(draw);
+        update();
+      })();
+
+      // ---------- Checklist ----------
+      (function () {
+        var host = document.getElementById('m4Checklist');
+        if (!host) return;
+        var items = [
+          'CTR taken at the actual operating I_F (normalised CTR–I_F curve), not just the datasheet test point.',
+          'CTR temperature factor taken at both the hottest and the coldest ambient.',
+          'Operating V_CE considered: switching designs use CTR at V_CE(sat), not at 5 V.',
+          'Switching output: overdrive k ≥ 2 with worst-case (min × temperature × ageing) CTR.',
+          'Overdrive not excessive (k ≫ 10 adds storage time) where speed matters.',
+          'R_L chosen for the required edge speed using τ ≈ τ₀ + h_FE·C_CB·R_L, or checked against the datasheet response-time vs R_L curve.',
+          'On 6-pin parts: base pin either tied through R_BE (with the CTR loss accounted for) or deliberately left open.',
+          'Dark current I_CEO × R_L checked at maximum temperature.',
+          'For feedback loops: opto pole estimated or measured and included in compensation; loop checked at CTR_max and CTR_min.',
+          'LED drive sized with V_F(max) at the coldest temperature and minimum supply.',
+        ];
+        var KEY = 'opto-m04-check-';
+        function get(i) {
+          try {
+            return localStorage.getItem(KEY + i) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function set(i, v) {
+          try {
+            localStorage.setItem(KEY + i, v ? '1' : '0');
+          } catch (e) {}
+        }
+        items.forEach(function (t, i) {
+          var lab = document.createElement('label');
+          lab.className = 'm3-check';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = get(i);
+          var span = document.createElement('span');
+          span.textContent = t;
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          if (cb.checked) lab.classList.add('done');
+          cb.addEventListener('change', function () {
+            set(i, cb.checked);
+            lab.classList.toggle('done', cb.checked);
+          });
+          host.appendChild(lab);
+        });
+        var reset = document.getElementById('m4ChecklistReset');
+        if (reset)
+          reset.addEventListener('click', function () {
+            host.querySelectorAll('input').forEach(function (cb, i) {
+              cb.checked = false;
+              set(i, false);
+              cb.parentNode.classList.remove('done');
+            });
+          });
+      })();
+
+      // ---------- Part A: MCQ ----------
+      var quizData = [
+        { q: 'What does the external quantum efficiency (EQE) of an optocoupler LED describe?', opts: ['Optical watts per electrical watt', 'Photons leaving the die per electron injected', 'Fraction of recombinations that are radiative', 'Photocurrent per LED current'], correct: 1, exp: 'EQE = IQE × extraction efficiency: photons out per electron in. Wall-plug efficiency is watts per watt; IQE is only the internal radiative fraction.' },
+        { q: 'Why is the extraction efficiency of a simple GaAs LED die so low?', opts: ['GaAs absorbs all infrared light', 'The high refractive index (≈ 3.5) traps most light by total internal reflection', 'The wire bond blocks the light', 'Silicone is opaque at 940 nm'], correct: 1, exp: 'With n ≈ 3.5 the escape cone is only ≈ 24° into silicone, so only a few percent escapes each face.' },
+        { q: 'A detector has quantum efficiency 0.7 at 940 nm. What is its responsivity?', opts: ['≈ 0.27 A/W', '≈ 0.53 A/W', '≈ 0.76 A/W', '≈ 1.32 A/W'], correct: 1, exp: '𝓡 = η·λ/1240 = 0.7 × 940/1240 ≈ 0.53 A/W. An ideal detector (η = 1) would give 0.76 A/W.' },
+        { q: 'Which expression correctly decomposes CTR for a phototransistor coupler?', opts: ['CTR = h_FE / η_LED', 'CTR = η_EQE × η_c × η_det × h_FE', 'CTR = V_F / V_CE', 'CTR = I_PH / I_C'], correct: 1, exp: 'The four conversions multiply: LED efficiency, coupling, detector efficiency and transistor gain.' },
+        { q: 'Why does CTR fall at very low I_F?', opts: ['The LED becomes too hot', 'Defect recombination lowers LED efficiency and h_FE falls at micro-amp base currents', 'V_CE becomes too high', 'The barrier capacitance increases'], correct: 1, exp: 'Both halves weaken at low current: SRH recombination in the LED, and recombination losses in the transistor base.' },
+        { q: 'As temperature rises from 25 °C to 100 °C, what typically happens?', opts: ['LED output rises and h_FE falls', 'LED output falls and h_FE rises; net CTR usually falls', 'Both rise, so CTR rises', 'Nothing: CTR is temperature-independent'], correct: 1, exp: 'The two effects oppose. At high temperature the LED loss dominates, so CTR drops.' },
+        { q: 'A pull-up of 4.7 kΩ to 3.3 V needs how much collector current to saturate (V_CE(sat) = 0.2 V)?', opts: ['≈ 0.07 mA', '≈ 0.66 mA', '≈ 1.5 mA', '≈ 6.6 mA'], correct: 1, exp: '(3.3 − 0.2) V / 4.7 kΩ ≈ 0.66 mA.' },
+        { q: 'What is the main downside of driving a phototransistor into very deep saturation (k ≈ 20)?', opts: ['Higher V_CE(sat)', 'Long storage time, so slow turn-off', 'Lower isolation voltage', 'Lower CTR'], correct: 1, exp: 'Excess base charge must be removed before I_C can fall; storage time grows roughly with ln(k).' },
+        { q: 'Why does a larger R_L make a phototransistor output slower?', opts: ['R_L reduces LED current', 'The Miller effect multiplies C_CB by roughly the stage gain, which grows with R_L', 'R_L adds inductance', 'R_L lowers CTR'], correct: 1, exp: 'τ ≈ τ₀ + h_FE·C_CB·R_L: the Miller term grows linearly with R_L.' },
+        { q: 'On a 6-pin part, adding R_BE = 100 kΩ from base to emitter will…', opts: ['Increase CTR and speed', 'Speed up turn-off but reduce CTR, especially at low I_F', 'Only change the isolation rating', 'Have no effect'], correct: 1, exp: 'R_BE steals ≈ 0.55 V/100 kΩ ≈ 5.5 µA of photocurrent, a large fraction at low I_F, while giving stored charge a discharge path.' },
+        { q: 'What is the "opto pole" in an SMPS feedback loop?', opts: ['A mechanical mounting post', 'The dominant pole set by the Miller-multiplied C_CB and the pull-up resistor', 'The TL431 reference voltage', 'The LED’s resonant frequency'], correct: 1, exp: 'f_opto ≈ 1/(2π(τ₀ + h_FE·C_CB·R_L)), typically a few kHz to tens of kHz; it adds phase lag to the loop.' },
+        { q: 'The datasheet guarantees CTR ≥ 130 % at 5 mA, 25 °C. The normalised curves give ×0.70 at 1 mA and ×0.93 at 60 °C. Estimated worst-case new-part CTR at 1 mA, 60 °C?', opts: ['≈ 170 %', '≈ 130 %', '≈ 85 %', '≈ 45 %'], correct: 2, exp: '130 % × 0.70 × 0.93 ≈ 85 %. Ageing still has to be applied on top.' },
+      ];
+      quizData.forEach(function (q, i) {
+        var n = q.opts.length, r = [2, 0, 3, 1, 1, 3, 0, 2, 3, 1, 2, 0][i % 12] % n;
+        q.opts = q.opts.slice(r).concat(q.opts.slice(0, r));
+        q.correct = (q.correct - r + n) % n;
+      });
+
+      function buildQuiz() {
+        var slidesEl = document.getElementById('quizSlides');
+        if (!slidesEl) return;
+        document.querySelectorAll('#quizTotalNum, #quizTotalNum2').forEach(function (el) {
+          el.textContent = quizData.length;
+        });
+        var html = '';
+        quizData.forEach(function (item, qi) {
+          html += '<div class="quiz-slide" data-q="' + (qi + 1) + '"' + (qi === 0 ? '' : ' style="display: none"') + '>';
+          html += '<div class="quiz-question">' + (qi + 1) + '. ' + item.q + '</div>';
+          html += '<ul class="quiz-options" data-correct="' + item.correct + '" id="quiz' + (qi + 1) + '">';
+          item.opts.forEach(function (opt, oi) {
+            html += '<li class="quiz-option" tabindex="0" role="button" data-idx="' + oi + '">' + opt + '</li>';
+          });
+          html += '</ul><div class="quiz-feedback" id="feedback' + (qi + 1) + '"></div></div>';
+        });
+        slidesEl.innerHTML = html;
+      }
+
+      function initQuizStepper() {
+        var slides = document.querySelectorAll('.quiz-slide');
+        var totalQuestions = slides.length;
+        if (!totalQuestions) return;
+        var passThreshold = Math.ceil(totalQuestions * 0.8);
+        var current = 0,
+          score = 0,
+          answered = 0,
+          answeredMap = {};
+        var scoreEl = document.getElementById('quizScore');
+        var prevBtn = document.getElementById('quizPrevBtn');
+        var nextBtn = document.getElementById('quizNextBtn');
+        var progressBar = document.getElementById('quizProgressBar');
+        var currentNumEl = document.getElementById('quizCurrentNum');
+        var dotsContainer = document.getElementById('quizDots');
+        for (var d = 0; d < totalQuestions; d++) {
+          var dot = document.createElement('span');
+          dot.style.cssText =
+            'width:8px;height:8px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);display:inline-block;transition:background 0.2s;';
+          dotsContainer.appendChild(dot);
+        }
+        function updateDots() {
+          dotsContainer.querySelectorAll('span').forEach(function (dot, i) {
+            if (i === current) {
+              dot.style.background = 'var(--cyan)';
+              dot.style.borderColor = 'var(--cyan)';
+            } else if (answeredMap[i] !== undefined) {
+              dot.style.background = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+              dot.style.borderColor = answeredMap[i] ? 'var(--success)' : 'var(--danger)';
+            } else {
+              dot.style.background = 'var(--bg-secondary)';
+              dot.style.borderColor = 'var(--border)';
+            }
+          });
+        }
+        function showSlide(idx) {
+          slides.forEach(function (s, i) {
+            s.style.display = i === idx ? 'block' : 'none';
+          });
+          current = idx;
+          currentNumEl.textContent = idx + 1;
+          progressBar.style.width = ((idx + 1) / totalQuestions) * 100 + '%';
+          prevBtn.disabled = idx === 0;
+          prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+          nextBtn.textContent = idx === totalQuestions - 1 ? (answered === totalQuestions ? 'Show Results →' : 'Finish →') : 'Next →';
+          updateDots();
+        }
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+          if (current < totalQuestions - 1) showSlide(current + 1);
+          else if (answered === totalQuestions) showSummary();
+        });
+        slides.forEach(function (slide, idx) {
+          var quiz = slide.querySelector('.quiz-options');
+          var correct = parseInt(quiz.getAttribute('data-correct'));
+          var feedback = document.getElementById(quiz.id.replace('quiz', 'feedback'));
+          var options = quiz.querySelectorAll('.quiz-option');
+          var done = false;
+          options.forEach(function (opt) {
+            function choose() {
+              if (done) return;
+              done = true;
+              answered++;
+              var chosen = parseInt(opt.getAttribute('data-idx'));
+              var exp = quizData[idx].exp || '';
+              if (chosen === correct) {
+                score++;
+                answeredMap[idx] = true;
+                opt.classList.add('correct');
+                feedback.innerHTML = '✓ Correct! ' + exp;
+                feedback.className = 'quiz-feedback show correct';
+              } else {
+                answeredMap[idx] = false;
+                opt.classList.add('incorrect');
+                options[correct].classList.add('correct');
+                feedback.innerHTML = '✗ Incorrect — the correct answer is highlighted. ' + exp;
+                feedback.className = 'quiz-feedback show incorrect';
+              }
+              if (scoreEl) scoreEl.textContent = score;
+              updateDots();
+              if (answered === totalQuestions) nextBtn.textContent = current === totalQuestions - 1 ? 'Show Results →' : 'Next →';
+            }
+            opt.addEventListener('click', choose);
+            opt.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose();
+              }
+            });
+          });
+        });
+        function showSummary() {
+          var summary = document.getElementById('quizSummary');
+          var finalScore = document.getElementById('quizFinalScore');
+          var finalMsg = document.getElementById('quizFinalMsg');
+          summary.style.display = 'block';
+          finalScore.textContent = score + ' / ' + totalQuestions;
+          if (score >= passThreshold) {
+            finalScore.style.color = 'var(--success)';
+            summary.style.background = 'rgba(76,223,139,0.05)';
+            summary.style.borderColor = 'var(--success)';
+            finalMsg.textContent =
+              'Congratulations! You passed the Module 4 Knowledge Check. Finish the true/false, matching and scenario exercises below, then continue to Module 5.';
+          } else {
+            finalScore.style.color = 'var(--danger)';
+            summary.style.background = 'rgba(255,107,107,0.05)';
+            summary.style.borderColor = 'var(--danger)';
+            finalMsg.textContent =
+              'You scored below the 80% threshold. Review the sections above and retry the questions you missed.';
+          }
+        }
+        showSlide(0);
+      }
+      buildQuiz();
+      initQuizStepper();
+
+      // ---------- Part B: True / False ----------
+      (function () {
+        var tfData = [
+          { s: 'LED forward voltage falls as temperature rises.', a: true, exp: 'About −1.5 to −2 mV/°C, because the diode saturation current rises steeply with temperature.' },
+          { s: 'Photocurrent in a reverse-biased junction is proportional to absorbed optical power.', a: true, exp: 'This linearity over many decades is what makes photodiode-based parts (IL300, HCNR201) useful for analog isolation.' },
+          { s: 'CTR is a constant that can be read once from the first page of the datasheet.', a: false, exp: 'CTR varies with I_F, temperature, V_CE and age; the headline value is only one point on a curve.' },
+          { s: 'A phototransistor with CTR = 200 % in the active region still has I_C = 2 × I_F when saturated.', a: false, exp: 'In saturation I_C is limited by the load: (V_CC − V_CE(sat))/R_L. The “excess” is overdrive.' },
+          { s: 'Turn-off time is usually longer than turn-on time for a saturated phototransistor output.', a: true, exp: 'Storage time adds to the Miller-limited rise time.' },
+          { s: 'Increasing R_L always makes the output both faster and larger in swing.', a: false, exp: 'Larger R_L gives more swing but slower edges (Miller); smaller R_L is faster but may not saturate.' },
+          { s: 'Small-signal CTR can differ from DC CTR at the same bias point.', a: true, exp: 'Small-signal CTR is the local slope dI_C/dI_F; because CTR varies with I_F, the slope and the ratio differ.' },
+          { s: 'A higher h_FE detector reduces the opto pole frequency for the same R_L and C_CB.', a: true, exp: 'τ ≈ τ₀ + h_FE·C_CB·R_L grows with h_FE, so the pole moves down.' },
+        ];
+        var list = document.getElementById('tfList');
+        if (!list) return;
+        var score = 0;
+        document.getElementById('tfTotal').textContent = tfData.length;
+        tfData.forEach(function (item, i) {
+          var div = document.createElement('div');
+          div.className = 'tf-item';
+          div.innerHTML =
+            '<div class="tf-q">' + (i + 1) + '. ' + item.s + '</div>' +
+            '<div class="tf-btns"><button class="tf-btn" type="button" data-v="true">True</button><button class="tf-btn" type="button" data-v="false">False</button></div>' +
+            '<div class="tf-exp"></div>';
+          var done = false;
+          div.querySelectorAll('.tf-btn').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (done) return;
+              done = true;
+              var v = b.getAttribute('data-v') === 'true';
+              var ok = v === item.a;
+              b.classList.add(ok ? 'correct' : 'incorrect');
+              if (!ok) div.querySelector('.tf-btn[data-v="' + item.a + '"]').classList.add('correct');
+              if (ok) score++;
+              document.getElementById('tfScore').textContent = score;
+              var ex = div.querySelector('.tf-exp');
+              ex.textContent = (ok ? '✓ ' : '✗ ') + (item.a ? 'True. ' : 'False. ') + item.exp;
+              ex.classList.add('show');
+            });
+          });
+          list.appendChild(div);
+        });
+      })();
+
+      // ---------- Part C: drag & drop matching ----------
+      (function () {
+        var pairs = [
+          { t: 'EQE', d: 'Photons leaving the LED per electron injected', h: 'It is an LED efficiency.' },
+          { t: 'Responsivity', d: 'Amps of photocurrent per watt of light (A/W)', h: 'It belongs to the detector.' },
+          { t: 'CTR', d: 'I_C / I_F × 100 % at stated I_F, V_CE and temperature', h: 'It is the overall transfer ratio.' },
+          { t: 'Overdrive factor k', d: 'Available collector current divided by the current needed to saturate the load', h: 'It decides saturation margin.' },
+          { t: 'Storage time t_s', d: 'Delay while excess base charge is removed after the LED turns off', h: 'It appears only after saturation.' },
+          { t: 'Miller effect', d: 'Multiplication of C_CB by the stage gain, which slows the collector node', h: 'It explains why R_L sets speed.' },
+        ];
+        var chipsEl = document.getElementById('ddChips'),
+          targetsEl = document.getElementById('ddTargets');
+        if (!chipsEl || !targetsEl) return;
+        var placed = 0,
+          selectedChip = null;
+        var order = pairs.map(function (_, i) {
+          return i;
+        });
+        var shuffled = order.slice().sort(function () {
+          return 0.5 - Math.random();
+        });
+        shuffled.forEach(function (i) {
+          var c = document.createElement('div');
+          c.className = 'dd-chip';
+          c.textContent = pairs[i].t;
+          c.setAttribute('draggable', 'true');
+          c.setAttribute('tabindex', '0');
+          c.setAttribute('role', 'button');
+          c.setAttribute('data-i', i);
+          c.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          function pick() {
+            if (c.classList.contains('placed')) return;
+            chipsEl.querySelectorAll('.dd-chip').forEach(function (x) {
+              x.classList.remove('selected');
+            });
+            c.classList.add('selected');
+            selectedChip = c;
+          }
+          c.addEventListener('click', pick);
+          c.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick();
+            }
+          });
+          chipsEl.appendChild(c);
+        });
+        order.forEach(function (i) {
+          var t = document.createElement('div');
+          t.className = 'dd-target';
+          t.setAttribute('tabindex', '0');
+          t.setAttribute('role', 'button');
+          t.innerHTML = '<h6>Definition</h6><div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5">' + pairs[i].d + '</div>';
+          function attempt(ci) {
+            ci = parseInt(ci);
+            if (isNaN(ci) || t.getAttribute('data-done')) return;
+            var chip = chipsEl.querySelector('.dd-chip[data-i="' + ci + '"]');
+            if (!chip || chip.classList.contains('placed')) return;
+            var s = document.createElement('span');
+            if (ci === i) {
+              s.className = 'dd-slot ok';
+              s.textContent = '✓ ' + pairs[ci].t;
+              t.appendChild(s);
+              t.setAttribute('data-done', '1');
+              chip.classList.add('placed');
+              chip.classList.remove('selected');
+              chip.setAttribute('draggable', 'false');
+              placed++;
+              document.getElementById('ddScore').textContent = placed;
+              if (placed === pairs.length) document.getElementById('ddStatus').innerHTML = 'Placed: ' + placed + '/' + pairs.length + ' — <strong style="color:var(--success)">all matched!</strong>';
+            } else {
+              s.className = 'dd-slot bad';
+              s.textContent = '✗ ' + pairs[ci].t + ': ' + pairs[ci].h;
+              t.appendChild(s);
+              setTimeout(function () {
+                if (s.parentNode) s.parentNode.removeChild(s);
+              }, 2600);
+            }
+            selectedChip = null;
+          }
+          t.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            t.classList.add('over');
+          });
+          t.addEventListener('dragleave', function () {
+            t.classList.remove('over');
+          });
+          t.addEventListener('drop', function (e) {
+            e.preventDefault();
+            t.classList.remove('over');
+            attempt(e.dataTransfer.getData('text/plain'));
+          });
+          t.addEventListener('click', function () {
+            if (selectedChip) attempt(selectedChip.getAttribute('data-i'));
+          });
+          t.addEventListener('keydown', function (e) {
+            if ((e.key === 'Enter' || e.key === ' ') && selectedChip) {
+              e.preventDefault();
+              attempt(selectedChip.getAttribute('data-i'));
+            }
+          });
+          targetsEl.appendChild(t);
+        });
+        document.getElementById('ddScore').textContent = '0';
+      })();
+
+      // ---------- Part D: scenario reveals ----------
+      document.querySelectorAll('[data-reveal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var sol = document.getElementById(btn.getAttribute('data-reveal'));
+          if (!sol) return;
+          var showing = sol.classList.toggle('show');
+          btn.textContent = showing ? 'Hide solution' : 'Reveal solution';
+        });
+      });
     </script>
     <script>
       if ('serviceWorker' in navigator) {
